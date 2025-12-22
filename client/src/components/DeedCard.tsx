@@ -41,14 +41,19 @@ export function DeedCard({ deed, index }: DeedCardProps) {
     >
       <div className="flex justify-between items-start gap-4">
         <div>
-          <span 
-            className={`
-              inline-block px-2 py-0.5 rounded-full text-xs font-medium mb-2
-              ${isGood ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400"}
-            `}
-          >
-            {isGood ? "+ Good Deed" : "- Bad Deed"}
-          </span>
+          <div className="flex items-center gap-2 mb-2">
+            <span 
+              className={`
+                inline-block px-2 py-0.5 rounded-full text-xs font-medium
+                ${isGood ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400"}
+              `}
+            >
+              {isGood ? "+ Good Deed" : "- Bad Deed"}
+            </span>
+            <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400">
+              {deed.category}
+            </span>
+          </div>
           <h3 className="text-lg font-medium text-white leading-tight mb-1">
             {deed.description}
           </h3>

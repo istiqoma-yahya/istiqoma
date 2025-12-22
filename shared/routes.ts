@@ -30,7 +30,9 @@ export const api = {
     create: {
       method: "POST" as const,
       path: "/api/deeds",
-      input: insertDeedSchema,
+      input: insertDeedSchema.extend({
+        category: z.enum(["Sholat", "Fasting", "Shodaqoh", "Zakat", "Umroh", "Hajj"]),
+      }),
       responses: {
         201: z.custom<typeof deeds.$inferSelect>(),
         400: errorSchemas.validation,

@@ -38,6 +38,8 @@ const formSchema = insertDeedSchema.extend({
 
 type FormValues = z.infer<typeof formSchema>;
 
+const CATEGORIES = ["Sholat", "Fasting", "Shodaqoh", "Zakat", "Umroh", "Hajj"] as const;
+
 export function CreateDeedDialog() {
   const [open, setOpen] = useState(false);
   const { mutate, isPending } = useCreateDeed();
@@ -47,6 +49,7 @@ export function CreateDeedDialog() {
     defaultValues: {
       description: "",
       deedType: "good",
+      category: "Sholat",
       points: 1,
     },
   });
@@ -90,6 +93,32 @@ export function CreateDeedDialog() {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="glass-input">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="bg-[#1E293B] border-white/10 text-white">
+                      {CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

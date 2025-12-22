@@ -12,6 +12,7 @@ export const deeds = pgTable("deeds", {
   userId: varchar("user_id").notNull().references(() => users.id),
   description: text("description").notNull(),
   deedType: text("deed_type", { enum: ["good", "bad"] }).notNull(),
+  category: text("category", { enum: ["Sholat", "Fasting", "Shodaqoh", "Zakat", "Umroh", "Hajj"] }).notNull(),
   points: integer("points").notNull().default(1),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -19,6 +20,7 @@ export const deeds = pgTable("deeds", {
 export const insertDeedSchema = createInsertSchema(deeds).pick({
   description: true,
   deedType: true,
+  category: true,
   points: true,
 });
 

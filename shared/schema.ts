@@ -1,18 +1,29 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+// Export auth models
+export * from "./models/auth";
+import { users } from "./models/auth";
+
+export const deeds = pgTable("deeds", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  description: text("description").notNull(),
+  deedType: text("deed_type", { enum: ["good", "bad"] }).notNull(),
+  points: integer("points").notNull().default(1),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const insertDeedSchema = createInsertSchema(deeds).pick({
+  description: true,
+  deedType: true,
+  points: true,
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export type InsertDeed = z.infer<typeof insertDeedSchema>;
+export type Deed = typeof deeds.$inferSelect;
+
+export type CreateDeedRequest = InsertDeed;
+export type DeedResponse = Deed;

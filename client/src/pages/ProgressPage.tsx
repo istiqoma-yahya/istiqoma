@@ -2,6 +2,7 @@ import { useDeeds } from "@/hooks/use-deeds";
 import { useAuth } from "@/hooks/use-auth";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTheme } from "@/components/ThemeProvider";
 import {
   BarChart,
   Bar,
@@ -24,6 +25,16 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 export default function ProgressPage() {
   const { data: deeds, isLoading } = useDeeds();
   const { user } = useAuth();
+  const { theme } = useTheme();
+  
+  // Theme-aware chart colors
+  const isDark = theme === "dark";
+  const axisColor = isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)";
+  const gridColor = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
+  const tooltipBg = isDark ? "#1e293b" : "#ffffff";
+  const tooltipBorder = isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)";
+  const tooltipLabelColor = isDark ? "#fff" : "#1e293b";
+  const tooltipItemColor = isDark ? "#e2e8f0" : "#475569";
 
   if (isLoading) {
     return (
@@ -191,17 +202,17 @@ export default function ProgressPage() {
               </h2>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={deedTypeData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" />
-                  <YAxis stroke="rgba(255,255,255,0.5)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                  <XAxis dataKey="name" stroke={axisColor} />
+                  <YAxis stroke={axisColor} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#1e293b",
-                      border: "1px solid rgba(255,255,255,0.2)",
+                      backgroundColor: tooltipBg,
+                      border: `1px solid ${tooltipBorder}`,
                       borderRadius: "8px",
                     }}
-                    labelStyle={{ color: "#fff", fontWeight: "bold" }}
-                    itemStyle={{ color: "#e2e8f0" }}
+                    labelStyle={{ color: tooltipLabelColor, fontWeight: "bold" }}
+                    itemStyle={{ color: tooltipItemColor }}
                   />
                   <Legend />
                   <Bar dataKey="count" fill="#10b981" name="Count" />
@@ -218,17 +229,17 @@ export default function ProgressPage() {
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={filteredPointsOverTime}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                    <XAxis dataKey="date" stroke="rgba(255,255,255,0.5)" />
-                    <YAxis stroke="rgba(255,255,255,0.5)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                    <XAxis dataKey="date" stroke={axisColor} />
+                    <YAxis stroke={axisColor} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#1e293b",
-                        border: "1px solid rgba(255,255,255,0.2)",
+                        backgroundColor: tooltipBg,
+                        border: `1px solid ${tooltipBorder}`,
                         borderRadius: "8px",
                       }}
-                      labelStyle={{ color: "#fff", fontWeight: "bold" }}
-                      itemStyle={{ color: "#e2e8f0" }}
+                      labelStyle={{ color: tooltipLabelColor, fontWeight: "bold" }}
+                      itemStyle={{ color: tooltipItemColor }}
                     />
                     <Legend />
                     <Line
@@ -289,12 +300,12 @@ export default function ProgressPage() {
                     </Pie>
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#1e293b",
-                        border: "1px solid rgba(255,255,255,0.2)",
+                        backgroundColor: tooltipBg,
+                        border: `1px solid ${tooltipBorder}`,
                         borderRadius: "8px",
                       }}
-                      labelStyle={{ color: "#fff", fontWeight: "bold" }}
-                      itemStyle={{ color: "#e2e8f0" }}
+                      labelStyle={{ color: tooltipLabelColor, fontWeight: "bold" }}
+                      itemStyle={{ color: tooltipItemColor }}
                     />
                   </PieChart>
                 </ResponsiveContainer>

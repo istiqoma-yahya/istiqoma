@@ -1,13 +1,15 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from "@/hooks/use-categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2, Edit2, Loader2 } from "lucide-react";
+import { Plus, Trash2, Edit2, Loader2, ArrowLeft } from "lucide-react";
 
 export default function CategoryManagement() {
+  const [, navigate] = useLocation();
   const { data: categories = [], isLoading } = useCategories();
   const { mutate: createCategory, isPending: isCreating } = useCreateCategory();
   const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
@@ -50,7 +52,17 @@ export default function CategoryManagement() {
     <div className="min-h-screen bg-background text-foreground pb-20">
       <header className="sticky top-0 z-50 border-b border-white/5 bg-background/80 backdrop-blur-md">
         <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <h1 className="font-display font-bold text-xl">Manage Categories</h1>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/")}
+              data-testid="button-back-to-dashboard"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <h1 className="font-display font-bold text-xl">Manage Categories</h1>
+          </div>
           <Dialog open={openCreateDialog} onOpenChange={setOpenCreateDialog}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600">

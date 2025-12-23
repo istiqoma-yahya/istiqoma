@@ -36,7 +36,7 @@ export default function Landing() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="font-display text-5xl md:text-7xl font-bold leading-tight mb-6 bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+            <h1 className="font-display text-5xl md:text-7xl font-bold leading-tight mb-6 bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent">
               Master Your Soul,<br />Track Your Deeds.
             </h1>
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
@@ -66,22 +66,22 @@ export default function Landing() {
                 icon: CheckCircle2,
                 title: "Track Easily",
                 desc: "Record your good and bad deeds instantly with a simple, intuitive interface.",
-                color: "text-emerald-400"
+                color: "text-emerald-600 dark:text-emerald-400"
               },
               {
                 icon: TrendingUp,
                 title: "Visualize Growth",
                 desc: "See your spiritual progress over time with beautiful charts and summaries.",
-                color: "text-blue-400"
+                color: "text-blue-600 dark:text-blue-400"
               },
               {
                 icon: ShieldCheck,
                 title: "Private & Secure",
                 desc: "Your data is yours alone. Securely authenticated and stored privately.",
-                color: "text-purple-400"
+                color: "text-purple-600 dark:text-purple-400"
               }
             ].map((feature, i) => (
-              <div key={i} className="glass-card p-6 text-left hover:border-white/20 transition-colors">
+              <div key={i} className="glass-card p-6 text-left hover:border-primary/20 transition-colors">
                 <feature.icon className={`w-8 h-8 ${feature.color} mb-4`} />
                 <h3 className="text-lg font-bold font-display mb-2">{feature.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{feature.desc}</p>
@@ -92,7 +92,7 @@ export default function Landing() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 py-8 text-center text-sm text-muted-foreground">
+      <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
         <p>© {new Date().getFullYear()} DeedTracker. Built for the Ummah.</p>
       </footer>
     </div>

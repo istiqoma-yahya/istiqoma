@@ -8,7 +8,7 @@ export function BottomNavigation() {
   const isActive = (path: string) => location === path;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 border-t border-white/5 bg-background/80 backdrop-blur-md z-40">
+    <nav className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/80 backdrop-blur-md z-40">
       <div className="container max-w-5xl mx-auto px-4">
         <div className="flex items-center justify-around h-16">
           <Button

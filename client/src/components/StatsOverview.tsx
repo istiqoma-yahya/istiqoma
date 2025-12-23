@@ -20,7 +20,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
       value: goodDeeds.length,
       points: goodPoints,
       icon: TrendingUp,
-      color: "text-emerald-400",
+      color: "text-emerald-600 dark:text-emerald-400",
       bg: "bg-emerald-500/10",
       border: "border-emerald-500/20",
     },
@@ -29,7 +29,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
       value: badDeeds.length,
       points: badPoints,
       icon: TrendingDown,
-      color: "text-rose-400",
+      color: "text-rose-600 dark:text-rose-400",
       bg: "bg-rose-500/10",
       border: "border-rose-500/20",
     },
@@ -38,7 +38,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
       value: netPoints,
       points: null, // Don't show points subtitle for net
       icon: Scale,
-      color: netPoints >= 0 ? "text-blue-400" : "text-amber-400",
+      color: netPoints >= 0 ? "text-blue-600 dark:text-blue-400" : "text-amber-600 dark:text-amber-400",
       bg: netPoints >= 0 ? "bg-blue-500/10" : "bg-amber-500/10",
       border: netPoints >= 0 ? "border-blue-500/20" : "border-amber-500/20",
     },
@@ -59,14 +59,14 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
               <stat.icon className="w-6 h-6" />
             </div>
             {stat.points !== null && (
-              <span className={`text-sm font-medium ${stat.color} bg-black/20 px-2 py-1 rounded-lg`}>
+              <span className={`text-sm font-medium ${stat.color} bg-muted px-2 py-1 rounded-lg`}>
                 {stat.points} pts
               </span>
             )}
           </div>
           <div>
             <p className="text-muted-foreground font-medium mb-1">{stat.label}</p>
-            <h3 className="text-3xl font-bold font-display text-white">
+            <h3 className="text-3xl font-bold font-display text-foreground">
               {stat.value}
             </h3>
           </div>

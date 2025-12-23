@@ -125,7 +125,7 @@ function SortableCategoryCard({
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="bg-[#1E293B] border-white/10 text-white">
+              <AlertDialogContent className="bg-card border-border text-card-foreground">
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Category?</AlertDialogTitle>
                   <AlertDialogDescription className="text-muted-foreground">
@@ -133,7 +133,7 @@ function SortableCategoryCard({
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-transparent border-white/10 hover:bg-white/5 text-white">
+                  <AlertDialogCancel className="bg-secondary border-border hover:bg-muted text-foreground">
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
@@ -227,7 +227,7 @@ export default function CategoryManagement() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
-      <header className="sticky top-0 z-50 border-b border-white/5 bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             <Button
@@ -247,7 +247,7 @@ export default function CategoryManagement() {
                 <span>Add Category</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-[#1E293B] border-white/10 text-white">
+            <DialogContent className="bg-card border-border text-card-foreground">
               <DialogHeader>
                 <DialogTitle>Create New Category</DialogTitle>
               </DialogHeader>

@@ -48,16 +48,16 @@ export function DeedCard({ deed, index }: DeedCardProps) {
             <span 
               className={`
                 inline-block px-2 py-0.5 rounded-full text-xs font-medium
-                ${isGood ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400"}
+                ${isGood ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/20 text-rose-600 dark:text-rose-400"}
               `}
             >
               {isGood ? "+ Good Deed" : "- Bad Deed"}
             </span>
-            <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400">
+            <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-600 dark:text-blue-400">
               {deed.category}
             </span>
           </div>
-          <h3 className="text-lg font-medium text-white leading-tight mb-1">
+          <h3 className="text-lg font-medium text-foreground leading-tight mb-1">
             {deed.description}
           </h3>
           <p className="text-sm text-muted-foreground">
@@ -66,7 +66,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
         </div>
 
         <div className="flex flex-col items-end gap-2">
-          <span className={`text-xl font-bold ${isGood ? "text-emerald-400" : "text-rose-400"}`}>
+          <span className={`text-xl font-bold ${isGood ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
             {isGood ? "+" : "-"}{deed.points}
           </span>
           
@@ -81,7 +81,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
                 <Trash2 className="w-4 h-4" />
               </button>
             </AlertDialogTrigger>
-            <AlertDialogContent className="bg-[#1E293B] border-white/10 text-white">
+            <AlertDialogContent className="bg-card border-border text-card-foreground">
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription className="text-muted-foreground">
@@ -89,7 +89,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="bg-transparent border-white/10 hover:bg-white/5 text-white">Cancel</AlertDialogCancel>
+                <AlertDialogCancel className="bg-secondary border-border hover:bg-muted text-foreground">Cancel</AlertDialogCancel>
                 <AlertDialogAction 
                   onClick={() => deleteDeed(deed.id)}
                   className="bg-rose-500 hover:bg-rose-600 text-white"

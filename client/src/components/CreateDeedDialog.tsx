@@ -102,7 +102,7 @@ export function CreateDeedDialog() {
           <span>Record Deed</span>
         </button>
       </DialogTrigger>
-      <DialogContent className="bg-[#1E293B] border-white/10 text-white sm:max-w-[425px]">
+      <DialogContent className="bg-card border-border text-card-foreground sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-display">Record a New Deed</DialogTitle>
           <DialogDescription className="text-muted-foreground">
@@ -144,7 +144,7 @@ export function CreateDeedDialog() {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="bg-[#1E293B] border-white/10 text-white">
+                    <SelectContent className="bg-popover border-border text-popover-foreground">
                       {categories.map((cat) => (
                         <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                       ))}
@@ -171,7 +171,7 @@ export function CreateDeedDialog() {
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="bg-[#1E293B] border-white/10 text-white">
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
                         <SelectItem value="good">Good Deed</SelectItem>
                         <SelectItem value="bad">Bad Deed</SelectItem>
                       </SelectContent>
@@ -201,7 +201,7 @@ export function CreateDeedDialog() {
               />
             </div>
 
-            <div className="space-y-4 pt-2 border-t border-white/10">
+            <div className="space-y-4 pt-2 border-t border-border">
               <p className="text-sm font-medium text-muted-foreground">Record Date & Time (Optional)</p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">

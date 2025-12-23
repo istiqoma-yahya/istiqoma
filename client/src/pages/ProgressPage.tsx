@@ -127,7 +127,7 @@ export default function ProgressPage() {
     <>
       <div className="min-h-screen bg-background text-foreground pb-20">
         {/* Header */}
-        <header className="sticky top-0 z-50 border-b border-white/5 bg-background/80 backdrop-blur-md">
+        <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
           <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
             <h1 className="font-display font-bold text-xl">Spiritual Progress</h1>
             <ThemeToggle />

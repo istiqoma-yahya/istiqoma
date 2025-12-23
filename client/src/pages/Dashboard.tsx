@@ -38,7 +38,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/5 bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-500">
@@ -60,14 +60,14 @@ export default function Dashboard() {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 bg-[#1E293B] border-white/10 text-white" align="end">
+            <DropdownMenuContent className="w-56 bg-popover border-border text-popover-foreground" align="end">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">{user?.firstName} {user?.lastName}</p>
                   <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuSeparator className="bg-border" />
               <DropdownMenuItem 
                 onClick={() => navigate("/categories")}
                 className="cursor-pointer"
@@ -75,11 +75,11 @@ export default function Dashboard() {
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Manage Categories</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuSeparator className="bg-border" />
               <DropdownMenuItem 
                 onClick={() => logout()}
                 disabled={isLoggingOut}
-                className="text-rose-400 focus:text-rose-400 focus:bg-rose-500/10 cursor-pointer"
+                className="text-rose-600 dark:text-rose-400 focus:text-rose-600 dark:focus:text-rose-400 focus:bg-rose-500/10 cursor-pointer"
               >
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
@@ -112,14 +112,14 @@ export default function Dashboard() {
         <div className="space-y-6">
           <h3 className="text-xl font-display font-bold flex items-center gap-2">
             Recent Activity
-            <span className="text-sm font-normal text-muted-foreground bg-white/5 px-2 py-0.5 rounded-full">
+            <span className="text-sm font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
               {sortedDeeds.length}
             </span>
           </h3>
 
           {sortedDeeds.length === 0 ? (
-            <div className="glass-card p-12 text-center flex flex-col items-center justify-center border-dashed border-2 border-white/10">
-              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+            <div className="glass-card p-12 text-center flex flex-col items-center justify-center border-dashed border-2 border-border">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                 <Loader2 className="w-8 h-8 text-muted-foreground animate-pulse" />
               </div>
               <h3 className="text-lg font-medium mb-2">No deeds recorded yet</h3>

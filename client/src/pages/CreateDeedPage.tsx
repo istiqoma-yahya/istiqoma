@@ -84,12 +84,12 @@ export default function CreateDeedPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-50 border-b border-white/5 bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
           <h1 className="font-display font-bold text-xl">Record a New Deed</h1>
           <button
             onClick={() => navigate("/")}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            className="p-2 hover:bg-muted rounded-lg transition-colors"
             data-testid="button-close-deed-form"
           >
             <X className="w-5 h-5" />
@@ -139,7 +139,7 @@ export default function CreateDeedPage() {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="bg-[#1E293B] border-white/10 text-white">
+                    <SelectContent className="bg-popover border-border text-popover-foreground">
                       {categories.map((cat) => (
                         <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                       ))}
@@ -166,7 +166,7 @@ export default function CreateDeedPage() {
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="bg-[#1E293B] border-white/10 text-white">
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
                         <SelectItem value="good">Good Deed</SelectItem>
                         <SelectItem value="bad">Bad Deed</SelectItem>
                       </SelectContent>
@@ -197,7 +197,7 @@ export default function CreateDeedPage() {
               />
             </div>
 
-            <div className="space-y-4 pt-2 border-t border-white/10">
+            <div className="space-y-4 pt-2 border-t border-border">
               <p className="text-sm font-medium text-muted-foreground">Record Date & Time (Optional)</p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">

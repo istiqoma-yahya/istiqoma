@@ -5,10 +5,49 @@
 @tailwind utilities;
 
 :root {
-  /* Islamic Art Inspired Palette - Modernized */
+  /* Light mode - Islamic Art Inspired Palette */
   /* Emerald Green Primary */
+  --primary: 158 64% 42%; /* Slightly darker emerald for light mode */
+  --primary-foreground: 0 0% 100%;
+  
+  /* Light Backgrounds */
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  
+  /* Card Surface */
+  --card: 210 40% 98%;
+  --card-foreground: 222 47% 11%;
+
+  /* UI Elements */
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+  
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  
+  --accent: 158 64% 42%;
+  --accent-foreground: 0 0% 100%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 158 64% 42%;
+  
+  --radius: 1rem;
+
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+.dark {
+  /* Dark mode - Islamic Art Inspired Palette */
   --primary: 158 64% 52%; /* #34D399 - Emerald 400ish */
-  --primary-foreground: 160 84% 97%; /* #ECFDF5 */
+  --primary-foreground: 160 84% 97%;
   
   /* Deep Night Blue Backgrounds */
   --background: 222 47% 11%; /* #0F172A */
@@ -37,11 +76,6 @@
   --border: 217 33% 25%;
   --input: 217 33% 25%;
   --ring: 158 64% 52%;
-  
-  --radius: 1rem;
-
-  --font-display: 'Outfit', sans-serif;
-  --font-body: 'Inter', sans-serif;
 }
 
 @layer base {

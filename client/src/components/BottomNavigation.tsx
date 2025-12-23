@@ -1,7 +1,6 @@
 import { useLocation } from "wouter";
 import { BarChart3, Home, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "./ThemeToggle";
 
 export function BottomNavigation() {
   const [location, navigate] = useLocation();
@@ -53,8 +52,6 @@ export function BottomNavigation() {
             <BarChart3 className="w-5 h-5" />
             <span>Progress</span>
           </Button>
-
-          <ThemeToggle />
         </div>
       </div>
     </nav>

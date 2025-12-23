@@ -5,6 +5,7 @@ import { useCategories } from "@/hooks/use-categories";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { RotateCcw, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -67,8 +68,9 @@ export default function DzikirPage() {
   return (
     <div className="min-h-screen bg-background text-foreground pb-24">
       <header className="sticky top-0 z-50 border-b border-white/5 bg-background/80 backdrop-blur-md">
-        <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-center">
+        <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <h1 className="font-display font-bold text-xl">Dzikir Counter</h1>
+          <ThemeToggle />
         </div>
       </header>
 

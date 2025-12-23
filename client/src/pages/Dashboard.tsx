@@ -2,6 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useDeeds } from "@/hooks/use-deeds";
 import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Loader2, LogOut, User, Settings, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -46,6 +47,8 @@ export default function Dashboard() {
             <h1 className="font-display font-bold text-xl">DeedTracker</h1>
           </div>
 
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -83,6 +86,7 @@ export default function Dashboard() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         </div>
       </header>
 

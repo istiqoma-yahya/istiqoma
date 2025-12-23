@@ -22,9 +22,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDeed(userId: string, insertDeed: InsertDeed): Promise<Deed> {
+    const values: any = { ...insertDeed, userId };
     const [deed] = await db
       .insert(deeds)
-      .values({ ...insertDeed, userId })
+      .values(values)
       .returning();
     return deed;
   }

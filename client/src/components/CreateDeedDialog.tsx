@@ -28,21 +28,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 // Extend schema to ensure coercion for form handling
 const formSchema = insertDeedSchema.extend({
   points: z.coerce.number().min(1, "Points must be at least 1"),
+  createdAt: z.date().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+function getCurrentDateTime() {
+  const now = new Date();
+  return {
+    date: now.toISOString().split('T')[0],
+    time: now.toTimeString().slice(0, 5),
+  };
+}
 
 export function CreateDeedDialog() {
   const [open, setOpen] = useState(false);
   const { mutate, isPending } = useCreateDeed();
   const { data: categories = [] } = useCategories();
+  const [dateTime, setDateTime] = useState(getCurrentDateTime());
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -51,8 +61,13 @@ export function CreateDeedDialog() {
       deedType: "good",
       category: "",
       points: 1,
+      createdAt: undefined,
     },
   });
+
+  useEffect(() => {
+    setDateTime(getCurrentDateTime());
+  }, [open]);
 
   useEffect(() => {
     if (categories.length > 0 && !form.getValues("category")) {
@@ -61,10 +76,20 @@ export function CreateDeedDialog() {
   }, [categories, form]);
 
   const onSubmit = (data: FormValues) => {
-    mutate(data, {
+    // Combine date and time if provided
+    let createdAt = data.createdAt;
+    if (dateTime.date && dateTime.time) {
+      const combinedDateTime = new Date(`${dateTime.date}T${dateTime.time}:00`);
+      if (!isNaN(combinedDateTime.getTime())) {
+        createdAt = combinedDateTime;
+      }
+    }
+    
+    mutate({ ...data, createdAt }, {
       onSuccess: () => {
         setOpen(false);
         form.reset();
+        setDateTime(getCurrentDateTime());
       },
     });
   };
@@ -174,6 +199,38 @@ export function CreateDeedDialog() {
                   </FormItem>
                 )}
               />
+            </div>
+
+            <div className="space-y-4 pt-2 border-t border-white/10">
+              <p className="text-sm font-medium text-muted-foreground">Record Date & Time (Optional)</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Date
+                  </label>
+                  <Input
+                    type="date"
+                    value={dateTime.date}
+                    onChange={(e) => setDateTime({ ...dateTime, date: e.target.value })}
+                    className="glass-input"
+                    data-testid="input-deed-date"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    Time
+                  </label>
+                  <Input
+                    type="time"
+                    value={dateTime.time}
+                    onChange={(e) => setDateTime({ ...dateTime, time: e.target.value })}
+                    className="glass-input"
+                    data-testid="input-deed-time"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="flex justify-end pt-4">

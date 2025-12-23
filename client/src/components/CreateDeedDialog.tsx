@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useCreateDeed } from "@/hooks/use-deeds";
+import { useCategories } from "@/hooks/use-categories";
 import { insertDeedSchema } from "@shared/schema";
 import {
   Dialog,
@@ -38,21 +39,26 @@ const formSchema = insertDeedSchema.extend({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const CATEGORIES = ["Sholat", "Fasting", "Shodaqoh", "Zakat", "Umroh", "Hajj", "Dzikr"] as const;
-
 export function CreateDeedDialog() {
   const [open, setOpen] = useState(false);
   const { mutate, isPending } = useCreateDeed();
+  const { data: categories = [] } = useCategories();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: "",
       deedType: "good",
-      category: "Sholat",
+      category: "",
       points: 1,
     },
   });
+
+  useEffect(() => {
+    if (categories.length > 0 && !form.getValues("category")) {
+      form.setValue("category", categories[0].name);
+    }
+  }, [categories, form]);
 
   const onSubmit = (data: FormValues) => {
     mutate(data, {
@@ -106,7 +112,7 @@ export function CreateDeedDialog() {
                   <FormLabel>Category</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger className="glass-input">
@@ -114,8 +120,8 @@ export function CreateDeedDialog() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-[#1E293B] border-white/10 text-white">
-                      {CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

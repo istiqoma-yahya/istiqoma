@@ -3,9 +3,10 @@ import { useDeeds } from "@/hooks/use-deeds";
 import { CreateDeedDialog } from "@/components/CreateDeedDialog";
 import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
-import { Loader2, LogOut, User } from "lucide-react";
+import { Loader2, LogOut, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { useLocation } from "wouter";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export default function Dashboard() {
   const { user, logout, isLoggingOut } = useAuth();
   const { data: deeds, isLoading } = useDeeds();
+  const [, navigate] = useLocation();
 
   if (isLoading) {
     return (
@@ -63,6 +65,14 @@ export default function Dashboard() {
                   <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
                 </div>
               </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuItem 
+                onClick={() => navigate("/categories")}
+                className="cursor-pointer"
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Manage Categories</span>
+              </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-white/10" />
               <DropdownMenuItem 
                 onClick={() => logout()}

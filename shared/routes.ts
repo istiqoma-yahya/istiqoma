@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, deeds } from "./schema";
+import { insertDeedSchema, insertCategorySchema, deeds, categories } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -30,9 +30,7 @@ export const api = {
     create: {
       method: "POST" as const,
       path: "/api/deeds",
-      input: insertDeedSchema.extend({
-        category: z.enum(["Sholat", "Fasting", "Shodaqoh", "Zakat", "Umroh", "Hajj"]),
-      }),
+      input: insertDeedSchema,
       responses: {
         201: z.custom<typeof deeds.$inferSelect>(),
         400: errorSchemas.validation,
@@ -44,6 +42,46 @@ export const api = {
       path: "/api/deeds/:id",
       responses: {
         204: z.void(),
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
+  },
+  categories: {
+    list: {
+      method: "GET" as const,
+      path: "/api/categories",
+      responses: {
+        200: z.array(z.custom<typeof categories.$inferSelect>()),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    create: {
+      method: "POST" as const,
+      path: "/api/categories",
+      input: insertCategorySchema,
+      responses: {
+        201: z.custom<typeof categories.$inferSelect>(),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+      },
+    },
+    delete: {
+      method: "DELETE" as const,
+      path: "/api/categories/:id",
+      responses: {
+        204: z.void(),
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
+    update: {
+      method: "PATCH" as const,
+      path: "/api/categories/:id",
+      input: insertCategorySchema,
+      responses: {
+        200: z.custom<typeof categories.$inferSelect>(),
+        400: errorSchemas.validation,
         401: errorSchemas.unauthorized,
         404: errorSchemas.notFound,
       },

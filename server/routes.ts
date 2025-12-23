@@ -47,5 +47,57 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
+  // Categories Routes - Protected
+  app.get(api.categories.list.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const cats = await storage.getCategories(userId);
+    res.json(cats);
+  });
+
+  app.post(api.categories.create.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const input = api.categories.create.input.parse(req.body);
+      const userId = req.user.claims.sub;
+      const category = await storage.createCategory(userId, input);
+      res.status(201).json(category);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      throw err;
+    }
+  });
+
+  app.delete(api.categories.delete.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+    await storage.deleteCategory(id, userId);
+    res.status(204).send();
+  });
+
+  app.patch(api.categories.update.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const { name } = req.body;
+      if (!name || typeof name !== 'string') {
+        return res.status(400).json({ message: "Invalid name" });
+      }
+      const userId = req.user.claims.sub;
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      const category = await storage.updateCategory(id, userId, name);
+      res.json(category);
+    } catch (err) {
+      throw err;
+    }
+  });
+
   return httpServer;
 }

@@ -94,7 +94,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-card backdrop-blur-xl border border-border shadow-xl rounded-2xl;
+    @apply bg-card backdrop-blur-xl border border-border rounded-2xl;
   }
   
   .glass-input {

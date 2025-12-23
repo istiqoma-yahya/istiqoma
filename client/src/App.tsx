@@ -8,6 +8,7 @@ import CategoryManagement from "@/pages/CategoryManagement";
 import CreateDeedPage from "@/pages/CreateDeedPage";
 import EditDeedPage from "@/pages/EditDeedPage";
 import ProgressPage from "@/pages/ProgressPage";
+import DzikirPage from "@/pages/DzikirPage";
 import { useDeeds } from "@/hooks/use-deeds";
 import NotFound from "@/pages/not-found";
 
@@ -27,6 +28,7 @@ function Router() {
     <Switch>
       <Route path="/" component={AuthWrapper} />
       <Route path="/progress" component={ProgressPage} />
+      <Route path="/dzikir" component={DzikirPage} />
       <Route path="/categories" component={CategoryManagement} />
       <Route path="/create-deed" component={CreateDeedPage} />
       <Route path="/edit-deed/:id" component={EditDeedRoute} />

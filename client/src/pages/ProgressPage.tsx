@@ -215,8 +215,8 @@ export default function ProgressPage() {
                     itemStyle={{ color: tooltipItemColor }}
                   />
                   <Legend />
-                  <Bar dataKey="count" fill="#10b981" name="Count" activeBar={false} />
-                  <Bar dataKey="points" fill="#3b82f6" name="Points" activeBar={false} />
+                  <Bar dataKey="count" fill="#10b981" name="Count" activeBar={{ fill: "rgba(16, 185, 129, 0.05)" }} />
+                  <Bar dataKey="points" fill="#3b82f6" name="Points" activeBar={{ fill: "rgba(59, 130, 246, 0.05)" }} />
                 </BarChart>
               </ResponsiveContainer>
             </Card>

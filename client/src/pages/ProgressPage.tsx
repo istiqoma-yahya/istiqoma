@@ -1,5 +1,6 @@
 import { useDeeds } from "@/hooks/use-deeds";
 import { useAuth } from "@/hooks/use-auth";
+import { BottomNavigation } from "@/components/BottomNavigation";
 import {
   BarChart,
   Bar,
@@ -122,16 +123,17 @@ export default function ProgressPage() {
   const netPoints = goodPoints - badPoints;
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-20">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/5 bg-background/80 backdrop-blur-md">
-        <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center">
-          <h1 className="font-display font-bold text-xl">Spiritual Progress</h1>
-        </div>
-      </header>
+    <>
+      <div className="min-h-screen bg-background text-foreground pb-20">
+        {/* Header */}
+        <header className="sticky top-0 z-50 border-b border-white/5 bg-background/80 backdrop-blur-md">
+          <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center">
+            <h1 className="font-display font-bold text-xl">Spiritual Progress</h1>
+          </div>
+        </header>
 
-      {/* Main Content */}
-      <main className="container max-w-5xl mx-auto px-4 py-8">
+        {/* Main Content */}
+        <main className="container max-w-5xl mx-auto px-4 py-8">
         {deedsArray.length === 0 ? (
           <Card className="p-12 text-center flex flex-col items-center justify-center border-dashed">
             <h3 className="text-lg font-medium mb-2">No data yet</h3>
@@ -295,7 +297,9 @@ export default function ProgressPage() {
             )}
           </div>
         )}
-      </main>
-    </div>
+        </main>
+      </div>
+      <BottomNavigation />
+    </>
   );
 }

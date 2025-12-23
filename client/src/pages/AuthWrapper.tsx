@@ -2,6 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import Dashboard from "./Dashboard";
 import Landing from "./Landing";
+import { BottomNavigation } from "@/components/BottomNavigation";
 
 export default function AuthWrapper() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -15,7 +16,12 @@ export default function AuthWrapper() {
   }
 
   if (isAuthenticated) {
-    return <Dashboard />;
+    return (
+      <>
+        <Dashboard />
+        <BottomNavigation />
+      </>
+    );
   }
 
   return <Landing />;

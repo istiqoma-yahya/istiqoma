@@ -75,11 +75,11 @@ export default function ProgressPage() {
 
   const pointsOverTime = days.map((day) => {
     const dayDeeds = deedsArray.filter((d) => {
-      const deedDate = new Date(d.createdAt);
+      const createdAt = typeof d.createdAt === 'string' ? new Date(d.createdAt) : (d.createdAt || new Date());
       return (
-        deedDate.getDate() === day.getDate() &&
-        deedDate.getMonth() === day.getMonth() &&
-        deedDate.getFullYear() === day.getFullYear()
+        createdAt.getDate() === day.getDate() &&
+        createdAt.getMonth() === day.getMonth() &&
+        createdAt.getFullYear() === day.getFullYear()
       );
     });
 

@@ -47,6 +47,27 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
+  app.patch(api.deeds.update.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const input = api.deeds.update.input.parse(req.body);
+      const userId = req.user.claims.sub;
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      const deed = await storage.updateDeed(id, userId, input);
+      res.json(deed);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      throw err;
+    }
+  });
+
   // Categories Routes - Protected
   app.get(api.categories.list.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;

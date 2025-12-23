@@ -46,6 +46,17 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
+    update: {
+      method: "PATCH" as const,
+      path: "/api/deeds/:id",
+      input: insertDeedSchema,
+      responses: {
+        200: z.custom<typeof deeds.$inferSelect>(),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
   },
   categories: {
     list: {

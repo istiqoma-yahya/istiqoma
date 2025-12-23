@@ -6,6 +6,7 @@ export interface IStorage {
   getDeeds(userId: string): Promise<Deed[]>;
   createDeed(userId: string, deed: InsertDeed): Promise<Deed>;
   deleteDeed(id: number, userId: string): Promise<void>;
+  updateDeed(id: number, userId: string, deed: InsertDeed): Promise<Deed>;
   getCategories(userId: string): Promise<Category[]>;
   createCategory(userId: string, category: InsertCategory): Promise<Category>;
   deleteCategory(id: number, userId: string): Promise<void>;
@@ -34,6 +35,16 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(deeds)
       .where(and(eq(deeds.id, id), eq(deeds.userId, userId)));
+  }
+
+  async updateDeed(id: number, userId: string, updateDeed: InsertDeed): Promise<Deed> {
+    const values: any = { ...updateDeed };
+    const [deed] = await db
+      .update(deeds)
+      .set(values)
+      .where(and(eq(deeds.id, id), eq(deeds.userId, userId)))
+      .returning();
+    return deed;
   }
 
   async getCategories(userId: string): Promise<Category[]> {

@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { type Deed } from "@shared/schema";
 import { useDeleteDeed } from "@/hooks/use-deeds";
+import { useLocation } from "wouter";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +22,7 @@ interface DeedCardProps {
 }
 
 export function DeedCard({ deed, index }: DeedCardProps) {
+  const [, navigate] = useLocation();
   const { mutate: deleteDeed, isPending } = useDeleteDeed();
 
   const isGood = deed.deedType === "good";
@@ -32,12 +34,13 @@ export function DeedCard({ deed, index }: DeedCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       className={`
-        group relative p-5 rounded-2xl border transition-all duration-300
+        group relative p-5 rounded-2xl border transition-all duration-300 cursor-pointer
         ${isGood 
           ? "bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/30" 
           : "bg-rose-500/5 border-rose-500/20 hover:bg-rose-500/10 hover:border-rose-500/30"
         }
       `}
+      onClick={() => navigate(`/edit-deed/${deed.id}`)}
     >
       <div className="flex justify-between items-start gap-4">
         <div>
@@ -72,6 +75,8 @@ export function DeedCard({ deed, index }: DeedCardProps) {
               <button 
                 className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 rounded-lg"
                 disabled={isPending}
+                onClick={(e) => e.stopPropagation()}
+                data-testid="button-delete-deed"
               >
                 <Trash2 className="w-4 h-4" />
               </button>

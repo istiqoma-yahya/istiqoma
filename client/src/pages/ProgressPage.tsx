@@ -35,7 +35,6 @@ export default function ProgressPage() {
   const tooltipBorder = isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)";
   const tooltipLabelColor = isDark ? "#fff" : "#1e293b";
   const tooltipItemColor = isDark ? "#e2e8f0" : "#475569";
-  const barActiveColor = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
 
   if (isLoading) {
     return (
@@ -216,8 +215,8 @@ export default function ProgressPage() {
                     itemStyle={{ color: tooltipItemColor }}
                   />
                   <Legend />
-                  <Bar dataKey="count" fill="#10b981" name="Count" activeBar={{ fill: barActiveColor }} />
-                  <Bar dataKey="points" fill="#3b82f6" name="Points" activeBar={{ fill: barActiveColor }} />
+                  <Bar dataKey="count" fill="#10b981" name="Count" activeBar={false} />
+                  <Bar dataKey="points" fill="#3b82f6" name="Points" activeBar={false} />
                 </BarChart>
               </ResponsiveContainer>
             </Card>

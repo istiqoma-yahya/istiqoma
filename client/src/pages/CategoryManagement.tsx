@@ -65,7 +65,7 @@ export default function CategoryManagement() {
           </div>
           <Dialog open={openCreateDialog} onOpenChange={setOpenCreateDialog}>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600">
+              <Button className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 py-2 text-base font-medium">
                 <Plus className="w-5 h-5" />
                 <span>Add Category</span>
               </Button>
@@ -85,7 +85,7 @@ export default function CategoryManagement() {
                 <Button
                   onClick={handleCreateCategory}
                   disabled={isCreating || !newCategoryName.trim()}
-                  className="w-full bg-emerald-500 hover:bg-emerald-600"
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 py-2 text-base font-medium"
                 >
                   {isCreating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Create"}
                 </Button>
@@ -125,17 +125,16 @@ export default function CategoryManagement() {
                       }}
                     />
                     <Button
-                      size="sm"
                       onClick={() => handleUpdateCategory(category.id)}
                       disabled={isUpdating || !editingName.trim()}
-                      className="bg-blue-500 hover:bg-blue-600"
+                      className="bg-blue-500 hover:bg-blue-600 py-2 text-base font-medium"
                     >
                       Save
                     </Button>
                     <Button
-                      size="sm"
                       variant="outline"
                       onClick={() => setEditingId(null)}
+                      className="py-2 text-base"
                     >
                       Cancel
                     </Button>
@@ -145,8 +144,8 @@ export default function CategoryManagement() {
                     <h3 className="text-lg font-medium">{category.name}</h3>
                     <div className="flex items-center gap-2">
                       <Button
-                        size="sm"
                         variant="ghost"
+                        size="icon"
                         onClick={() => {
                           setEditingId(category.id);
                           setEditingName(category.name);
@@ -156,7 +155,7 @@ export default function CategoryManagement() {
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button size="sm" variant="ghost" className="text-rose-400 hover:text-rose-600">
+                          <Button variant="ghost" size="icon" className="text-rose-400 hover:text-rose-600">
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>

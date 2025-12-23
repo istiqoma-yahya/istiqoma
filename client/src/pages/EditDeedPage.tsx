@@ -48,7 +48,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const [, navigate] = useLocation();
   const { mutate, isPending } = useUpdateDeed();
   const { data: categories = [] } = useCategories();
-  const [dateTime, setDateTime] = useState(formatDateTimeForInput(new Date(deed.createdAt)));
+  const [dateTime, setDateTime] = useState(formatDateTimeForInput(deed.createdAt || new Date()));
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -225,7 +225,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                 type="button"
                 variant="outline"
                 onClick={() => navigate("/")}
-                className="flex-1"
+                className="flex-1 py-2 text-base"
                 data-testid="button-cancel-edit-deed"
               >
                 Cancel
@@ -233,7 +233,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
               <Button
                 type="submit"
                 disabled={isPending}
-                className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-6 rounded-xl text-lg shadow-lg shadow-emerald-500/20"
+                className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 text-base shadow-lg shadow-emerald-500/20"
                 data-testid="button-confirm-edit-deed"
               >
                 {isPending ? (

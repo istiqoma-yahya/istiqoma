@@ -234,7 +234,7 @@ export default function CreateDeedPage() {
                 type="button"
                 variant="outline"
                 onClick={() => navigate("/")}
-                className="flex-1"
+                className="flex-1 py-2 text-base"
                 data-testid="button-cancel-deed"
               >
                 Cancel
@@ -242,7 +242,7 @@ export default function CreateDeedPage() {
               <Button
                 type="submit"
                 disabled={isPending}
-                className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-6 rounded-xl text-lg shadow-lg shadow-emerald-500/20"
+                className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 text-base shadow-lg shadow-emerald-500/20"
                 data-testid="button-submit-deed"
               >
                 {isPending ? (

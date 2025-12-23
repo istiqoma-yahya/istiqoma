@@ -38,7 +38,7 @@ const formSchema = insertDeedSchema.extend({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const CATEGORIES = ["Sholat", "Fasting", "Shodaqoh", "Zakat", "Umroh", "Hajj"] as const;
+const CATEGORIES = ["Sholat", "Fasting", "Shodaqoh", "Zakat", "Umroh", "Hajj", "Dzikr"] as const;
 
 export function CreateDeedDialog() {
   const [open, setOpen] = useState(false);

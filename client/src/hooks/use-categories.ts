@@ -124,3 +124,34 @@ export function useUpdateCategory() {
     },
   });
 }
+
+export function useReorderCategories() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (orderedIds: number[]) => {
+      const res = await fetch(api.categories.reorder.path, {
+        method: api.categories.reorder.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderedIds }),
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to reorder categories");
+      }
+      return api.categories.reorder.responses[200].parse(await res.json());
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.categories.list.path] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}

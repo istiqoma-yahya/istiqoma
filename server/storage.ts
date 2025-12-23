@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { deeds, categories, type InsertDeed, type Deed, type Category, type InsertCategory } from "@shared/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, asc, sql } from "drizzle-orm";
 
 export interface IStorage {
   getDeeds(userId: string): Promise<Deed[]>;
@@ -11,6 +11,7 @@ export interface IStorage {
   createCategory(userId: string, category: InsertCategory): Promise<Category>;
   deleteCategory(id: number, userId: string): Promise<void>;
   updateCategory(id: number, userId: string, name: string): Promise<Category>;
+  reorderCategories(userId: string, orderedIds: number[]): Promise<Category[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -52,13 +53,15 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(categories)
       .where(eq(categories.userId, userId))
-      .orderBy(desc(categories.createdAt));
+      .orderBy(asc(categories.sortOrder), asc(categories.id));
   }
 
   async createCategory(userId: string, insertCategory: InsertCategory): Promise<Category> {
+    const existing = await this.getCategories(userId);
+    const maxSortOrder = existing.length > 0 ? Math.max(...existing.map(c => c.sortOrder)) : -1;
     const [category] = await db
       .insert(categories)
-      .values({ ...insertCategory, userId })
+      .values({ ...insertCategory, userId, sortOrder: maxSortOrder + 1 })
       .returning();
     return category;
   }
@@ -76,6 +79,16 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(categories.id, id), eq(categories.userId, userId)))
       .returning();
     return category;
+  }
+
+  async reorderCategories(userId: string, orderedIds: number[]): Promise<Category[]> {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await db
+        .update(categories)
+        .set({ sortOrder: i })
+        .where(and(eq(categories.id, orderedIds[i]), eq(categories.userId, userId)));
+    }
+    return this.getCategories(userId);
   }
 }
 

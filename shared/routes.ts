@@ -97,6 +97,15 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
+    reorder: {
+      method: "POST" as const,
+      path: "/api/categories/reorder",
+      input: z.object({ orderedIds: z.array(z.number()) }),
+      responses: {
+        200: z.array(z.custom<typeof categories.$inferSelect>()),
+        401: errorSchemas.unauthorized,
+      },
+    },
   },
 };
 

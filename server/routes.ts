@@ -120,5 +120,22 @@ export async function registerRoutes(
     }
   });
 
+  app.post(api.categories.reorder.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const input = api.categories.reorder.input.parse(req.body);
+      const userId = req.user.claims.sub;
+      const cats = await storage.reorderCategories(userId, input.orderedIds);
+      res.json(cats);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      throw err;
+    }
+  });
+
   return httpServer;
 }

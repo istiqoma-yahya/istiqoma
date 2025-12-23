@@ -11,6 +11,7 @@ export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   name: text("name").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

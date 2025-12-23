@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from "@/hooks/use-categories";
+import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory, useReorderCategories } from "@/hooks/use-categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2, Edit2, Loader2, ArrowLeft } from "lucide-react";
+import { Plus, Trash2, Edit2, Loader2, ArrowLeft, ChevronUp, ChevronDown } from "lucide-react";
 
 export default function CategoryManagement() {
   const [, navigate] = useLocation();
@@ -14,11 +14,26 @@ export default function CategoryManagement() {
   const { mutate: createCategory, isPending: isCreating } = useCreateCategory();
   const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
   const { mutate: updateCategory, isPending: isUpdating } = useUpdateCategory();
+  const { mutate: reorderCategories, isPending: isReordering } = useReorderCategories();
   
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState("");
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
+
+  const handleMoveUp = (index: number) => {
+    if (index === 0) return;
+    const newOrder = [...categories];
+    [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
+    reorderCategories(newOrder.map(c => c.id));
+  };
+
+  const handleMoveDown = (index: number) => {
+    if (index === categories.length - 1) return;
+    const newOrder = [...categories];
+    [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+    reorderCategories(newOrder.map(c => c.id));
+  };
 
   const handleCreateCategory = () => {
     if (!newCategoryName.trim()) return;
@@ -110,8 +125,8 @@ export default function CategoryManagement() {
           </Card>
         ) : (
           <div className="grid gap-4">
-            {categories.map((category) => (
-              <Card key={category.id} className="p-4 flex items-center justify-between">
+            {categories.map((category, index) => (
+              <Card key={category.id} className="p-4 flex items-center justify-between gap-2">
                 {editingId === category.id ? (
                   <div className="flex items-center gap-2 flex-1">
                     <Input
@@ -141,7 +156,31 @@ export default function CategoryManagement() {
                   </div>
                 ) : (
                   <>
-                    <h3 className="text-lg font-medium">{category.name}</h3>
+                    <div className="flex items-center gap-2">
+                      <div className="flex flex-col">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleMoveUp(index)}
+                          disabled={index === 0 || isReordering}
+                          className="h-6 w-6"
+                          data-testid={`button-move-up-${category.id}`}
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleMoveDown(index)}
+                          disabled={index === categories.length - 1 || isReordering}
+                          className="h-6 w-6"
+                          data-testid={`button-move-down-${category.id}`}
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <h3 className="text-lg font-medium">{category.name}</h3>
+                    </div>
                     <div className="flex items-center gap-2">
                       <Button
                         variant="ghost"

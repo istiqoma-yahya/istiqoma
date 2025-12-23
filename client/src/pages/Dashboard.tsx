@@ -1,9 +1,8 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useDeeds } from "@/hooks/use-deeds";
-import { CreateDeedDialog } from "@/components/CreateDeedDialog";
 import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
-import { Loader2, LogOut, User, Settings } from "lucide-react";
+import { Loader2, LogOut, User, Settings, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
@@ -94,7 +93,14 @@ export default function Dashboard() {
             <h2 className="text-3xl font-display font-bold mb-2">Dashboard</h2>
             <p className="text-muted-foreground">Track your journey, one deed at a time.</p>
           </div>
-          <CreateDeedDialog />
+          <button 
+            onClick={() => navigate("/create-deed")}
+            className="btn-primary flex items-center gap-2"
+            data-testid="button-create-deed"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Record Deed</span>
+          </button>
         </div>
 
         <StatsOverview deeds={sortedDeeds} />
@@ -116,7 +122,14 @@ export default function Dashboard() {
               <p className="text-muted-foreground max-w-md mx-auto mb-6">
                 Start tracking your good and bad deeds to see your progress over time.
               </p>
-              <CreateDeedDialog />
+              <button 
+                onClick={() => navigate("/create-deed")}
+                className="btn-primary flex items-center gap-2"
+                data-testid="button-create-deed-empty"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Record Deed</span>
+              </button>
             </div>
           ) : (
             <div className="grid gap-4">

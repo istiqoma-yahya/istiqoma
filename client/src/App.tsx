@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AuthWrapper from "@/pages/AuthWrapper";
 import CategoryManagement from "@/pages/CategoryManagement";
+import CreateDeedPage from "@/pages/CreateDeedPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -12,6 +13,7 @@ function Router() {
     <Switch>
       <Route path="/" component={AuthWrapper} />
       <Route path="/categories" component={CategoryManagement} />
+      <Route path="/create-deed" component={CreateDeedPage} />
       <Route component={NotFound} />
     </Switch>
   );

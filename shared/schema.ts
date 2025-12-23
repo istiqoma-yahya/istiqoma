@@ -31,7 +31,7 @@ export const insertDeedSchema = createInsertSchema(deeds).pick({
   points: true,
   createdAt: true,
 }).extend({
-  createdAt: z.date().optional(),
+  createdAt: z.coerce.date().optional(),
 });
 
 export const insertCategorySchema = createInsertSchema(categories).pick({

@@ -194,11 +194,12 @@ export default function ProgressPage() {
                   <YAxis stroke="rgba(255,255,255,0.5)" />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "rgba(30, 41, 59, 0.8)",
-                      border: "1px solid rgba(255,255,255,0.1)",
+                      backgroundColor: "#1e293b",
+                      border: "1px solid rgba(255,255,255,0.2)",
                       borderRadius: "8px",
                     }}
-                    labelStyle={{ color: "#fff" }}
+                    labelStyle={{ color: "#fff", fontWeight: "bold" }}
+                    itemStyle={{ color: "#e2e8f0" }}
                   />
                   <Legend />
                   <Bar dataKey="count" fill="#10b981" name="Count" />
@@ -220,11 +221,12 @@ export default function ProgressPage() {
                     <YAxis stroke="rgba(255,255,255,0.5)" />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "rgba(30, 41, 59, 0.8)",
-                        border: "1px solid rgba(255,255,255,0.1)",
+                        backgroundColor: "#1e293b",
+                        border: "1px solid rgba(255,255,255,0.2)",
                         borderRadius: "8px",
                       }}
-                      labelStyle={{ color: "#fff" }}
+                      labelStyle={{ color: "#fff", fontWeight: "bold" }}
+                      itemStyle={{ color: "#e2e8f0" }}
                     />
                     <Legend />
                     <Line
@@ -285,11 +287,12 @@ export default function ProgressPage() {
                     </Pie>
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "rgba(30, 41, 59, 0.8)",
-                        border: "1px solid rgba(255,255,255,0.1)",
+                        backgroundColor: "#1e293b",
+                        border: "1px solid rgba(255,255,255,0.2)",
                         borderRadius: "8px",
                       }}
-                      labelStyle={{ color: "#fff" }}
+                      labelStyle={{ color: "#fff", fontWeight: "bold" }}
+                      itemStyle={{ color: "#e2e8f0" }}
                     />
                   </PieChart>
                 </ResponsiveContainer>

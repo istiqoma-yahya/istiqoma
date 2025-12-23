@@ -35,6 +35,7 @@ export default function ProgressPage() {
   const tooltipBorder = isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)";
   const tooltipLabelColor = isDark ? "#fff" : "#1e293b";
   const tooltipItemColor = isDark ? "#e2e8f0" : "#475569";
+  const cursorFill = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
 
   if (isLoading) {
     return (
@@ -206,6 +207,7 @@ export default function ProgressPage() {
                   <XAxis dataKey="name" stroke={axisColor} />
                   <YAxis stroke={axisColor} />
                   <Tooltip
+                    cursor={{ fill: cursorFill }}
                     contentStyle={{
                       backgroundColor: tooltipBg,
                       border: `1px solid ${tooltipBorder}`,
@@ -215,8 +217,8 @@ export default function ProgressPage() {
                     itemStyle={{ color: tooltipItemColor }}
                   />
                   <Legend />
-                  <Bar dataKey="count" fill="#10b981" name="Count" activeBar={{ fill: "rgba(16, 185, 129, 0.05)" }} />
-                  <Bar dataKey="points" fill="#3b82f6" name="Points" activeBar={{ fill: "rgba(59, 130, 246, 0.05)" }} />
+                  <Bar dataKey="count" fill="#10b981" name="Count" />
+                  <Bar dataKey="points" fill="#3b82f6" name="Points" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>

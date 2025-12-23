@@ -51,9 +51,9 @@ export default function Dashboard() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar className="h-10 w-10 border-2 border-primary/20">
-                  <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "User"} />
+                  <AvatarImage src={user?.profileImageUrl || undefined} alt={user?.firstName || "User"} />
                   <AvatarFallback className="bg-primary/10 text-primary">
-                    {user?.firstName?.charAt(0) || <User className="w-4 h-4" />}
+                    {(user?.firstName && user.firstName.charAt(0)) || <User className="w-4 h-4" />}
                   </AvatarFallback>
                 </Avatar>
               </Button>

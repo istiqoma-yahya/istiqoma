@@ -32,8 +32,8 @@ const formSchema = insertDeedSchema.extend({
 
 type FormValues = z.infer<typeof formSchema>;
 
-function formatDateTimeForInput(date: Date | null) {
-  const d = date || new Date();
+function formatDateTimeForInput(date: Date | string | null) {
+  const d = typeof date === 'string' ? new Date(date) : (date || new Date());
   return {
     date: d.toISOString().split('T')[0],
     time: d.toTimeString().slice(0, 5),
@@ -48,7 +48,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const [, navigate] = useLocation();
   const { mutate, isPending } = useUpdateDeed();
   const { data: categories = [] } = useCategories();
-  const [dateTime, setDateTime] = useState(formatDateTimeForInput(deed.createdAt || new Date()));
+  const [dateTime, setDateTime] = useState(formatDateTimeForInput(deed.createdAt));
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

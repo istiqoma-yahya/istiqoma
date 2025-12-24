@@ -22,7 +22,7 @@ export function BottomNavigation() {
             data-testid="button-nav-dashboard"
           >
             <Home className="w-5 h-5" />
-            <span>Dashboard</span>
+            <span>Home</span>
           </Button>
 
           <Button

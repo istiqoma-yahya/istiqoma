@@ -94,7 +94,7 @@ export default function Dashboard() {
       <main className="container max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-display font-bold mb-2">Dashboard</h2>
+            <h2 className="text-3xl font-display font-bold mb-2">Assalaamu'alaikum</h2>
             <p className="text-muted-foreground">Track your journey, one deed at a time.</p>
           </div>
           <button 

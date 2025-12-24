@@ -32,7 +32,9 @@
     "recentActivity": "Aktivitas Terbaru",
     "noDeeds": "Belum ada amal yang dicatat",
     "startRecording": "Mulai mencatat amal baik dan burukmu untuk melihat kemajuanmu dari waktu ke waktu.",
-    "addDeed": "Tambah amal pertamamu"
+    "addDeed": "Tambah amal pertamamu",
+    "activeTargets": "Target Aktif",
+    "viewAll": "Lihat Semua"
   },
   "stats": {
     "goodDeeds": "Amal Baik",

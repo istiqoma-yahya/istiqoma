@@ -1,11 +1,14 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useDeeds } from "@/hooks/use-deeds";
+import { useTargetsWithProgress } from "@/hooks/use-targets";
 import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { Loader2, LogOut, User, Settings, Plus } from "lucide-react";
+import { Loader2, LogOut, User, Settings, Plus, Target, Trophy, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -22,6 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export default function Dashboard() {
   const { user, logout, isLoggingOut } = useAuth();
   const { data: deeds, isLoading } = useDeeds();
+  const { data: targets } = useTargetsWithProgress();
   const [, navigate] = useLocation();
   const { t } = useTranslation();
 
@@ -112,6 +116,46 @@ export default function Dashboard() {
         </div>
 
         <StatsOverview deeds={sortedDeeds} />
+
+        {targets && targets.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Target className="w-5 h-5 text-emerald-500" />
+                {t('dashboard.activeTargets')}
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/targets")}
+                className="text-muted-foreground"
+                data-testid="button-view-all-targets"
+              >
+                {t('dashboard.viewAll')}
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {targets.slice(0, 3).map((target) => (
+                <Card key={target.id} className="p-3" data-testid={`card-dashboard-target-${target.id}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-sm truncate">{target.category}</span>
+                    {target.percentComplete >= 100 && (
+                      <Trophy className="w-4 h-4 text-emerald-500" />
+                    )}
+                  </div>
+                  <Progress value={target.percentComplete} className="h-2 mb-1" />
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{target.currentValue} / {target.targetValue}</span>
+                    <span className={target.percentComplete >= 100 ? "text-emerald-500 font-medium" : ""}>
+                      {target.percentComplete}%
+                    </span>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="space-y-6">
           <h3 className="text-xl font-display font-bold flex items-center gap-2">

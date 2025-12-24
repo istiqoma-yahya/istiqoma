@@ -32,7 +32,9 @@
     "recentActivity": "Recent Activity",
     "noDeeds": "No deeds recorded yet",
     "startRecording": "Start tracking your good and bad deeds to see your progress over time.",
-    "addDeed": "Add your first deed"
+    "addDeed": "Add your first deed",
+    "activeTargets": "Active Targets",
+    "viewAll": "View All"
   },
   "stats": {
     "goodDeeds": "Good Deeds",

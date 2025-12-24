@@ -11,6 +11,7 @@ interface LocationState {
   longitude: number | null;
   error: string | null;
   loading: boolean;
+  requested: boolean;
 }
 
 export default function QiblaPage() {
@@ -18,7 +19,8 @@ export default function QiblaPage() {
     latitude: null,
     longitude: null,
     error: null,
-    loading: true,
+    loading: false,
+    requested: false,
   });
   const [compassHeading, setCompassHeading] = useState<number | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
@@ -27,16 +29,19 @@ export default function QiblaPage() {
 
   const KAABA_COORDS = { lat: 21.422487, lng: 39.826206 };
 
-  useEffect(() => {
+  const requestLocation = () => {
     if (!navigator.geolocation) {
       setLocation({
         latitude: null,
         longitude: null,
         error: "Geolocation is not supported by your browser",
         loading: false,
+        requested: true,
       });
       return;
     }
+
+    setLocation(prev => ({ ...prev, loading: true, requested: true, error: null }));
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -45,6 +50,7 @@ export default function QiblaPage() {
           longitude: position.coords.longitude,
           error: null,
           loading: false,
+          requested: true,
         });
       },
       (error) => {
@@ -62,11 +68,12 @@ export default function QiblaPage() {
           longitude: null,
           error: errorMessage,
           loading: false,
+          requested: true,
         });
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
-  }, []);
+  };
 
   const handleOrientation = (event: DeviceOrientationEvent) => {
     let heading: number | null = null;
@@ -146,30 +153,7 @@ export default function QiblaPage() {
     ? qiblaDirection - compassHeading
     : qiblaDirection;
 
-  const requestLocationPermission = () => {
-    setLocation({ ...location, loading: true, error: null });
-    setPermissionDenied(false);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          error: null,
-          loading: false,
-        });
-      },
-      (error) => {
-        setLocation({
-          latitude: null,
-          longitude: null,
-          error: "Location permission denied",
-          loading: false,
-        });
-        setPermissionDenied(true);
-      }
-    );
-  };
-
+  
   return (
     <>
       <div className="min-h-screen bg-background text-foreground pb-20">
@@ -184,12 +168,26 @@ export default function QiblaPage() {
         </header>
 
         <main className="container max-w-5xl mx-auto px-4 py-8">
-          {location.loading ? (
+          {!location.requested ? (
+            <Card className="p-12 text-center flex flex-col items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6">
+                <Compass className="w-10 h-10 text-emerald-500" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Find Qibla Direction</h3>
+              <p className="text-muted-foreground mb-6 max-w-md">
+                To find the direction to Mecca, we need your location. Tap the button below and allow location access when prompted.
+              </p>
+              <Button onClick={requestLocation} size="lg" data-testid="button-enable-location">
+                <MapPin className="w-4 h-4 mr-2" />
+                Enable Location
+              </Button>
+            </Card>
+          ) : location.loading ? (
             <Card className="p-12 text-center flex flex-col items-center justify-center">
               <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-4" />
               <h3 className="text-lg font-medium mb-2">Getting your location...</h3>
               <p className="text-muted-foreground">
-                Please allow location access to find Qibla direction.
+                Please allow location access when prompted by your browser.
               </p>
             </Card>
           ) : location.error ? (
@@ -199,11 +197,9 @@ export default function QiblaPage() {
               <p className="text-muted-foreground mb-6 max-w-md">
                 {location.error}
               </p>
-              {permissionDenied && (
-                <Button onClick={requestLocationPermission} data-testid="button-retry-location">
-                  Try Again
-                </Button>
-              )}
+              <Button onClick={requestLocation} data-testid="button-retry-location">
+                Try Again
+              </Button>
             </Card>
           ) : (
             <div className="space-y-8">

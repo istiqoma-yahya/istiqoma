@@ -4,6 +4,8 @@ import { useCreateDeed } from "@/hooks/use-deeds";
 import { useCategories } from "@/hooks/use-categories";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { RotateCcw, Save, Loader2 } from "lucide-react";
@@ -12,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function DzikirPage() {
   const [, navigate] = useLocation();
   const [count, setCount] = useState(0);
+  const [isIstighfar, setIsIstighfar] = useState(false);
   const { data: categories = [] } = useCategories();
   const { mutate: createDeed, isPending: isSaving } = useCreateDeed();
   const { toast } = useToast();
@@ -38,31 +41,59 @@ export default function DzikirPage() {
       return;
     }
 
-    createDeed(
-      {
-        deedType: "good",
-        description: `Dzikir - ${count} counts`,
-        category: dzikirCategory?.name || "Dzikr",
-        points: count,
-        createdAt: new Date(),
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: "Dzikir saved!",
-            description: `${count} dzikir counted and saved as ${count} points.`,
-          });
-          setCount(0);
+    if (isIstighfar) {
+      createDeed(
+        {
+          deedType: "good",
+          description: `Istighfar - ${count} counts (seeking forgiveness)`,
+          category: "Istighfar",
+          points: count,
+          createdAt: new Date(),
         },
-        onError: () => {
-          toast({
-            title: "Failed to save",
-            description: "Please try again.",
-            variant: "destructive",
-          });
+        {
+          onSuccess: () => {
+            toast({
+              title: "Istighfar saved!",
+              description: `${count} istighfar counted and saved as ${count} points.`,
+            });
+            setCount(0);
+          },
+          onError: () => {
+            toast({
+              title: "Failed to save",
+              description: "Please try again.",
+              variant: "destructive",
+            });
+          },
+        }
+      );
+    } else {
+      createDeed(
+        {
+          deedType: "good",
+          description: `Dzikir - ${count} counts`,
+          category: dzikirCategory?.name || "Dzikr",
+          points: count,
+          createdAt: new Date(),
         },
-      }
-    );
+        {
+          onSuccess: () => {
+            toast({
+              title: "Dzikir saved!",
+              description: `${count} dzikir counted and saved as ${count} points.`,
+            });
+            setCount(0);
+          },
+          onError: () => {
+            toast({
+              title: "Failed to save",
+              description: "Please try again.",
+              variant: "destructive",
+            });
+          },
+        }
+      );
+    }
   };
 
   return (
@@ -77,22 +108,42 @@ export default function DzikirPage() {
       <main className="container max-w-5xl mx-auto px-4 py-8 flex flex-col items-center">
         <div className="text-center mb-8">
           <p className="text-muted-foreground">
-            Tap the counter to record your dzikir. Each tap equals 1 point.
+            {isIstighfar 
+              ? "Tap the counter to record your istighfar. Each tap reduces bad deeds by 1 point."
+              : "Tap the counter to record your dzikir. Each tap equals 1 point."}
           </p>
+        </div>
+
+        <div className="flex items-center gap-3 mb-6">
+          <Switch
+            id="istighfar-toggle"
+            checked={isIstighfar}
+            onCheckedChange={setIsIstighfar}
+            data-testid="switch-istighfar"
+          />
+          <Label htmlFor="istighfar-toggle" className="text-base font-medium cursor-pointer">
+            Istighfar
+          </Label>
         </div>
 
         <Card className="w-full max-w-sm p-8 flex flex-col items-center gap-6">
           <button
             onClick={handleTap}
-            className="w-48 h-48 rounded-full bg-emerald-500/20 border-4 border-emerald-500 flex items-center justify-center transition-all active:scale-95 active:bg-emerald-500/30 hover:bg-emerald-500/25"
+            className={`w-48 h-48 rounded-full flex items-center justify-center transition-all active:scale-95 ${
+              isIstighfar 
+                ? "bg-rose-500/20 border-4 border-rose-500 active:bg-rose-500/30 hover:bg-rose-500/25"
+                : "bg-emerald-500/20 border-4 border-emerald-500 active:bg-emerald-500/30 hover:bg-emerald-500/25"
+            }`}
             data-testid="button-dzikir-tap"
           >
-            <span className="text-6xl font-bold text-emerald-500" data-testid="text-dzikir-count">
+            <span className={`text-6xl font-bold ${isIstighfar ? "text-rose-500" : "text-emerald-500"}`} data-testid="text-dzikir-count">
               {count}
             </span>
           </button>
 
-          <p className="text-sm text-muted-foreground">Tap to count</p>
+          <p className="text-sm text-muted-foreground">
+            {isIstighfar ? "Tap to count istighfar" : "Tap to count"}
+          </p>
         </Card>
 
         <div className="flex items-center gap-4 mt-8">
@@ -110,7 +161,11 @@ export default function DzikirPage() {
           <Button
             onClick={handleSave}
             disabled={count === 0 || isSaving}
-            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 py-2 text-base font-medium"
+            className={`flex items-center gap-2 py-2 text-base font-medium ${
+              isIstighfar 
+                ? "bg-rose-500 hover:bg-rose-600"
+                : "bg-emerald-500 hover:bg-emerald-600"
+            }`}
             data-testid="button-dzikir-save"
           >
             {isSaving ? (
@@ -118,13 +173,15 @@ export default function DzikirPage() {
             ) : (
               <Save className="w-4 h-4" />
             )}
-            Save ({count} points)
+            {isIstighfar ? `Save (+${count} istighfar)` : `Save (+${count} points)`}
           </Button>
         </div>
 
         <div className="mt-12 text-center">
           <p className="text-xs text-muted-foreground max-w-xs">
-            SubhanAllah, Alhamdulillah, Allahu Akbar - Remember Allah often.
+            {isIstighfar 
+              ? "Astaghfirullah - Seek forgiveness from Allah."
+              : "SubhanAllah, Alhamdulillah, Allahu Akbar - Remember Allah often."}
           </p>
         </div>
       </main>

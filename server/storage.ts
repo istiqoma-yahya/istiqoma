@@ -1,6 +1,7 @@
 import { db } from "./db";
-import { deeds, categories, type InsertDeed, type Deed, type Category, type InsertCategory } from "@shared/schema";
-import { eq, desc, and, asc, sql } from "drizzle-orm";
+import { deeds, categories, targets, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetWithProgress } from "@shared/schema";
+import { eq, desc, and, asc, sql, gte, lte } from "drizzle-orm";
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 
 export interface IStorage {
   getDeeds(userId: string): Promise<Deed[]>;
@@ -12,6 +13,11 @@ export interface IStorage {
   deleteCategory(id: number, userId: string): Promise<void>;
   updateCategory(id: number, userId: string, name: string): Promise<Category>;
   reorderCategories(userId: string, orderedIds: number[]): Promise<Category[]>;
+  getTargets(userId: string): Promise<Target[]>;
+  getTargetsWithProgress(userId: string): Promise<TargetWithProgress[]>;
+  createTarget(userId: string, target: InsertTarget): Promise<Target>;
+  updateTarget(id: number, userId: string, target: InsertTarget): Promise<Target>;
+  deleteTarget(id: number, userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -89,6 +95,85 @@ export class DatabaseStorage implements IStorage {
         .where(and(eq(categories.id, orderedIds[i]), eq(categories.userId, userId)));
     }
     return this.getCategories(userId);
+  }
+
+  async getTargets(userId: string): Promise<Target[]> {
+    return await db
+      .select()
+      .from(targets)
+      .where(eq(targets.userId, userId))
+      .orderBy(desc(targets.createdAt));
+  }
+
+  async getTargetsWithProgress(userId: string): Promise<TargetWithProgress[]> {
+    const userTargets = await this.getTargets(userId);
+    const userDeeds = await this.getDeeds(userId);
+    const now = new Date();
+
+    return userTargets.map((target) => {
+      let periodStart: Date;
+      let periodEnd: Date;
+
+      switch (target.period) {
+        case "daily":
+          periodStart = startOfDay(now);
+          periodEnd = endOfDay(now);
+          break;
+        case "weekly":
+          periodStart = startOfWeek(now, { weekStartsOn: 1 });
+          periodEnd = endOfWeek(now, { weekStartsOn: 1 });
+          break;
+        case "monthly":
+          periodStart = startOfMonth(now);
+          periodEnd = endOfMonth(now);
+          break;
+        default:
+          periodStart = startOfDay(now);
+          periodEnd = endOfDay(now);
+      }
+
+      const deedsInPeriod = userDeeds.filter((deed) => {
+        const deedDate = new Date(deed.createdAt || now);
+        return (
+          deed.category === target.category &&
+          deed.deedType === "good" &&
+          deedDate >= periodStart &&
+          deedDate <= periodEnd
+        );
+      });
+
+      const currentValue = deedsInPeriod.reduce((sum, deed) => sum + deed.points, 0);
+      const percentComplete = Math.min(100, Math.round((currentValue / target.targetValue) * 100));
+
+      return {
+        ...target,
+        currentValue,
+        percentComplete,
+      };
+    });
+  }
+
+  async createTarget(userId: string, insertTarget: InsertTarget): Promise<Target> {
+    const [target] = await db
+      .insert(targets)
+      .values({ ...insertTarget, userId })
+      .returning();
+    return target;
+  }
+
+  async updateTarget(id: number, userId: string, updateTarget: InsertTarget): Promise<Target> {
+    const [target] = await db
+      .update(targets)
+      .set(updateTarget)
+      .where(and(eq(targets.id, id), eq(targets.userId, userId)))
+      .returning();
+    return target;
+  }
+
+  async deleteTarget(id: number, userId: string): Promise<void> {
+    await db
+      .delete(targets)
+      .where(and(eq(targets.id, id), eq(targets.userId, userId)));
   }
 }
 

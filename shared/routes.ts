@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, deeds, categories } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, deeds, categories, targets } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -104,6 +104,54 @@ export const api = {
       responses: {
         200: z.array(z.custom<typeof categories.$inferSelect>()),
         401: errorSchemas.unauthorized,
+      },
+    },
+  },
+  targets: {
+    list: {
+      method: "GET" as const,
+      path: "/api/targets",
+      responses: {
+        200: z.array(z.custom<typeof targets.$inferSelect>()),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    listWithProgress: {
+      method: "GET" as const,
+      path: "/api/targets/progress",
+      responses: {
+        200: z.array(z.any()),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    create: {
+      method: "POST" as const,
+      path: "/api/targets",
+      input: insertTargetSchema,
+      responses: {
+        201: z.custom<typeof targets.$inferSelect>(),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+      },
+    },
+    update: {
+      method: "PATCH" as const,
+      path: "/api/targets/:id",
+      input: insertTargetSchema,
+      responses: {
+        200: z.custom<typeof targets.$inferSelect>(),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
+    delete: {
+      method: "DELETE" as const,
+      path: "/api/targets/:id",
+      responses: {
+        204: z.void(),
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
       },
     },
   },

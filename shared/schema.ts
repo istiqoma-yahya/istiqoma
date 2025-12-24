@@ -25,6 +25,16 @@ export const deeds = pgTable("deeds", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const targets = pgTable("targets", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  category: text("category").notNull(),
+  targetValue: integer("target_value").notNull(),
+  period: text("period", { enum: ["daily", "weekly", "monthly"] }).notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertDeedSchema = createInsertSchema(deeds).pick({
   description: true,
   deedType: true,
@@ -39,12 +49,30 @@ export const insertCategorySchema = createInsertSchema(categories).pick({
   name: true,
 });
 
+export const insertTargetSchema = createInsertSchema(targets).pick({
+  category: true,
+  targetValue: true,
+  period: true,
+}).extend({
+  targetValue: z.number().min(1, "Target value must be at least 1"),
+  period: z.enum(["daily", "weekly", "monthly"]),
+});
+
 export type InsertDeed = z.infer<typeof insertDeedSchema>;
 export type Deed = typeof deeds.$inferSelect;
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
+export type Target = typeof targets.$inferSelect;
+export type InsertTarget = z.infer<typeof insertTargetSchema>;
 
 export type CreateDeedRequest = InsertDeed;
 export type DeedResponse = Deed;
 export type CreateCategoryRequest = InsertCategory;
 export type CategoryResponse = Category;
+export type CreateTargetRequest = InsertTarget;
+export type TargetResponse = Target;
+
+export type TargetWithProgress = Target & {
+  currentValue: number;
+  percentComplete: number;
+};

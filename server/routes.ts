@@ -137,5 +137,66 @@ export async function registerRoutes(
     }
   });
 
+  // Targets Routes - Protected
+  app.get(api.targets.list.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const targetsList = await storage.getTargets(userId);
+    res.json(targetsList);
+  });
+
+  app.get(api.targets.listWithProgress.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const targetsWithProgress = await storage.getTargetsWithProgress(userId);
+    res.json(targetsWithProgress);
+  });
+
+  app.post(api.targets.create.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const input = api.targets.create.input.parse(req.body);
+      const userId = req.user.claims.sub;
+      const target = await storage.createTarget(userId, input);
+      res.status(201).json(target);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      throw err;
+    }
+  });
+
+  app.patch(api.targets.update.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const input = api.targets.update.input.parse(req.body);
+      const userId = req.user.claims.sub;
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      const target = await storage.updateTarget(id, userId, input);
+      res.json(target);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      throw err;
+    }
+  });
+
+  app.delete(api.targets.delete.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+    await storage.deleteTarget(id, userId);
+    res.status(204).send();
+  });
+
   return httpServer;
 }

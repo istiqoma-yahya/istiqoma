@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory, useReorderCategories } from "@/hooks/use-categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +48,7 @@ function SortableCategoryCard({
   deleteCategory: (id: number) => void;
   isDeleting: boolean;
 }) {
+  const { t } = useTranslation();
   const {
     attributes,
     listeners,
@@ -85,14 +87,14 @@ function SortableCategoryCard({
             disabled={isUpdating || !editingName.trim()}
             className="bg-blue-500 hover:bg-blue-600 py-2 text-base font-medium"
           >
-            Save
+            {t('common.save')}
           </Button>
           <Button
             variant="outline"
             onClick={() => setEditingId(null)}
             className="py-2 text-base"
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
         </div>
       ) : (
@@ -127,21 +129,21 @@ function SortableCategoryCard({
               </AlertDialogTrigger>
               <AlertDialogContent className="bg-card border-border text-card-foreground">
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Category?</AlertDialogTitle>
+                  <AlertDialogTitle>{t('categories.deleteConfirm')}</AlertDialogTitle>
                   <AlertDialogDescription className="text-muted-foreground">
                     This action cannot be undone. Deeds with this category will keep their category name.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel className="bg-secondary border-border hover:bg-muted text-foreground">
-                    Cancel
+                    {t('common.cancel')}
                   </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => deleteCategory(category.id)}
                     disabled={isDeleting}
                     className="bg-rose-500 hover:bg-rose-600 text-white"
                   >
-                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Delete"}
+                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('common.delete')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -154,6 +156,7 @@ function SortableCategoryCard({
 }
 
 export default function CategoryManagement() {
+  const { t } = useTranslation();
   const [, navigate] = useLocation();
   const { data: categories = [], isLoading } = useCategories();
   const { mutate: createCategory, isPending: isCreating } = useCreateCategory();
@@ -238,22 +241,22 @@ export default function CategoryManagement() {
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h1 className="font-display font-bold text-xl">Manage Categories</h1>
+            <h1 className="font-display font-bold text-xl">{t('categories.title')}</h1>
           </div>
           <Dialog open={openCreateDialog} onOpenChange={setOpenCreateDialog}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 py-2 text-base font-medium">
                 <Plus className="w-5 h-5" />
-                <span>Add Category</span>
+                <span>{t('categories.addCategory')}</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-border text-card-foreground">
               <DialogHeader>
-                <DialogTitle>Create New Category</DialogTitle>
+                <DialogTitle>{t('categories.addCategory')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 mt-4">
                 <Input
-                  placeholder="Category name (e.g., Reciting Quran)"
+                  placeholder={t('categories.categoryName')}
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
                   className="glass-input"
@@ -264,7 +267,7 @@ export default function CategoryManagement() {
                   disabled={isCreating || !newCategoryName.trim()}
                   className="w-full bg-emerald-500 hover:bg-emerald-600 py-2 text-base font-medium"
                 >
-                  {isCreating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Create"}
+                  {isCreating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('common.add')}
                 </Button>
               </div>
             </DialogContent>
@@ -274,13 +277,13 @@ export default function CategoryManagement() {
 
       <main className="container max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-display font-bold mb-2">Your Categories</h2>
+          <h2 className="text-3xl font-display font-bold mb-2">{t('categories.customCategories')}</h2>
           <p className="text-muted-foreground">Drag to reorder. Create and manage categories for tracking your deeds.</p>
         </div>
 
         {categories.length === 0 ? (
           <Card className="p-12 text-center flex flex-col items-center justify-center border-dashed">
-            <h3 className="text-lg font-medium mb-2">No categories yet</h3>
+            <h3 className="text-lg font-medium mb-2">{t('categories.noCustom')}</h3>
             <p className="text-muted-foreground max-w-md mx-auto mb-6">
               Create your first category to start tracking deeds by category.
             </p>

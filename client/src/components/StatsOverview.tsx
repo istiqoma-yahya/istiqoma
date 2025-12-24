@@ -1,12 +1,14 @@
 import { type Deed } from "@shared/schema";
 import { TrendingUp, TrendingDown, Scale } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface StatsOverviewProps {
   deeds: Deed[];
 }
 
 export function StatsOverview({ deeds }: StatsOverviewProps) {
+  const { t } = useTranslation();
   const goodDeeds = deeds.filter((d) => d.deedType === "good");
   const badDeedsExcludingIstighfar = deeds.filter((d) => d.deedType === "bad" && d.category !== "Istighfar");
   const istighfarDeeds = deeds.filter((d) => d.deedType === "bad" && d.category === "Istighfar");
@@ -19,7 +21,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
 
   const stats = [
     {
-      label: "Good Deeds",
+      label: t('stats.goodDeeds'),
       value: goodDeeds.length,
       points: goodPoints,
       icon: TrendingUp,
@@ -28,7 +30,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
       border: "border-emerald-500/20",
     },
     {
-      label: "Bad Deeds",
+      label: t('stats.badDeeds'),
       value: badDeedsExcludingIstighfar.length,
       points: badPoints,
       icon: TrendingDown,
@@ -37,9 +39,9 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
       border: "border-rose-500/20",
     },
     {
-      label: "Net Balance",
+      label: t('stats.netBalance'),
       value: netPoints,
-      points: null, // Don't show points subtitle for net
+      points: null,
       icon: Scale,
       color: netPoints >= 0 ? "text-blue-600 dark:text-blue-400" : "text-amber-600 dark:text-amber-400",
       bg: netPoints >= 0 ? "bg-blue-500/10" : "bg-amber-500/10",

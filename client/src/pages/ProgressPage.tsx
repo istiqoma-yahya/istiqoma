@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
+import { useTranslation } from "react-i18next";
 import {
   BarChart,
   Bar,
@@ -23,6 +24,7 @@ import { Loader2 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 
 export default function ProgressPage() {
+  const { t } = useTranslation();
   const { data: deeds, isLoading } = useDeeds();
   const { user } = useAuth();
   const { theme } = useTheme();
@@ -61,12 +63,12 @@ export default function ProgressPage() {
   // Data for good vs bad deeds chart
   const deedTypeData = [
     {
-      name: "Good Deeds",
+      name: t("stats.goodDeeds"),
       count: goodDeeds.length,
       points: goodPoints,
     },
     {
-      name: "Bad Deeds",
+      name: t("stats.badDeeds"),
       count: badDeedsExcludingIstighfar.length,
       points: badPoints,
     },
@@ -150,7 +152,7 @@ export default function ProgressPage() {
         {/* Header */}
         <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
           <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-            <h1 className="font-display font-bold text-xl">Spiritual Progress</h1>
+            <h1 className="font-display font-bold text-xl">{t("progress.spiritualProgress")}</h1>
             <ThemeToggle />
           </div>
         </header>
@@ -159,9 +161,9 @@ export default function ProgressPage() {
         <main className="container max-w-5xl mx-auto px-4 py-8">
         {deedsArray.length === 0 ? (
           <Card className="p-12 text-center flex flex-col items-center justify-center border-dashed">
-            <h3 className="text-lg font-medium mb-2">No data yet</h3>
+            <h3 className="text-lg font-medium mb-2">{t("progress.noData")}</h3>
             <p className="text-muted-foreground max-w-md mx-auto">
-              Record some deeds to see your spiritual progress visualized here.
+              {t("progress.noDataDesc")}
             </p>
           </Card>
         ) : (
@@ -170,13 +172,13 @@ export default function ProgressPage() {
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <Card className="p-6">
                 <div className="text-muted-foreground text-sm mb-2">
-                  Total Deeds
+                  {t("progress.totalDeeds")}
                 </div>
                 <div className="text-3xl font-bold">{deedsArray.length}</div>
               </Card>
               <Card className="p-6">
                 <div className="text-muted-foreground text-sm mb-2">
-                  Good Deeds
+                  {t("stats.goodDeeds")}
                 </div>
                 <div className="text-3xl font-bold text-emerald-500">
                   {goodDeeds.length}
@@ -184,7 +186,7 @@ export default function ProgressPage() {
               </Card>
               <Card className="p-6">
                 <div className="text-muted-foreground text-sm mb-2">
-                  Bad Deeds
+                  {t("stats.badDeeds")}
                 </div>
                 <div className="text-3xl font-bold text-rose-500">
                   {badDeedsExcludingIstighfar.length}
@@ -192,18 +194,18 @@ export default function ProgressPage() {
               </Card>
               <Card className="p-6">
                 <div className="text-muted-foreground text-sm mb-2">
-                  Istighfar
+                  {t("progress.istighfar")}
                 </div>
                 <div className="text-3xl font-bold text-purple-500">
                   -{istighfarPoints}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  ({istighfarDeeds.length} times)
+                  ({istighfarDeeds.length} {t("progress.times")})
                 </div>
               </Card>
               <Card className="p-6">
                 <div className="text-muted-foreground text-sm mb-2">
-                  Net Points
+                  {t("progress.netPoints")}
                 </div>
                 <div
                   className={`text-3xl font-bold ${
@@ -219,7 +221,7 @@ export default function ProgressPage() {
             {/* Good vs Bad Deeds Chart */}
             <Card className="p-6">
               <h2 className="text-lg font-display font-bold mb-6">
-                Good vs Bad Deeds
+                {t("progress.goodVsBad")}
               </h2>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={deedTypeData}>
@@ -237,8 +239,8 @@ export default function ProgressPage() {
                     itemStyle={{ color: tooltipItemColor }}
                   />
                   <Legend />
-                  <Bar dataKey="count" fill="#10b981" name="Count" />
-                  <Bar dataKey="points" fill="#3b82f6" name="Points" />
+                  <Bar dataKey="count" fill="#10b981" name={t("progress.count")} />
+                  <Bar dataKey="points" fill="#3b82f6" name={t("progress.points")} />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -247,7 +249,7 @@ export default function ProgressPage() {
             {filteredPointsOverTime.length > 0 && (
               <Card className="p-6">
                 <h2 className="text-lg font-display font-bold mb-6">
-                  Points Over Time (This Month)
+                  {t("progress.pointsOverTime")}
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={filteredPointsOverTime}>
@@ -268,7 +270,7 @@ export default function ProgressPage() {
                       type="monotone"
                       dataKey="good"
                       stroke="#10b981"
-                      name="Good Deeds Points"
+                      name={t("progress.goodDeedsPoints")}
                       strokeWidth={2}
                       dot={false}
                     />
@@ -276,7 +278,7 @@ export default function ProgressPage() {
                       type="monotone"
                       dataKey="bad"
                       stroke="#f87171"
-                      name="Bad Deeds Points"
+                      name={t("progress.badDeedsPoints")}
                       strokeWidth={2}
                       dot={false}
                     />
@@ -284,7 +286,7 @@ export default function ProgressPage() {
                       type="monotone"
                       dataKey="total"
                       stroke="#fbbf24"
-                      name="Net Points"
+                      name={t("progress.netPointsLabel")}
                       strokeWidth={2}
                       dot={false}
                     />
@@ -297,7 +299,7 @@ export default function ProgressPage() {
             {categoryData.length > 0 && (
               <Card className="p-6">
                 <h2 className="text-lg font-display font-bold mb-6">
-                  Deeds by Category
+                  {t("progress.deedsByCategory")}
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>

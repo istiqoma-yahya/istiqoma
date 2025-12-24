@@ -26,9 +26,11 @@
   },
   "dashboard": {
     "greeting": "Assalaamu'alaikum",
+    "subtitle": "Lacak perjalananmu, satu amal pada satu waktu.",
+    "recordDeed": "Catat Amal",
     "recentActivity": "Aktivitas Terbaru",
     "noDeeds": "Belum ada amal yang dicatat",
-    "startRecording": "Mulai mencatat amal baik dan burukmu untuk melihatnya di sini.",
+    "startRecording": "Mulai mencatat amal baik dan burukmu untuk melihat kemajuanmu dari waktu ke waktu.",
     "addDeed": "Tambah amal pertamamu"
   },
   "stats": {
@@ -68,11 +70,26 @@
     "title": "Penghitung Dzikir",
     "counter": "Penghitung",
     "reset": "Reset",
+    "save": "Simpan",
     "target": "Target",
     "completed": "Selesai",
-    "istighfarMode": "Mode Istighfar",
-    "istighfarDesc": "Saat diaktifkan, setiap hitungan akan dicatat sebagai Istighfar (memohon ampunan)",
-    "tapToCount": "Ketuk di mana saja untuk menghitung"
+    "istighfarMode": "Istighfar",
+    "istighfarDesc": "Ketuk penghitung untuk mencatat istighfarmu. Setiap ketukan mengurangi amal buruk sebanyak 1 poin.",
+    "dzikirDesc": "Ketuk penghitung untuk mencatat dzikirmu. Setiap ketukan bernilai 1 poin.",
+    "tapToCount": "Ketuk untuk menghitung",
+    "tapIstighfar": "Ketuk untuk menghitung istighfar",
+    "istighfarReminder": "Astaghfirullah - Memohon ampunan dari Allah.",
+    "dzikirReminder": "SubhanAllah, Alhamdulillah, Allahu Akbar - Ingatlah Allah selalu.",
+    "nothingToSave": "Tidak ada yang disimpan",
+    "tapCounterFirst": "Ketuk penghitung untuk menambah dzikir dulu.",
+    "istighfarSaved": "Istighfar tersimpan!",
+    "istighfarSavedDesc": "{{count}} istighfar dihitung. Amal buruk berkurang {{count}} poin.",
+    "dzikirSaved": "Dzikir tersimpan!",
+    "dzikirSavedDesc": "{{count}} dzikir dihitung dan disimpan sebagai {{count}} poin.",
+    "failedToSave": "Gagal menyimpan",
+    "tryAgain": "Silakan coba lagi.",
+    "istighfarDeedDesc": "Istighfar - {{count}} hitungan (pengampunan)",
+    "dzikirDeedDesc": "Dzikir - {{count}} hitungan"
   },
   "qibla": {
     "title": "Kompas Kiblat",

@@ -3,6 +3,7 @@ import { Trash2 } from "lucide-react";
 import { type Deed } from "@shared/schema";
 import { useDeleteDeed } from "@/hooks/use-deeds";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +25,7 @@ interface DeedCardProps {
 export function DeedCard({ deed, index }: DeedCardProps) {
   const [, navigate] = useLocation();
   const { mutate: deleteDeed, isPending } = useDeleteDeed();
+  const { t } = useTranslation();
 
   const isGood = deed.deedType === "good";
   const isIstighfar = deed.category === "Istighfar";
@@ -52,7 +54,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
                 ${isGood ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/20 text-rose-600 dark:text-rose-400"}
               `}
             >
-              {isGood ? "+ Good Deed" : isIstighfar ? "- Bad Deed" : "+ Bad Deed"}
+              {isGood ? `+ ${t('deed.goodDeed')}` : isIstighfar ? `- ${t('deed.badDeed')}` : `+ ${t('deed.badDeed')}`}
             </span>
             <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-600 dark:text-blue-400">
               {deed.category}
@@ -84,18 +86,18 @@ export function DeedCard({ deed, index }: DeedCardProps) {
             </AlertDialogTrigger>
             <AlertDialogContent className="bg-card border-border text-card-foreground">
               <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogTitle>{t('deed.deleteConfirm')}</AlertDialogTitle>
                 <AlertDialogDescription className="text-muted-foreground">
-                  This action cannot be undone. This will permanently delete this deed from your history.
+                  {t('deed.deleteWarning')}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="bg-secondary border-border hover:bg-muted text-foreground">Cancel</AlertDialogCancel>
+                <AlertDialogCancel className="bg-secondary border-border hover:bg-muted text-foreground">{t('common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction 
                   onClick={() => deleteDeed(deed.id)}
                   className="bg-rose-500 hover:bg-rose-600 text-white"
                 >
-                  Delete
+                  {t('common.delete')}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

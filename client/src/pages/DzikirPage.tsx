@@ -10,6 +10,7 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { RotateCcw, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 export default function DzikirPage() {
   const [, navigate] = useLocation();
@@ -18,6 +19,7 @@ export default function DzikirPage() {
   const { data: categories = [] } = useCategories();
   const { mutate: createDeed, isPending: isSaving } = useCreateDeed();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const dzikirCategory = categories.find(
     (c) => c.name.toLowerCase() === "dzikr" || c.name.toLowerCase() === "dzikir"
@@ -34,8 +36,8 @@ export default function DzikirPage() {
   const handleSave = () => {
     if (count === 0) {
       toast({
-        title: "Nothing to save",
-        description: "Tap the counter to add dzikir first.",
+        title: t('dzikir.nothingToSave'),
+        description: t('dzikir.tapCounterFirst'),
         variant: "destructive",
       });
       return;
@@ -45,7 +47,7 @@ export default function DzikirPage() {
       createDeed(
         {
           deedType: "bad",
-          description: `Istighfar - ${count} counts (forgiveness)`,
+          description: t('dzikir.istighfarDeedDesc', { count }),
           category: "Istighfar",
           points: count,
           createdAt: new Date(),
@@ -53,15 +55,15 @@ export default function DzikirPage() {
         {
           onSuccess: () => {
             toast({
-              title: "Istighfar saved!",
-              description: `${count} istighfar counted. Bad deeds reduced by ${count} points.`,
+              title: t('dzikir.istighfarSaved'),
+              description: t('dzikir.istighfarSavedDesc', { count }),
             });
             setCount(0);
           },
           onError: () => {
             toast({
-              title: "Failed to save",
-              description: "Please try again.",
+              title: t('dzikir.failedToSave'),
+              description: t('dzikir.tryAgain'),
               variant: "destructive",
             });
           },
@@ -71,7 +73,7 @@ export default function DzikirPage() {
       createDeed(
         {
           deedType: "good",
-          description: `Dzikir - ${count} counts`,
+          description: t('dzikir.dzikirDeedDesc', { count }),
           category: dzikirCategory?.name || "Dzikr",
           points: count,
           createdAt: new Date(),
@@ -79,15 +81,15 @@ export default function DzikirPage() {
         {
           onSuccess: () => {
             toast({
-              title: "Dzikir saved!",
-              description: `${count} dzikir counted and saved as ${count} points.`,
+              title: t('dzikir.dzikirSaved'),
+              description: t('dzikir.dzikirSavedDesc', { count }),
             });
             setCount(0);
           },
           onError: () => {
             toast({
-              title: "Failed to save",
-              description: "Please try again.",
+              title: t('dzikir.failedToSave'),
+              description: t('dzikir.tryAgain'),
               variant: "destructive",
             });
           },
@@ -100,7 +102,7 @@ export default function DzikirPage() {
     <div className="min-h-screen bg-background text-foreground pb-24">
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <h1 className="font-display font-bold text-xl">Dzikir Counter</h1>
+          <h1 className="font-display font-bold text-xl">{t('dzikir.title')}</h1>
           <ThemeToggle />
         </div>
       </header>
@@ -109,8 +111,8 @@ export default function DzikirPage() {
         <div className="text-center mb-8">
           <p className="text-muted-foreground">
             {isIstighfar 
-              ? "Tap the counter to record your istighfar. Each tap reduces bad deeds by 1 point."
-              : "Tap the counter to record your dzikir. Each tap equals 1 point."}
+              ? t('dzikir.istighfarDesc')
+              : t('dzikir.dzikirDesc')}
           </p>
         </div>
 
@@ -122,7 +124,7 @@ export default function DzikirPage() {
             data-testid="switch-istighfar"
           />
           <Label htmlFor="istighfar-toggle" className="text-base font-medium cursor-pointer">
-            Istighfar
+            {t('dzikir.istighfarMode')}
           </Label>
         </div>
 
@@ -142,7 +144,7 @@ export default function DzikirPage() {
           </button>
 
           <p className="text-sm text-muted-foreground">
-            {isIstighfar ? "Tap to count istighfar" : "Tap to count"}
+            {isIstighfar ? t('dzikir.tapIstighfar') : t('dzikir.tapToCount')}
           </p>
         </Card>
 
@@ -155,7 +157,7 @@ export default function DzikirPage() {
             data-testid="button-dzikir-reset"
           >
             <RotateCcw className="w-4 h-4" />
-            Reset
+            {t('dzikir.reset')}
           </Button>
 
           <Button
@@ -173,15 +175,15 @@ export default function DzikirPage() {
             ) : (
               <Save className="w-4 h-4" />
             )}
-            {isIstighfar ? `Save (-${count} bad points)` : `Save (+${count} points)`}
+            {isIstighfar ? `${t('dzikir.save')} (-${count})` : `${t('dzikir.save')} (+${count})`}
           </Button>
         </div>
 
         <div className="mt-12 text-center">
           <p className="text-xs text-muted-foreground max-w-xs">
             {isIstighfar 
-              ? "Astaghfirullah - Seek forgiveness from Allah."
-              : "SubhanAllah, Alhamdulillah, Allahu Akbar - Remember Allah often."}
+              ? t('dzikir.istighfarReminder')
+              : t('dzikir.dzikirReminder')}
           </p>
         </div>
       </main>

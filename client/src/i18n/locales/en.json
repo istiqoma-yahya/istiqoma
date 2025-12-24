@@ -26,9 +26,11 @@
   },
   "dashboard": {
     "greeting": "Assalaamu'alaikum",
+    "subtitle": "Track your journey, one deed at a time.",
+    "recordDeed": "Record Deed",
     "recentActivity": "Recent Activity",
     "noDeeds": "No deeds recorded yet",
-    "startRecording": "Start recording your good and bad deeds to see them here.",
+    "startRecording": "Start tracking your good and bad deeds to see your progress over time.",
     "addDeed": "Add your first deed"
   },
   "stats": {
@@ -68,11 +70,26 @@
     "title": "Dzikir Counter",
     "counter": "Counter",
     "reset": "Reset",
+    "save": "Save",
     "target": "Target",
     "completed": "Completed",
-    "istighfarMode": "Istighfar Mode",
-    "istighfarDesc": "When enabled, each count will be recorded as Istighfar (seeking forgiveness)",
-    "tapToCount": "Tap anywhere to count"
+    "istighfarMode": "Istighfar",
+    "istighfarDesc": "Tap the counter to record your istighfar. Each tap reduces bad deeds by 1 point.",
+    "dzikirDesc": "Tap the counter to record your dzikir. Each tap equals 1 point.",
+    "tapToCount": "Tap to count",
+    "tapIstighfar": "Tap to count istighfar",
+    "istighfarReminder": "Astaghfirullah - Seek forgiveness from Allah.",
+    "dzikirReminder": "SubhanAllah, Alhamdulillah, Allahu Akbar - Remember Allah often.",
+    "nothingToSave": "Nothing to save",
+    "tapCounterFirst": "Tap the counter to add dzikir first.",
+    "istighfarSaved": "Istighfar saved!",
+    "istighfarSavedDesc": "{{count}} istighfar counted. Bad deeds reduced by {{count}} points.",
+    "dzikirSaved": "Dzikir saved!",
+    "dzikirSavedDesc": "{{count}} dzikir counted and saved as {{count}} points.",
+    "failedToSave": "Failed to save",
+    "tryAgain": "Please try again.",
+    "istighfarDeedDesc": "Istighfar - {{count}} counts (forgiveness)",
+    "dzikirDeedDesc": "Dzikir - {{count}} counts"
   },
   "qibla": {
     "title": "Qibla Compass",

@@ -3,10 +3,12 @@ import { useDeeds } from "@/hooks/use-deeds";
 import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Loader2, LogOut, User, Settings, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +23,7 @@ export default function Dashboard() {
   const { user, logout, isLoggingOut } = useAuth();
   const { data: deeds, isLoading } = useDeeds();
   const [, navigate] = useLocation();
+  const { t } = useTranslation();
 
   if (isLoading) {
     return (
@@ -48,6 +51,7 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
             <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -73,7 +77,7 @@ export default function Dashboard() {
                 className="cursor-pointer"
               >
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Manage Categories</span>
+                <span>{t('user.manageCategories')}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border" />
               <DropdownMenuItem 
@@ -82,7 +86,7 @@ export default function Dashboard() {
                 className="text-rose-600 dark:text-rose-400 focus:text-rose-600 dark:focus:text-rose-400 focus:bg-rose-500/10 cursor-pointer"
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>{t('user.logout')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -94,8 +98,8 @@ export default function Dashboard() {
       <main className="container max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-display font-bold mb-2">Assalaamu'alaikum</h2>
-            <p className="text-muted-foreground">Track your journey, one deed at a time.</p>
+            <h2 className="text-3xl font-display font-bold mb-2">{t('dashboard.greeting')}</h2>
+            <p className="text-muted-foreground">{t('dashboard.subtitle')}</p>
           </div>
           <button 
             onClick={() => navigate("/create-deed")}
@@ -103,7 +107,7 @@ export default function Dashboard() {
             data-testid="button-create-deed"
           >
             <Plus className="w-5 h-5" />
-            <span>Record Deed</span>
+            <span>{t('dashboard.recordDeed')}</span>
           </button>
         </div>
 
@@ -111,7 +115,7 @@ export default function Dashboard() {
 
         <div className="space-y-6">
           <h3 className="text-xl font-display font-bold flex items-center gap-2">
-            Recent Activity
+            {t('dashboard.recentActivity')}
             <span className="text-sm font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
               {sortedDeeds.length}
             </span>
@@ -122,9 +126,9 @@ export default function Dashboard() {
               <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                 <Loader2 className="w-8 h-8 text-muted-foreground animate-pulse" />
               </div>
-              <h3 className="text-lg font-medium mb-2">No deeds recorded yet</h3>
+              <h3 className="text-lg font-medium mb-2">{t('dashboard.noDeeds')}</h3>
               <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                Start tracking your good and bad deeds to see your progress over time.
+                {t('dashboard.startRecording')}
               </p>
               <button 
                 onClick={() => navigate("/create-deed")}
@@ -132,7 +136,7 @@ export default function Dashboard() {
                 data-testid="button-create-deed-empty"
               >
                 <Plus className="w-5 h-5" />
-                <span>Record Deed</span>
+                <span>{t('dashboard.recordDeed')}</span>
               </button>
             </div>
           ) : (

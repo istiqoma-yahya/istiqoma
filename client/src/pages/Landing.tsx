@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle2, ShieldCheck, TrendingUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function Landing() {
+  const { t } = useTranslation();
   const handleLogin = () => {
     window.location.href = "/api/login";
   };
@@ -24,7 +26,7 @@ export default function Landing() {
           onClick={handleLogin}
           className="btn-secondary text-sm px-5 py-2.5"
         >
-          Login
+          {t('landing.login')}
         </button>
       </nav>
 
@@ -37,10 +39,10 @@ export default function Landing() {
             transition={{ duration: 0.6 }}
           >
             <h1 className="font-display text-5xl md:text-7xl font-bold leading-tight mb-6 bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent">
-              Master Your Soul,<br />Track Your Deeds.
+              {t('landing.title')}<br />{t('landing.titleLine2')}
             </h1>
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-              A spiritual companion for the modern Muslim. Monitor your daily actions, visualize your progress, and strive for excellence in character.
+              {t('landing.subtitle')}
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -48,7 +50,7 @@ export default function Landing() {
                 onClick={handleLogin}
                 className="btn-primary w-full sm:w-auto text-lg px-8 py-4 flex items-center justify-center gap-2 group"
               >
-                Start Tracking Now
+                {t('landing.startTracking')}
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -64,20 +66,20 @@ export default function Landing() {
             {[
               {
                 icon: CheckCircle2,
-                title: "Track Easily",
-                desc: "Record your good and bad deeds instantly with a simple, intuitive interface.",
+                title: t('landing.features.trackTitle'),
+                desc: t('landing.features.trackDesc'),
                 color: "text-emerald-600 dark:text-emerald-400"
               },
               {
                 icon: TrendingUp,
-                title: "Visualize Growth",
-                desc: "See your spiritual progress over time with beautiful charts and summaries.",
+                title: t('landing.features.visualizeTitle'),
+                desc: t('landing.features.visualizeDesc'),
                 color: "text-blue-600 dark:text-blue-400"
               },
               {
                 icon: ShieldCheck,
-                title: "Private & Secure",
-                desc: "Your data is yours alone. Securely authenticated and stored privately.",
+                title: t('landing.features.secureTitle'),
+                desc: t('landing.features.secureDesc'),
                 color: "text-purple-600 dark:text-purple-400"
               }
             ].map((feature, i) => (
@@ -93,7 +95,7 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} Istiqoma. Built for the Ummah.</p>
+        <p>© {new Date().getFullYear()} {t('app.name')}. {t('app.tagline')}</p>
       </footer>
     </div>
   );

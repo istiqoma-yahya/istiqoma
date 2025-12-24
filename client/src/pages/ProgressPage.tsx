@@ -167,7 +167,7 @@ export default function ProgressPage() {
         ) : (
           <div className="space-y-8">
             {/* Key Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <Card className="p-6">
                 <div className="text-muted-foreground text-sm mb-2">
                   Total Deeds
@@ -188,6 +188,17 @@ export default function ProgressPage() {
                 </div>
                 <div className="text-3xl font-bold text-rose-500">
                   {badDeedsExcludingIstighfar.length}
+                </div>
+              </Card>
+              <Card className="p-6">
+                <div className="text-muted-foreground text-sm mb-2">
+                  Istighfar
+                </div>
+                <div className="text-3xl font-bold text-purple-500">
+                  -{istighfarPoints}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  ({istighfarDeeds.length} times)
                 </div>
               </Card>
               <Card className="p-6">

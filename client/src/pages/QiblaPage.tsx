@@ -22,6 +22,8 @@ export default function QiblaPage() {
   });
   const [compassHeading, setCompassHeading] = useState<number | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const [compassEnabled, setCompassEnabled] = useState(false);
+  const [needsManualCompassEnable, setNeedsManualCompassEnable] = useState(false);
 
   const KAABA_COORDS = { lat: 21.422487, lng: 39.826206 };
 
@@ -66,34 +68,28 @@ export default function QiblaPage() {
     );
   }, []);
 
-  useEffect(() => {
-    const handleOrientation = (event: DeviceOrientationEvent) => {
-      let heading: number | null = null;
-      
-      if ("webkitCompassHeading" in event) {
-        heading = (event as any).webkitCompassHeading;
-      } else if (event.alpha !== null) {
-        heading = event.absolute ? event.alpha : 360 - event.alpha;
-      }
-      
-      if (heading !== null) {
-        setCompassHeading(heading);
-      }
-    };
+  const handleOrientation = (event: DeviceOrientationEvent) => {
+    let heading: number | null = null;
+    
+    if ("webkitCompassHeading" in event) {
+      heading = (event as any).webkitCompassHeading;
+    } else if (event.alpha !== null) {
+      heading = event.absolute ? event.alpha : 360 - event.alpha;
+    }
+    
+    if (heading !== null) {
+      setCompassHeading(heading);
+    }
+  };
 
+  useEffect(() => {
     if (typeof DeviceOrientationEvent !== "undefined") {
       if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
-        (DeviceOrientationEvent as any)
-          .requestPermission()
-          .then((permissionState: string) => {
-            if (permissionState === "granted") {
-              window.addEventListener("deviceorientation", handleOrientation, true);
-            }
-          })
-          .catch(console.error);
+        setNeedsManualCompassEnable(true);
       } else {
         window.addEventListener("deviceorientationabsolute", handleOrientation as any, true);
         window.addEventListener("deviceorientation", handleOrientation, true);
+        setCompassEnabled(true);
       }
     }
 
@@ -102,6 +98,21 @@ export default function QiblaPage() {
       window.removeEventListener("deviceorientation", handleOrientation, true);
     };
   }, []);
+
+  const enableCompass = async () => {
+    if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
+      try {
+        const permissionState = await (DeviceOrientationEvent as any).requestPermission();
+        if (permissionState === "granted") {
+          window.addEventListener("deviceorientation", handleOrientation, true);
+          setCompassEnabled(true);
+          setNeedsManualCompassEnable(false);
+        }
+      } catch (error) {
+        console.error("Compass permission error:", error);
+      }
+    }
+  };
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371;
@@ -251,9 +262,25 @@ export default function QiblaPage() {
                   <p className="text-lg font-medium">
                     Qibla Direction: <span className="text-emerald-500">{qiblaDirection !== null ? `${Math.round(qiblaDirection)}° from North` : "Calculating..."}</span>
                   </p>
-                  {compassHeading === null && (
+                  {needsManualCompassEnable && !compassEnabled && (
+                    <Button 
+                      onClick={enableCompass} 
+                      variant="outline" 
+                      className="mt-4"
+                      data-testid="button-enable-compass"
+                    >
+                      <Compass className="w-4 h-4 mr-2" />
+                      Enable Live Compass
+                    </Button>
+                  )}
+                  {compassHeading === null && !needsManualCompassEnable && (
                     <p className="text-sm text-muted-foreground mt-2">
                       Rotate your device to enable compass (mobile only)
+                    </p>
+                  )}
+                  {compassEnabled && compassHeading !== null && (
+                    <p className="text-sm text-emerald-500 mt-2">
+                      Live compass active
                     </p>
                   )}
                 </div>

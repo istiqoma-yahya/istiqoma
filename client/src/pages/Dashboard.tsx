@@ -117,13 +117,13 @@ export default function Dashboard() {
 
         <StatsOverview deeds={sortedDeeds} />
 
-        {targets && targets.length > 0 && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Target className="w-5 h-5 text-emerald-500" />
-                {t('dashboard.activeTargets')}
-              </h3>
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Target className="w-5 h-5 text-emerald-500" />
+              {t('dashboard.activeTargets')}
+            </h3>
+            {targets && targets.length > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -134,7 +134,9 @@ export default function Dashboard() {
                 {t('dashboard.viewAll')}
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
-            </div>
+            )}
+          </div>
+          {targets && targets.length > 0 ? (
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {targets.slice(0, 3).map((target) => (
                 <Card key={target.id} className="p-3" data-testid={`card-dashboard-target-${target.id}`}>
@@ -154,8 +156,25 @@ export default function Dashboard() {
                 </Card>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <Card className="p-4 border-dashed">
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground mb-3" data-testid="text-no-targets-dashboard">
+                  {t('dashboard.noTargetsYet')}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/targets")}
+                  data-testid="button-setup-targets"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  {t('dashboard.setupTargets')}
+                </Button>
+              </div>
+            </Card>
+          )}
+        </div>
 
         <div className="space-y-6">
           <h3 className="text-xl font-display font-bold flex items-center gap-2">

@@ -34,7 +34,9 @@
     "startRecording": "Mula merekod amal baik dan buruk anda untuk melihat kemajuan anda dari semasa ke semasa.",
     "addDeed": "Tambah amal pertama anda",
     "activeTargets": "Sasaran Aktif",
-    "viewAll": "Lihat Semua"
+    "viewAll": "Lihat Semua",
+    "noTargetsYet": "Tetapkan matlamat rohani untuk menjejaki kemajuan anda secara automatik",
+    "setupTargets": "Tetapkan Sasaran"
   },
   "stats": {
     "goodDeeds": "Amal Baik",
@@ -136,7 +138,8 @@
     "goodDeedsPoints": "Amal Baik",
     "badDeedsPoints": "Amal Buruk",
     "netPointsLabel": "Mata Bersih",
-    "deedsByCategory": "Amal Mengikut Kategori"
+    "deedsByCategory": "Amal Mengikut Kategori",
+    "targetsProgress": "Kemajuan Sasaran"
   },
   "targets": {
     "title": "Sasaran",

@@ -34,7 +34,9 @@
     "startRecording": "Start tracking your good and bad deeds to see your progress over time.",
     "addDeed": "Add your first deed",
     "activeTargets": "Active Targets",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "noTargetsYet": "Set spiritual goals to track your progress automatically",
+    "setupTargets": "Set Up Targets"
   },
   "stats": {
     "goodDeeds": "Good Deeds",
@@ -136,7 +138,8 @@
     "goodDeedsPoints": "Good Deeds",
     "badDeedsPoints": "Bad Deeds",
     "netPointsLabel": "Net Points",
-    "deedsByCategory": "Deeds by Category"
+    "deedsByCategory": "Deeds by Category",
+    "targetsProgress": "Targets Progress"
   },
   "targets": {
     "title": "Targets",

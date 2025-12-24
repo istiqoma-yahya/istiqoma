@@ -83,13 +83,17 @@ export default function TargetsPage() {
   };
 
   const onSubmit = async (data: InsertTarget) => {
-    if (editingTarget) {
-      await updateTarget.mutateAsync({ id: editingTarget.id, data });
-    } else {
-      await createTarget.mutateAsync(data);
+    try {
+      if (editingTarget) {
+        await updateTarget.mutateAsync({ id: editingTarget.id, data });
+      } else {
+        await createTarget.mutateAsync(data);
+      }
+      setIsDialogOpen(false);
+      setEditingTarget(null);
+    } catch (error) {
+      // Error is handled by mutation's onError, keep dialog open
     }
-    setIsDialogOpen(false);
-    setEditingTarget(null);
   };
 
   const handleDelete = async () => {

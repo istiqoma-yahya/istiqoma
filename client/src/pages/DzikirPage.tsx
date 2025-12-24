@@ -44,8 +44,8 @@ export default function DzikirPage() {
     if (isIstighfar) {
       createDeed(
         {
-          deedType: "good",
-          description: `Istighfar - ${count} counts (seeking forgiveness)`,
+          deedType: "bad",
+          description: `Istighfar - ${count} counts (forgiveness)`,
           category: "Istighfar",
           points: count,
           createdAt: new Date(),
@@ -54,7 +54,7 @@ export default function DzikirPage() {
           onSuccess: () => {
             toast({
               title: "Istighfar saved!",
-              description: `${count} istighfar counted and saved as ${count} points.`,
+              description: `${count} istighfar counted. Bad deeds reduced by ${count} points.`,
             });
             setCount(0);
           },
@@ -173,7 +173,7 @@ export default function DzikirPage() {
             ) : (
               <Save className="w-4 h-4" />
             )}
-            {isIstighfar ? `Save (+${count} istighfar)` : `Save (+${count} points)`}
+            {isIstighfar ? `Save (-${count} bad points)` : `Save (+${count} points)`}
           </Button>
         </div>
 

@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Compass, MapPin, Loader2, Navigation } from "lucide-react";
+import { Compass, MapPin, Loader2, ArrowUp } from "lucide-react";
 
 interface LocationState {
   latitude: number | null;
@@ -240,7 +240,7 @@ export default function QiblaPage() {
                     <div className="absolute w-1 h-24 bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-full -top-2 left-1/2 -translate-x-1/2" />
                     <div className="absolute -top-6 left-1/2 -translate-x-1/2">
                       <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                        <Navigation className="w-4 h-4 text-white fill-white" />
+                        <ArrowUp className="w-5 h-5 text-white" />
                       </div>
                     </div>
                   </div>

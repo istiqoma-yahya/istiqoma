@@ -16,9 +16,9 @@ export default function Landing() {
       <nav className="container mx-auto px-6 py-6 relative z-10 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-            <span className="font-display font-bold text-2xl">D</span>
+            <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-2xl">I</span>
           </div>
-          <span className="font-display font-bold text-xl tracking-tight">DeedTracker</span>
+          <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-2xl tracking-tight">Istiqoma</span>
         </div>
         <button 
           onClick={handleLogin}
@@ -93,7 +93,7 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} DeedTracker. Built for the Ummah.</p>
+        <p>© {new Date().getFullYear()} Istiqoma. Built for the Ummah.</p>
       </footer>
     </div>
   );

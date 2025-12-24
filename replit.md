@@ -1,8 +1,8 @@
-# DeedTracker
+# Istiqoma
 
 ## Overview
 
-DeedTracker is a spiritual self-improvement application designed for Muslims to track their daily good and bad deeds. Users can log deeds with descriptions, categories, and point values, then visualize their progress through statistics. The application features user authentication via Replit Auth, category management, and a modern dark-themed UI with emerald green accents inspired by Islamic art.
+Istiqoma is a spiritual self-improvement application designed for Muslims to track their daily good and bad deeds. Users can log deeds with descriptions, categories, and point values, then visualize their progress through statistics. The application features user authentication via Replit Auth, category management, and a modern dark-themed UI with emerald green accents inspired by Islamic art.
 
 ## User Preferences
 

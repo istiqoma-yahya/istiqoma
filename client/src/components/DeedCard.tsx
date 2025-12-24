@@ -26,6 +26,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
   const { mutate: deleteDeed, isPending } = useDeleteDeed();
 
   const isGood = deed.deedType === "good";
+  const isIstighfar = deed.category === "Istighfar";
   const date = deed.createdAt ? new Date(deed.createdAt) : new Date();
 
   return (
@@ -51,7 +52,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
                 ${isGood ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/20 text-rose-600 dark:text-rose-400"}
               `}
             >
-              {isGood ? "+ Good Deed" : "- Bad Deed"}
+              {isGood ? "+ Good Deed" : isIstighfar ? "- Bad Deed" : "+ Bad Deed"}
             </span>
             <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-600 dark:text-blue-400">
               {deed.category}
@@ -67,7 +68,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
 
         <div className="flex flex-col items-end gap-2">
           <span className={`text-xl font-bold ${isGood ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
-            {isGood ? "+" : "-"}{deed.points}
+            {isGood ? "+" : isIstighfar ? "-" : "+"}{deed.points}
           </span>
           
           <AlertDialog>

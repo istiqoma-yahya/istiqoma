@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { BarChart3, Home, Circle } from "lucide-react";
+import { BarChart3, Home, Circle, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function BottomNavigation() {
@@ -37,6 +37,20 @@ export function BottomNavigation() {
           >
             <Circle className="w-5 h-5" />
             <span>Dzikir</span>
+          </Button>
+
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/qibla")}
+            className={`flex flex-col items-center gap-1 py-2 text-xs font-medium transition-colors ${
+              isActive("/qibla")
+                ? "text-emerald-500"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+            data-testid="button-nav-qibla"
+          >
+            <Compass className="w-5 h-5" />
+            <span>Qibla</span>
           </Button>
 
           <Button

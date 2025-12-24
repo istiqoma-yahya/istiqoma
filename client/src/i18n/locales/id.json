@@ -1,0 +1,125 @@
+{
+  "app": {
+    "name": "Istiqoma",
+    "tagline": "Dibangun untuk Umat"
+  },
+  "nav": {
+    "home": "Beranda",
+    "progress": "Progres",
+    "dzikir": "Dzikir",
+    "qibla": "Kiblat"
+  },
+  "landing": {
+    "title": "Kuasai Jiwamu,",
+    "titleLine2": "Lacak Amalmu.",
+    "subtitle": "Pendamping spiritual untuk Muslim modern. Pantau aktivitas harianmu, visualisasikan kemajuanmu, dan berusaha untuk keunggulan dalam karakter.",
+    "startTracking": "Mulai Mencatat Sekarang",
+    "login": "Masuk",
+    "features": {
+      "trackTitle": "Catat dengan Mudah",
+      "trackDesc": "Rekam amal baik dan burukmu secara instan dengan antarmuka yang sederhana dan intuitif.",
+      "visualizeTitle": "Visualisasi Pertumbuhan",
+      "visualizeDesc": "Lihat kemajuan spiritualmu dari waktu ke waktu dengan grafik dan ringkasan yang indah.",
+      "secureTitle": "Privat & Aman",
+      "secureDesc": "Datamu hanya milikmu. Terautentikasi dengan aman dan tersimpan secara privat."
+    }
+  },
+  "dashboard": {
+    "greeting": "Assalaamu'alaikum",
+    "recentActivity": "Aktivitas Terbaru",
+    "noDeeds": "Belum ada amal yang dicatat",
+    "startRecording": "Mulai mencatat amal baik dan burukmu untuk melihatnya di sini.",
+    "addDeed": "Tambah amal pertamamu"
+  },
+  "stats": {
+    "goodDeeds": "Amal Baik",
+    "badDeeds": "Amal Buruk",
+    "netBalance": "Saldo Bersih",
+    "points": "poin"
+  },
+  "deed": {
+    "goodDeed": "Amal Baik",
+    "badDeed": "Amal Buruk",
+    "addDeed": "Tambah Amal",
+    "editDeed": "Edit Amal",
+    "deleteDeed": "Hapus Amal",
+    "description": "Deskripsi",
+    "category": "Kategori",
+    "points": "Poin",
+    "dateTime": "Tanggal & Waktu",
+    "type": "Jenis",
+    "good": "Baik",
+    "bad": "Buruk",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "deleteConfirm": "Apakah kamu yakin?",
+    "deleteWarning": "Tindakan ini tidak dapat dibatalkan. Ini akan menghapus amal ini secara permanen dari riwayatmu."
+  },
+  "categories": {
+    "title": "Kelola Kategori",
+    "addCategory": "Tambah Kategori",
+    "categoryName": "Nama Kategori",
+    "defaultCategories": "Kategori Bawaan",
+    "customCategories": "Kategori Kustom",
+    "noCustom": "Belum ada kategori kustom",
+    "deleteConfirm": "Hapus kategori ini?"
+  },
+  "dzikir": {
+    "title": "Penghitung Dzikir",
+    "counter": "Penghitung",
+    "reset": "Reset",
+    "target": "Target",
+    "completed": "Selesai",
+    "istighfarMode": "Mode Istighfar",
+    "istighfarDesc": "Saat diaktifkan, setiap hitungan akan dicatat sebagai Istighfar (memohon ampunan)",
+    "tapToCount": "Ketuk di mana saja untuk menghitung"
+  },
+  "qibla": {
+    "title": "Kompas Kiblat",
+    "findQibla": "Temukan Arah Kiblat",
+    "enableLocation": "Aktifkan Lokasi",
+    "locationDesc": "Untuk menemukan arah ke Mekkah, kami membutuhkan lokasimu. Ketuk tombol di bawah dan izinkan akses lokasi saat diminta.",
+    "gettingLocation": "Mendapatkan lokasimu...",
+    "allowLocation": "Harap izinkan akses lokasi saat diminta oleh browsermu.",
+    "locationRequired": "Lokasi Diperlukan",
+    "tryAgain": "Coba Lagi",
+    "qiblaDirection": "Arah Kiblat",
+    "distanceToKaaba": "Jarak ke Ka'bah",
+    "enableCompass": "Aktifkan Kompas Langsung",
+    "compassActive": "Kompas Aktif",
+    "howToUse": "Cara Menggunakan",
+    "step1": "Panah hijau menunjuk ke arah Ka'bah di Mekkah",
+    "step2": "Putar tubuhmu sampai menghadap arah panah",
+    "step3": "Untuk akurasi terbaik, pegang perangkatmu secara datar dan jauh dari benda logam"
+  },
+  "progress": {
+    "title": "Progres",
+    "weeklyProgress": "Progres Mingguan",
+    "monthlyStats": "Statistik Bulanan",
+    "totalGood": "Total Baik",
+    "totalBad": "Total Buruk",
+    "istighfar": "Istighfar",
+    "forgiveness": "Poin Pengampunan",
+    "deedsOverTime": "Amal Seiring Waktu",
+    "good": "Baik",
+    "bad": "Buruk"
+  },
+  "user": {
+    "profile": "Profil",
+    "manageCategories": "Kelola Kategori",
+    "logout": "Keluar"
+  },
+  "common": {
+    "loading": "Memuat...",
+    "error": "Kesalahan",
+    "success": "Berhasil",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "edit": "Edit",
+    "add": "Tambah",
+    "close": "Tutup",
+    "back": "Kembali",
+    "language": "Bahasa"
+  }
+}

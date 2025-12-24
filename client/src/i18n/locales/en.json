@@ -1,0 +1,125 @@
+{
+  "app": {
+    "name": "Istiqoma",
+    "tagline": "Built for the Ummah"
+  },
+  "nav": {
+    "home": "Home",
+    "progress": "Progress",
+    "dzikir": "Dzikir",
+    "qibla": "Qibla"
+  },
+  "landing": {
+    "title": "Master Your Soul,",
+    "titleLine2": "Track Your Deeds.",
+    "subtitle": "A spiritual companion for the modern Muslim. Monitor your daily actions, visualize your progress, and strive for excellence in character.",
+    "startTracking": "Start Tracking Now",
+    "login": "Login",
+    "features": {
+      "trackTitle": "Track Easily",
+      "trackDesc": "Record your good and bad deeds instantly with a simple, intuitive interface.",
+      "visualizeTitle": "Visualize Growth",
+      "visualizeDesc": "See your spiritual progress over time with beautiful charts and summaries.",
+      "secureTitle": "Private & Secure",
+      "secureDesc": "Your data is yours alone. Securely authenticated and stored privately."
+    }
+  },
+  "dashboard": {
+    "greeting": "Assalaamu'alaikum",
+    "recentActivity": "Recent Activity",
+    "noDeeds": "No deeds recorded yet",
+    "startRecording": "Start recording your good and bad deeds to see them here.",
+    "addDeed": "Add your first deed"
+  },
+  "stats": {
+    "goodDeeds": "Good Deeds",
+    "badDeeds": "Bad Deeds",
+    "netBalance": "Net Balance",
+    "points": "points"
+  },
+  "deed": {
+    "goodDeed": "Good Deed",
+    "badDeed": "Bad Deed",
+    "addDeed": "Add Deed",
+    "editDeed": "Edit Deed",
+    "deleteDeed": "Delete Deed",
+    "description": "Description",
+    "category": "Category",
+    "points": "Points",
+    "dateTime": "Date & Time",
+    "type": "Type",
+    "good": "Good",
+    "bad": "Bad",
+    "save": "Save",
+    "cancel": "Cancel",
+    "deleteConfirm": "Are you sure?",
+    "deleteWarning": "This action cannot be undone. This will permanently delete this deed from your history."
+  },
+  "categories": {
+    "title": "Manage Categories",
+    "addCategory": "Add Category",
+    "categoryName": "Category Name",
+    "defaultCategories": "Default Categories",
+    "customCategories": "Custom Categories",
+    "noCustom": "No custom categories yet",
+    "deleteConfirm": "Delete this category?"
+  },
+  "dzikir": {
+    "title": "Dzikir Counter",
+    "counter": "Counter",
+    "reset": "Reset",
+    "target": "Target",
+    "completed": "Completed",
+    "istighfarMode": "Istighfar Mode",
+    "istighfarDesc": "When enabled, each count will be recorded as Istighfar (seeking forgiveness)",
+    "tapToCount": "Tap anywhere to count"
+  },
+  "qibla": {
+    "title": "Qibla Compass",
+    "findQibla": "Find Qibla Direction",
+    "enableLocation": "Enable Location",
+    "locationDesc": "To find the direction to Mecca, we need your location. Tap the button below and allow location access when prompted.",
+    "gettingLocation": "Getting your location...",
+    "allowLocation": "Please allow location access when prompted by your browser.",
+    "locationRequired": "Location Required",
+    "tryAgain": "Try Again",
+    "qiblaDirection": "Qibla Direction",
+    "distanceToKaaba": "Distance to Kaaba",
+    "enableCompass": "Enable Live Compass",
+    "compassActive": "Compass Active",
+    "howToUse": "How to Use",
+    "step1": "The green arrow points toward the Kaaba in Mecca",
+    "step2": "Turn your body until facing the arrow direction",
+    "step3": "For best accuracy, hold your device flat and away from metal objects"
+  },
+  "progress": {
+    "title": "Progress",
+    "weeklyProgress": "Weekly Progress",
+    "monthlyStats": "Monthly Stats",
+    "totalGood": "Total Good",
+    "totalBad": "Total Bad",
+    "istighfar": "Istighfar",
+    "forgiveness": "Forgiveness Points",
+    "deedsOverTime": "Deeds Over Time",
+    "good": "Good",
+    "bad": "Bad"
+  },
+  "user": {
+    "profile": "Profile",
+    "manageCategories": "Manage Categories",
+    "logout": "Log out"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "back": "Back",
+    "language": "Language"
+  }
+}

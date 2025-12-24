@@ -1,0 +1,125 @@
+{
+  "app": {
+    "name": "Istiqoma",
+    "tagline": "Dibina untuk Ummah"
+  },
+  "nav": {
+    "home": "Laman Utama",
+    "progress": "Kemajuan",
+    "dzikir": "Zikir",
+    "qibla": "Kiblat"
+  },
+  "landing": {
+    "title": "Kuasai Jiwamu,",
+    "titleLine2": "Jejaki Amalmu.",
+    "subtitle": "Teman rohani untuk Muslim moden. Pantau aktiviti harian anda, visualisasikan kemajuan anda, dan berusaha untuk kecemerlangan dalam pekerti.",
+    "startTracking": "Mula Menjejak Sekarang",
+    "login": "Log Masuk",
+    "features": {
+      "trackTitle": "Jejak dengan Mudah",
+      "trackDesc": "Rekod amal baik dan buruk anda dengan serta-merta menggunakan antara muka yang ringkas dan intuitif.",
+      "visualizeTitle": "Visualisasi Pertumbuhan",
+      "visualizeDesc": "Lihat kemajuan rohani anda dari semasa ke semasa dengan carta dan ringkasan yang cantik.",
+      "secureTitle": "Peribadi & Selamat",
+      "secureDesc": "Data anda adalah milik anda sahaja. Disahkan dengan selamat dan disimpan secara peribadi."
+    }
+  },
+  "dashboard": {
+    "greeting": "Assalaamu'alaikum",
+    "recentActivity": "Aktiviti Terkini",
+    "noDeeds": "Tiada amal yang direkod lagi",
+    "startRecording": "Mula merekod amal baik dan buruk anda untuk melihatnya di sini.",
+    "addDeed": "Tambah amal pertama anda"
+  },
+  "stats": {
+    "goodDeeds": "Amal Baik",
+    "badDeeds": "Amal Buruk",
+    "netBalance": "Baki Bersih",
+    "points": "mata"
+  },
+  "deed": {
+    "goodDeed": "Amal Baik",
+    "badDeed": "Amal Buruk",
+    "addDeed": "Tambah Amal",
+    "editDeed": "Edit Amal",
+    "deleteDeed": "Padam Amal",
+    "description": "Penerangan",
+    "category": "Kategori",
+    "points": "Mata",
+    "dateTime": "Tarikh & Masa",
+    "type": "Jenis",
+    "good": "Baik",
+    "bad": "Buruk",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "deleteConfirm": "Adakah anda pasti?",
+    "deleteWarning": "Tindakan ini tidak boleh dibatalkan. Ini akan memadam amal ini secara kekal daripada sejarah anda."
+  },
+  "categories": {
+    "title": "Urus Kategori",
+    "addCategory": "Tambah Kategori",
+    "categoryName": "Nama Kategori",
+    "defaultCategories": "Kategori Lalai",
+    "customCategories": "Kategori Tersuai",
+    "noCustom": "Tiada kategori tersuai lagi",
+    "deleteConfirm": "Padam kategori ini?"
+  },
+  "dzikir": {
+    "title": "Kaunter Zikir",
+    "counter": "Kaunter",
+    "reset": "Set Semula",
+    "target": "Sasaran",
+    "completed": "Selesai",
+    "istighfarMode": "Mod Istighfar",
+    "istighfarDesc": "Apabila diaktifkan, setiap kiraan akan direkod sebagai Istighfar (memohon keampunan)",
+    "tapToCount": "Ketik di mana-mana untuk mengira"
+  },
+  "qibla": {
+    "title": "Kompas Kiblat",
+    "findQibla": "Cari Arah Kiblat",
+    "enableLocation": "Aktifkan Lokasi",
+    "locationDesc": "Untuk mencari arah ke Mekah, kami memerlukan lokasi anda. Ketik butang di bawah dan benarkan akses lokasi apabila diminta.",
+    "gettingLocation": "Mendapatkan lokasi anda...",
+    "allowLocation": "Sila benarkan akses lokasi apabila diminta oleh pelayar anda.",
+    "locationRequired": "Lokasi Diperlukan",
+    "tryAgain": "Cuba Lagi",
+    "qiblaDirection": "Arah Kiblat",
+    "distanceToKaaba": "Jarak ke Kaabah",
+    "enableCompass": "Aktifkan Kompas Langsung",
+    "compassActive": "Kompas Aktif",
+    "howToUse": "Cara Menggunakan",
+    "step1": "Anak panah hijau menunjuk ke arah Kaabah di Mekah",
+    "step2": "Pusingkan badan anda sehingga menghadap arah anak panah",
+    "step3": "Untuk ketepatan terbaik, pegang peranti anda secara rata dan jauh dari objek logam"
+  },
+  "progress": {
+    "title": "Kemajuan",
+    "weeklyProgress": "Kemajuan Mingguan",
+    "monthlyStats": "Statistik Bulanan",
+    "totalGood": "Jumlah Baik",
+    "totalBad": "Jumlah Buruk",
+    "istighfar": "Istighfar",
+    "forgiveness": "Mata Keampunan",
+    "deedsOverTime": "Amal Mengikut Masa",
+    "good": "Baik",
+    "bad": "Buruk"
+  },
+  "user": {
+    "profile": "Profil",
+    "manageCategories": "Urus Kategori",
+    "logout": "Log Keluar"
+  },
+  "common": {
+    "loading": "Memuatkan...",
+    "error": "Ralat",
+    "success": "Berjaya",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "delete": "Padam",
+    "edit": "Edit",
+    "add": "Tambah",
+    "close": "Tutup",
+    "back": "Kembali",
+    "language": "Bahasa"
+  }
+}

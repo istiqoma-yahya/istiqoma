@@ -1,9 +1,11 @@
 import { useLocation } from "wouter";
 import { BarChart3, Home, Circle, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 export function BottomNavigation() {
   const [location, navigate] = useLocation();
+  const { t } = useTranslation();
 
   const isActive = (path: string) => location === path;
 
@@ -22,7 +24,7 @@ export function BottomNavigation() {
             data-testid="button-nav-dashboard"
           >
             <Home className="w-5 h-5" />
-            <span>Home</span>
+            <span>{t('nav.home')}</span>
           </Button>
 
           <Button
@@ -36,7 +38,7 @@ export function BottomNavigation() {
             data-testid="button-nav-dzikir"
           >
             <Circle className="w-5 h-5" />
-            <span>Dzikir</span>
+            <span>{t('nav.dzikir')}</span>
           </Button>
 
           <Button
@@ -50,7 +52,7 @@ export function BottomNavigation() {
             data-testid="button-nav-qibla"
           >
             <Compass className="w-5 h-5" />
-            <span>Qibla</span>
+            <span>{t('nav.qibla')}</span>
           </Button>
 
           <Button
@@ -64,7 +66,7 @@ export function BottomNavigation() {
             data-testid="button-nav-progress"
           >
             <BarChart3 className="w-5 h-5" />
-            <span>Progress</span>
+            <span>{t('nav.progress')}</span>
           </Button>
         </div>
       </div>

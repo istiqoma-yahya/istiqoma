@@ -7,7 +7,8 @@
     "home": "Beranda",
     "progress": "Progres",
     "dzikir": "Dzikir",
-    "qibla": "Kiblat"
+    "qibla": "Kiblat",
+    "targets": "Target"
   },
   "landing": {
     "title": "Kuasai Jiwamu,",
@@ -134,6 +135,26 @@
     "badDeedsPoints": "Amal Buruk",
     "netPointsLabel": "Poin Bersih",
     "deedsByCategory": "Amal per Kategori"
+  },
+  "targets": {
+    "title": "Target",
+    "subtitle": "Tetapkan dan lacak tujuan spiritualmu",
+    "addTarget": "Tambah Target",
+    "editTarget": "Edit Target",
+    "noTargets": "Belum ada target",
+    "noTargetsDesc": "Tetapkan tujuan spiritual untuk melacak kemajuanmu secara otomatis berdasarkan amalmu.",
+    "addFirstTarget": "Tetapkan target pertamamu",
+    "selectCategory": "Pilih kategori",
+    "targetValue": "Poin Target",
+    "period": "Periode",
+    "selectPeriod": "Pilih periode",
+    "daily": "Harian",
+    "weekly": "Mingguan",
+    "monthly": "Bulanan",
+    "progress": "Kemajuan",
+    "completed": "Selesai",
+    "deleteConfirm": "Hapus target ini?",
+    "deleteWarning": "Tindakan ini tidak dapat dibatalkan. Ini akan menghapus target ini secara permanen."
   },
   "user": {
     "profile": "Profil",

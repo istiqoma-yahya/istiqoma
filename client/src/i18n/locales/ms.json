@@ -7,7 +7,8 @@
     "home": "Laman Utama",
     "progress": "Kemajuan",
     "dzikir": "Zikir",
-    "qibla": "Kiblat"
+    "qibla": "Kiblat",
+    "targets": "Sasaran"
   },
   "landing": {
     "title": "Kuasai Jiwamu,",
@@ -134,6 +135,26 @@
     "badDeedsPoints": "Amal Buruk",
     "netPointsLabel": "Mata Bersih",
     "deedsByCategory": "Amal Mengikut Kategori"
+  },
+  "targets": {
+    "title": "Sasaran",
+    "subtitle": "Tetapkan dan jejaki matlamat rohani anda",
+    "addTarget": "Tambah Sasaran",
+    "editTarget": "Edit Sasaran",
+    "noTargets": "Tiada sasaran ditetapkan",
+    "noTargetsDesc": "Tetapkan matlamat rohani untuk menjejaki kemajuan anda secara automatik berdasarkan amal anda.",
+    "addFirstTarget": "Tetapkan sasaran pertama anda",
+    "selectCategory": "Pilih kategori",
+    "targetValue": "Mata Sasaran",
+    "period": "Tempoh",
+    "selectPeriod": "Pilih tempoh",
+    "daily": "Harian",
+    "weekly": "Mingguan",
+    "monthly": "Bulanan",
+    "progress": "Kemajuan",
+    "completed": "Selesai",
+    "deleteConfirm": "Padam sasaran ini?",
+    "deleteWarning": "Tindakan ini tidak boleh dibatalkan. Ini akan memadam sasaran ini secara kekal."
   },
   "user": {
     "profile": "Profil",

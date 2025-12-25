@@ -41,7 +41,6 @@
   "stats": {
     "goodDeeds": "Amal Baik",
     "badDeeds": "Amal Buruk",
-    "netBalance": "Baki Bersih",
     "points": "mata"
   },
   "deed": {

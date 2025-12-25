@@ -1,5 +1,5 @@
 import { type Deed } from "@shared/schema";
-import { TrendingUp, TrendingDown, Scale } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -17,7 +17,6 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
   const rawBadPoints = badDeedsExcludingIstighfar.reduce((acc, d) => acc + d.points, 0);
   const istighfarPoints = istighfarDeeds.reduce((acc, d) => acc + d.points, 0);
   const badPoints = Math.max(0, rawBadPoints - istighfarPoints);
-  const netPoints = goodPoints - badPoints;
 
   const stats = [
     {
@@ -38,19 +37,10 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
       bg: "bg-rose-500/10",
       border: "border-rose-500/20",
     },
-    {
-      label: t('stats.netBalance'),
-      value: netPoints,
-      points: null,
-      icon: Scale,
-      color: netPoints >= 0 ? "text-blue-600 dark:text-blue-400" : "text-amber-600 dark:text-amber-400",
-      bg: netPoints >= 0 ? "bg-blue-500/10" : "bg-amber-500/10",
-      border: netPoints >= 0 ? "border-blue-500/20" : "border-amber-500/20",
-    },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
       {stats.map((stat, i) => (
         <motion.div
           key={stat.label}

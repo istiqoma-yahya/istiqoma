@@ -41,7 +41,6 @@
   "stats": {
     "goodDeeds": "Good Deeds",
     "badDeeds": "Bad Deeds",
-    "netBalance": "Net Balance",
     "points": "points"
   },
   "deed": {

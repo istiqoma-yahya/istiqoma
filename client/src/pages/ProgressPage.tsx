@@ -1,6 +1,4 @@
 import { useDeeds } from "@/hooks/use-deeds";
-import { useAuth } from "@/hooks/use-auth";
-import { useTargetsWithProgress } from "@/hooks/use-targets";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
@@ -21,15 +19,12 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Loader2, Target, Trophy } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 
 export default function ProgressPage() {
   const { t } = useTranslation();
   const { data: deeds, isLoading } = useDeeds();
-  const { data: targets } = useTargetsWithProgress();
-  const { user } = useAuth();
   const { theme } = useTheme();
   
   // Theme-aware chart colors
@@ -171,56 +166,6 @@ export default function ProgressPage() {
           </Card>
         ) : (
           <div className="space-y-8">
-            {/* Key Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              <Card className="p-6">
-                <div className="text-muted-foreground text-sm mb-2">
-                  {t("progress.totalDeeds")}
-                </div>
-                <div className="text-3xl font-bold">{deedsArray.length}</div>
-              </Card>
-              <Card className="p-6">
-                <div className="text-muted-foreground text-sm mb-2">
-                  {t("stats.goodDeeds")}
-                </div>
-                <div className="text-3xl font-bold text-emerald-500">
-                  {goodDeeds.length}
-                </div>
-              </Card>
-              <Card className="p-6">
-                <div className="text-muted-foreground text-sm mb-2">
-                  {t("stats.badDeeds")}
-                </div>
-                <div className="text-3xl font-bold text-rose-500">
-                  {badDeedsExcludingIstighfar.length}
-                </div>
-              </Card>
-              <Card className="p-6">
-                <div className="text-muted-foreground text-sm mb-2">
-                  {t("progress.istighfar")}
-                </div>
-                <div className="text-3xl font-bold text-purple-500">
-                  -{istighfarPoints}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  ({istighfarDeeds.length} {t("progress.times")})
-                </div>
-              </Card>
-              <Card className="p-6">
-                <div className="text-muted-foreground text-sm mb-2">
-                  {t("progress.netPoints")}
-                </div>
-                <div
-                  className={`text-3xl font-bold ${
-                    netPoints >= 0 ? "text-emerald-500" : "text-rose-500"
-                  }`}
-                >
-                  {netPoints >= 0 ? "+" : ""}
-                  {netPoints}
-                </div>
-              </Card>
-            </div>
-
             {/* Good vs Bad Deeds Chart */}
             <Card className="p-6">
               <h2 className="text-lg font-display font-bold mb-6">
@@ -339,44 +284,6 @@ export default function ProgressPage() {
               </Card>
             )}
 
-            {/* Targets Progress */}
-            {targets && targets.length > 0 && (
-              <Card className="p-6">
-                <h2 className="text-lg font-display font-bold mb-6 flex items-center gap-2">
-                  <Target className="w-5 h-5 text-emerald-500" />
-                  {t("progress.targetsProgress")}
-                </h2>
-                <div className="space-y-4">
-                  {targets.map((target) => (
-                    <div key={target.id} className="space-y-2" data-testid={`progress-target-${target.id}`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{target.category}</span>
-                          <span className="text-xs text-muted-foreground px-2 py-0.5 bg-muted rounded-full">
-                            {target.period === "daily" ? t("targets.daily") : 
-                             target.period === "weekly" ? t("targets.weekly") : t("targets.monthly")}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">
-                            {target.currentValue} / {target.targetValue}
-                          </span>
-                          {target.percentComplete >= 100 && (
-                            <Trophy className="w-4 h-4 text-emerald-500" />
-                          )}
-                        </div>
-                      </div>
-                      <Progress value={target.percentComplete} className="h-2" />
-                      <div className="text-right text-xs text-muted-foreground">
-                        <span className={target.percentComplete >= 100 ? "text-emerald-500 font-medium" : ""}>
-                          {target.percentComplete}%
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            )}
           </div>
         )}
         </main>

@@ -198,5 +198,17 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
+  app.get(api.targets.history.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+    
+    await storage.calculateAndSaveTargetHistory(id, userId, 7);
+    const result = await storage.getTargetHistoryWithStreak(id, userId, 7);
+    res.json(result);
+  });
+
   return httpServer;
 }

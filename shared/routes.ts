@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, insertTargetSchema, deeds, categories, targets } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, deeds, categories, targets, targetHistory } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -150,6 +150,18 @@ export const api = {
       path: "/api/targets/:id",
       responses: {
         204: z.void(),
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
+    history: {
+      method: "GET" as const,
+      path: "/api/targets/:id/history",
+      responses: {
+        200: z.object({
+          history: z.array(z.custom<typeof targetHistory.$inferSelect>()),
+          currentStreak: z.number(),
+        }),
         401: errorSchemas.unauthorized,
         404: errorSchemas.notFound,
       },

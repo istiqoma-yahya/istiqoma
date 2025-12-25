@@ -35,6 +35,19 @@ export const targets = pgTable("targets", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const targetHistory = pgTable("target_history", {
+  id: serial("id").primaryKey(),
+  targetId: integer("target_id").notNull().references(() => targets.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  category: text("category").notNull(),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  achievedValue: integer("achieved_value").notNull(),
+  targetValue: integer("target_value").notNull(),
+  completed: boolean("completed").notNull(),
+  capturedAt: timestamp("captured_at").defaultNow(),
+});
+
 export const insertDeedSchema = createInsertSchema(deeds).pick({
   description: true,
   deedType: true,
@@ -58,12 +71,25 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   period: z.enum(["daily", "weekly", "monthly"]),
 });
 
+export const insertTargetHistorySchema = createInsertSchema(targetHistory).pick({
+  targetId: true,
+  userId: true,
+  category: true,
+  periodStart: true,
+  periodEnd: true,
+  achievedValue: true,
+  targetValue: true,
+  completed: true,
+});
+
 export type InsertDeed = z.infer<typeof insertDeedSchema>;
 export type Deed = typeof deeds.$inferSelect;
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Target = typeof targets.$inferSelect;
 export type InsertTarget = z.infer<typeof insertTargetSchema>;
+export type TargetHistory = typeof targetHistory.$inferSelect;
+export type InsertTargetHistory = z.infer<typeof insertTargetHistorySchema>;
 
 export type CreateDeedRequest = InsertDeed;
 export type DeedResponse = Deed;

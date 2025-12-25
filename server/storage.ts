@@ -1,7 +1,12 @@
 import { db } from "./db";
-import { deeds, categories, targets, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetWithProgress } from "@shared/schema";
+import { deeds, categories, targets, targetHistory, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetWithProgress, type TargetHistory, type InsertTargetHistory } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte } from "drizzle-orm";
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from "date-fns";
+
+export type TargetHistoryWithStreak = {
+  history: TargetHistory[];
+  currentStreak: number;
+};
 
 export interface IStorage {
   getDeeds(userId: string): Promise<Deed[]>;
@@ -18,6 +23,9 @@ export interface IStorage {
   createTarget(userId: string, target: InsertTarget): Promise<Target>;
   updateTarget(id: number, userId: string, target: InsertTarget): Promise<Target>;
   deleteTarget(id: number, userId: string): Promise<void>;
+  getTargetHistory(targetId: number, userId: string, limit?: number): Promise<TargetHistory[]>;
+  getTargetHistoryWithStreak(targetId: number, userId: string, limit?: number): Promise<TargetHistoryWithStreak>;
+  calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack?: number): Promise<TargetHistory[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -174,6 +182,117 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(targets)
       .where(and(eq(targets.id, id), eq(targets.userId, userId)));
+  }
+
+  async getTargetHistory(targetId: number, userId: string, limit: number = 30): Promise<TargetHistory[]> {
+    return await db
+      .select()
+      .from(targetHistory)
+      .where(and(eq(targetHistory.targetId, targetId), eq(targetHistory.userId, userId)))
+      .orderBy(desc(targetHistory.periodEnd))
+      .limit(limit);
+  }
+
+  async getTargetHistoryWithStreak(targetId: number, userId: string, limit: number = 30): Promise<TargetHistoryWithStreak> {
+    const history = await this.getTargetHistory(targetId, userId, limit);
+    
+    let currentStreak = 0;
+    for (const entry of history) {
+      if (entry.completed) {
+        currentStreak++;
+      } else {
+        break;
+      }
+    }
+
+    return { history, currentStreak };
+  }
+
+  async calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack: number = 7): Promise<TargetHistory[]> {
+    const target = await db
+      .select()
+      .from(targets)
+      .where(and(eq(targets.id, targetId), eq(targets.userId, userId)))
+      .limit(1);
+
+    if (!target.length) {
+      return [];
+    }
+
+    const t = target[0];
+    const userDeeds = await this.getDeeds(userId);
+    const now = new Date();
+    const savedHistory: TargetHistory[] = [];
+
+    for (let i = 1; i <= periodsBack; i++) {
+      let periodStart: Date;
+      let periodEnd: Date;
+
+      switch (t.period) {
+        case "daily":
+          periodStart = startOfDay(subDays(now, i));
+          periodEnd = endOfDay(subDays(now, i));
+          break;
+        case "weekly":
+          periodStart = startOfWeek(subWeeks(now, i), { weekStartsOn: 1 });
+          periodEnd = endOfWeek(subWeeks(now, i), { weekStartsOn: 1 });
+          break;
+        case "monthly":
+          periodStart = startOfMonth(subMonths(now, i));
+          periodEnd = endOfMonth(subMonths(now, i));
+          break;
+        default:
+          continue;
+      }
+
+      const existingEntry = await db
+        .select()
+        .from(targetHistory)
+        .where(and(
+          eq(targetHistory.targetId, targetId),
+          eq(targetHistory.userId, userId),
+          eq(targetHistory.periodStart, periodStart)
+        ))
+        .limit(1);
+
+      if (existingEntry.length > 0) {
+        savedHistory.push(existingEntry[0]);
+        continue;
+      }
+
+      const deedsInPeriod = userDeeds.filter((deed) => {
+        const deedDate = new Date(deed.createdAt || now);
+        return (
+          deed.category === t.category &&
+          deed.deedType === "good" &&
+          deedDate >= periodStart &&
+          deedDate <= periodEnd
+        );
+      });
+
+      const achievedValue = deedsInPeriod.reduce((sum, deed) => sum + deed.points, 0);
+      const completed = achievedValue >= t.targetValue;
+
+      const [entry] = await db
+        .insert(targetHistory)
+        .values({
+          targetId,
+          userId,
+          category: t.category,
+          periodStart,
+          periodEnd,
+          achievedValue,
+          targetValue: t.targetValue,
+          completed,
+        })
+        .returning();
+
+      savedHistory.push(entry);
+    }
+
+    return savedHistory.sort((a, b) => 
+      new Date(b.periodEnd).getTime() - new Date(a.periodEnd).getTime()
+    );
   }
 }
 

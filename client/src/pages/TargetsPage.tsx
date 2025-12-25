@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useTargetsWithProgress, useCreateTarget, useUpdateTarget, useDeleteTarget } from "@/hooks/use-targets";
+import { useTargetsWithProgress, useCreateTarget, useUpdateTarget, useDeleteTarget, useTargetHistory } from "@/hooks/use-targets";
 import { useCategories } from "@/hooks/use-categories";
 import { useAuth } from "@/hooks/use-auth";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -32,13 +33,188 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertTargetSchema, type InsertTarget, type TargetWithProgress } from "@shared/schema";
+import { insertTargetSchema, type InsertTarget, type TargetWithProgress, type TargetHistory } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2, Plus, Target, Pencil, Trash2, Trophy, TrendingUp, Calendar } from "lucide-react";
+import { Loader2, Plus, Target, Pencil, Trash2, Trophy, TrendingUp, Calendar, ChevronDown, ChevronUp, Flame, CheckCircle, XCircle, History } from "lucide-react";
+import { format } from "date-fns";
+
+interface TargetCardProps {
+  target: TargetWithProgress;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  getPeriodIcon: (period: string) => JSX.Element;
+  getPeriodLabel: (period: string) => string;
+  t: (key: string) => string;
+}
+
+function TargetCard({
+  target,
+  isExpanded,
+  onToggleExpand,
+  onEdit,
+  onDelete,
+  getPeriodIcon,
+  getPeriodLabel,
+  t,
+}: TargetCardProps) {
+  const { data: historyData, isLoading: historyLoading } = useTargetHistory(
+    isExpanded ? target.id : null
+  );
+
+  const formatPeriodDate = (date: Date | string, period: string) => {
+    const d = new Date(date);
+    switch (period) {
+      case "daily":
+        return format(d, "MMM d, yyyy");
+      case "weekly":
+        return format(d, "MMM d");
+      case "monthly":
+        return format(d, "MMM yyyy");
+      default:
+        return format(d, "MMM d, yyyy");
+    }
+  };
+
+  return (
+    <Card className="p-4" data-testid={`card-target-${target.id}`}>
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="flex items-center gap-2">
+          {getPeriodIcon(target.period)}
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-medium" data-testid={`text-target-category-${target.id}`}>
+                {target.category}
+              </h3>
+              {historyData && historyData.currentStreak > 0 && (
+                <Badge variant="secondary" className="text-xs" data-testid={`badge-streak-${target.id}`}>
+                  <Flame className="w-3 h-3 mr-1 text-orange-500" />
+                  {historyData.currentStreak} {t("targets.streak")}
+                </Badge>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {getPeriodLabel(target.period)}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onEdit}
+            data-testid={`button-edit-target-${target.id}`}
+          >
+            <Pencil className="w-4 h-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            data-testid={`button-delete-target-${target.id}`}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">{t("targets.progress")}</span>
+          <span className="font-medium" data-testid={`text-target-progress-${target.id}`}>
+            {target.currentValue} / {target.targetValue} {t("stats.points")}
+          </span>
+        </div>
+        <Progress
+          value={target.percentComplete}
+          className="h-2"
+          data-testid={`progress-target-${target.id}`}
+        />
+        <div className="flex items-center justify-between text-xs">
+          <span className={target.percentComplete >= 100 ? "text-green-600 dark:text-green-400 font-medium" : "text-muted-foreground"}>
+            {target.percentComplete}%
+          </span>
+          {target.percentComplete >= 100 && (
+            <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
+              <Trophy className="w-3 h-3" />
+              {t("targets.completed")}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <Collapsible open={isExpanded} onOpenChange={onToggleExpand}>
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full mt-3 text-muted-foreground"
+            data-testid={`button-toggle-history-${target.id}`}
+          >
+            <History className="w-4 h-4 mr-1" />
+            {t("targets.history")}
+            {isExpanded ? (
+              <ChevronUp className="w-4 h-4 ml-1" />
+            ) : (
+              <ChevronDown className="w-4 h-4 ml-1" />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-3">
+          {historyLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : historyData && historyData.history.length > 0 ? (
+            <div className="space-y-2">
+              <div className="text-xs text-muted-foreground mb-2">
+                {t("targets.pastPeriods")}
+              </div>
+              {historyData.history.map((entry, idx) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center justify-between p-2 rounded-md bg-muted/50"
+                  data-testid={`history-entry-${entry.id}`}
+                >
+                  <div className="flex items-center gap-2">
+                    {entry.completed ? (
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-red-400" />
+                    )}
+                    <span className="text-sm">
+                      {formatPeriodDate(entry.periodStart, target.period)}
+                    </span>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {entry.achievedValue} / {entry.targetValue}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-4 text-sm text-muted-foreground">
+              {t("targets.noHistory")}
+            </div>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+    </Card>
+  );
+}
 
 export default function TargetsPage() {
   const { t } = useTranslation();
@@ -52,6 +228,7 @@ export default function TargetsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTarget, setEditingTarget] = useState<TargetWithProgress | null>(null);
   const [deletingTarget, setDeletingTarget] = useState<TargetWithProgress | null>(null);
+  const [expandedTargetId, setExpandedTargetId] = useState<number | null>(null);
 
   const form = useForm<InsertTarget>({
     resolver: zodResolver(insertTargetSchema),
@@ -166,67 +343,17 @@ export default function TargetsPage() {
         ) : (
           <div className="space-y-4">
             {targetsArray.map((target) => (
-              <Card key={target.id} className="p-4" data-testid={`card-target-${target.id}`}>
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <div className="flex items-center gap-2">
-                    {getPeriodIcon(target.period)}
-                    <div>
-                      <h3 className="font-medium" data-testid={`text-target-category-${target.id}`}>
-                        {target.category}
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        {getPeriodLabel(target.period)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => openEditDialog(target)}
-                      data-testid={`button-edit-target-${target.id}`}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeletingTarget(target);
-                      }}
-                      data-testid={`button-delete-target-${target.id}`}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{t("targets.progress")}</span>
-                    <span className="font-medium" data-testid={`text-target-progress-${target.id}`}>
-                      {target.currentValue} / {target.targetValue} {t("stats.points")}
-                    </span>
-                  </div>
-                  <Progress
-                    value={target.percentComplete}
-                    className="h-2"
-                    data-testid={`progress-target-${target.id}`}
-                  />
-                  <div className="flex items-center justify-between text-xs">
-                    <span className={target.percentComplete >= 100 ? "text-green-600 dark:text-green-400 font-medium" : "text-muted-foreground"}>
-                      {target.percentComplete}%
-                    </span>
-                    {target.percentComplete >= 100 && (
-                      <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
-                        <Trophy className="w-3 h-3" />
-                        {t("targets.completed")}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </Card>
+              <TargetCard
+                key={target.id}
+                target={target}
+                isExpanded={expandedTargetId === target.id}
+                onToggleExpand={() => setExpandedTargetId(expandedTargetId === target.id ? null : target.id)}
+                onEdit={() => openEditDialog(target)}
+                onDelete={() => setDeletingTarget(target)}
+                getPeriodIcon={getPeriodIcon}
+                getPeriodLabel={getPeriodLabel}
+                t={t}
+              />
             ))}
           </div>
         )}

@@ -1,8 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl } from "@shared/routes";
-import { type InsertTarget, type TargetWithProgress } from "@shared/schema";
+import { type InsertTarget, type TargetWithProgress, type TargetHistory } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+
+export type TargetHistoryWithStreak = {
+  history: TargetHistory[];
+  currentStreak: number;
+};
 
 export function useTargets() {
   return useQuery({
@@ -146,5 +151,20 @@ export function useDeleteTarget() {
         variant: "destructive",
       });
     },
+  });
+}
+
+export function useTargetHistory(targetId: number | null) {
+  return useQuery<TargetHistoryWithStreak>({
+    queryKey: [api.targets.history.path, targetId],
+    queryFn: async () => {
+      if (!targetId) return { history: [], currentStreak: 0 };
+      const url = buildUrl(api.targets.history.path, { id: targetId });
+      const res = await fetch(url, { credentials: "include" });
+      if (res.status === 401) return { history: [], currentStreak: 0 };
+      if (!res.ok) throw new Error("Failed to fetch target history");
+      return await res.json();
+    },
+    enabled: !!targetId,
   });
 }

@@ -158,7 +158,11 @@
     "progress": "Kemajuan",
     "completed": "Selesai",
     "deleteConfirm": "Padam sasaran ini?",
-    "deleteWarning": "Tindakan ini tidak boleh dibatalkan. Ini akan memadam sasaran ini secara kekal."
+    "deleteWarning": "Tindakan ini tidak boleh dibatalkan. Ini akan memadam sasaran ini secara kekal.",
+    "history": "Sejarah",
+    "streak": "berturut-turut",
+    "pastPeriods": "Tempoh Lepas",
+    "noHistory": "Tiada sejarah lagi. Lengkapkan satu tempoh untuk melihat prestasi lepas anda."
   },
   "user": {
     "profile": "Profil",

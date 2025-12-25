@@ -158,7 +158,11 @@
     "progress": "Kemajuan",
     "completed": "Selesai",
     "deleteConfirm": "Hapus target ini?",
-    "deleteWarning": "Tindakan ini tidak dapat dibatalkan. Ini akan menghapus target ini secara permanen."
+    "deleteWarning": "Tindakan ini tidak dapat dibatalkan. Ini akan menghapus target ini secara permanen.",
+    "history": "Riwayat",
+    "streak": "beruntun",
+    "pastPeriods": "Periode Sebelumnya",
+    "noHistory": "Belum ada riwayat. Selesaikan satu periode untuk melihat kinerja sebelumnya."
   },
   "user": {
     "profile": "Profil",

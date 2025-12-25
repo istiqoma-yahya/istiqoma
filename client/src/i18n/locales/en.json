@@ -158,7 +158,11 @@
     "progress": "Progress",
     "completed": "Completed",
     "deleteConfirm": "Delete this target?",
-    "deleteWarning": "This action cannot be undone. This will permanently remove this target."
+    "deleteWarning": "This action cannot be undone. This will permanently remove this target.",
+    "history": "History",
+    "streak": "streak",
+    "pastPeriods": "Past Periods",
+    "noHistory": "No history yet. Complete a period to see your past performance."
   },
   "user": {
     "profile": "Profile",

@@ -222,8 +222,8 @@ export class DatabaseStorage implements IStorage {
     const t = target[0];
     const userDeeds = await this.getDeeds(userId);
     const now = new Date();
-    const savedHistory: TargetHistory[] = [];
-
+    
+    const periodBoundaries: Array<{ periodStart: Date; periodEnd: Date }> = [];
     for (let i = 1; i <= periodsBack; i++) {
       let periodStart: Date;
       let periodEnd: Date;
@@ -244,22 +244,28 @@ export class DatabaseStorage implements IStorage {
         default:
           continue;
       }
+      periodBoundaries.push({ periodStart, periodEnd });
+    }
 
-      const existingEntry = await db
-        .select()
-        .from(targetHistory)
-        .where(and(
-          eq(targetHistory.targetId, targetId),
-          eq(targetHistory.userId, userId),
-          eq(targetHistory.periodStart, periodStart)
-        ))
-        .limit(1);
+    if (periodBoundaries.length === 0) {
+      return [];
+    }
 
-      if (existingEntry.length > 0) {
-        savedHistory.push(existingEntry[0]);
-        continue;
-      }
+    const oldestPeriodStart = periodBoundaries[periodBoundaries.length - 1].periodStart;
+    const newestPeriodEnd = periodBoundaries[0].periodEnd;
+    
+    await db
+      .delete(targetHistory)
+      .where(and(
+        eq(targetHistory.targetId, targetId),
+        eq(targetHistory.userId, userId),
+        gte(targetHistory.periodStart, oldestPeriodStart),
+        lte(targetHistory.periodEnd, newestPeriodEnd)
+      ));
 
+    const savedHistory: TargetHistory[] = [];
+    
+    for (const { periodStart, periodEnd } of periodBoundaries) {
       const deedsInPeriod = userDeeds.filter((deed) => {
         const deedDate = new Date(deed.createdAt || now);
         return (

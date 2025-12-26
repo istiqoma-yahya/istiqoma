@@ -350,10 +350,10 @@ export default function TargetsPage() {
 
   const targetsArray = targets || [];
   
-  // For achievement targets: exclude Istighfar and Maksiat (good deed categories)
-  // For limit targets: only show Maksiat and other bad deed categories
+  // For achievement targets: exclude Istighfar and Maksiat (good deed categories for positive goals)
+  // For limit targets: show all categories except Istighfar (user can limit any behavior)
   const goodCategories = categories?.filter(c => c.name !== "Istighfar" && c.name !== "Maksiat") || [];
-  const limitCategories = categories?.filter(c => c.name === "Maksiat" || c.name === "Bad Character" || c.name === "Negligent") || [];
+  const limitCategories = categories?.filter(c => c.name !== "Istighfar") || [];
   
   const availableCategories = watchedTargetType === "limit" ? limitCategories : goodCategories;
 
@@ -485,7 +485,11 @@ export default function TargetsPage() {
                         type="number"
                         min={watchedTargetType === "limit" ? 0 : 1}
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          const minVal = watchedTargetType === "limit" ? 0 : 1;
+                          field.onChange(isNaN(val) ? minVal : Math.max(minVal, val));
+                        }}
                         data-testid="input-target-value"
                       />
                     </FormControl>

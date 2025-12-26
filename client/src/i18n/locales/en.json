@@ -61,6 +61,22 @@
     "deleteConfirm": "Are you sure?",
     "deleteWarning": "This action cannot be undone. This will permanently delete this deed from your history."
   },
+  "createDeed": {
+    "title": "Record a New Deed",
+    "subtitle": "Track your good actions or mistakes to monitor your spiritual progress.",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "e.g., Helped a neighbor, Missed prayer...",
+    "categoryLabel": "Category",
+    "categoryPlaceholder": "Select category",
+    "typeLabel": "Type",
+    "typePlaceholder": "Select type",
+    "pointsLabel": "Points (Weight)",
+    "dateTimeSection": "Record Date & Time (Optional)",
+    "dateLabel": "Date",
+    "timeLabel": "Time",
+    "saving": "Saving...",
+    "saveDeed": "Save Deed"
+  },
   "categories": {
     "title": "Manage Categories",
     "addCategory": "Add Category",

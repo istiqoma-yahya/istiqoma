@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { useCreateDeed } from "@/hooks/use-deeds";
 import { useCategories } from "@/hooks/use-categories";
 import { insertDeedSchema } from "@shared/schema";
@@ -41,6 +42,7 @@ function getCurrentDateTime() {
 }
 
 export default function CreateDeedPage() {
+  const { t } = useTranslation();
   const [, navigate] = useLocation();
   const { mutate, isPending } = useCreateDeed();
   const { data: categories = [] } = useCategories();
@@ -86,7 +88,7 @@ export default function CreateDeedPage() {
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
-          <h1 className="font-display font-bold text-xl">Record a New Deed</h1>
+          <h1 className="font-display font-bold text-xl">{t("createDeed.title")}</h1>
           <button
             onClick={() => navigate("/")}
             className="p-2 hover:bg-muted rounded-lg transition-colors"
@@ -100,7 +102,7 @@ export default function CreateDeedPage() {
       {/* Main Content */}
       <main className="container max-w-2xl mx-auto px-4 py-12">
         <p className="text-muted-foreground mb-8">
-          Track your good actions or mistakes to monitor your spiritual progress.
+          {t("createDeed.subtitle")}
         </p>
 
         <Form {...form}>
@@ -110,10 +112,10 @@ export default function CreateDeedPage() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t("createDeed.descriptionLabel")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Helped a neighbor, Missed prayer..."
+                      placeholder={t("createDeed.descriptionPlaceholder")}
                       className="glass-input"
                       {...field}
                       data-testid="input-deed-description"
@@ -129,14 +131,14 @@ export default function CreateDeedPage() {
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>{t("createDeed.categoryLabel")}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger className="glass-input" data-testid="select-deed-category">
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={t("createDeed.categoryPlaceholder")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -156,19 +158,19 @@ export default function CreateDeedPage() {
                 name="deedType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Type</FormLabel>
+                    <FormLabel>{t("createDeed.typeLabel")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger className="glass-input" data-testid="select-deed-type">
-                          <SelectValue placeholder="Select type" />
+                          <SelectValue placeholder={t("createDeed.typePlaceholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-popover border-border text-popover-foreground">
-                        <SelectItem value="good">Good Deed</SelectItem>
-                        <SelectItem value="bad">Bad Deed</SelectItem>
+                        <SelectItem value="good">{t("deed.goodDeed")}</SelectItem>
+                        <SelectItem value="bad">{t("deed.badDeed")}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -181,7 +183,7 @@ export default function CreateDeedPage() {
                 name="points"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Points (Weight)</FormLabel>
+                    <FormLabel>{t("createDeed.pointsLabel")}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -198,12 +200,12 @@ export default function CreateDeedPage() {
             </div>
 
             <div className="space-y-4 pt-2 border-t border-border">
-              <p className="text-sm font-medium text-muted-foreground">Record Date & Time (Optional)</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("createDeed.dateTimeSection")}</p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    Date
+                    {t("createDeed.dateLabel")}
                   </label>
                   <Input
                     type="date"
@@ -216,7 +218,7 @@ export default function CreateDeedPage() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Clock className="w-4 h-4" />
-                    Time
+                    {t("createDeed.timeLabel")}
                   </label>
                   <Input
                     type="time"
@@ -237,7 +239,7 @@ export default function CreateDeedPage() {
                 className="flex-1 py-2 text-base"
                 data-testid="button-cancel-deed"
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button
                 type="submit"
@@ -248,10 +250,10 @@ export default function CreateDeedPage() {
                 {isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
+                    {t("createDeed.saving")}
                   </>
                 ) : (
-                  "Save Deed"
+                  t("createDeed.saveDeed")
                 )}
               </Button>
             </div>

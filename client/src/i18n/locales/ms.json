@@ -61,6 +61,22 @@
     "deleteConfirm": "Adakah anda pasti?",
     "deleteWarning": "Tindakan ini tidak boleh dibatalkan. Ini akan memadam amal ini secara kekal daripada sejarah anda."
   },
+  "createDeed": {
+    "title": "Rekod Amal Baru",
+    "subtitle": "Jejaki amal baik atau kesilapan anda untuk memantau kemajuan rohani anda.",
+    "descriptionLabel": "Penerangan",
+    "descriptionPlaceholder": "contoh: Membantu jiran, Terlepas solat...",
+    "categoryLabel": "Kategori",
+    "categoryPlaceholder": "Pilih kategori",
+    "typeLabel": "Jenis",
+    "typePlaceholder": "Pilih jenis",
+    "pointsLabel": "Mata (Berat)",
+    "dateTimeSection": "Tarikh & Masa (Pilihan)",
+    "dateLabel": "Tarikh",
+    "timeLabel": "Masa",
+    "saving": "Menyimpan...",
+    "saveDeed": "Simpan Amal"
+  },
   "categories": {
     "title": "Urus Kategori",
     "addCategory": "Tambah Kategori",

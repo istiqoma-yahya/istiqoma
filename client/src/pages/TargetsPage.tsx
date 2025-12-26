@@ -44,7 +44,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTargetSchema, type InsertTarget, type TargetWithProgress, type TargetHistory } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2, Plus, Target, Pencil, Trash2, Trophy, TrendingUp, Calendar, ChevronDown, ChevronUp, Flame, CheckCircle, XCircle, History } from "lucide-react";
+import { Loader2, Plus, Target, Pencil, Trash2, Trophy, TrendingUp, Calendar, ChevronDown, ChevronUp, Flame, CheckCircle, XCircle, History, Ban } from "lucide-react";
 import { format } from "date-fns";
 
 interface TargetCardProps {
@@ -86,16 +86,30 @@ function TargetCard({
     }
   };
 
+  const isLimitTarget = target.targetType === "limit";
+  const isWithinLimit = isLimitTarget && target.currentValue <= target.targetValue;
+  const isExceeded = isLimitTarget && target.currentValue > target.targetValue;
+  const isAchieved = !isLimitTarget && target.percentComplete >= 100;
+
   return (
     <Card className="p-4" data-testid={`card-target-${target.id}`}>
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex items-center gap-2">
-          {getPeriodIcon(target.period)}
+          {isLimitTarget ? (
+            <Ban className="w-4 h-4 text-rose-500" />
+          ) : (
+            getPeriodIcon(target.period)
+          )}
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-medium" data-testid={`text-target-category-${target.id}`}>
                 {target.category}
               </h3>
+              {isLimitTarget && (
+                <Badge variant="secondary" className="text-xs">
+                  {t("targets.limitBadge")}
+                </Badge>
+              )}
               {historyData && historyData.currentStreak > 0 && (
                 <Badge variant="secondary" className="text-xs" data-testid={`badge-streak-${target.id}`}>
                   <Flame className="w-3 h-3 mr-1 text-orange-500" />
@@ -133,25 +147,48 @@ function TargetCard({
 
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{t("targets.progress")}</span>
+          <span className="text-muted-foreground">
+            {isLimitTarget ? t("targets.usage") : t("targets.progress")}
+          </span>
           <span className="font-medium" data-testid={`text-target-progress-${target.id}`}>
-            {target.currentValue} / {target.targetValue} {t("stats.points")}
+            {target.currentValue} / {target.targetValue} {isLimitTarget ? t("targets.max") : t("stats.points")}
           </span>
         </div>
         <Progress
-          value={target.percentComplete}
-          className="h-2"
+          value={isLimitTarget ? Math.min(100, target.percentComplete) : target.percentComplete}
+          className={`h-2 ${isExceeded ? "[&>div]:bg-rose-500" : ""}`}
           data-testid={`progress-target-${target.id}`}
         />
         <div className="flex items-center justify-between text-xs">
-          <span className={target.percentComplete >= 100 ? "text-green-600 dark:text-green-400 font-medium" : "text-muted-foreground"}>
-            {target.percentComplete}%
-          </span>
-          {target.percentComplete >= 100 && (
-            <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
-              <Trophy className="w-3 h-3" />
-              {t("targets.completed")}
-            </span>
+          {isLimitTarget ? (
+            <>
+              <span className={isWithinLimit ? "text-green-600 dark:text-green-400 font-medium" : "text-rose-600 dark:text-rose-400 font-medium"}>
+                {target.percentComplete}% {t("targets.used")}
+              </span>
+              {isWithinLimit ? (
+                <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3" />
+                  {t("targets.withinLimit")}
+                </span>
+              ) : (
+                <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                  <XCircle className="w-3 h-3" />
+                  {t("targets.exceeded")}
+                </span>
+              )}
+            </>
+          ) : (
+            <>
+              <span className={isAchieved ? "text-green-600 dark:text-green-400 font-medium" : "text-muted-foreground"}>
+                {target.percentComplete}%
+              </span>
+              {isAchieved && (
+                <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
+                  <Trophy className="w-3 h-3" />
+                  {t("targets.completed")}
+                </span>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -236,8 +273,11 @@ export default function TargetsPage() {
       category: "",
       targetValue: 10,
       period: "daily",
+      targetType: "achievement",
     },
   });
+
+  const watchedTargetType = form.watch("targetType");
 
   const openEditDialog = (target: TargetWithProgress) => {
     setEditingTarget(target);
@@ -245,6 +285,7 @@ export default function TargetsPage() {
       category: target.category,
       targetValue: target.targetValue,
       period: target.period as "daily" | "weekly" | "monthly",
+      targetType: (target.targetType as "achievement" | "limit") || "achievement",
     });
     setIsDialogOpen(true);
   };
@@ -255,6 +296,7 @@ export default function TargetsPage() {
       category: "",
       targetValue: 10,
       period: "daily",
+      targetType: "achievement",
     });
     setIsDialogOpen(true);
   };
@@ -307,7 +349,13 @@ export default function TargetsPage() {
   }
 
   const targetsArray = targets || [];
+  
+  // For achievement targets: exclude Istighfar and Maksiat (good deed categories)
+  // For limit targets: only show Maksiat and other bad deed categories
   const goodCategories = categories?.filter(c => c.name !== "Istighfar" && c.name !== "Maksiat") || [];
+  const limitCategories = categories?.filter(c => c.name === "Maksiat" || c.name === "Bad Character" || c.name === "Negligent") || [];
+  
+  const availableCategories = watchedTargetType === "limit" ? limitCategories : goodCategories;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -370,6 +418,37 @@ export default function TargetsPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
+                name="targetType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("targets.targetType")}</FormLabel>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        form.setValue("category", "");
+                      }} 
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger data-testid="select-target-type">
+                          <SelectValue placeholder={t("targets.selectType")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="achievement">{t("targets.achievementType")}</SelectItem>
+                        <SelectItem value="limit">{t("targets.limitType")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {field.value === "limit" ? t("targets.limitTypeDesc") : t("targets.achievementTypeDesc")}
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="category"
                 render={({ field }) => (
                   <FormItem>
@@ -381,7 +460,7 @@ export default function TargetsPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {goodCategories.map((cat) => (
+                        {availableCategories.map((cat) => (
                           <SelectItem key={cat.id} value={cat.name}>
                             {cat.name}
                           </SelectItem>
@@ -398,16 +477,21 @@ export default function TargetsPage() {
                 name="targetValue"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("targets.targetValue")}</FormLabel>
+                    <FormLabel>
+                      {watchedTargetType === "limit" ? t("targets.maxValue") : t("targets.targetValue")}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        min={1}
+                        min={watchedTargetType === "limit" ? 0 : 1}
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                         data-testid="input-target-value"
                       />
                     </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      {watchedTargetType === "limit" ? t("targets.maxValueDesc") : t("targets.targetValueDesc")}
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

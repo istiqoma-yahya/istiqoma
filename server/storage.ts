@@ -140,18 +140,40 @@ export class DatabaseStorage implements IStorage {
           periodEnd = endOfDay(now);
       }
 
+      // For achievement targets: count good deeds
+      // For limit targets: count bad deeds (or deeds in that category regardless of type for Maksiat)
+      const isLimitTarget = target.targetType === "limit";
+      
       const deedsInPeriod = userDeeds.filter((deed) => {
         const deedDate = new Date(deed.createdAt || now);
-        return (
-          deed.category === target.category &&
-          deed.deedType === "good" &&
-          deedDate >= periodStart &&
-          deedDate <= periodEnd
-        );
+        const inPeriod = deedDate >= periodStart && deedDate <= periodEnd;
+        const matchesCategory = deed.category === target.category;
+        
+        if (isLimitTarget) {
+          // For limit targets, count all deeds in this category (typically bad deeds like Maksiat)
+          return matchesCategory && inPeriod;
+        } else {
+          // For achievement targets, only count good deeds
+          return matchesCategory && deed.deedType === "good" && inPeriod;
+        }
       });
 
       const currentValue = deedsInPeriod.reduce((sum, deed) => sum + deed.points, 0);
-      const percentComplete = Math.min(100, Math.round((currentValue / target.targetValue) * 100));
+      
+      let percentComplete: number;
+      if (isLimitTarget) {
+        // For limit targets: 100% means at limit, over 100% means exceeded
+        // Show as usage percentage
+        if (target.targetValue === 0) {
+          // If limit is 0, any deed means 100%+ (exceeded)
+          percentComplete = currentValue > 0 ? 100 : 0;
+        } else {
+          percentComplete = Math.round((currentValue / target.targetValue) * 100);
+        }
+      } else {
+        // For achievement targets: progress toward goal, capped at 100%
+        percentComplete = Math.min(100, Math.round((currentValue / target.targetValue) * 100));
+      }
 
       return {
         ...target,
@@ -265,19 +287,30 @@ export class DatabaseStorage implements IStorage {
 
     const savedHistory: TargetHistory[] = [];
     
+    const isLimitTarget = t.targetType === "limit";
+    
     for (const { periodStart, periodEnd } of periodBoundaries) {
       const deedsInPeriod = userDeeds.filter((deed) => {
         const deedDate = new Date(deed.createdAt || now);
-        return (
-          deed.category === t.category &&
-          deed.deedType === "good" &&
-          deedDate >= periodStart &&
-          deedDate <= periodEnd
-        );
+        const inPeriod = deedDate >= periodStart && deedDate <= periodEnd;
+        const matchesCategory = deed.category === t.category;
+        
+        if (isLimitTarget) {
+          // For limit targets, count all deeds in this category
+          return matchesCategory && inPeriod;
+        } else {
+          // For achievement targets, only count good deeds
+          return matchesCategory && deed.deedType === "good" && inPeriod;
+        }
       });
 
       const achievedValue = deedsInPeriod.reduce((sum, deed) => sum + deed.points, 0);
-      const completed = achievedValue >= t.targetValue;
+      
+      // For limit targets: success means staying at or below the limit
+      // For achievement targets: success means reaching or exceeding the target
+      const completed = isLimitTarget 
+        ? achievedValue <= t.targetValue 
+        : achievedValue >= t.targetValue;
 
       const [entry] = await db
         .insert(targetHistory)
@@ -289,6 +322,7 @@ export class DatabaseStorage implements IStorage {
           periodEnd,
           achievedValue,
           targetValue: t.targetValue,
+          targetType: t.targetType,
           completed,
         })
         .returning();

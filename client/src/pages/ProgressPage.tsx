@@ -172,10 +172,10 @@ export default function ProgressPage() {
                 {t("progress.goodVsBad")}
               </h2>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={deedTypeData}>
+                <BarChart data={deedTypeData} margin={{ left: -20, right: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                   <XAxis dataKey="name" stroke={axisColor} />
-                  <YAxis stroke={axisColor} />
+                  <YAxis stroke={axisColor} width={50} />
                   <Tooltip
                     cursor={{ fill: cursorFill }}
                     contentStyle={{
@@ -200,10 +200,10 @@ export default function ProgressPage() {
                   {t("progress.pointsOverTime")}
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={filteredPointsOverTime}>
+                  <LineChart data={filteredPointsOverTime} margin={{ left: -20, right: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                     <XAxis dataKey="date" stroke={axisColor} />
-                    <YAxis stroke={axisColor} />
+                    <YAxis stroke={axisColor} width={50} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: tooltipBg,

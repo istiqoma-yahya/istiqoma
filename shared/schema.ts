@@ -31,6 +31,7 @@ export const targets = pgTable("targets", {
   category: text("category").notNull(),
   targetValue: integer("target_value").notNull(),
   period: text("period", { enum: ["daily", "weekly", "monthly"] }).notNull(),
+  targetType: text("target_type", { enum: ["achievement", "limit"] }).notNull().default("achievement"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -44,6 +45,7 @@ export const targetHistory = pgTable("target_history", {
   periodEnd: timestamp("period_end").notNull(),
   achievedValue: integer("achieved_value").notNull(),
   targetValue: integer("target_value").notNull(),
+  targetType: text("target_type", { enum: ["achievement", "limit"] }).notNull().default("achievement"),
   completed: boolean("completed").notNull(),
   capturedAt: timestamp("captured_at").defaultNow(),
 });
@@ -66,9 +68,11 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   category: true,
   targetValue: true,
   period: true,
+  targetType: true,
 }).extend({
-  targetValue: z.number().min(1, "Target value must be at least 1"),
+  targetValue: z.number().min(0, "Target value must be at least 0"),
   period: z.enum(["daily", "weekly", "monthly"]),
+  targetType: z.enum(["achievement", "limit"]).default("achievement"),
 });
 
 export const insertTargetHistorySchema = createInsertSchema(targetHistory).pick({
@@ -79,6 +83,7 @@ export const insertTargetHistorySchema = createInsertSchema(targetHistory).pick(
   periodEnd: true,
   achievedValue: true,
   targetValue: true,
+  targetType: true,
   completed: true,
 });
 

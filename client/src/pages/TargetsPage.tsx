@@ -485,21 +485,6 @@ export default function TargetsPage() {
                         type="number"
                         min={watchedTargetType === "limit" ? 0 : 1}
                         {...field}
-                        value={field.value}
-                        onChange={(e) => {
-                          const rawValue = e.target.value;
-                          if (rawValue === "") {
-                            field.onChange(0);
-                          } else {
-                            field.onChange(parseInt(rawValue) || 0);
-                          }
-                        }}
-                        onBlur={(e) => {
-                          const minVal = watchedTargetType === "limit" ? 0 : 1;
-                          if (field.value < minVal) {
-                            field.onChange(minVal);
-                          }
-                        }}
                         data-testid="input-target-value"
                       />
                     </FormControl>

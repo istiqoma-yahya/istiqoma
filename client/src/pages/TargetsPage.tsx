@@ -484,7 +484,14 @@ export default function TargetsPage() {
                       <Input
                         type="number"
                         min={watchedTargetType === "limit" ? 0 : 1}
-                        {...field}
+                        value={field.value}
+                        onChange={(e) => {
+                          const value = e.target.valueAsNumber;
+                          field.onChange(isNaN(value) ? "" : value);
+                        }}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
                         data-testid="input-target-value"
                       />
                     </FormControl>

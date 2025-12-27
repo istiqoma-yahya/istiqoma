@@ -70,6 +70,7 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   period: true,
   targetType: true,
 }).extend({
+  category: z.string().min(1, "Category is required"),
   targetValue: z.number().min(0, "Target value must be at least 0"),
   period: z.enum(["daily", "weekly", "monthly"]),
   targetType: z.enum(["achievement", "limit"]).default("achievement"),

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle2, ShieldCheck, TrendingUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function Landing() {
   const { t } = useTranslation();
@@ -22,12 +23,15 @@ export default function Landing() {
           </div>
           <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-2xl tracking-tight">Istiqoma</span>
         </div>
-        <button 
-          onClick={handleLogin}
-          className="btn-secondary text-sm px-5 py-2.5"
-        >
-          {t('landing.login')}
-        </button>
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          <button 
+            onClick={handleLogin}
+            className="btn-secondary text-sm px-5 py-2.5"
+          >
+            {t('landing.login')}
+          </button>
+        </div>
       </nav>
 
       {/* Hero Section */}

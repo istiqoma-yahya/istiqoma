@@ -17,12 +17,12 @@
     "startTracking": "Mulai Mencatat Sekarang",
     "login": "Masuk",
     "features": {
+      "targetsTitle": "Tetapkan Target",
+      "targetsDesc": "Tetapkan tujuan spiritual untuk kategori yang kamu pedulikan dan lacak kemajuanmu untuk mencapainya.",
       "trackTitle": "Catat dengan Mudah",
       "trackDesc": "Rekam amal baik dan burukmu secara instan dengan antarmuka yang sederhana dan intuitif.",
       "visualizeTitle": "Visualisasi Pertumbuhan",
-      "visualizeDesc": "Lihat kemajuan spiritualmu dari waktu ke waktu dengan grafik dan ringkasan yang indah.",
-      "secureTitle": "Privat & Aman",
-      "secureDesc": "Datamu hanya milikmu. Terautentikasi dengan aman dan tersimpan secara privat."
+      "visualizeDesc": "Lihat kemajuan spiritualmu dari waktu ke waktu dengan grafik dan ringkasan yang indah."
     }
   },
   "dashboard": {

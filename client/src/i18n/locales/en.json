@@ -17,12 +17,12 @@
     "startTracking": "Start Tracking Now",
     "login": "Login",
     "features": {
+      "targetsTitle": "Set Targets",
+      "targetsDesc": "Set spiritual goals for categories you care about and track your progress toward achieving them.",
       "trackTitle": "Track Easily",
       "trackDesc": "Record your good and bad deeds instantly with a simple, intuitive interface.",
       "visualizeTitle": "Visualize Growth",
-      "visualizeDesc": "See your spiritual progress over time with beautiful charts and summaries.",
-      "secureTitle": "Private & Secure",
-      "secureDesc": "Your data is yours alone. Securely authenticated and stored privately."
+      "visualizeDesc": "See your spiritual progress over time with beautiful charts and summaries."
     }
   },
   "dashboard": {

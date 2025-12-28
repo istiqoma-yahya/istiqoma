@@ -17,12 +17,12 @@
     "startTracking": "Mula Menjejak Sekarang",
     "login": "Log Masuk",
     "features": {
+      "targetsTitle": "Tetapkan Sasaran",
+      "targetsDesc": "Tetapkan matlamat rohani untuk kategori yang anda ambil berat dan jejaki kemajuan anda untuk mencapainya.",
       "trackTitle": "Jejak dengan Mudah",
       "trackDesc": "Rekod amal baik dan buruk anda dengan serta-merta menggunakan antara muka yang ringkas dan intuitif.",
       "visualizeTitle": "Visualisasi Pertumbuhan",
-      "visualizeDesc": "Lihat kemajuan rohani anda dari semasa ke semasa dengan carta dan ringkasan yang cantik.",
-      "secureTitle": "Peribadi & Selamat",
-      "secureDesc": "Data anda adalah milik anda sahaja. Disahkan dengan selamat dan disimpan secara peribadi."
+      "visualizeDesc": "Lihat kemajuan rohani anda dari semasa ke semasa dengan carta dan ringkasan yang cantik."
     }
   },
   "dashboard": {

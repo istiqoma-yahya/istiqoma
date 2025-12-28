@@ -269,12 +269,17 @@ export class DatabaseStorage implements IStorage {
       periodBoundaries.push({ periodStart, periodEnd });
     }
 
-    if (periodBoundaries.length === 0) {
+    // Filter out periods that end before the target was created
+    // We use periodEnd so that the period containing the creation date is included
+    const targetCreatedAt = t.createdAt ? new Date(t.createdAt) : new Date();
+    const validPeriods = periodBoundaries.filter(({ periodEnd }) => periodEnd >= targetCreatedAt);
+
+    if (validPeriods.length === 0) {
       return [];
     }
 
-    const oldestPeriodStart = periodBoundaries[periodBoundaries.length - 1].periodStart;
-    const newestPeriodEnd = periodBoundaries[0].periodEnd;
+    const oldestPeriodStart = validPeriods[validPeriods.length - 1].periodStart;
+    const newestPeriodEnd = validPeriods[0].periodEnd;
     
     await db
       .delete(targetHistory)
@@ -289,7 +294,7 @@ export class DatabaseStorage implements IStorage {
     
     const isLimitTarget = t.targetType === "limit";
     
-    for (const { periodStart, periodEnd } of periodBoundaries) {
+    for (const { periodStart, periodEnd } of validPeriods) {
       const deedsInPeriod = userDeeds.filter((deed) => {
         const deedDate = new Date(deed.createdAt || now);
         const inPeriod = deedDate >= periodStart && deedDate <= periodEnd;

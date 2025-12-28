@@ -146,7 +146,7 @@ export default function Dashboard() {
                       <Trophy className="w-4 h-4 text-emerald-500" />
                     )}
                   </div>
-                  <Progress value={target.percentComplete} className="h-2 mb-1" />
+                  <Progress value={target.percentComplete} className="h-2 mb-1 bg-gray-300 dark:bg-gray-600" />
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>{target.currentValue} / {target.targetValue}</span>
                     <span className={target.percentComplete >= 100 ? "text-emerald-500 font-medium" : ""}>

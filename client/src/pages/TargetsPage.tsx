@@ -156,7 +156,7 @@ function TargetCard({
         </div>
         <Progress
           value={isLimitTarget ? Math.min(100, target.percentComplete) : target.percentComplete}
-          className={`h-2 ${isExceeded ? "[&>div]:bg-rose-500" : ""}`}
+          className={`h-2 bg-gray-300 dark:bg-gray-600 ${isExceeded ? "[&>div]:bg-rose-500" : ""}`}
           data-testid={`progress-target-${target.id}`}
         />
         <div className="flex items-center justify-between text-xs">

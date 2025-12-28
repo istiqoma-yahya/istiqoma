@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, ShieldCheck, TrendingUp } from "lucide-react";
+import { ArrowRight, CheckCircle2, Target, TrendingUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
@@ -69,6 +69,12 @@ export default function Landing() {
           >
             {[
               {
+                icon: Target,
+                title: t('landing.features.targetsTitle'),
+                desc: t('landing.features.targetsDesc'),
+                color: "text-purple-600 dark:text-purple-400"
+              },
+              {
                 icon: CheckCircle2,
                 title: t('landing.features.trackTitle'),
                 desc: t('landing.features.trackDesc'),
@@ -79,12 +85,6 @@ export default function Landing() {
                 title: t('landing.features.visualizeTitle'),
                 desc: t('landing.features.visualizeDesc'),
                 color: "text-blue-600 dark:text-blue-400"
-              },
-              {
-                icon: ShieldCheck,
-                title: t('landing.features.secureTitle'),
-                desc: t('landing.features.secureDesc'),
-                color: "text-purple-600 dark:text-purple-400"
               }
             ].map((feature, i) => (
               <div key={i} className="glass-card p-6 text-left hover:border-primary/20 transition-colors">

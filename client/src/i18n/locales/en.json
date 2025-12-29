@@ -121,7 +121,8 @@
       "any": "Any Type"
     },
     "selectType": "Select Dzikir Type",
-    "anyType": "Any (all types counted)"
+    "anyType": "Any (all types counted)",
+    "typeRequired": "Please select a dzikir type"
   },
   "qibla": {
     "title": "Qibla Compass",

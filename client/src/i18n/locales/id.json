@@ -121,7 +121,8 @@
       "any": "Semua Jenis"
     },
     "selectType": "Pilih Jenis Dzikir",
-    "anyType": "Semua (semua jenis dihitung)"
+    "anyType": "Semua (semua jenis dihitung)",
+    "typeRequired": "Silakan pilih jenis dzikir"
   },
   "qibla": {
     "title": "Kompas Kiblat",

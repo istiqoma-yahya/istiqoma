@@ -56,14 +56,31 @@ export default function CreateDeedPage() {
       category: "",
       points: 1,
       createdAt: undefined,
+      dzikirType: undefined,
     },
   });
+
+  const watchedCategory = form.watch("category");
+  const isDzikirCategory = watchedCategory?.toLowerCase() === "dzikir" || watchedCategory?.toLowerCase() === "dzikr";
+  
+  const DZIKIR_TYPES = [
+    { id: "subhanallah", labelKey: "dzikir.types.subhanallah" },
+    { id: "alhamdulillah", labelKey: "dzikir.types.alhamdulillah" },
+    { id: "allahuakbar", labelKey: "dzikir.types.allahuakbar" },
+    { id: "lailahaillallah", labelKey: "dzikir.types.lailahaillallah" },
+  ];
 
   useEffect(() => {
     if (categories.length > 0 && !form.getValues("category")) {
       form.setValue("category", categories[0].name);
     }
   }, [categories, form]);
+  
+  useEffect(() => {
+    if (!isDzikirCategory) {
+      form.setValue("dzikirType", undefined);
+    }
+  }, [isDzikirCategory, form]);
 
   const onSubmit = (data: FormValues) => {
     let createdAt = data.createdAt;
@@ -151,6 +168,37 @@ export default function CreateDeedPage() {
                 </FormItem>
               )}
             />
+
+            {isDzikirCategory && (
+              <FormField
+                control={form.control}
+                name="dzikirType"
+                rules={{ required: t("dzikir.typeRequired") }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("dzikir.selectType")} *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="glass-input" data-testid="select-deed-dzikir-type">
+                          <SelectValue placeholder={t("dzikir.selectType")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
+                        {DZIKIR_TYPES.map((type) => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {t(type.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <FormField

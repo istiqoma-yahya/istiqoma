@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { useUpdateDeed } from "@/hooks/use-deeds";
 import { useCategories } from "@/hooks/use-categories";
 import { insertDeedSchema, type Deed } from "@shared/schema";
@@ -45,6 +46,7 @@ interface EditDeedPageProps {
 }
 
 export default function EditDeedPage({ deed }: EditDeedPageProps) {
+  const { t } = useTranslation();
   const [, navigate] = useLocation();
   const { mutate, isPending } = useUpdateDeed();
   const { data: categories = [] } = useCategories();
@@ -58,8 +60,25 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
       category: deed.category,
       points: deed.points,
       createdAt: undefined,
+      dzikirType: deed.dzikirType || undefined,
     },
   });
+
+  const watchedCategory = form.watch("category");
+  const isDzikirCategory = watchedCategory?.toLowerCase() === "dzikir" || watchedCategory?.toLowerCase() === "dzikr";
+  
+  const DZIKIR_TYPES = [
+    { id: "subhanallah", labelKey: "dzikir.types.subhanallah" },
+    { id: "alhamdulillah", labelKey: "dzikir.types.alhamdulillah" },
+    { id: "allahuakbar", labelKey: "dzikir.types.allahuakbar" },
+    { id: "lailahaillallah", labelKey: "dzikir.types.lailahaillallah" },
+  ];
+  
+  useEffect(() => {
+    if (!isDzikirCategory) {
+      form.setValue("dzikirType", undefined);
+    }
+  }, [isDzikirCategory, form]);
 
   const onSubmit = (data: FormValues) => {
     let createdAt = data.createdAt;
@@ -120,14 +139,14 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>{t("createDeed.categoryLabel")}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger className="glass-input" data-testid="select-edit-deed-category">
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={t("createDeed.categoryPlaceholder")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -140,6 +159,37 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                 </FormItem>
               )}
             />
+
+            {isDzikirCategory && (
+              <FormField
+                control={form.control}
+                name="dzikirType"
+                rules={{ required: t("dzikir.typeRequired") }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("dzikir.selectType")} *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="glass-input" data-testid="select-edit-deed-dzikir-type">
+                          <SelectValue placeholder={t("dzikir.selectType")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
+                        {DZIKIR_TYPES.map((type) => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {t(type.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <FormField

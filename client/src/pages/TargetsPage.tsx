@@ -160,9 +160,6 @@ function TargetCard({
         <div className="flex items-center justify-between text-xs">
           {isLimitTarget ? (
             <>
-              <span className={isWithinLimit ? "text-green-600 dark:text-green-400 font-medium" : "text-rose-600 dark:text-rose-400 font-medium"}>
-                {target.percentComplete}% {t("targets.used")}
-              </span>
               {isWithinLimit ? (
                 <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
                   <CheckCircle className="w-3 h-3" />

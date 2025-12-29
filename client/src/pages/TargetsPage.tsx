@@ -105,11 +105,9 @@ function TargetCard({
               <h3 className="font-medium" data-testid={`text-target-category-${target.id}`}>
                 {target.category}
               </h3>
-              {isLimitTarget && (
-                <Badge variant="secondary" className="text-xs">
-                  {t("targets.limitBadge")}
+              <Badge variant="secondary" className="text-xs">
+                  {isLimitTarget ? t("targets.limitType") : t("targets.achievementType")}
                 </Badge>
-              )}
               {historyData && historyData.currentStreak > 0 && (
                 <Badge variant="secondary" className="text-xs" data-testid={`badge-streak-${target.id}`}>
                   <Flame className="w-3 h-3 mr-1 text-orange-500" />

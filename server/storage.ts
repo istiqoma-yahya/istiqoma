@@ -149,12 +149,15 @@ export class DatabaseStorage implements IStorage {
         const inPeriod = deedDate >= periodStart && deedDate <= periodEnd;
         const matchesCategory = deed.category === target.category;
         
+        // For dzikir targets with specific type, also match dzikirType
+        const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;
+        
         if (isLimitTarget) {
           // For limit targets, count all deeds in this category (typically bad deeds like Maksiat)
-          return matchesCategory && inPeriod;
+          return matchesCategory && matchesDzikirType && inPeriod;
         } else {
           // For achievement targets, only count good deeds
-          return matchesCategory && deed.deedType === "good" && inPeriod;
+          return matchesCategory && matchesDzikirType && deed.deedType === "good" && inPeriod;
         }
       });
 
@@ -300,12 +303,15 @@ export class DatabaseStorage implements IStorage {
         const inPeriod = deedDate >= periodStart && deedDate <= periodEnd;
         const matchesCategory = deed.category === t.category;
         
+        // For dzikir targets with specific type, also match dzikirType
+        const matchesDzikirType = !t.dzikirType || deed.dzikirType === t.dzikirType;
+        
         if (isLimitTarget) {
           // For limit targets, count all deeds in this category
-          return matchesCategory && inPeriod;
+          return matchesCategory && matchesDzikirType && inPeriod;
         } else {
           // For achievement targets, only count good deeds
-          return matchesCategory && deed.deedType === "good" && inPeriod;
+          return matchesCategory && matchesDzikirType && deed.deedType === "good" && inPeriod;
         }
       });
 
@@ -323,6 +329,7 @@ export class DatabaseStorage implements IStorage {
           targetId,
           userId,
           category: t.category,
+          dzikirType: t.dzikirType,
           periodStart,
           periodEnd,
           achievedValue,

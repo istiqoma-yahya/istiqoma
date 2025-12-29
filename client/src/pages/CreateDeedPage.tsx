@@ -57,11 +57,15 @@ export default function CreateDeedPage() {
       points: 1,
       createdAt: undefined,
       dzikirType: undefined,
+      sholatType: undefined,
     },
   });
 
   const watchedCategory = form.watch("category");
   const isDzikirCategory = watchedCategory?.toLowerCase() === "dzikir" || watchedCategory?.toLowerCase() === "dzikr";
+  const isSholatFardhuCategory = watchedCategory?.toLowerCase() === "sholat fardhu";
+  const isSholatSunnahCategory = watchedCategory?.toLowerCase() === "sholat sunnah";
+  const isSholatCategory = isSholatFardhuCategory || isSholatSunnahCategory;
   
   const DZIKIR_TYPES = [
     { id: "subhanallah", labelKey: "dzikir.types.subhanallah" },
@@ -69,6 +73,28 @@ export default function CreateDeedPage() {
     { id: "allahuakbar", labelKey: "dzikir.types.allahuakbar" },
     { id: "lailahaillallah", labelKey: "dzikir.types.lailahaillallah" },
   ];
+
+  const SHOLAT_FARDHU_TYPES = [
+    { id: "subuh", labelKey: "sholat.types.subuh" },
+    { id: "dzuhur", labelKey: "sholat.types.dzuhur" },
+    { id: "ashar", labelKey: "sholat.types.ashar" },
+    { id: "maghrib", labelKey: "sholat.types.maghrib" },
+    { id: "isya", labelKey: "sholat.types.isya" },
+  ];
+
+  const SHOLAT_SUNNAH_TYPES = [
+    { id: "rawatib", labelKey: "sholat.types.rawatib" },
+    { id: "dhuha", labelKey: "sholat.types.dhuha" },
+    { id: "tahajjud", labelKey: "sholat.types.tahajjud" },
+    { id: "witir", labelKey: "sholat.types.witir" },
+    { id: "tarawih", labelKey: "sholat.types.tarawih" },
+    { id: "eid", labelKey: "sholat.types.eid" },
+    { id: "istikharah", labelKey: "sholat.types.istikharah" },
+    { id: "hajat", labelKey: "sholat.types.hajat" },
+    { id: "taubat", labelKey: "sholat.types.taubat" },
+  ];
+
+  const currentSholatTypes = isSholatFardhuCategory ? SHOLAT_FARDHU_TYPES : SHOLAT_SUNNAH_TYPES;
 
   useEffect(() => {
     if (categories.length > 0 && !form.getValues("category")) {
@@ -81,6 +107,12 @@ export default function CreateDeedPage() {
       form.setValue("dzikirType", undefined);
     }
   }, [isDzikirCategory, form]);
+
+  useEffect(() => {
+    if (!isSholatCategory) {
+      form.setValue("sholatType", undefined);
+    }
+  }, [isSholatCategory, form]);
 
   const onSubmit = (data: FormValues) => {
     let createdAt = data.createdAt;
@@ -188,6 +220,37 @@ export default function CreateDeedPage() {
                       <SelectContent className="bg-popover border-border text-popover-foreground">
                         <SelectItem value="__any__">{t("dzikir.anyType")}</SelectItem>
                         {DZIKIR_TYPES.map((type) => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {t(type.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {isSholatCategory && (
+              <FormField
+                control={form.control}
+                name="sholatType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("sholat.selectType")}</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(value === "__any__" ? undefined : value)}
+                      value={field.value || "__any__"}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="glass-input" data-testid="select-deed-sholat-type">
+                          <SelectValue placeholder={t("sholat.selectType")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
+                        <SelectItem value="__any__">{t("sholat.anyType")}</SelectItem>
+                        {currentSholatTypes.map((type) => (
                           <SelectItem key={type.id} value={type.id}>
                             {t(type.labelKey)}
                           </SelectItem>

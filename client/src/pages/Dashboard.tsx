@@ -143,7 +143,9 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-sm truncate">{target.category}</span>
                     {target.targetType === "limit" ? (
-                      <ThumbsDown className="w-4 h-4 text-rose-500" />
+                      target.currentValue > target.targetValue && (
+                        <ThumbsDown className="w-4 h-4 text-rose-500" />
+                      )
                     ) : (
                       target.percentComplete >= 100 && (
                         <Trophy className="w-4 h-4 text-emerald-500" />

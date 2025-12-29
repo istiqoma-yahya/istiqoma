@@ -27,6 +27,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
       color: "text-emerald-600 dark:text-emerald-400",
       bg: "bg-emerald-500/10",
       border: "border-emerald-500/20",
+      pointsBg: "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300",
     },
     {
       label: t('stats.badDeeds'),
@@ -36,6 +37,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
       color: "text-rose-600 dark:text-rose-400",
       bg: "bg-rose-500/10",
       border: "border-rose-500/20",
+      pointsBg: "bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300",
     },
   ];
 
@@ -54,7 +56,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
               <stat.icon className="w-6 h-6" />
             </div>
             {stat.points !== null && (
-              <span className={`text-sm font-medium ${stat.color} bg-muted px-2 py-1 rounded-lg`}>
+              <span className={`text-sm font-medium ${stat.pointsBg} px-2 py-1 rounded-lg`}>
                 {stat.points} pts
               </span>
             )}

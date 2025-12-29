@@ -151,13 +151,15 @@ export class DatabaseStorage implements IStorage {
         
         // For dzikir targets with specific type, also match dzikirType
         const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;
+        // For sholat targets with specific type, also match sholatType
+        const matchesSholatType = !target.sholatType || deed.sholatType === target.sholatType;
         
         if (isLimitTarget) {
           // For limit targets, count all deeds in this category (typically bad deeds like Maksiat)
-          return matchesCategory && matchesDzikirType && inPeriod;
+          return matchesCategory && matchesDzikirType && matchesSholatType && inPeriod;
         } else {
           // For achievement targets, only count good deeds
-          return matchesCategory && matchesDzikirType && deed.deedType === "good" && inPeriod;
+          return matchesCategory && matchesDzikirType && matchesSholatType && deed.deedType === "good" && inPeriod;
         }
       });
 
@@ -305,13 +307,15 @@ export class DatabaseStorage implements IStorage {
         
         // For dzikir targets with specific type, also match dzikirType
         const matchesDzikirType = !t.dzikirType || deed.dzikirType === t.dzikirType;
+        // For sholat targets with specific type, also match sholatType
+        const matchesSholatType = !t.sholatType || deed.sholatType === t.sholatType;
         
         if (isLimitTarget) {
           // For limit targets, count all deeds in this category
-          return matchesCategory && matchesDzikirType && inPeriod;
+          return matchesCategory && matchesDzikirType && matchesSholatType && inPeriod;
         } else {
           // For achievement targets, only count good deeds
-          return matchesCategory && matchesDzikirType && deed.deedType === "good" && inPeriod;
+          return matchesCategory && matchesDzikirType && matchesSholatType && deed.deedType === "good" && inPeriod;
         }
       });
 
@@ -330,6 +334,7 @@ export class DatabaseStorage implements IStorage {
           userId,
           category: t.category,
           dzikirType: t.dzikirType,
+          sholatType: t.sholatType,
           periodStart,
           periodEnd,
           achievedValue,

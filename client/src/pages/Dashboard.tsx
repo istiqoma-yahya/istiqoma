@@ -5,7 +5,7 @@ import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { Loader2, LogOut, User, Settings, Plus, Target, Trophy, ChevronRight } from "lucide-react";
+import { Loader2, LogOut, User, Settings, Plus, Target, Trophy, ChevronRight, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -142,14 +142,24 @@ export default function Dashboard() {
                 <Card key={target.id} className="p-3" data-testid={`card-dashboard-target-${target.id}`}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-sm truncate">{target.category}</span>
-                    {target.percentComplete >= 100 && (
-                      <Trophy className="w-4 h-4 text-emerald-500" />
+                    {target.targetType === "limit" ? (
+                      <ThumbsDown className="w-4 h-4 text-rose-500" />
+                    ) : (
+                      target.percentComplete >= 100 && (
+                        <Trophy className="w-4 h-4 text-emerald-500" />
+                      )
                     )}
                   </div>
-                  <Progress value={target.percentComplete} className="h-2 mb-1 bg-gray-300 dark:bg-gray-600" />
+                  <Progress 
+                    value={target.targetType === "limit" ? Math.min(100, target.percentComplete) : target.percentComplete} 
+                    className={`h-2 mb-1 bg-gray-300 dark:bg-gray-600 ${target.targetType === "limit" ? "[&>div]:bg-rose-500" : ""}`} 
+                  />
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>{target.currentValue} / {target.targetValue}</span>
-                    <span className={target.percentComplete >= 100 ? "text-emerald-500 font-medium" : ""}>
+                    <span className={target.targetType === "limit" 
+                      ? (target.currentValue <= target.targetValue ? "text-emerald-500 font-medium" : "text-rose-500 font-medium")
+                      : (target.percentComplete >= 100 ? "text-emerald-500 font-medium" : "")
+                    }>
                       {target.percentComplete}%
                     </span>
                   </div>

@@ -107,10 +107,21 @@
     "istighfarSavedDesc": "{{count}} istighfar dikira. Amal buruk dikurangkan {{count}} mata.",
     "dzikirSaved": "Zikir disimpan!",
     "dzikirSavedDesc": "{{count}} zikir dikira dan disimpan sebagai {{count}} mata.",
+    "dzikirTypeSavedDesc": "{{count}} {{type}} dikira dan disimpan sebagai {{count}} mata.",
     "failedToSave": "Gagal menyimpan",
     "tryAgain": "Sila cuba lagi.",
     "istighfarDeedDesc": "Istighfar - {{count}} kiraan (keampunan)",
-    "dzikirDeedDesc": "Zikir - {{count}} kiraan"
+    "dzikirDeedDesc": "Zikir - {{count}} kiraan",
+    "dzikirTypeDeedDesc": "{{type}} - {{count}} kiraan",
+    "types": {
+      "subhanallah": "Subhanallah",
+      "alhamdulillah": "Alhamdulillah",
+      "allahuakbar": "Allahu Akbar",
+      "lailahaillallah": "La ilaha illallah",
+      "any": "Semua Jenis"
+    },
+    "selectType": "Pilih Jenis Zikir",
+    "anyType": "Semua (semua jenis dikira)"
   },
   "qibla": {
     "title": "Kompas Kiblat",

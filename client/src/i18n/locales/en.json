@@ -107,10 +107,21 @@
     "istighfarSavedDesc": "{{count}} istighfar counted. Bad deeds reduced by {{count}} points.",
     "dzikirSaved": "Dzikir saved!",
     "dzikirSavedDesc": "{{count}} dzikir counted and saved as {{count}} points.",
+    "dzikirTypeSavedDesc": "{{count}} {{type}} counted and saved as {{count}} points.",
     "failedToSave": "Failed to save",
     "tryAgain": "Please try again.",
     "istighfarDeedDesc": "Istighfar - {{count}} counts (forgiveness)",
-    "dzikirDeedDesc": "Dzikir - {{count}} counts"
+    "dzikirDeedDesc": "Dzikir - {{count}} counts",
+    "dzikirTypeDeedDesc": "{{type}} - {{count}} counts",
+    "types": {
+      "subhanallah": "Subhanallah",
+      "alhamdulillah": "Alhamdulillah",
+      "allahuakbar": "Allahu Akbar",
+      "lailahaillallah": "La ilaha illallah",
+      "any": "Any Type"
+    },
+    "selectType": "Select Dzikir Type",
+    "anyType": "Any (all types counted)"
   },
   "qibla": {
     "title": "Qibla Compass",

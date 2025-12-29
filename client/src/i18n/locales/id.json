@@ -107,10 +107,21 @@
     "istighfarSavedDesc": "{{count}} istighfar dihitung. Amal buruk berkurang {{count}} poin.",
     "dzikirSaved": "Dzikir tersimpan!",
     "dzikirSavedDesc": "{{count}} dzikir dihitung dan disimpan sebagai {{count}} poin.",
+    "dzikirTypeSavedDesc": "{{count}} {{type}} dihitung dan disimpan sebagai {{count}} poin.",
     "failedToSave": "Gagal menyimpan",
     "tryAgain": "Silakan coba lagi.",
     "istighfarDeedDesc": "Istighfar - {{count}} hitungan (pengampunan)",
-    "dzikirDeedDesc": "Dzikir - {{count}} hitungan"
+    "dzikirDeedDesc": "Dzikir - {{count}} hitungan",
+    "dzikirTypeDeedDesc": "{{type}} - {{count}} hitungan",
+    "types": {
+      "subhanallah": "Subhanallah",
+      "alhamdulillah": "Alhamdulillah",
+      "allahuakbar": "Allahu Akbar",
+      "lailahaillallah": "La ilaha illallah",
+      "any": "Semua Jenis"
+    },
+    "selectType": "Pilih Jenis Dzikir",
+    "anyType": "Semua (semua jenis dihitung)"
   },
   "qibla": {
     "title": "Kompas Kiblat",

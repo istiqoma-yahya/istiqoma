@@ -98,6 +98,9 @@ function TargetCard({
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-medium" data-testid={`text-target-category-${target.id}`}>
               {target.category}
+              {target.dzikirType && (
+                <span className="text-muted-foreground font-normal"> ({t(`dzikir.types.${target.dzikirType}`)})</span>
+              )}
             </h3>
             <Badge 
               variant="secondary" 
@@ -265,10 +268,21 @@ export default function TargetsPage() {
       targetValue: 10,
       period: "daily",
       targetType: "achievement",
+      dzikirType: undefined,
     },
   });
 
   const watchedTargetType = form.watch("targetType");
+  const watchedCategory = form.watch("category");
+  
+  const isDzikirCategory = watchedCategory?.toLowerCase() === "dzikir" || watchedCategory?.toLowerCase() === "dzikr";
+  
+  const DZIKIR_TYPES = [
+    { id: "subhanallah", labelKey: "dzikir.types.subhanallah" },
+    { id: "alhamdulillah", labelKey: "dzikir.types.alhamdulillah" },
+    { id: "allahuakbar", labelKey: "dzikir.types.allahuakbar" },
+    { id: "lailahaillallah", labelKey: "dzikir.types.lailahaillallah" },
+  ];
 
   const openEditDialog = (target: TargetWithProgress) => {
     setEditingTarget(target);
@@ -277,6 +291,7 @@ export default function TargetsPage() {
       targetValue: target.targetValue,
       period: target.period as "daily" | "weekly" | "monthly",
       targetType: (target.targetType as "achievement" | "limit") || "achievement",
+      dzikirType: target.dzikirType || undefined,
     });
     setIsDialogOpen(true);
   };
@@ -288,6 +303,7 @@ export default function TargetsPage() {
       targetValue: 10,
       period: "daily",
       targetType: "achievement",
+      dzikirType: undefined,
     });
     setIsDialogOpen(true);
   };
@@ -444,7 +460,12 @@ export default function TargetsPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("deed.category")}</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={(value) => {
+                      field.onChange(value);
+                      if (value.toLowerCase() !== "dzikir" && value.toLowerCase() !== "dzikr") {
+                        form.setValue("dzikirType", undefined);
+                      }
+                    }} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-target-category">
                           <SelectValue placeholder={t("targets.selectCategory")} />
@@ -462,6 +483,34 @@ export default function TargetsPage() {
                   </FormItem>
                 )}
               />
+
+              {isDzikirCategory && (
+                <FormField
+                  control={form.control}
+                  name="dzikirType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("dzikir.selectType")}</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-dzikir-type">
+                            <SelectValue placeholder={t("dzikir.selectType")} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">{t("dzikir.anyType")}</SelectItem>
+                          {DZIKIR_TYPES.map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {t(type.labelKey)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}

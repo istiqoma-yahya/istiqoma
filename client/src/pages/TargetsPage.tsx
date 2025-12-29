@@ -101,6 +101,9 @@ function TargetCard({
               {target.dzikirType && (
                 <span className="text-muted-foreground font-normal"> ({t(`dzikir.types.${target.dzikirType}`)})</span>
               )}
+              {target.sholatType && (
+                <span className="text-muted-foreground font-normal"> ({t(`sholat.types.${target.sholatType}`)})</span>
+              )}
             </h3>
             <Badge 
               variant="secondary" 
@@ -276,6 +279,9 @@ export default function TargetsPage() {
   const watchedCategory = form.watch("category");
   
   const isDzikirCategory = watchedCategory?.toLowerCase() === "dzikir" || watchedCategory?.toLowerCase() === "dzikr";
+  const isSholatFardhuCategory = watchedCategory?.toLowerCase() === "sholat fardhu";
+  const isSholatSunnahCategory = watchedCategory?.toLowerCase() === "sholat sunnah";
+  const isSholatCategory = isSholatFardhuCategory || isSholatSunnahCategory;
   
   const DZIKIR_TYPES = [
     { id: "subhanallah", labelKey: "dzikir.types.subhanallah" },
@@ -283,6 +289,28 @@ export default function TargetsPage() {
     { id: "allahuakbar", labelKey: "dzikir.types.allahuakbar" },
     { id: "lailahaillallah", labelKey: "dzikir.types.lailahaillallah" },
   ];
+
+  const SHOLAT_FARDHU_TYPES = [
+    { id: "subuh", labelKey: "sholat.types.subuh" },
+    { id: "dzuhur", labelKey: "sholat.types.dzuhur" },
+    { id: "ashar", labelKey: "sholat.types.ashar" },
+    { id: "maghrib", labelKey: "sholat.types.maghrib" },
+    { id: "isya", labelKey: "sholat.types.isya" },
+  ];
+
+  const SHOLAT_SUNNAH_TYPES = [
+    { id: "rawatib", labelKey: "sholat.types.rawatib" },
+    { id: "dhuha", labelKey: "sholat.types.dhuha" },
+    { id: "tahajjud", labelKey: "sholat.types.tahajjud" },
+    { id: "witir", labelKey: "sholat.types.witir" },
+    { id: "tarawih", labelKey: "sholat.types.tarawih" },
+    { id: "eid", labelKey: "sholat.types.eid" },
+    { id: "istikharah", labelKey: "sholat.types.istikharah" },
+    { id: "hajat", labelKey: "sholat.types.hajat" },
+    { id: "taubat", labelKey: "sholat.types.taubat" },
+  ];
+
+  const currentSholatTypes = isSholatFardhuCategory ? SHOLAT_FARDHU_TYPES : SHOLAT_SUNNAH_TYPES;
 
   const openEditDialog = (target: TargetWithProgress) => {
     setEditingTarget(target);
@@ -292,6 +320,7 @@ export default function TargetsPage() {
       period: target.period as "daily" | "weekly" | "monthly",
       targetType: (target.targetType as "achievement" | "limit") || "achievement",
       dzikirType: target.dzikirType || undefined,
+      sholatType: target.sholatType || undefined,
     });
     setIsDialogOpen(true);
   };
@@ -304,6 +333,7 @@ export default function TargetsPage() {
       period: "daily",
       targetType: "achievement",
       dzikirType: undefined,
+      sholatType: undefined,
     });
     setIsDialogOpen(true);
   };
@@ -462,8 +492,12 @@ export default function TargetsPage() {
                     <FormLabel>{t("deed.category")}</FormLabel>
                     <Select onValueChange={(value) => {
                       field.onChange(value);
-                      if (value.toLowerCase() !== "dzikir" && value.toLowerCase() !== "dzikr") {
+                      const lowerValue = value.toLowerCase();
+                      if (lowerValue !== "dzikir" && lowerValue !== "dzikr") {
                         form.setValue("dzikirType", undefined);
+                      }
+                      if (lowerValue !== "sholat fardhu" && lowerValue !== "sholat sunnah") {
+                        form.setValue("sholatType", undefined);
                       }
                     }} value={field.value}>
                       <FormControl>
@@ -503,6 +537,37 @@ export default function TargetsPage() {
                         <SelectContent>
                           <SelectItem value="__any__">{t("dzikir.anyType")}</SelectItem>
                           {DZIKIR_TYPES.map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {t(type.labelKey)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {isSholatCategory && (
+                <FormField
+                  control={form.control}
+                  name="sholatType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("sholat.selectType")}</FormLabel>
+                      <Select 
+                        onValueChange={(value) => field.onChange(value === "__any__" ? undefined : value)} 
+                        value={field.value || "__any__"}
+                      >
+                        <FormControl>
+                          <SelectTrigger data-testid="select-sholat-type">
+                            <SelectValue placeholder={t("sholat.selectType")} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="__any__">{t("sholat.anyType")}</SelectItem>
+                          {currentSholatTypes.map((type) => (
                             <SelectItem key={type.id} value={type.id}>
                               {t(type.labelKey)}
                             </SelectItem>

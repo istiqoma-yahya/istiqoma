@@ -225,5 +225,25 @@
     "close": "Close",
     "back": "Back",
     "language": "Language"
+  },
+  "sholat": {
+    "selectType": "Select Prayer Type",
+    "anyType": "Any (all types counted)",
+    "types": {
+      "subuh": "Subuh (Fajr)",
+      "dzuhur": "Dzuhur (Dhuhr)",
+      "ashar": "Ashar (Asr)",
+      "maghrib": "Maghrib",
+      "isya": "Isya (Isha)",
+      "rawatib": "Rawatib",
+      "dhuha": "Dhuha",
+      "tahajjud": "Tahajjud",
+      "witir": "Witir",
+      "tarawih": "Tarawih",
+      "eid": "Eid Prayer",
+      "istikharah": "Istikharah",
+      "hajat": "Hajat",
+      "taubat": "Taubat"
+    }
   }
 }

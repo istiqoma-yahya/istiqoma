@@ -225,5 +225,25 @@
     "close": "Tutup",
     "back": "Kembali",
     "language": "Bahasa"
+  },
+  "sholat": {
+    "selectType": "Pilih Jenis Solat",
+    "anyType": "Semua (semua jenis dikira)",
+    "types": {
+      "subuh": "Subuh",
+      "dzuhur": "Zuhur",
+      "ashar": "Asar",
+      "maghrib": "Maghrib",
+      "isya": "Isyak",
+      "rawatib": "Rawatib",
+      "dhuha": "Dhuha",
+      "tahajjud": "Tahajjud",
+      "witir": "Witir",
+      "tarawih": "Tarawih",
+      "eid": "Solat Eid",
+      "istikharah": "Istikharah",
+      "hajat": "Hajat",
+      "taubat": "Taubat"
+    }
   }
 }

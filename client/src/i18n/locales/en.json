@@ -245,5 +245,21 @@
       "hajat": "Hajat",
       "taubat": "Taubat"
     }
+  },
+  "fasting": {
+    "selectType": "Select Fasting Type",
+    "anyType": "Any (all types counted)",
+    "types": {
+      "ramadhan": "Ramadhan",
+      "qadha": "Qadha (Make-up)",
+      "kaffarah": "Kaffarah (Expiation)",
+      "nadzar": "Nadzar (Vow)",
+      "seninkamis": "Monday-Thursday",
+      "ayyamulbidh": "Ayyamul Bidh (White Days)",
+      "arafah": "Day of Arafah",
+      "asyura": "Day of Ashura",
+      "syawal": "Syawal (6 days)",
+      "daud": "Daud Fasting"
+    }
   }
 }

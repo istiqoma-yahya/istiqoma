@@ -104,6 +104,9 @@ function TargetCard({
               {target.sholatType && (
                 <span className="text-muted-foreground font-normal"> ({t(`sholat.types.${target.sholatType}`)})</span>
               )}
+              {target.fastingType && (
+                <span className="text-muted-foreground font-normal"> ({t(`fasting.types.${target.fastingType}`)})</span>
+              )}
             </h3>
             <Badge 
               variant="secondary" 
@@ -282,6 +285,9 @@ export default function TargetsPage() {
   const isSholatFardhuCategory = watchedCategory?.toLowerCase() === "sholat fardhu";
   const isSholatSunnahCategory = watchedCategory?.toLowerCase() === "sholat sunnah";
   const isSholatCategory = isSholatFardhuCategory || isSholatSunnahCategory;
+  const isFastingFardhuCategory = watchedCategory?.toLowerCase() === "fasting fardhu";
+  const isFastingSunnahCategory = watchedCategory?.toLowerCase() === "fasting sunnah";
+  const isFastingCategory = isFastingFardhuCategory || isFastingSunnahCategory;
   
   const DZIKIR_TYPES = [
     { id: "subhanallah", labelKey: "dzikir.types.subhanallah" },
@@ -310,7 +316,24 @@ export default function TargetsPage() {
     { id: "taubat", labelKey: "sholat.types.taubat" },
   ];
 
+  const FASTING_FARDHU_TYPES = [
+    { id: "ramadhan", labelKey: "fasting.types.ramadhan" },
+    { id: "qadha", labelKey: "fasting.types.qadha" },
+    { id: "kaffarah", labelKey: "fasting.types.kaffarah" },
+    { id: "nadzar", labelKey: "fasting.types.nadzar" },
+  ];
+
+  const FASTING_SUNNAH_TYPES = [
+    { id: "seninkamis", labelKey: "fasting.types.seninkamis" },
+    { id: "ayyamulbidh", labelKey: "fasting.types.ayyamulbidh" },
+    { id: "arafah", labelKey: "fasting.types.arafah" },
+    { id: "asyura", labelKey: "fasting.types.asyura" },
+    { id: "syawal", labelKey: "fasting.types.syawal" },
+    { id: "daud", labelKey: "fasting.types.daud" },
+  ];
+
   const currentSholatTypes = isSholatFardhuCategory ? SHOLAT_FARDHU_TYPES : SHOLAT_SUNNAH_TYPES;
+  const currentFastingTypes = isFastingFardhuCategory ? FASTING_FARDHU_TYPES : FASTING_SUNNAH_TYPES;
 
   const openEditDialog = (target: TargetWithProgress) => {
     setEditingTarget(target);
@@ -321,6 +344,7 @@ export default function TargetsPage() {
       targetType: (target.targetType as "achievement" | "limit") || "achievement",
       dzikirType: target.dzikirType || undefined,
       sholatType: target.sholatType || undefined,
+      fastingType: target.fastingType || undefined,
     });
     setIsDialogOpen(true);
   };
@@ -334,6 +358,7 @@ export default function TargetsPage() {
       targetType: "achievement",
       dzikirType: undefined,
       sholatType: undefined,
+      fastingType: undefined,
     });
     setIsDialogOpen(true);
   };
@@ -568,6 +593,37 @@ export default function TargetsPage() {
                         <SelectContent>
                           <SelectItem value="__any__">{t("sholat.anyType")}</SelectItem>
                           {currentSholatTypes.map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {t(type.labelKey)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {isFastingCategory && (
+                <FormField
+                  control={form.control}
+                  name="fastingType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("fasting.selectType")}</FormLabel>
+                      <Select 
+                        onValueChange={(value) => field.onChange(value === "__any__" ? undefined : value)} 
+                        value={field.value || "__any__"}
+                      >
+                        <FormControl>
+                          <SelectTrigger data-testid="select-fasting-type">
+                            <SelectValue placeholder={t("fasting.selectType")} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="__any__">{t("fasting.anyType")}</SelectItem>
+                          {currentFastingTypes.map((type) => (
                             <SelectItem key={type.id} value={type.id}>
                               {t(type.labelKey)}
                             </SelectItem>

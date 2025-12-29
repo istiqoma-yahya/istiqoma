@@ -65,7 +65,7 @@ function SortableCategoryCard({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const isProtectedCategory = category.name === "Dzikir" || category.name === "Sholat Fardhu" || category.name === "Sholat Sunnah";
+  const isProtectedCategory = category.name === "Dzikir" || category.name === "Sholat Fardhu" || category.name === "Sholat Sunnah" || category.name === "Fasting Fardhu" || category.name === "Fasting Sunnah";
 
   return (
     <Card

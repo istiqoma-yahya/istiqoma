@@ -24,6 +24,7 @@ export const deeds = pgTable("deeds", {
   points: integer("points").notNull().default(1),
   dzikirType: text("dzikir_type"),
   sholatType: text("sholat_type"),
+  fastingType: text("fasting_type"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -36,6 +37,7 @@ export const targets = pgTable("targets", {
   targetType: text("target_type", { enum: ["achievement", "limit"] }).notNull().default("achievement"),
   dzikirType: text("dzikir_type"),
   sholatType: text("sholat_type"),
+  fastingType: text("fasting_type"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -47,6 +49,7 @@ export const targetHistory = pgTable("target_history", {
   category: text("category").notNull(),
   dzikirType: text("dzikir_type"),
   sholatType: text("sholat_type"),
+  fastingType: text("fasting_type"),
   periodStart: timestamp("period_start").notNull(),
   periodEnd: timestamp("period_end").notNull(),
   achievedValue: integer("achieved_value").notNull(),
@@ -63,11 +66,13 @@ export const insertDeedSchema = createInsertSchema(deeds).pick({
   points: true,
   dzikirType: true,
   sholatType: true,
+  fastingType: true,
   createdAt: true,
 }).extend({
   createdAt: z.coerce.date().optional(),
   dzikirType: z.string().optional(),
   sholatType: z.string().optional(),
+  fastingType: z.string().optional(),
 });
 
 export const insertCategorySchema = createInsertSchema(categories).pick({
@@ -81,6 +86,7 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   targetType: true,
   dzikirType: true,
   sholatType: true,
+  fastingType: true,
 }).extend({
   category: z.string().min(1, "Category is required"),
   targetValue: z.number().min(0, "Target value must be at least 0"),
@@ -88,6 +94,7 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   targetType: z.enum(["achievement", "limit"]).default("achievement"),
   dzikirType: z.string().optional(),
   sholatType: z.string().optional(),
+  fastingType: z.string().optional(),
 });
 
 export const insertTargetHistorySchema = createInsertSchema(targetHistory).pick({
@@ -96,6 +103,7 @@ export const insertTargetHistorySchema = createInsertSchema(targetHistory).pick(
   category: true,
   dzikirType: true,
   sholatType: true,
+  fastingType: true,
   periodStart: true,
   periodEnd: true,
   achievedValue: true,

@@ -58,6 +58,7 @@ export default function CreateDeedPage() {
       createdAt: undefined,
       dzikirType: undefined,
       sholatType: undefined,
+      fastingType: undefined,
     },
   });
 
@@ -66,6 +67,9 @@ export default function CreateDeedPage() {
   const isSholatFardhuCategory = watchedCategory?.toLowerCase() === "sholat fardhu";
   const isSholatSunnahCategory = watchedCategory?.toLowerCase() === "sholat sunnah";
   const isSholatCategory = isSholatFardhuCategory || isSholatSunnahCategory;
+  const isFastingFardhuCategory = watchedCategory?.toLowerCase() === "fasting fardhu";
+  const isFastingSunnahCategory = watchedCategory?.toLowerCase() === "fasting sunnah";
+  const isFastingCategory = isFastingFardhuCategory || isFastingSunnahCategory;
   
   const DZIKIR_TYPES = [
     { id: "subhanallah", labelKey: "dzikir.types.subhanallah" },
@@ -94,7 +98,24 @@ export default function CreateDeedPage() {
     { id: "taubat", labelKey: "sholat.types.taubat" },
   ];
 
+  const FASTING_FARDHU_TYPES = [
+    { id: "ramadhan", labelKey: "fasting.types.ramadhan" },
+    { id: "qadha", labelKey: "fasting.types.qadha" },
+    { id: "kaffarah", labelKey: "fasting.types.kaffarah" },
+    { id: "nadzar", labelKey: "fasting.types.nadzar" },
+  ];
+
+  const FASTING_SUNNAH_TYPES = [
+    { id: "seninkamis", labelKey: "fasting.types.seninkamis" },
+    { id: "ayyamulbidh", labelKey: "fasting.types.ayyamulbidh" },
+    { id: "arafah", labelKey: "fasting.types.arafah" },
+    { id: "asyura", labelKey: "fasting.types.asyura" },
+    { id: "syawal", labelKey: "fasting.types.syawal" },
+    { id: "daud", labelKey: "fasting.types.daud" },
+  ];
+
   const currentSholatTypes = isSholatFardhuCategory ? SHOLAT_FARDHU_TYPES : SHOLAT_SUNNAH_TYPES;
+  const currentFastingTypes = isFastingFardhuCategory ? FASTING_FARDHU_TYPES : FASTING_SUNNAH_TYPES;
 
   useEffect(() => {
     if (categories.length > 0 && !form.getValues("category")) {
@@ -113,6 +134,12 @@ export default function CreateDeedPage() {
       form.setValue("sholatType", undefined);
     }
   }, [isSholatCategory, form]);
+
+  useEffect(() => {
+    if (!isFastingCategory) {
+      form.setValue("fastingType", undefined);
+    }
+  }, [isFastingCategory, form]);
 
   const onSubmit = (data: FormValues) => {
     let createdAt = data.createdAt;
@@ -251,6 +278,37 @@ export default function CreateDeedPage() {
                       <SelectContent className="bg-popover border-border text-popover-foreground">
                         <SelectItem value="__any__">{t("sholat.anyType")}</SelectItem>
                         {currentSholatTypes.map((type) => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {t(type.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {isFastingCategory && (
+              <FormField
+                control={form.control}
+                name="fastingType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("fasting.selectType")}</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(value === "__any__" ? undefined : value)}
+                      value={field.value || "__any__"}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="glass-input" data-testid="select-deed-fasting-type">
+                          <SelectValue placeholder={t("fasting.selectType")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
+                        <SelectItem value="__any__">{t("fasting.anyType")}</SelectItem>
+                        {currentFastingTypes.map((type) => (
                           <SelectItem key={type.id} value={type.id}>
                             {t(type.labelKey)}
                           </SelectItem>

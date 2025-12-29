@@ -245,5 +245,21 @@
       "hajat": "Hajat",
       "taubat": "Taubat"
     }
+  },
+  "fasting": {
+    "selectType": "Pilih Jenis Puasa",
+    "anyType": "Semua (semua jenis dihitung)",
+    "types": {
+      "ramadhan": "Ramadhan",
+      "qadha": "Qadha (Pengganti)",
+      "kaffarah": "Kaffarah (Tebusan)",
+      "nadzar": "Nadzar (Niat)",
+      "seninkamis": "Senin-Kamis",
+      "ayyamulbidh": "Ayyamul Bidh (Hari Putih)",
+      "arafah": "Hari Arafah",
+      "asyura": "Hari Asyura",
+      "syawal": "Syawal (6 hari)",
+      "daud": "Puasa Daud"
+    }
   }
 }

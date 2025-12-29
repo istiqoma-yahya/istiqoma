@@ -94,34 +94,27 @@ function TargetCard({
   return (
     <Card className="p-4" data-testid={`card-target-${target.id}`}>
       <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="flex items-center gap-2">
-          {isLimitTarget ? (
-            <Ban className="w-4 h-4 text-rose-500" />
-          ) : (
-            getPeriodIcon(target.period)
-          )}
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-medium" data-testid={`text-target-category-${target.id}`}>
-                {target.category}
-              </h3>
-              <Badge 
-                  variant="secondary" 
-                  className={`text-xs ${isLimitTarget ? "bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300" : "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300"}`}
-                >
-                  {isLimitTarget ? t("targets.limitType") : t("targets.achievementType")}
-                </Badge>
-              {historyData && historyData.currentStreak > 0 && (
-                <Badge variant="secondary" className="text-xs bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300" data-testid={`badge-streak-${target.id}`}>
-                  <Flame className="w-3 h-3 mr-1" />
-                  {historyData.currentStreak} {t("targets.streak")}
-                </Badge>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {getPeriodLabel(target.period)}
-            </p>
+        <div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-medium" data-testid={`text-target-category-${target.id}`}>
+              {target.category}
+            </h3>
+            <Badge 
+              variant="secondary" 
+              className={`text-xs ${isLimitTarget ? "bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300" : "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300"}`}
+            >
+              {isLimitTarget ? t("targets.limitType") : t("targets.achievementType")}
+            </Badge>
+            {historyData && historyData.currentStreak > 0 && (
+              <Badge variant="secondary" className="text-xs bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300" data-testid={`badge-streak-${target.id}`}>
+                <Flame className="w-3 h-3 mr-1" />
+                {historyData.currentStreak} {t("targets.streak")}
+              </Badge>
+            )}
           </div>
+          <p className="text-xs text-muted-foreground">
+            {getPeriodLabel(target.period)}
+          </p>
         </div>
         <div className="flex items-center gap-1">
           <Button

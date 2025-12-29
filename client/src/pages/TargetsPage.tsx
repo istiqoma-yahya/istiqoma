@@ -491,14 +491,17 @@ export default function TargetsPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("dzikir.selectType")}</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                      <Select 
+                        onValueChange={(value) => field.onChange(value === "__any__" ? undefined : value)} 
+                        value={field.value || "__any__"}
+                      >
                         <FormControl>
                           <SelectTrigger data-testid="select-dzikir-type">
                             <SelectValue placeholder={t("dzikir.selectType")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">{t("dzikir.anyType")}</SelectItem>
+                          <SelectItem value="__any__">{t("dzikir.anyType")}</SelectItem>
                           {DZIKIR_TYPES.map((type) => (
                             <SelectItem key={type.id} value={type.id}>
                               {t(type.labelKey)}

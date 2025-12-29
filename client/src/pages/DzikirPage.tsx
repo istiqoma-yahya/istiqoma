@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useCreateDeed } from "@/hooks/use-deeds";
 import { useCategories } from "@/hooks/use-categories";
@@ -12,14 +12,28 @@ import { RotateCcw, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
+const DZIKIR_TYPES = [
+  { id: "subhanallah", labelKey: "dzikir.types.subhanallah" },
+  { id: "alhamdulillah", labelKey: "dzikir.types.alhamdulillah" },
+  { id: "allahuakbar", labelKey: "dzikir.types.allahuakbar" },
+  { id: "lailahaillallah", labelKey: "dzikir.types.lailahaillallah" },
+] as const;
+
 export default function DzikirPage() {
   const [, navigate] = useLocation();
   const [count, setCount] = useState(0);
   const [isIstighfar, setIsIstighfar] = useState(false);
+  const [selectedDzikirType, setSelectedDzikirType] = useState<string>(() => {
+    return localStorage.getItem("lastDzikirType") || "subhanallah";
+  });
   const { data: categories = [] } = useCategories();
   const { mutate: createDeed, isPending: isSaving } = useCreateDeed();
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    localStorage.setItem("lastDzikirType", selectedDzikirType);
+  }, [selectedDzikirType]);
 
   const dzikirCategory = categories.find(
     (c) => c.name.toLowerCase() === "dzikr" || c.name.toLowerCase() === "dzikir"
@@ -70,19 +84,21 @@ export default function DzikirPage() {
         }
       );
     } else {
+      const dzikirTypeLabel = t(`dzikir.types.${selectedDzikirType}`);
       createDeed(
         {
           deedType: "good",
-          description: t('dzikir.dzikirDeedDesc', { count }),
+          description: t('dzikir.dzikirTypeDeedDesc', { type: dzikirTypeLabel, count }),
           category: dzikirCategory?.name || "Dzikr",
           points: count,
+          dzikirType: selectedDzikirType,
           createdAt: new Date(),
         },
         {
           onSuccess: () => {
             toast({
               title: t('dzikir.dzikirSaved'),
-              description: t('dzikir.dzikirSavedDesc', { count }),
+              description: t('dzikir.dzikirTypeSavedDesc', { type: dzikirTypeLabel, count }),
             });
             setCount(0);
           },
@@ -127,6 +143,23 @@ export default function DzikirPage() {
             {t('dzikir.istighfarMode')}
           </Label>
         </div>
+
+        {!isIstighfar && (
+          <div className="flex flex-wrap justify-center gap-2 mb-6">
+            {DZIKIR_TYPES.map((type) => (
+              <Button
+                key={type.id}
+                variant={selectedDzikirType === type.id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedDzikirType(type.id)}
+                className={selectedDzikirType === type.id ? "bg-emerald-500 hover:bg-emerald-600" : ""}
+                data-testid={`button-dzikir-type-${type.id}`}
+              >
+                {t(type.labelKey)}
+              </Button>
+            ))}
+          </div>
+        )}
 
         <Card className="w-full max-w-sm p-8 flex flex-col items-center gap-6">
           <button

@@ -173,13 +173,12 @@ export default function CreateDeedPage() {
               <FormField
                 control={form.control}
                 name="dzikirType"
-                rules={{ required: t("dzikir.typeRequired") }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("dzikir.selectType")} *</FormLabel>
+                    <FormLabel>{t("dzikir.selectType")}</FormLabel>
                     <Select
-                      onValueChange={field.onChange}
-                      value={field.value || ""}
+                      onValueChange={(value) => field.onChange(value === "__any__" ? undefined : value)}
+                      value={field.value || "__any__"}
                     >
                       <FormControl>
                         <SelectTrigger className="glass-input" data-testid="select-deed-dzikir-type">
@@ -187,6 +186,7 @@ export default function CreateDeedPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-popover border-border text-popover-foreground">
+                        <SelectItem value="__any__">{t("dzikir.anyType")}</SelectItem>
                         {DZIKIR_TYPES.map((type) => (
                           <SelectItem key={type.id} value={type.id}>
                             {t(type.labelKey)}

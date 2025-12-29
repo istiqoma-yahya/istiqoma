@@ -84,7 +84,8 @@
     "defaultCategories": "Kategori Lalai",
     "customCategories": "Kategori Tersuai",
     "noCustom": "Tiada kategori tersuai lagi",
-    "deleteConfirm": "Padam kategori ini?"
+    "deleteConfirm": "Padam kategori ini?",
+    "protectedCategory": "Kategori ini dilindungi dan tidak boleh diedit atau dipadam"
   },
   "dzikir": {
     "title": "Kaunter Zikir",

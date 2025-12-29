@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2, Edit2, Loader2, ArrowLeft, GripVertical } from "lucide-react";
+import { Plus, Trash2, Edit2, Loader2, ArrowLeft, GripVertical, Lock } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DndContext,
   closestCenter,
@@ -64,6 +65,8 @@ function SortableCategoryCard({
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const isProtectedCategory = category.name === "Dzikir";
+
   return (
     <Card
       ref={setNodeRef}
@@ -111,43 +114,58 @@ function SortableCategoryCard({
             <h3 className="text-lg font-medium">{category.name}</h3>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setEditingId(category.id);
-                setEditingName(category.name);
-              }}
-            >
-              <Edit2 className="w-4 h-4" />
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-rose-400 hover:text-rose-600">
-                  <Trash2 className="w-4 h-4" />
+            {isProtectedCategory ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="p-2">
+                    <Lock className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('categories.protectedCategory')}</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setEditingId(category.id);
+                    setEditingName(category.name);
+                  }}
+                >
+                  <Edit2 className="w-4 h-4" />
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-card border-border text-card-foreground">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t('categories.deleteConfirm')}</AlertDialogTitle>
-                  <AlertDialogDescription className="text-muted-foreground">
-                    This action cannot be undone. Deeds with this category will keep their category name.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-secondary border-border hover:bg-muted text-foreground">
-                    {t('common.cancel')}
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => deleteCategory(category.id)}
-                    disabled={isDeleting}
-                    className="bg-rose-500 hover:bg-rose-600 text-white"
-                  >
-                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('common.delete')}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-rose-400 hover:text-rose-600">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-card border-border text-card-foreground">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t('categories.deleteConfirm')}</AlertDialogTitle>
+                      <AlertDialogDescription className="text-muted-foreground">
+                        This action cannot be undone. Deeds with this category will keep their category name.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="bg-secondary border-border hover:bg-muted text-foreground">
+                        {t('common.cancel')}
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteCategory(category.id)}
+                        disabled={isDeleting}
+                        className="bg-rose-500 hover:bg-rose-600 text-white"
+                      >
+                        {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('common.delete')}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            )}
           </div>
         </>
       )}

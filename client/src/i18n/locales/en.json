@@ -84,7 +84,8 @@
     "defaultCategories": "Default Categories",
     "customCategories": "Custom Categories",
     "noCustom": "No custom categories yet",
-    "deleteConfirm": "Delete this category?"
+    "deleteConfirm": "Delete this category?",
+    "protectedCategory": "This category is protected and cannot be edited or deleted"
   },
   "dzikir": {
     "title": "Dzikir Counter",

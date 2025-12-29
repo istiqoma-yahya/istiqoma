@@ -22,6 +22,7 @@ export const deeds = pgTable("deeds", {
   deedType: text("deed_type", { enum: ["good", "bad"] }).notNull(),
   category: text("category").notNull(),
   points: integer("points").notNull().default(1),
+  dzikirType: text("dzikir_type"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -32,6 +33,7 @@ export const targets = pgTable("targets", {
   targetValue: integer("target_value").notNull(),
   period: text("period", { enum: ["daily", "weekly", "monthly"] }).notNull(),
   targetType: text("target_type", { enum: ["achievement", "limit"] }).notNull().default("achievement"),
+  dzikirType: text("dzikir_type"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -41,6 +43,7 @@ export const targetHistory = pgTable("target_history", {
   targetId: integer("target_id").notNull().references(() => targets.id, { onDelete: "cascade" }),
   userId: varchar("user_id").notNull().references(() => users.id),
   category: text("category").notNull(),
+  dzikirType: text("dzikir_type"),
   periodStart: timestamp("period_start").notNull(),
   periodEnd: timestamp("period_end").notNull(),
   achievedValue: integer("achieved_value").notNull(),
@@ -55,9 +58,11 @@ export const insertDeedSchema = createInsertSchema(deeds).pick({
   deedType: true,
   category: true,
   points: true,
+  dzikirType: true,
   createdAt: true,
 }).extend({
   createdAt: z.coerce.date().optional(),
+  dzikirType: z.string().optional(),
 });
 
 export const insertCategorySchema = createInsertSchema(categories).pick({
@@ -69,17 +74,20 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   targetValue: true,
   period: true,
   targetType: true,
+  dzikirType: true,
 }).extend({
   category: z.string().min(1, "Category is required"),
   targetValue: z.number().min(0, "Target value must be at least 0"),
   period: z.enum(["daily", "weekly", "monthly"]),
   targetType: z.enum(["achievement", "limit"]).default("achievement"),
+  dzikirType: z.string().optional(),
 });
 
 export const insertTargetHistorySchema = createInsertSchema(targetHistory).pick({
   targetId: true,
   userId: true,
   category: true,
+  dzikirType: true,
   periodStart: true,
   periodEnd: true,
   achievedValue: true,

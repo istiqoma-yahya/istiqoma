@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { deeds, categories, targets, targetHistory, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetWithProgress, type TargetHistory, type InsertTargetHistory } from "@shared/schema";
+import { deeds, categories, targets, targetHistory, pushSubscriptions, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte } from "drizzle-orm";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from "date-fns";
 
@@ -26,6 +26,11 @@ export interface IStorage {
   getTargetHistory(targetId: number, userId: string, limit?: number): Promise<TargetHistory[]>;
   getTargetHistoryWithStreak(targetId: number, userId: string, limit?: number): Promise<TargetHistoryWithStreak>;
   calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack?: number): Promise<TargetHistory[]>;
+  getPushSubscription(userId: string): Promise<PushSubscription | null>;
+  savePushSubscription(userId: string, subscription: InsertPushSubscription): Promise<PushSubscription>;
+  updatePushSubscriptionSettings(userId: string, settings: Partial<InsertPushSubscription>): Promise<PushSubscription | null>;
+  deletePushSubscription(userId: string): Promise<void>;
+  getAllPushSubscriptions(): Promise<PushSubscription[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -355,6 +360,63 @@ export class DatabaseStorage implements IStorage {
     return savedHistory.sort((a, b) => 
       new Date(b.periodEnd).getTime() - new Date(a.periodEnd).getTime()
     );
+  }
+
+  async getPushSubscription(userId: string): Promise<PushSubscription | null> {
+    const [subscription] = await db
+      .select()
+      .from(pushSubscriptions)
+      .where(eq(pushSubscriptions.userId, userId))
+      .limit(1);
+    return subscription || null;
+  }
+
+  async savePushSubscription(userId: string, subscription: InsertPushSubscription): Promise<PushSubscription> {
+    const existing = await this.getPushSubscription(userId);
+    
+    if (existing) {
+      const [updated] = await db
+        .update(pushSubscriptions)
+        .set({
+          endpoint: subscription.endpoint,
+          p256dh: subscription.p256dh,
+          auth: subscription.auth,
+          dailyReminder: subscription.dailyReminder ?? existing.dailyReminder,
+          reminderTime: subscription.reminderTime ?? existing.reminderTime,
+          targetAlerts: subscription.targetAlerts ?? existing.targetAlerts,
+        })
+        .where(eq(pushSubscriptions.userId, userId))
+        .returning();
+      return updated;
+    }
+    
+    const [created] = await db
+      .insert(pushSubscriptions)
+      .values({ ...subscription, userId })
+      .returning();
+    return created;
+  }
+
+  async updatePushSubscriptionSettings(userId: string, settings: Partial<InsertPushSubscription>): Promise<PushSubscription | null> {
+    const existing = await this.getPushSubscription(userId);
+    if (!existing) return null;
+    
+    const [updated] = await db
+      .update(pushSubscriptions)
+      .set(settings)
+      .where(eq(pushSubscriptions.userId, userId))
+      .returning();
+    return updated;
+  }
+
+  async deletePushSubscription(userId: string): Promise<void> {
+    await db
+      .delete(pushSubscriptions)
+      .where(eq(pushSubscriptions.userId, userId));
+  }
+
+  async getAllPushSubscriptions(): Promise<PushSubscription[]> {
+    return await db.select().from(pushSubscriptions);
   }
 }
 

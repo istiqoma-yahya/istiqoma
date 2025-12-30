@@ -95,19 +95,7 @@ function TargetCard({
     <Card className="p-4" data-testid={`card-target-${target.id}`}>
       <div className="flex items-start justify-between gap-2 mb-3">
         <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-medium" data-testid={`text-target-category-${target.id}`}>
-              {target.category}
-              {target.dzikirType && (
-                <span className="text-muted-foreground font-normal"> ({t(`dzikir.types.${target.dzikirType}`)})</span>
-              )}
-              {target.sholatType && (
-                <span className="text-muted-foreground font-normal"> ({t(`sholat.types.${target.sholatType}`)})</span>
-              )}
-              {target.fastingType && (
-                <span className="text-muted-foreground font-normal"> ({t(`fasting.types.${target.fastingType}`)})</span>
-              )}
-            </h3>
+          <div className="flex items-center gap-1 flex-wrap mb-1">
             <Badge 
               variant="secondary" 
               className={`text-xs ${isLimitTarget ? "bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300" : "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300"}`}
@@ -121,6 +109,18 @@ function TargetCard({
               </Badge>
             )}
           </div>
+          <h3 className="font-medium" data-testid={`text-target-category-${target.id}`}>
+            {target.category}
+            {target.dzikirType && (
+              <span className="text-muted-foreground font-normal"> ({t(`dzikir.types.${target.dzikirType}`)})</span>
+            )}
+            {target.sholatType && (
+              <span className="text-muted-foreground font-normal"> ({t(`sholat.types.${target.sholatType}`)})</span>
+            )}
+            {target.fastingType && (
+              <span className="text-muted-foreground font-normal"> ({t(`fasting.types.${target.fastingType}`)})</span>
+            )}
+          </h3>
           <p className="text-xs text-muted-foreground">
             {getPeriodLabel(target.period)}
           </p>

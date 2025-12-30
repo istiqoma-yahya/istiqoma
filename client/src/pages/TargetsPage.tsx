@@ -184,14 +184,14 @@ function TargetCard({
             )}
           </div>
           <h3 className="font-medium" data-testid={`text-target-category-${target.id}`}>
-            {target.category}
-            {target.dzikirType && (
+            {isOneTime && target.unitLabel ? target.unitLabel : target.category}
+            {!isOneTime && target.dzikirType && (
               <span className="text-muted-foreground font-normal"> ({t(`dzikir.types.${target.dzikirType}`)})</span>
             )}
-            {target.sholatType && (
+            {!isOneTime && target.sholatType && (
               <span className="text-muted-foreground font-normal"> ({t(`sholat.types.${target.sholatType}`)})</span>
             )}
-            {target.fastingType && (
+            {!isOneTime && target.fastingType && (
               <span className="text-muted-foreground font-normal"> ({t(`fasting.types.${target.fastingType}`)})</span>
             )}
           </h3>
@@ -549,6 +549,13 @@ export default function TargetsPage() {
 
   const onSubmit = async (data: InsertTarget) => {
     try {
+      if (data.recurrence === "oneTime" && !data.unitLabel?.trim()) {
+        form.setError("unitLabel", { 
+          type: "manual", 
+          message: t("targets.targetNameRequired") 
+        });
+        return;
+      }
       if (editingTarget) {
         await updateTarget.mutateAsync({ id: editingTarget.id, data });
       } else {
@@ -964,13 +971,13 @@ export default function TargetsPage() {
                     name="unitLabel"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("targets.unitLabel")}</FormLabel>
+                        <FormLabel>{t("targets.targetName")} *</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder={t("targets.unitLabelPlaceholder")}
+                            placeholder={t("targets.targetNamePlaceholder")}
                             {...field}
                             value={field.value || ""}
-                            data-testid="input-unit-label"
+                            data-testid="input-target-name"
                           />
                         </FormControl>
                         <FormMessage />

@@ -237,8 +237,9 @@
       "1month": "1 Bulan",
       "3months": "3 Bulan"
     },
-    "unitLabel": "Label Unit",
-    "unitLabelPlaceholder": "contoh: juz, halaman, surah",
+    "targetName": "Nama Target",
+    "targetNamePlaceholder": "contoh: Khatam Al-Quran, Selesaikan 30 juz",
+    "targetNameRequired": "Nama target wajib diisi untuk target sekali",
     "dueIn": "Jatuh tempo dalam {{time}}",
     "overdue": "Terlambat {{time}}",
     "statusActive": "Aktif",

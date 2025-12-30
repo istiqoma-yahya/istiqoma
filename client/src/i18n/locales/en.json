@@ -237,8 +237,9 @@
       "1month": "1 Month",
       "3months": "3 Months"
     },
-    "unitLabel": "Unit Label",
-    "unitLabelPlaceholder": "e.g., juz, pages, surahs",
+    "targetName": "Target Name",
+    "targetNamePlaceholder": "e.g., Finish reading Quran, Complete 30 juz",
+    "targetNameRequired": "Target name is required for one-time targets",
     "dueIn": "Due in {{time}}",
     "overdue": "Overdue by {{time}}",
     "statusActive": "Active",

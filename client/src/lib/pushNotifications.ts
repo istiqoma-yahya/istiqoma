@@ -36,6 +36,9 @@ export function isPushSupported(): boolean {
 }
 
 export async function getNotificationPermission(): Promise<NotificationPermission> {
+  if (!('Notification' in window)) {
+    return 'denied';
+  }
   return Notification.permission;
 }
 

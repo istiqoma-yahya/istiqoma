@@ -12,6 +12,7 @@ export const categories = pgTable("categories", {
   userId: varchar("user_id").notNull().references(() => users.id),
   name: text("name").notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
+  isProtected: boolean("is_protected").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -25,6 +26,9 @@ export const deeds = pgTable("deeds", {
   dzikirType: text("dzikir_type"),
   sholatType: text("sholat_type"),
   fastingType: text("fasting_type"),
+  isJamaah: boolean("is_jamaah"),
+  quranUnit: text("quran_unit"),
+  sedekahType: text("sedekah_type"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -44,6 +48,9 @@ export const targets = pgTable("targets", {
   dzikirType: text("dzikir_type"),
   sholatType: text("sholat_type"),
   fastingType: text("fasting_type"),
+  isJamaah: boolean("is_jamaah"),
+  quranUnit: text("quran_unit"),
+  sedekahType: text("sedekah_type"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -85,12 +92,18 @@ export const insertDeedSchema = createInsertSchema(deeds).pick({
   dzikirType: true,
   sholatType: true,
   fastingType: true,
+  isJamaah: true,
+  quranUnit: true,
+  sedekahType: true,
   createdAt: true,
 }).extend({
   createdAt: z.coerce.date().optional(),
   dzikirType: z.string().optional(),
   sholatType: z.string().optional(),
   fastingType: z.string().optional(),
+  isJamaah: z.boolean().optional(),
+  quranUnit: z.enum(["ayat", "halaman", "surat", "juz"]).optional(),
+  sedekahType: z.enum(["uang", "hitungan"]).optional(),
 });
 
 export const insertCategorySchema = createInsertSchema(categories).pick({
@@ -109,6 +122,9 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   dzikirType: true,
   sholatType: true,
   fastingType: true,
+  isJamaah: true,
+  quranUnit: true,
+  sedekahType: true,
 }).extend({
   category: z.string().min(1, "Category is required"),
   targetValue: z.number().min(0, "Target value must be at least 0"),
@@ -121,6 +137,9 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   dzikirType: z.string().optional(),
   sholatType: z.string().optional(),
   fastingType: z.string().optional(),
+  isJamaah: z.boolean().optional(),
+  quranUnit: z.enum(["ayat", "halaman", "surat", "juz"]).optional(),
+  sedekahType: z.enum(["uang", "hitungan"]).optional(),
 });
 
 export const insertTargetHistorySchema = createInsertSchema(targetHistory).pick({

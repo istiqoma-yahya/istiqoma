@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Calendar, Clock, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
@@ -63,6 +64,9 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
       dzikirType: deed.dzikirType || undefined,
       sholatType: deed.sholatType || undefined,
       fastingType: deed.fastingType || undefined,
+      isJamaah: deed.isJamaah || undefined,
+      quranUnit: (deed.quranUnit as "ayat" | "halaman" | "surat" | "juz" | undefined) || undefined,
+      sedekahType: (deed.sedekahType as "uang" | "hitungan" | undefined) || undefined,
     },
   });
 
@@ -71,9 +75,23 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const isSholatFardhuCategory = watchedCategory?.toLowerCase() === "sholat fardhu";
   const isSholatSunnahCategory = watchedCategory?.toLowerCase() === "sholat sunnah";
   const isSholatCategory = isSholatFardhuCategory || isSholatSunnahCategory;
-  const isFastingFardhuCategory = watchedCategory?.toLowerCase() === "fasting fardhu";
-  const isFastingSunnahCategory = watchedCategory?.toLowerCase() === "fasting sunnah";
+  const isFastingFardhuCategory = watchedCategory?.toLowerCase() === "fasting fardhu" || watchedCategory?.toLowerCase() === "puasa fardhu";
+  const isFastingSunnahCategory = watchedCategory?.toLowerCase() === "fasting sunnah" || watchedCategory?.toLowerCase() === "puasa sunnah";
   const isFastingCategory = isFastingFardhuCategory || isFastingSunnahCategory;
+  const isQuranCategory = watchedCategory?.toLowerCase() === "baca quran" || watchedCategory?.toLowerCase() === "quran";
+  const isSedekahCategory = watchedCategory?.toLowerCase() === "shodaqoh" || watchedCategory?.toLowerCase() === "sedekah" || watchedCategory?.toLowerCase() === "sodaqoh";
+  
+  const QURAN_UNITS = [
+    { id: "ayat", labelKey: "quran.units.ayat" },
+    { id: "halaman", labelKey: "quran.units.halaman" },
+    { id: "surat", labelKey: "quran.units.surat" },
+    { id: "juz", labelKey: "quran.units.juz" },
+  ];
+
+  const SEDEKAH_TYPES = [
+    { id: "uang", labelKey: "sedekah.types.uang" },
+    { id: "hitungan", labelKey: "sedekah.types.hitungan" },
+  ];
   
   const DZIKIR_TYPES = [
     { id: "subhanallah", labelKey: "dzikir.types.subhanallah" },
@@ -125,19 +143,20 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
     if (!isDzikirCategory) {
       form.setValue("dzikirType", undefined);
     }
-  }, [isDzikirCategory, form]);
-
-  useEffect(() => {
     if (!isSholatCategory) {
       form.setValue("sholatType", undefined);
+      form.setValue("isJamaah", undefined);
     }
-  }, [isSholatCategory, form]);
-
-  useEffect(() => {
     if (!isFastingCategory) {
       form.setValue("fastingType", undefined);
     }
-  }, [isFastingCategory, form]);
+    if (!isQuranCategory) {
+      form.setValue("quranUnit", undefined);
+    }
+    if (!isSedekahCategory) {
+      form.setValue("sedekahType", undefined);
+    }
+  }, [watchedCategory, isDzikirCategory, isSholatCategory, isFastingCategory, isQuranCategory, isSedekahCategory, form]);
 
   const onSubmit = (data: FormValues) => {
     let createdAt = data.createdAt;
@@ -300,6 +319,87 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                       <SelectContent className="bg-popover border-border text-popover-foreground">
                         <SelectItem value="__any__">{t("fasting.anyType")}</SelectItem>
                         {currentFastingTypes.map((type) => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {t(type.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {isSholatCategory && (
+              <FormField
+                control={form.control}
+                name="isJamaah"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value || false}
+                        onCheckedChange={field.onChange}
+                        data-testid="checkbox-edit-deed-jamaah"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>{t("sholat.isJamaah")}</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {isQuranCategory && (
+              <FormField
+                control={form.control}
+                name="quranUnit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("quran.selectUnit")}</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="glass-input" data-testid="select-edit-deed-quran-unit">
+                          <SelectValue placeholder={t("quran.selectUnit")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
+                        {QURAN_UNITS.map((unit) => (
+                          <SelectItem key={unit.id} value={unit.id}>
+                            {t(unit.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {isSedekahCategory && (
+              <FormField
+                control={form.control}
+                name="sedekahType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("sedekah.selectType")}</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="glass-input" data-testid="select-edit-deed-sedekah-type">
+                          <SelectValue placeholder={t("sedekah.selectType")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
+                        {SEDEKAH_TYPES.map((type) => (
                           <SelectItem key={type.id} value={type.id}>
                             {t(type.labelKey)}
                           </SelectItem>

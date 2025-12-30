@@ -273,6 +273,7 @@
   "sholat": {
     "selectType": "Select Prayer Type",
     "anyType": "Any (all types counted)",
+    "isJamaah": "Prayed in congregation (Jamaah)",
     "types": {
       "subuh": "Subuh (Fajr)",
       "dzuhur": "Dzuhur (Dhuhr)",
@@ -304,6 +305,22 @@
       "asyura": "Day of Ashura",
       "syawal": "Syawal (6 days)",
       "daud": "Daud Fasting"
+    }
+  },
+  "quran": {
+    "selectUnit": "Select Unit",
+    "units": {
+      "ayat": "Verses (Ayat)",
+      "halaman": "Pages",
+      "surat": "Chapters (Surah)",
+      "juz": "Juz"
+    }
+  },
+  "sedekah": {
+    "selectType": "Select Type",
+    "types": {
+      "uang": "Money (Amount)",
+      "hitungan": "Count (Times)"
     }
   },
   "notifications": {

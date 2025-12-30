@@ -273,6 +273,7 @@
   "sholat": {
     "selectType": "Pilih Jenis Sholat",
     "anyType": "Semua (semua jenis dihitung)",
+    "isJamaah": "Sholat berjamaah",
     "types": {
       "subuh": "Subuh",
       "dzuhur": "Dzuhur",
@@ -304,6 +305,22 @@
       "asyura": "Hari Asyura",
       "syawal": "Syawal (6 hari)",
       "daud": "Puasa Daud"
+    }
+  },
+  "quran": {
+    "selectUnit": "Pilih Satuan",
+    "units": {
+      "ayat": "Ayat",
+      "halaman": "Halaman",
+      "surat": "Surat",
+      "juz": "Juz"
+    }
+  },
+  "sedekah": {
+    "selectType": "Pilih Jenis",
+    "types": {
+      "uang": "Uang (Jumlah)",
+      "hitungan": "Hitungan (Kali)"
     }
   },
   "notifications": {

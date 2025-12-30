@@ -44,6 +44,12 @@ export function DeedCard({ deed, index }: DeedCardProps) {
       return t('dzikir.dzikirDeedDesc', { count: deed.points || 0 });
     }
     if (!deed.description || deed.description.trim() === "") {
+      if (deed.sholatType && deed.sholatType !== "any") {
+        return t(`sholat.types.${deed.sholatType}`);
+      }
+      if (deed.fastingType && deed.fastingType !== "any") {
+        return t(`fasting.types.${deed.fastingType}`);
+      }
       return deed.category;
     }
     return deed.description;

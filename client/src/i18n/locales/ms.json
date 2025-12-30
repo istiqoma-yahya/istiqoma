@@ -125,7 +125,7 @@
     "typeRequired": "Sila pilih jenis zikir"
   },
   "qibla": {
-    "title": "Kompas Kiblat",
+    "title": "Kiblat & Waktu Solat",
     "findQibla": "Cari Arah Kiblat",
     "enableLocation": "Aktifkan Lokasi",
     "locationDesc": "Untuk mencari arah ke Mekah, kami memerlukan lokasi anda. Ketik butang di bawah dan benarkan akses lokasi apabila diminta.",
@@ -135,12 +135,32 @@
     "tryAgain": "Cuba Lagi",
     "qiblaDirection": "Arah Kiblat",
     "distanceToKaaba": "Jarak ke Kaabah",
+    "yourLocation": "Lokasi Anda",
     "enableCompass": "Aktifkan Kompas Langsung",
     "compassActive": "Kompas Aktif",
     "howToUse": "Cara Menggunakan",
-    "step1": "Anak panah hijau menunjuk ke arah Kaabah di Mekah",
-    "step2": "Pusingkan badan anda sehingga menghadap arah anak panah",
-    "step3": "Untuk ketepatan terbaik, pegang peranti anda secara rata dan jauh dari objek logam"
+    "rotateDevice": "Pusingkan peranti anda untuk mengaktifkan kompas (mudah alih sahaja)",
+    "step1": "Pegang peranti anda secara rata dan mendatar",
+    "step2": "Anak panah hijau menunjuk ke arah Kaabah di Mekah",
+    "step3": "Pusingkan badan anda sehingga menghadap arah anak panah",
+    "prayerTimes": "Waktu Solat",
+    "nextIn": "Seterusnya dalam",
+    "now": "Sekarang",
+    "next": "Seterusnya",
+    "prayers": {
+      "fajr": "Subuh",
+      "dhuhr": "Zohor",
+      "asr": "Asar",
+      "maghrib": "Maghrib",
+      "isha": "Isyak"
+    },
+    "errors": {
+      "notSupported": "Geolokasi tidak disokong oleh pelayar anda",
+      "unableToRetrieve": "Tidak dapat mendapatkan lokasi anda",
+      "permissionDenied": "Kebenaran lokasi ditolak. Sila aktifkan dalam tetapan pelayar.",
+      "unavailable": "Maklumat lokasi tidak tersedia.",
+      "timeout": "Permintaan lokasi tamat masa."
+    }
   },
   "progress": {
     "title": "Kemajuan",

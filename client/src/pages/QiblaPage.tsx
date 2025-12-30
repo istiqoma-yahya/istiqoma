@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
-import { Coordinates, Qibla } from "adhan";
+import { useState, useEffect, useMemo } from "react";
+import { Coordinates, Qibla, PrayerTimes, CalculationMethod, Prayer } from "adhan";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Compass, MapPin, Loader2, ArrowUp } from "lucide-react";
+import { Compass, MapPin, Loader2, ArrowUp, Clock, Sun, Sunrise, Sunset, Moon } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
 
 interface LocationState {
   latitude: number | null;
@@ -15,6 +17,7 @@ interface LocationState {
 }
 
 export default function QiblaPage() {
+  const { t } = useTranslation();
   const [location, setLocation] = useState<LocationState>({
     latitude: null,
     longitude: null,
@@ -26,15 +29,77 @@ export default function QiblaPage() {
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [compassEnabled, setCompassEnabled] = useState(false);
   const [needsManualCompassEnable, setNeedsManualCompassEnable] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const KAABA_COORDS = { lat: 21.422487, lng: 39.826206 };
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const dateString = currentTime.toDateString();
+  const dateOnly = useMemo(() => {
+    return new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate());
+  }, [dateString]);
+
+  const prayerTimes = useMemo(() => {
+    if (location.latitude === null || location.longitude === null) return null;
+    const coords = new Coordinates(location.latitude, location.longitude);
+    const params = CalculationMethod.MuslimWorldLeague();
+    return new PrayerTimes(coords, dateOnly, params);
+  }, [location.latitude, location.longitude, dateOnly]);
+
+  const prayerList = useMemo(() => {
+    if (!prayerTimes) return [];
+    return [
+      { name: "fajr", time: prayerTimes.fajr, icon: Sunrise },
+      { name: "dhuhr", time: prayerTimes.dhuhr, icon: Sun },
+      { name: "asr", time: prayerTimes.asr, icon: Sun },
+      { name: "maghrib", time: prayerTimes.maghrib, icon: Sunset },
+      { name: "isha", time: prayerTimes.isha, icon: Moon },
+    ];
+  }, [prayerTimes]);
+
+  const currentPrayer = useMemo(() => {
+    if (!prayerTimes) return null;
+    return prayerTimes.currentPrayer();
+  }, [prayerTimes, currentTime]);
+
+  const nextPrayer = useMemo(() => {
+    if (!prayerTimes) return null;
+    return prayerTimes.nextPrayer();
+  }, [prayerTimes, currentTime]);
+
+  const timeUntilNextPrayer = useMemo(() => {
+    if (!prayerTimes || !nextPrayer || nextPrayer === Prayer.None) return null;
+    const nextTime = prayerTimes.timeForPrayer(nextPrayer);
+    if (!nextTime) return null;
+    const diff = nextTime.getTime() - currentTime.getTime();
+    if (diff <= 0) return null;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  }, [prayerTimes, nextPrayer, currentTime]);
+
+  const getPrayerKey = (prayer: typeof Prayer[keyof typeof Prayer]): string => {
+    switch (prayer) {
+      case Prayer.Fajr: return "fajr";
+      case Prayer.Dhuhr: return "dhuhr";
+      case Prayer.Asr: return "asr";
+      case Prayer.Maghrib: return "maghrib";
+      case Prayer.Isha: return "isha";
+      default: return "";
+    }
+  };
 
   const requestLocation = () => {
     if (!navigator.geolocation) {
       setLocation({
         latitude: null,
         longitude: null,
-        error: "Geolocation is not supported by your browser",
+        error: t("qibla.errors.notSupported"),
         loading: false,
         requested: true,
       });
@@ -54,14 +119,14 @@ export default function QiblaPage() {
         });
       },
       (error) => {
-        let errorMessage = "Unable to retrieve your location";
+        let errorMessage = t("qibla.errors.unableToRetrieve");
         if (error.code === error.PERMISSION_DENIED) {
-          errorMessage = "Location permission denied. Please enable it in your browser settings.";
+          errorMessage = t("qibla.errors.permissionDenied");
           setPermissionDenied(true);
         } else if (error.code === error.POSITION_UNAVAILABLE) {
-          errorMessage = "Location information is unavailable.";
+          errorMessage = t("qibla.errors.unavailable");
         } else if (error.code === error.TIMEOUT) {
-          errorMessage = "Location request timed out.";
+          errorMessage = t("qibla.errors.timeout");
         }
         setLocation({
           latitude: null,
@@ -161,7 +226,7 @@ export default function QiblaPage() {
           <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
             <h1 className="font-display font-bold text-xl flex items-center gap-2">
               <Compass className="w-5 h-5 text-emerald-500" />
-              Qibla Compass
+              {t("qibla.title")}
             </h1>
             <ThemeToggle />
           </div>
@@ -173,32 +238,32 @@ export default function QiblaPage() {
               <div className="w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6">
                 <Compass className="w-10 h-10 text-emerald-500" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Find Qibla Direction</h3>
+              <h3 className="text-xl font-bold mb-2">{t("qibla.findQibla")}</h3>
               <p className="text-muted-foreground mb-6 max-w-md">
-                To find the direction to Mecca, we need your location. Tap the button below and allow location access when prompted.
+                {t("qibla.locationDesc")}
               </p>
               <Button onClick={requestLocation} size="lg" data-testid="button-enable-location">
                 <MapPin className="w-4 h-4 mr-2" />
-                Enable Location
+                {t("qibla.enableLocation")}
               </Button>
             </Card>
           ) : location.loading ? (
             <Card className="p-12 text-center flex flex-col items-center justify-center">
               <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-4" />
-              <h3 className="text-lg font-medium mb-2">Getting your location...</h3>
+              <h3 className="text-lg font-medium mb-2">{t("qibla.gettingLocation")}</h3>
               <p className="text-muted-foreground">
-                Please allow location access when prompted by your browser.
+                {t("qibla.allowLocation")}
               </p>
             </Card>
           ) : location.error ? (
             <Card className="p-12 text-center flex flex-col items-center justify-center">
               <MapPin className="w-12 h-12 text-rose-500 mb-4" />
-              <h3 className="text-lg font-medium mb-2">Location Required</h3>
+              <h3 className="text-lg font-medium mb-2">{t("qibla.locationRequired")}</h3>
               <p className="text-muted-foreground mb-6 max-w-md">
                 {location.error}
               </p>
               <Button onClick={requestLocation} data-testid="button-retry-location">
-                Try Again
+                {t("qibla.tryAgain")}
               </Button>
             </Card>
           ) : (
@@ -256,7 +321,7 @@ export default function QiblaPage() {
 
                 <div className="mt-6 text-center">
                   <p className="text-lg font-medium">
-                    Qibla Direction: <span className="text-emerald-500">{qiblaDirection !== null ? `${Math.round(qiblaDirection)}° from North` : "Calculating..."}</span>
+                    {t("qibla.qiblaDirection")}: <span className="text-emerald-500">{qiblaDirection !== null ? `${Math.round(qiblaDirection)}°` : "--"}</span>
                   </p>
                   {needsManualCompassEnable && !compassEnabled && (
                     <Button 
@@ -266,17 +331,17 @@ export default function QiblaPage() {
                       data-testid="button-enable-compass"
                     >
                       <Compass className="w-4 h-4 mr-2" />
-                      Enable Live Compass
+                      {t("qibla.enableCompass")}
                     </Button>
                   )}
                   {compassHeading === null && !needsManualCompassEnable && (
                     <p className="text-sm text-muted-foreground mt-2">
-                      Rotate your device to enable compass (mobile only)
+                      {t("qibla.rotateDevice")}
                     </p>
                   )}
                   {compassEnabled && compassHeading !== null && (
                     <p className="text-sm text-emerald-500 mt-2">
-                      Live compass active
+                      {t("qibla.compassActive")}
                     </p>
                   )}
                 </div>
@@ -284,7 +349,7 @@ export default function QiblaPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <Card className="p-6">
-                  <div className="text-muted-foreground text-sm mb-2">Distance to Kaaba</div>
+                  <div className="text-muted-foreground text-sm mb-2">{t("qibla.distanceToKaaba")}</div>
                   <div className="text-2xl font-bold text-foreground">
                     {distanceToKaaba !== null
                       ? distanceToKaaba > 1000
@@ -294,7 +359,7 @@ export default function QiblaPage() {
                   </div>
                 </Card>
                 <Card className="p-6">
-                  <div className="text-muted-foreground text-sm mb-2">Your Location</div>
+                  <div className="text-muted-foreground text-sm mb-2">{t("qibla.yourLocation")}</div>
                   <div className="text-sm font-medium text-foreground">
                     {location.latitude !== null && location.longitude !== null
                       ? `${location.latitude.toFixed(4)}°, ${location.longitude.toFixed(4)}°`
@@ -304,19 +369,73 @@ export default function QiblaPage() {
               </div>
 
               <Card className="p-6">
-                <h3 className="font-medium mb-2">How to use</h3>
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <h3 className="font-medium flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-emerald-500" />
+                    {t("qibla.prayerTimes")}
+                  </h3>
+                  {nextPrayer !== null && nextPrayer !== Prayer.None && timeUntilNextPrayer && (
+                    <span className="text-xs text-muted-foreground">
+                      {t("qibla.nextIn")} <span className="text-emerald-500 font-medium">{timeUntilNextPrayer}</span>
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  {prayerList.map((prayer) => {
+                    const isCurrent = currentPrayer !== null && getPrayerKey(currentPrayer) === prayer.name;
+                    const isNext = nextPrayer !== null && getPrayerKey(nextPrayer) === prayer.name;
+                    const IconComponent = prayer.icon;
+                    return (
+                      <div
+                        key={prayer.name}
+                        className={`flex items-center justify-between p-3 rounded-lg ${
+                          isCurrent
+                            ? "bg-emerald-500/10 border border-emerald-500/30"
+                            : isNext
+                            ? "bg-muted/50"
+                            : ""
+                        }`}
+                        data-testid={`prayer-time-${prayer.name}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <IconComponent className={`w-4 h-4 ${isCurrent ? "text-emerald-500" : "text-muted-foreground"}`} />
+                          <span className={`font-medium ${isCurrent ? "text-emerald-500" : ""}`}>
+                            {t(`qibla.prayers.${prayer.name}`)}
+                          </span>
+                          {isCurrent && (
+                            <span className="text-xs bg-emerald-500 text-white px-2 py-0.5 rounded-full">
+                              {t("qibla.now")}
+                            </span>
+                          )}
+                          {isNext && !isCurrent && (
+                            <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                              {t("qibla.next")}
+                            </span>
+                          )}
+                        </div>
+                        <span className={`font-mono text-sm ${isCurrent ? "text-emerald-500 font-bold" : "text-muted-foreground"}`}>
+                          {format(prayer.time, "HH:mm")}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+
+              <Card className="p-6">
+                <h3 className="font-medium mb-2">{t("qibla.howToUse")}</h3>
                 <ul className="text-sm text-muted-foreground space-y-2">
                   <li className="flex items-start gap-2">
                     <span className="text-emerald-500 font-bold">1.</span>
-                    Hold your device flat and level
+                    {t("qibla.step1")}
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-emerald-500 font-bold">2.</span>
-                    The green arrow points toward the Kaaba in Mecca
+                    {t("qibla.step2")}
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-emerald-500 font-bold">3.</span>
-                    Turn your body until facing the arrow direction
+                    {t("qibla.step3")}
                   </li>
                 </ul>
               </Card>

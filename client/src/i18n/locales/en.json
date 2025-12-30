@@ -125,7 +125,7 @@
     "typeRequired": "Please select a dzikir type"
   },
   "qibla": {
-    "title": "Qibla Compass",
+    "title": "Qibla & Prayer Times",
     "findQibla": "Find Qibla Direction",
     "enableLocation": "Enable Location",
     "locationDesc": "To find the direction to Mecca, we need your location. Tap the button below and allow location access when prompted.",
@@ -135,12 +135,32 @@
     "tryAgain": "Try Again",
     "qiblaDirection": "Qibla Direction",
     "distanceToKaaba": "Distance to Kaaba",
+    "yourLocation": "Your Location",
     "enableCompass": "Enable Live Compass",
     "compassActive": "Compass Active",
     "howToUse": "How to Use",
-    "step1": "The green arrow points toward the Kaaba in Mecca",
-    "step2": "Turn your body until facing the arrow direction",
-    "step3": "For best accuracy, hold your device flat and away from metal objects"
+    "rotateDevice": "Rotate your device to enable compass (mobile only)",
+    "step1": "Hold your device flat and level",
+    "step2": "The green arrow points toward the Kaaba in Mecca",
+    "step3": "Turn your body until facing the arrow direction",
+    "prayerTimes": "Prayer Times",
+    "nextIn": "Next in",
+    "now": "Now",
+    "next": "Next",
+    "prayers": {
+      "fajr": "Fajr",
+      "dhuhr": "Dhuhr",
+      "asr": "Asr",
+      "maghrib": "Maghrib",
+      "isha": "Isha"
+    },
+    "errors": {
+      "notSupported": "Geolocation is not supported by your browser",
+      "unableToRetrieve": "Unable to retrieve your location",
+      "permissionDenied": "Location permission denied. Please enable it in your browser settings.",
+      "unavailable": "Location information is unavailable.",
+      "timeout": "Location request timed out."
+    }
   },
   "progress": {
     "title": "Progress",

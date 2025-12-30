@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { sendDailyReminders, isPushConfigured } from "./pushNotifications";
 
 const app = express();
 const httpServer = createServer(app);
@@ -93,6 +94,16 @@ app.use((req, res, next) => {
     },
     () => {
       log(`serving on port ${port}`);
+      
+      // Start daily reminder scheduler - runs every minute to check for reminders
+      if (isPushConfigured()) {
+        setInterval(() => {
+          sendDailyReminders().catch(err => {
+            console.error('Error sending daily reminders:', err);
+          });
+        }, 60000); // Check every minute
+        log('Push notification scheduler started');
+      }
     },
   );
 })();

@@ -239,7 +239,7 @@
     },
     "targetName": "Target Name",
     "targetNamePlaceholder": "e.g., Finish reading Quran, Complete 30 juz",
-    "targetNameRequired": "Target name is required for one-time targets",
+    "targetNameRequired": "Target name is required",
     "dueIn": "Due in {{time}}",
     "overdue": "Overdue by {{time}}",
     "statusActive": "Active",

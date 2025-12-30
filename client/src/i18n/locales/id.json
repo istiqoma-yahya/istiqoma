@@ -239,7 +239,7 @@
     },
     "targetName": "Nama Target",
     "targetNamePlaceholder": "contoh: Khatam Al-Quran, Selesaikan 30 juz",
-    "targetNameRequired": "Nama target wajib diisi untuk target sekali",
+    "targetNameRequired": "Nama target wajib diisi",
     "dueIn": "Jatuh tempo dalam {{time}}",
     "overdue": "Terlambat {{time}}",
     "statusActive": "Aktif",

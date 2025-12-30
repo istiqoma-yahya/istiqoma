@@ -42,6 +42,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTargetSchema, type InsertTarget, type TargetWithProgress, type TargetHistory } from "@shared/schema";
@@ -184,17 +185,29 @@ function TargetCard({
             )}
           </div>
           <h3 className="font-medium" data-testid={`text-target-category-${target.id}`}>
-            {isOneTime && target.unitLabel ? target.unitLabel : target.category}
-            {!isOneTime && target.dzikirType && (
-              <span className="text-muted-foreground font-normal"> ({t(`dzikir.types.${target.dzikirType}`)})</span>
-            )}
-            {!isOneTime && target.sholatType && (
-              <span className="text-muted-foreground font-normal"> ({t(`sholat.types.${target.sholatType}`)})</span>
-            )}
-            {!isOneTime && target.fastingType && (
-              <span className="text-muted-foreground font-normal"> ({t(`fasting.types.${target.fastingType}`)})</span>
-            )}
+            {target.unitLabel || target.category}
           </h3>
+          <p className="text-sm text-muted-foreground">
+            {target.category}
+            {target.dzikirType && (
+              <span> - {t(`dzikir.types.${target.dzikirType}`)}</span>
+            )}
+            {target.sholatType && (
+              <span> - {t(`sholat.types.${target.sholatType}`)}</span>
+            )}
+            {target.fastingType && (
+              <span> - {t(`fasting.types.${target.fastingType}`)}</span>
+            )}
+            {target.isJamaah && (
+              <span> ({t("sholat.isJamaah")})</span>
+            )}
+            {target.quranUnit && (
+              <span> - {t(`quran.units.${target.quranUnit}`)}</span>
+            )}
+            {target.sedekahType && (
+              <span> - {t(`sedekah.types.${target.sedekahType}`)}</span>
+            )}
+          </p>
           <p className="text-xs text-muted-foreground">
             {isOneTime && deadlineDisplay ? (
               <span className={deadlineDisplay.isOverdue ? "text-red-500 dark:text-red-400" : ""}>
@@ -432,9 +445,11 @@ export default function TargetsPage() {
   const isSholatFardhuCategory = watchedCategory?.toLowerCase() === "sholat fardhu";
   const isSholatSunnahCategory = watchedCategory?.toLowerCase() === "sholat sunnah";
   const isSholatCategory = isSholatFardhuCategory || isSholatSunnahCategory;
-  const isFastingFardhuCategory = watchedCategory?.toLowerCase() === "fasting fardhu";
-  const isFastingSunnahCategory = watchedCategory?.toLowerCase() === "fasting sunnah";
+  const isFastingFardhuCategory = watchedCategory?.toLowerCase() === "fasting fardhu" || watchedCategory?.toLowerCase() === "puasa fardhu";
+  const isFastingSunnahCategory = watchedCategory?.toLowerCase() === "fasting sunnah" || watchedCategory?.toLowerCase() === "puasa sunnah";
   const isFastingCategory = isFastingFardhuCategory || isFastingSunnahCategory;
+  const isQuranCategory = watchedCategory?.toLowerCase() === "baca quran" || watchedCategory?.toLowerCase() === "quran";
+  const isSedekahCategory = watchedCategory?.toLowerCase() === "shodaqoh" || watchedCategory?.toLowerCase() === "sedekah" || watchedCategory?.toLowerCase() === "sodaqoh";
   
   const DZIKIR_TYPES = [
     { id: "subhanallah", labelKey: "dzikir.types.subhanallah" },
@@ -479,6 +494,18 @@ export default function TargetsPage() {
     { id: "daud", labelKey: "fasting.types.daud" },
   ];
 
+  const QURAN_UNITS = [
+    { id: "ayat", labelKey: "quran.units.ayat" },
+    { id: "halaman", labelKey: "quran.units.halaman" },
+    { id: "surat", labelKey: "quran.units.surat" },
+    { id: "juz", labelKey: "quran.units.juz" },
+  ];
+
+  const SEDEKAH_TYPES = [
+    { id: "uang", labelKey: "sedekah.types.uang" },
+    { id: "hitungan", labelKey: "sedekah.types.hitungan" },
+  ];
+
   const currentSholatTypes = isSholatFardhuCategory ? SHOLAT_FARDHU_TYPES : SHOLAT_SUNNAH_TYPES;
   const currentFastingTypes = isFastingFardhuCategory ? FASTING_FARDHU_TYPES : FASTING_SUNNAH_TYPES;
 
@@ -510,7 +537,6 @@ export default function TargetsPage() {
 
   const openEditDialog = (target: TargetWithProgress) => {
     setEditingTarget(target);
-    const isOneTime = target.recurrence === "oneTime";
     setSelectedDuration(null);
     form.reset({
       category: target.category,
@@ -524,6 +550,9 @@ export default function TargetsPage() {
       dzikirType: target.dzikirType || undefined,
       sholatType: target.sholatType || undefined,
       fastingType: target.fastingType || undefined,
+      isJamaah: target.isJamaah || undefined,
+      quranUnit: (target.quranUnit as "ayat" | "halaman" | "surat" | "juz" | undefined) || undefined,
+      sedekahType: (target.sedekahType as "uang" | "hitungan" | undefined) || undefined,
     });
     setIsDialogOpen(true);
   };
@@ -543,13 +572,16 @@ export default function TargetsPage() {
       dzikirType: undefined,
       sholatType: undefined,
       fastingType: undefined,
+      isJamaah: undefined,
+      quranUnit: undefined,
+      sedekahType: undefined,
     });
     setIsDialogOpen(true);
   };
 
   const onSubmit = async (data: InsertTarget) => {
     try {
-      if (data.recurrence === "oneTime" && !data.unitLabel?.trim()) {
+      if (!data.unitLabel?.trim()) {
         form.setError("unitLabel", { 
           type: "manual", 
           message: t("targets.targetNameRequired") 
@@ -701,13 +733,31 @@ export default function TargetsPage() {
                         onClick={() => {
                           field.onChange("oneTime");
                           form.setValue("period", undefined);
-                          form.setValue("category", t("targets.oneTimeGoal"));
                         }}
                         data-testid="button-recurrence-onetime"
                       >
                         {t("targets.oneTime")}
                       </Button>
                     </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="unitLabel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("targets.targetName")} *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t("targets.targetNamePlaceholder")}
+                        {...field}
+                        value={field.value || ""}
+                        data-testid="input-target-name"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -746,43 +796,51 @@ export default function TargetsPage() {
                 />
               )}
 
-              {watchedRecurrence === "recurring" && (
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("deed.category")}</FormLabel>
-                      <Select onValueChange={(value) => {
-                        field.onChange(value);
-                        const lowerValue = value.toLowerCase();
-                        if (lowerValue !== "dzikir" && lowerValue !== "dzikr") {
-                          form.setValue("dzikirType", undefined);
-                        }
-                        if (lowerValue !== "sholat fardhu" && lowerValue !== "sholat sunnah") {
-                          form.setValue("sholatType", undefined);
-                        }
-                      }} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger data-testid="select-target-category">
-                            <SelectValue placeholder={t("targets.selectCategory")} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {availableCategories.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.name}>
-                              {cat.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("deed.category")}</FormLabel>
+                    <Select onValueChange={(value) => {
+                      field.onChange(value);
+                      const lowerValue = value.toLowerCase();
+                      if (!isDzikirCategory) {
+                        form.setValue("dzikirType", undefined);
+                      }
+                      if (!isSholatCategory) {
+                        form.setValue("sholatType", undefined);
+                        form.setValue("isJamaah", undefined);
+                      }
+                      if (!isFastingCategory) {
+                        form.setValue("fastingType", undefined);
+                      }
+                      if (!isQuranCategory) {
+                        form.setValue("quranUnit", undefined);
+                      }
+                      if (!isSedekahCategory) {
+                        form.setValue("sedekahType", undefined);
+                      }
+                    }} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-target-category">
+                          <SelectValue placeholder={t("targets.selectCategory")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {availableCategories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.name}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              {watchedRecurrence === "recurring" && isDzikirCategory && (
+              {isDzikirCategory && (
                 <FormField
                   control={form.control}
                   name="dzikirType"
@@ -813,7 +871,7 @@ export default function TargetsPage() {
                 />
               )}
 
-              {watchedRecurrence === "recurring" && isSholatCategory && (
+              {isSholatCategory && (
                 <FormField
                   control={form.control}
                   name="sholatType"
@@ -844,7 +902,7 @@ export default function TargetsPage() {
                 />
               )}
 
-              {watchedRecurrence === "recurring" && isFastingCategory && (
+              {isFastingCategory && (
                 <FormField
                   control={form.control}
                   name="fastingType"
@@ -863,6 +921,87 @@ export default function TargetsPage() {
                         <SelectContent>
                           <SelectItem value="__any__">{t("fasting.anyType")}</SelectItem>
                           {currentFastingTypes.map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {t(type.labelKey)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {isSholatCategory && (
+                <FormField
+                  control={form.control}
+                  name="isJamaah"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value || false}
+                          onCheckedChange={field.onChange}
+                          data-testid="checkbox-target-jamaah"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>{t("sholat.isJamaah")}</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {isQuranCategory && (
+                <FormField
+                  control={form.control}
+                  name="quranUnit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("quran.selectUnit")}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger data-testid="select-target-quran-unit">
+                            <SelectValue placeholder={t("quran.selectUnit")} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {QURAN_UNITS.map((unit) => (
+                            <SelectItem key={unit.id} value={unit.id}>
+                              {t(unit.labelKey)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {isSedekahCategory && (
+                <FormField
+                  control={form.control}
+                  name="sedekahType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("sedekah.selectType")}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger data-testid="select-target-sedekah-type">
+                            <SelectValue placeholder={t("sedekah.selectType")} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {SEDEKAH_TYPES.map((type) => (
                             <SelectItem key={type.id} value={type.id}>
                               {t(type.labelKey)}
                             </SelectItem>
@@ -966,25 +1105,7 @@ export default function TargetsPage() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="unitLabel"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("targets.targetName")} *</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t("targets.targetNamePlaceholder")}
-                            {...field}
-                            value={field.value || ""}
-                            data-testid="input-target-name"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                  </div>
               )}
 
               <FormField

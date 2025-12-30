@@ -234,7 +234,7 @@ function TargetCard({
             {isLimitTarget ? t("targets.usage") : t("targets.progress")}
           </span>
           <span className="font-medium" data-testid={`text-target-progress-${target.id}`}>
-            {target.currentValue} / {target.targetValue} {isOneTime && target.unitLabel ? target.unitLabel : (isLimitTarget ? t("targets.max") : t("stats.points"))}
+            {target.currentValue} / {target.targetValue} {isOneTime ? "" : (isLimitTarget ? t("targets.max") : t("stats.points"))}
           </span>
         </div>
         <Progress
@@ -298,7 +298,7 @@ function TargetCard({
               data-testid={`input-progress-${target.id}`}
             />
             <span className="text-sm text-muted-foreground">
-              / {target.targetValue} {target.unitLabel || t("stats.points")}
+              / {target.targetValue}
             </span>
             <Button
               size="sm"

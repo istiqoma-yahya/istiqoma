@@ -5,7 +5,7 @@ import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { Loader2, LogOut, User, Settings, Plus, Target, Trophy, ChevronRight, ThumbsDown } from "lucide-react";
+import { Loader2, LogOut, User, Settings, Plus, Target, Trophy, ChevronRight, ThumbsDown, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -82,6 +82,14 @@ export default function Dashboard() {
               >
                 <Settings className="mr-2 h-4 w-4" />
                 <span>{t('user.manageCategories')}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => navigate("/notifications")}
+                className="cursor-pointer"
+                data-testid="menu-item-notifications"
+              >
+                <Bell className="mr-2 h-4 w-4" />
+                <span>{t('notifications.title')}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border" />
               <DropdownMenuItem 

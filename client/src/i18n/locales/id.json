@@ -261,5 +261,25 @@
       "syawal": "Syawal (6 hari)",
       "daud": "Puasa Daud"
     }
+  },
+  "notifications": {
+    "title": "Notifikasi",
+    "subtitle": "Kelola pengaturan notifikasi Anda",
+    "notSupported": "Notifikasi push tidak didukung di browser ini",
+    "permissionDenied": "Izin notifikasi ditolak. Harap aktifkan di pengaturan browser.",
+    "enableNotifications": "Aktifkan Notifikasi",
+    "disableNotifications": "Nonaktifkan Notifikasi",
+    "enabling": "Mengaktifkan...",
+    "dailyReminder": "Pengingat Harian",
+    "dailyReminderDesc": "Dapatkan pengingat harian untuk mencatat amal Anda",
+    "reminderTime": "Waktu Pengingat",
+    "targetAlerts": "Peringatan Target",
+    "targetAlertsDesc": "Dapatkan notifikasi tentang kemajuan target Anda",
+    "testNotification": "Uji Notifikasi",
+    "testSent": "Notifikasi uji terkirim!",
+    "testFailed": "Gagal mengirim notifikasi uji",
+    "settingsSaved": "Pengaturan disimpan",
+    "subscribed": "Berlangganan",
+    "notSubscribed": "Tidak berlangganan"
   }
 }

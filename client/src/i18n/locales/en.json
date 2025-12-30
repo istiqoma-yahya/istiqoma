@@ -261,5 +261,25 @@
       "syawal": "Syawal (6 days)",
       "daud": "Daud Fasting"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Manage your notification preferences",
+    "notSupported": "Push notifications are not supported in this browser",
+    "permissionDenied": "Notification permission denied. Please enable in browser settings.",
+    "enableNotifications": "Enable Notifications",
+    "disableNotifications": "Disable Notifications",
+    "enabling": "Enabling...",
+    "dailyReminder": "Daily Reminder",
+    "dailyReminderDesc": "Get a daily reminder to log your deeds",
+    "reminderTime": "Reminder Time",
+    "targetAlerts": "Target Alerts",
+    "targetAlertsDesc": "Get notified about your target progress",
+    "testNotification": "Test Notification",
+    "testSent": "Test notification sent!",
+    "testFailed": "Failed to send test notification",
+    "settingsSaved": "Settings saved",
+    "subscribed": "Subscribed",
+    "notSubscribed": "Not subscribed"
   }
 }

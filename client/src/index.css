@@ -56,7 +56,7 @@
 .dark {
   /* Dark mode - Islamic Art Inspired Palette */
   --primary: 158 64% 52%; /* #34D399 - Emerald 400ish */
-  --primary-foreground: 160 84% 97%;
+  --primary-foreground: 222 47% 11%; /* Dark text on emerald for better contrast */
   
   /* Deep Night Blue Backgrounds */
   --background: 222 47% 11%; /* #0F172A */

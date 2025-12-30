@@ -226,7 +226,30 @@
     "max": "maks",
     "used": "digunakan",
     "withinLimit": "Dalam Had",
-    "exceeded": "Melebihi"
+    "exceeded": "Melebihi",
+    "recurring": "Berulang",
+    "oneTime": "Sekali",
+    "recurrenceType": "Jenis Pengulangan",
+    "deadline": "Tarikh Akhir",
+    "duration": {
+      "1day": "1 Hari",
+      "1week": "1 Minggu",
+      "1month": "1 Bulan",
+      "3months": "3 Bulan"
+    },
+    "unitLabel": "Label Unit",
+    "unitLabelPlaceholder": "contoh: juz, halaman, surah",
+    "dueIn": "Tamat dalam {{time}}",
+    "overdue": "Lewat {{time}}",
+    "statusActive": "Aktif",
+    "statusCompleted": "Selesai",
+    "statusExpired": "Tamat Tempoh",
+    "customDeadline": "Tarikh Tersuai",
+    "oneTimeGoal": "Sasaran Sekali",
+    "oneTimeTargetValue": "Nilai Sasaran",
+    "oneTimeTargetValueDesc": "Nilai untuk dicapai sebelum tarikh akhir",
+    "updateProgress": "Kemas Kini",
+    "markComplete": "Tandakan Selesai"
   },
   "user": {
     "profile": "Profil",

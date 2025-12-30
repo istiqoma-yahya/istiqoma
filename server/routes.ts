@@ -212,6 +212,37 @@ export async function registerRoutes(
     res.json(result);
   });
 
+  app.patch(api.targets.updateProgress.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const { progress } = api.targets.updateProgress.input.parse(req.body);
+      const userId = req.user.claims.sub;
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      const target = await storage.updateTargetProgress(id, userId, progress);
+      res.json(target);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      throw err;
+    }
+  });
+
+  app.post(api.targets.complete.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+    const target = await storage.completeTarget(id, userId);
+    res.json(target);
+  });
+
   // Push Notification Routes
   app.get("/api/push/status", isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;

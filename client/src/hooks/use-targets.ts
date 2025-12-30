@@ -168,3 +168,73 @@ export function useTargetHistory(targetId: number | null) {
     enabled: !!targetId,
   });
 }
+
+export function useUpdateTargetProgress() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ id, progress }: { id: number; progress: number }) => {
+      const url = buildUrl(api.targets.updateProgress.path, { id });
+      const res = await fetch(url, {
+        method: api.targets.updateProgress.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ progress }),
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        if (res.status === 404) throw new Error("Target not found");
+        throw new Error("Failed to update progress");
+      }
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.targets.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useCompleteTarget() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const url = buildUrl(api.targets.complete.path, { id });
+      const res = await fetch(url, {
+        method: api.targets.complete.method,
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        if (res.status === 404) throw new Error("Target not found");
+        throw new Error("Failed to complete target");
+      }
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.targets.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+      toast({
+        title: "Target Completed",
+        description: "Congratulations on achieving your goal!",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}

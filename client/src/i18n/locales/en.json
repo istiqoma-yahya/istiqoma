@@ -226,7 +226,30 @@
     "max": "max",
     "used": "used",
     "withinLimit": "Within Limit",
-    "exceeded": "Exceeded"
+    "exceeded": "Exceeded",
+    "recurring": "Recurring",
+    "oneTime": "One-Time",
+    "recurrenceType": "Recurrence Type",
+    "deadline": "Deadline",
+    "duration": {
+      "1day": "1 Day",
+      "1week": "1 Week",
+      "1month": "1 Month",
+      "3months": "3 Months"
+    },
+    "unitLabel": "Unit Label",
+    "unitLabelPlaceholder": "e.g., juz, pages, surahs",
+    "dueIn": "Due in {{time}}",
+    "overdue": "Overdue by {{time}}",
+    "statusActive": "Active",
+    "statusCompleted": "Completed",
+    "statusExpired": "Expired",
+    "customDeadline": "Custom Date",
+    "oneTimeGoal": "One-Time Goal",
+    "oneTimeTargetValue": "Target Value",
+    "oneTimeTargetValueDesc": "Value to achieve by deadline",
+    "updateProgress": "Update",
+    "markComplete": "Mark as Complete"
   },
   "user": {
     "profile": "Profile",

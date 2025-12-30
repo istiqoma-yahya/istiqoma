@@ -124,6 +124,23 @@ export class DatabaseStorage implements IStorage {
     const now = new Date();
 
     return userTargets.map((target) => {
+      const isOneTime = target.recurrence === "oneTime";
+      
+      // For one-time targets, use manual progress instead of deed aggregation
+      if (isOneTime) {
+        const currentValue = target.manualProgress || 0;
+        const percentComplete = target.targetValue > 0 
+          ? Math.min(100, Math.round((currentValue / target.targetValue) * 100))
+          : 0;
+        
+        return {
+          ...target,
+          currentValue,
+          percentComplete,
+        };
+      }
+      
+      // Recurring target logic
       let periodStart: Date;
       let periodEnd: Date;
 
@@ -216,6 +233,24 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(targets)
       .where(and(eq(targets.id, id), eq(targets.userId, userId)));
+  }
+
+  async updateTargetProgress(id: number, userId: string, progress: number): Promise<Target> {
+    const [target] = await db
+      .update(targets)
+      .set({ manualProgress: progress })
+      .where(and(eq(targets.id, id), eq(targets.userId, userId)))
+      .returning();
+    return target;
+  }
+
+  async completeTarget(id: number, userId: string): Promise<Target> {
+    const [target] = await db
+      .update(targets)
+      .set({ completedAt: new Date() })
+      .where(and(eq(targets.id, id), eq(targets.userId, userId)))
+      .returning();
+    return target;
   }
 
   async getTargetHistory(targetId: number, userId: string, limit: number = 30): Promise<TargetHistory[]> {

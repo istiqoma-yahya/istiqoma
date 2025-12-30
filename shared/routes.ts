@@ -166,6 +166,26 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
+    updateProgress: {
+      method: "PATCH" as const,
+      path: "/api/targets/:id/progress",
+      input: z.object({ progress: z.number().min(0) }),
+      responses: {
+        200: z.custom<typeof targets.$inferSelect>(),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
+    complete: {
+      method: "POST" as const,
+      path: "/api/targets/:id/complete",
+      responses: {
+        200: z.custom<typeof targets.$inferSelect>(),
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
   },
 };
 

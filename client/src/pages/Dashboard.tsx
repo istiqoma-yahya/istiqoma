@@ -141,7 +141,18 @@ export default function Dashboard() {
               {targets.slice(0, 3).map((target) => (
                 <Card key={target.id} className="p-3" data-testid={`card-dashboard-target-${target.id}`}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-sm truncate">{target.category}</span>
+                    <span className="font-medium text-sm truncate">
+                      {target.category}
+                      {target.dzikirType && (
+                        <span className="text-muted-foreground font-normal"> ({t(`dzikir.types.${target.dzikirType}`)})</span>
+                      )}
+                      {target.sholatType && (
+                        <span className="text-muted-foreground font-normal"> ({t(`sholat.types.${target.sholatType}`)})</span>
+                      )}
+                      {target.fastingType && (
+                        <span className="text-muted-foreground font-normal"> ({t(`fasting.types.${target.fastingType}`)})</span>
+                      )}
+                    </span>
                     {target.targetType === "limit" ? (
                       target.currentValue > target.targetValue && (
                         <ThumbsDown className="w-4 h-4 text-rose-500" />

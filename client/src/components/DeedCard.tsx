@@ -30,6 +30,23 @@ export function DeedCard({ deed, index }: DeedCardProps) {
   const isGood = deed.deedType === "good";
   const isIstighfar = deed.category === "Istighfar";
   const date = deed.createdAt ? new Date(deed.createdAt) : new Date();
+  
+  const getDisplayDescription = () => {
+    if (isIstighfar) {
+      return t('dzikir.istighfarDeedDesc', { count: deed.points || 0 });
+    }
+    const isDzikirCategory = deed.category?.toLowerCase() === "dzikir" || deed.category?.toLowerCase() === "dzikr";
+    if (isDzikirCategory) {
+      if (deed.dzikirType) {
+        const dzikirTypeLabel = t(`dzikir.types.${deed.dzikirType}`);
+        return t('dzikir.dzikirTypeDeedDesc', { type: dzikirTypeLabel, count: deed.points || 0 });
+      }
+      return t('dzikir.dzikirDeedDesc', { count: deed.points || 0 });
+    }
+    return deed.description;
+  };
+  
+  const displayDescription = getDisplayDescription();
 
   return (
     <motion.div
@@ -61,7 +78,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
             </span>
           </div>
           <h3 className="text-lg font-medium text-foreground leading-tight mb-1">
-            {deed.description}
+            {displayDescription}
           </h3>
           <p className="text-sm text-muted-foreground">
             {format(date, "PPP p")}

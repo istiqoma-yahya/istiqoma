@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
+import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
+import { insertPushSubscriptionSchema } from "@shared/schema";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -208,6 +210,73 @@ export async function registerRoutes(
     await storage.calculateAndSaveTargetHistory(id, userId, 7);
     const result = await storage.getTargetHistoryWithStreak(id, userId, 7);
     res.json(result);
+  });
+
+  // Push Notification Routes
+  app.get("/api/push/status", isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const subscription = await storage.getPushSubscription(userId);
+    res.json({
+      configured: isPushConfigured(),
+      subscribed: !!subscription,
+      settings: subscription ? {
+        dailyReminder: subscription.dailyReminder,
+        reminderTime: subscription.reminderTime,
+        targetAlerts: subscription.targetAlerts
+      } : null
+    });
+  });
+
+  app.post("/api/push/subscribe", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const input = insertPushSubscriptionSchema.parse(req.body);
+      const subscription = await storage.savePushSubscription(userId, input);
+      res.status(201).json({ success: true, subscription });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      throw err;
+    }
+  });
+
+  app.patch("/api/push/settings", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { dailyReminder, reminderTime, targetAlerts } = req.body;
+      const settings: any = {};
+      if (typeof dailyReminder === 'boolean') settings.dailyReminder = dailyReminder;
+      if (typeof reminderTime === 'string') settings.reminderTime = reminderTime;
+      if (typeof targetAlerts === 'boolean') settings.targetAlerts = targetAlerts;
+      
+      const subscription = await storage.updatePushSubscriptionSettings(userId, settings);
+      if (!subscription) {
+        return res.status(404).json({ message: "No subscription found" });
+      }
+      res.json({ success: true, subscription });
+    } catch (err) {
+      throw err;
+    }
+  });
+
+  app.delete("/api/push/unsubscribe", isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    await storage.deletePushSubscription(userId);
+    res.status(204).send();
+  });
+
+  app.post("/api/push/test", isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const success = await sendNotificationToUser(userId, {
+      title: "Test Notification",
+      body: "Push notifications are working!",
+      url: "/"
+    });
+    res.json({ success });
   });
 
   return httpServer;

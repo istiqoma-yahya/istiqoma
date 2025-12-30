@@ -59,6 +59,18 @@ export const targetHistory = pgTable("target_history", {
   capturedAt: timestamp("captured_at").defaultNow(),
 });
 
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  endpoint: text("endpoint").notNull(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  dailyReminder: boolean("daily_reminder").notNull().default(true),
+  reminderTime: text("reminder_time").notNull().default("08:00"),
+  targetAlerts: boolean("target_alerts").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertDeedSchema = createInsertSchema(deeds).pick({
   description: true,
   deedType: true,
@@ -132,3 +144,22 @@ export type TargetWithProgress = Target & {
   currentValue: number;
   percentComplete: number;
 };
+
+export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions).pick({
+  endpoint: true,
+  p256dh: true,
+  auth: true,
+  dailyReminder: true,
+  reminderTime: true,
+  targetAlerts: true,
+}).extend({
+  endpoint: z.string().min(1),
+  p256dh: z.string().min(1),
+  auth: z.string().min(1),
+  dailyReminder: z.boolean().optional().default(true),
+  reminderTime: z.string().optional().default("08:00"),
+  targetAlerts: z.boolean().optional().default(true),
+});
+
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema>;

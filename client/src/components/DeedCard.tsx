@@ -43,6 +43,9 @@ export function DeedCard({ deed, index }: DeedCardProps) {
       }
       return t('dzikir.dzikirDeedDesc', { count: deed.points || 0 });
     }
+    if (!deed.description || deed.description.trim() === "") {
+      return deed.category;
+    }
     return deed.description;
   };
   

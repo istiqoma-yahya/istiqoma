@@ -118,7 +118,12 @@ export function DeedCard({ deed, index }: DeedCardProps) {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="bg-secondary border-border hover:bg-muted text-foreground">{t('common.cancel')}</AlertDialogCancel>
+                <AlertDialogCancel 
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-secondary border-border hover:bg-muted text-foreground"
+                >
+                  {t('common.cancel')}
+                </AlertDialogCancel>
                 <AlertDialogAction 
                   onClick={(e) => {
                     e.stopPropagation();

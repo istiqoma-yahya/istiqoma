@@ -245,6 +245,8 @@
     "targetName": "Target Name",
     "targetNamePlaceholder": "e.g., Finish reading Quran, Complete 30 juz",
     "targetNameRequired": "Target name is required",
+    "saveTarget": "Save Target",
+    "updateTarget": "Update Target",
     "dueIn": "Due in {{time}}",
     "overdue": "Overdue by {{time}}",
     "statusActive": "Active",

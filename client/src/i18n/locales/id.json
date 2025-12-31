@@ -245,6 +245,8 @@
     "targetName": "Nama Target",
     "targetNamePlaceholder": "contoh: Khatam Al-Quran, Selesaikan 30 juz",
     "targetNameRequired": "Nama target wajib diisi",
+    "saveTarget": "Simpan Target",
+    "updateTarget": "Perbarui Target",
     "dueIn": "Jatuh tempo dalam {{time}}",
     "overdue": "Terlambat {{time}}",
     "statusActive": "Aktif",

@@ -1,0 +1,700 @@
+import { useState, useEffect } from "react";
+import { useCategories } from "@/hooks/use-categories";
+import { useTranslation } from "react-i18next";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { insertTargetSchema, type InsertTarget, type TargetWithProgress } from "@shared/schema";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Loader2, CalendarIcon, ArrowLeft } from "lucide-react";
+import { format, addDays, addWeeks, addMonths } from "date-fns";
+import { cn } from "@/lib/utils";
+
+interface TargetFormProps {
+  mode: "create" | "edit";
+  defaultValues?: Partial<InsertTarget>;
+  editingTarget?: TargetWithProgress | null;
+  onSubmit: (data: InsertTarget) => Promise<void>;
+  onCancel: () => void;
+  isSubmitting: boolean;
+}
+
+export function TargetForm({
+  mode,
+  defaultValues,
+  editingTarget,
+  onSubmit,
+  onCancel,
+  isSubmitting,
+}: TargetFormProps) {
+  const { t } = useTranslation();
+  const { data: categories } = useCategories();
+  const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
+
+  const form = useForm<InsertTarget>({
+    resolver: zodResolver(insertTargetSchema),
+    defaultValues: defaultValues || {
+      category: "",
+      targetValue: 10,
+      period: "daily",
+      targetType: "achievement",
+      recurrence: "recurring",
+      startDate: undefined,
+      dueDate: undefined,
+      unitLabel: undefined,
+      dzikirType: undefined,
+      sholatType: undefined,
+      fastingType: undefined,
+      isJamaah: undefined,
+      quranUnit: undefined,
+      sedekahType: undefined,
+    },
+  });
+
+  useEffect(() => {
+    if (editingTarget) {
+      form.reset({
+        category: editingTarget.category,
+        targetValue: editingTarget.targetValue,
+        period: editingTarget.period as "daily" | "weekly" | "monthly" | undefined,
+        targetType: (editingTarget.targetType as "achievement" | "limit") || "achievement",
+        recurrence: (editingTarget.recurrence as "recurring" | "oneTime") || "recurring",
+        startDate: editingTarget.startDate ? new Date(editingTarget.startDate) : undefined,
+        dueDate: editingTarget.dueDate ? new Date(editingTarget.dueDate) : undefined,
+        unitLabel: editingTarget.unitLabel || undefined,
+        dzikirType: editingTarget.dzikirType || undefined,
+        sholatType: editingTarget.sholatType || undefined,
+        fastingType: editingTarget.fastingType || undefined,
+        isJamaah: editingTarget.isJamaah || undefined,
+        quranUnit: (editingTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz" | undefined) || undefined,
+        sedekahType: (editingTarget.sedekahType as "uang" | "hitungan" | undefined) || undefined,
+      });
+    }
+  }, [editingTarget, form]);
+
+  const watchedTargetType = form.watch("targetType");
+  const watchedCategory = form.watch("category");
+  const watchedRecurrence = form.watch("recurrence");
+
+  const isDzikirCategory = watchedCategory?.toLowerCase() === "dzikir" || watchedCategory?.toLowerCase() === "dzikr";
+  const isSholatFardhuCategory = watchedCategory?.toLowerCase() === "sholat fardhu";
+  const isSholatSunnahCategory = watchedCategory?.toLowerCase() === "sholat sunnah";
+  const isSholatCategory = isSholatFardhuCategory || isSholatSunnahCategory;
+  const isFastingFardhuCategory = watchedCategory?.toLowerCase() === "fasting fardhu" || watchedCategory?.toLowerCase() === "puasa fardhu";
+  const isFastingSunnahCategory = watchedCategory?.toLowerCase() === "fasting sunnah" || watchedCategory?.toLowerCase() === "puasa sunnah";
+  const isFastingCategory = isFastingFardhuCategory || isFastingSunnahCategory;
+  const isQuranCategory = watchedCategory?.toLowerCase() === "baca quran" || watchedCategory?.toLowerCase() === "quran";
+  const isSedekahCategory = watchedCategory?.toLowerCase() === "shodaqoh" || watchedCategory?.toLowerCase() === "sedekah" || watchedCategory?.toLowerCase() === "sodaqoh";
+
+  const DZIKIR_TYPES = [
+    { id: "subhanallah", labelKey: "dzikir.types.subhanallah" },
+    { id: "alhamdulillah", labelKey: "dzikir.types.alhamdulillah" },
+    { id: "allahuakbar", labelKey: "dzikir.types.allahuakbar" },
+    { id: "lailahaillallah", labelKey: "dzikir.types.lailahaillallah" },
+  ];
+
+  const SHOLAT_FARDHU_TYPES = [
+    { id: "subuh", labelKey: "sholat.types.subuh" },
+    { id: "dzuhur", labelKey: "sholat.types.dzuhur" },
+    { id: "ashar", labelKey: "sholat.types.ashar" },
+    { id: "maghrib", labelKey: "sholat.types.maghrib" },
+    { id: "isya", labelKey: "sholat.types.isya" },
+  ];
+
+  const SHOLAT_SUNNAH_TYPES = [
+    { id: "rawatib", labelKey: "sholat.types.rawatib" },
+    { id: "dhuha", labelKey: "sholat.types.dhuha" },
+    { id: "tahajjud", labelKey: "sholat.types.tahajjud" },
+    { id: "witir", labelKey: "sholat.types.witir" },
+    { id: "tarawih", labelKey: "sholat.types.tarawih" },
+    { id: "eid", labelKey: "sholat.types.eid" },
+    { id: "istikharah", labelKey: "sholat.types.istikharah" },
+    { id: "hajat", labelKey: "sholat.types.hajat" },
+    { id: "taubat", labelKey: "sholat.types.taubat" },
+  ];
+
+  const FASTING_FARDHU_TYPES = [
+    { id: "ramadhan", labelKey: "fasting.types.ramadhan" },
+    { id: "qadha", labelKey: "fasting.types.qadha" },
+    { id: "kaffarah", labelKey: "fasting.types.kaffarah" },
+    { id: "nadzar", labelKey: "fasting.types.nadzar" },
+  ];
+
+  const FASTING_SUNNAH_TYPES = [
+    { id: "seninkamis", labelKey: "fasting.types.seninkamis" },
+    { id: "ayyamulbidh", labelKey: "fasting.types.ayyamulbidh" },
+    { id: "arafah", labelKey: "fasting.types.arafah" },
+    { id: "asyura", labelKey: "fasting.types.asyura" },
+    { id: "syawal", labelKey: "fasting.types.syawal" },
+    { id: "daud", labelKey: "fasting.types.daud" },
+  ];
+
+  const QURAN_UNITS = [
+    { id: "ayat", labelKey: "quran.units.ayat" },
+    { id: "halaman", labelKey: "quran.units.halaman" },
+    { id: "surat", labelKey: "quran.units.surat" },
+    { id: "juz", labelKey: "quran.units.juz" },
+  ];
+
+  const SEDEKAH_TYPES = [
+    { id: "uang", labelKey: "sedekah.types.uang" },
+    { id: "hitungan", labelKey: "sedekah.types.hitungan" },
+  ];
+
+  const currentSholatTypes = isSholatFardhuCategory ? SHOLAT_FARDHU_TYPES : SHOLAT_SUNNAH_TYPES;
+  const currentFastingTypes = isFastingFardhuCategory ? FASTING_FARDHU_TYPES : FASTING_SUNNAH_TYPES;
+
+  const handleDurationSelect = (duration: string) => {
+    setSelectedDuration(duration);
+    const now = new Date();
+    let dueDate: Date;
+
+    switch (duration) {
+      case "1day":
+        dueDate = addDays(now, 1);
+        break;
+      case "1week":
+        dueDate = addWeeks(now, 1);
+        break;
+      case "1month":
+        dueDate = addMonths(now, 1);
+        break;
+      case "3months":
+        dueDate = addMonths(now, 3);
+        break;
+      default:
+        return;
+    }
+
+    form.setValue("startDate", now);
+    form.setValue("dueDate", dueDate);
+  };
+
+  const handleFormSubmit = async (data: InsertTarget) => {
+    if (!data.unitLabel?.trim()) {
+      form.setError("unitLabel", {
+        type: "manual",
+        message: t("targets.targetNameRequired"),
+      });
+      return;
+    }
+    await onSubmit(data);
+  };
+
+  const goodCategories = categories?.filter(c => c.name !== "Istighfar" && c.name !== "Maksiat") || [];
+  const limitCategories = categories?.filter(c => c.name !== "Istighfar") || [];
+  const availableCategories = watchedTargetType === "limit" ? limitCategories : goodCategories;
+
+  return (
+    <Card className="p-6">
+      <div className="flex items-center gap-2 mb-6">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onCancel}
+          data-testid="button-back"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+        <h2 className="text-xl font-semibold" data-testid="text-form-title">
+          {mode === "edit" ? t("targets.editTarget") : t("targets.addTarget")}
+        </h2>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="recurrence"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("targets.recurrenceType")}</FormLabel>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={field.value === "recurring" ? "default" : "outline"}
+                    className="flex-1"
+                    onClick={() => {
+                      field.onChange("recurring");
+                      form.setValue("startDate", undefined);
+                      form.setValue("dueDate", undefined);
+                      setSelectedDuration(null);
+                    }}
+                    data-testid="button-recurrence-recurring"
+                  >
+                    {t("targets.recurring")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={field.value === "oneTime" ? "default" : "outline"}
+                    className="flex-1"
+                    onClick={() => {
+                      field.onChange("oneTime");
+                      form.setValue("period", undefined);
+                    }}
+                    data-testid="button-recurrence-onetime"
+                  >
+                    {t("targets.oneTime")}
+                  </Button>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="unitLabel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("targets.targetName")} *</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={t("targets.targetNamePlaceholder")}
+                    {...field}
+                    value={field.value || ""}
+                    data-testid="input-target-name"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {watchedRecurrence === "recurring" && (
+            <FormField
+              control={form.control}
+              name="targetType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("targets.targetType")}</FormLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.setValue("category", "");
+                    }}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger data-testid="select-target-type">
+                        <SelectValue placeholder={t("targets.selectType")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="achievement">{t("targets.achievementType")}</SelectItem>
+                      <SelectItem value="limit">{t("targets.limitType")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {field.value === "limit" ? t("targets.limitTypeDesc") : t("targets.achievementTypeDesc")}
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("deed.category")}</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    if (!isDzikirCategory) {
+                      form.setValue("dzikirType", undefined);
+                    }
+                    if (!isSholatCategory) {
+                      form.setValue("sholatType", undefined);
+                      form.setValue("isJamaah", undefined);
+                    }
+                    if (!isFastingCategory) {
+                      form.setValue("fastingType", undefined);
+                    }
+                    if (!isQuranCategory) {
+                      form.setValue("quranUnit", undefined);
+                    }
+                    if (!isSedekahCategory) {
+                      form.setValue("sedekahType", undefined);
+                    }
+                  }}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger data-testid="select-target-category">
+                      <SelectValue placeholder={t("targets.selectCategory")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {availableCategories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {isDzikirCategory && (
+            <FormField
+              control={form.control}
+              name="dzikirType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("dzikir.selectType")}</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(value === "__any__" ? undefined : value)}
+                    value={field.value || "__any__"}
+                  >
+                    <FormControl>
+                      <SelectTrigger data-testid="select-dzikir-type">
+                        <SelectValue placeholder={t("dzikir.selectType")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="__any__">{t("dzikir.anyType")}</SelectItem>
+                      {DZIKIR_TYPES.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {t(type.labelKey)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {isSholatCategory && (
+            <FormField
+              control={form.control}
+              name="sholatType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("sholat.selectType")}</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(value === "__any__" ? undefined : value)}
+                    value={field.value || "__any__"}
+                  >
+                    <FormControl>
+                      <SelectTrigger data-testid="select-sholat-type">
+                        <SelectValue placeholder={t("sholat.selectType")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="__any__">{t("sholat.anyType")}</SelectItem>
+                      {currentSholatTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {t(type.labelKey)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {isFastingCategory && (
+            <FormField
+              control={form.control}
+              name="fastingType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("fasting.selectType")}</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(value === "__any__" ? undefined : value)}
+                    value={field.value || "__any__"}
+                  >
+                    <FormControl>
+                      <SelectTrigger data-testid="select-fasting-type">
+                        <SelectValue placeholder={t("fasting.selectType")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="__any__">{t("fasting.anyType")}</SelectItem>
+                      {currentFastingTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {t(type.labelKey)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {isSholatCategory && (
+            <FormField
+              control={form.control}
+              name="isJamaah"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value || false}
+                      onCheckedChange={field.onChange}
+                      data-testid="checkbox-target-jamaah"
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>{t("sholat.isJamaah")}</FormLabel>
+                  </div>
+                </FormItem>
+              )}
+            />
+          )}
+
+          {isQuranCategory && (
+            <FormField
+              control={form.control}
+              name="quranUnit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("quran.selectUnit")}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-target-quran-unit">
+                        <SelectValue placeholder={t("quran.selectUnit")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {QURAN_UNITS.map((unit) => (
+                        <SelectItem key={unit.id} value={unit.id}>
+                          {t(unit.labelKey)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {isSedekahCategory && (
+            <FormField
+              control={form.control}
+              name="sedekahType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("sedekah.selectType")}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-target-sedekah-type">
+                        <SelectValue placeholder={t("sedekah.selectType")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {SEDEKAH_TYPES.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {t(type.labelKey)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {watchedRecurrence === "oneTime" && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium">{t("targets.deadline")}</Label>
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  <Button
+                    type="button"
+                    variant={selectedDuration === "1day" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleDurationSelect("1day")}
+                    data-testid="button-duration-1day"
+                  >
+                    {t("targets.duration.1day")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={selectedDuration === "1week" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleDurationSelect("1week")}
+                    data-testid="button-duration-1week"
+                  >
+                    {t("targets.duration.1week")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={selectedDuration === "1month" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleDurationSelect("1month")}
+                    data-testid="button-duration-1month"
+                  >
+                    {t("targets.duration.1month")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={selectedDuration === "3months" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleDurationSelect("3months")}
+                    data-testid="button-duration-3months"
+                  >
+                    {t("targets.duration.3months")}
+                  </Button>
+                </div>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="dueDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>{t("targets.customDeadline")}</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                            data-testid="button-custom-deadline"
+                          >
+                            {field.value ? (
+                              format(new Date(field.value), "PPP")
+                            ) : (
+                              <span>{t("targets.customDeadline")}</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={field.value ? new Date(field.value) : undefined}
+                          onSelect={(date) => {
+                            if (date) {
+                              field.onChange(date);
+                              form.setValue("startDate", new Date());
+                              setSelectedDuration(null);
+                            }
+                          }}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+
+          <FormField
+            control={form.control}
+            name="targetValue"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {watchedRecurrence === "oneTime"
+                    ? t("targets.oneTimeTargetValue")
+                    : watchedTargetType === "limit"
+                    ? t("targets.maxValue")
+                    : t("targets.targetValue")}
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min={watchedTargetType === "limit" ? 0 : 1}
+                    value={field.value}
+                    onChange={(e) => {
+                      const value = e.target.valueAsNumber;
+                      field.onChange(isNaN(value) ? "" : value);
+                    }}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                    data-testid="input-target-value"
+                  />
+                </FormControl>
+                <p className="text-xs text-muted-foreground">
+                  {watchedRecurrence === "oneTime"
+                    ? t("targets.oneTimeTargetValueDesc")
+                    : watchedTargetType === "limit"
+                    ? t("targets.maxValueDesc")
+                    : t("targets.targetValueDesc")}
+                </p>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {watchedRecurrence === "recurring" && (
+            <FormField
+              control={form.control}
+              name="period"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("targets.period")}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-target-period">
+                        <SelectValue placeholder={t("targets.selectPeriod")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="daily">{t("targets.daily")}</SelectItem>
+                      <SelectItem value="weekly">{t("targets.weekly")}</SelectItem>
+                      <SelectItem value="monthly">{t("targets.monthly")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              data-testid="button-cancel-target"
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button type="submit" disabled={isSubmitting} data-testid="button-save-target">
+              {isSubmitting && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
+              {t("common.save")}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </Card>
+  );
+}

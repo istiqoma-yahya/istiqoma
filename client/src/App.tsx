@@ -12,6 +12,8 @@ import ProgressPage from "@/pages/ProgressPage";
 import DzikirPage from "@/pages/DzikirPage";
 import QiblaPage from "@/pages/QiblaPage";
 import TargetsPage from "@/pages/TargetsPage";
+import CreateTargetPage from "@/pages/CreateTargetPage";
+import EditTargetPage from "@/pages/EditTargetPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import { useDeeds } from "@/hooks/use-deeds";
 import NotFound from "@/pages/not-found";
@@ -35,6 +37,8 @@ function Router() {
       <Route path="/dzikir" component={DzikirPage} />
       <Route path="/qibla" component={QiblaPage} />
       <Route path="/targets" component={TargetsPage} />
+      <Route path="/targets/new" component={CreateTargetPage} />
+      <Route path="/targets/:id/edit" component={EditTargetPage} />
       <Route path="/categories" component={CategoryManagement} />
       <Route path="/notifications" component={NotificationsPage} />
       <Route path="/create-deed" component={CreateDeedPage} />

@@ -250,7 +250,15 @@
     "oneTimeTargetValue": "Nilai Target",
     "oneTimeTargetValueDesc": "Nilai yang harus dicapai sebelum tenggat",
     "updateProgress": "Perbarui",
-    "markComplete": "Tandai Selesai"
+    "markComplete": "Tandai Selesai",
+    "targetCreated": "Target Dibuat",
+    "targetCreatedDesc": "Target baru Anda telah berhasil ditambahkan.",
+    "targetUpdated": "Target Diperbarui",
+    "targetUpdatedDesc": "Target Anda telah berhasil diperbarui.",
+    "createError": "Gagal membuat target. Silakan coba lagi.",
+    "updateError": "Gagal memperbarui target. Silakan coba lagi.",
+    "notFound": "Target Tidak Ditemukan",
+    "notFoundDesc": "Target yang Anda cari tidak ada."
   },
   "user": {
     "profile": "Profil",

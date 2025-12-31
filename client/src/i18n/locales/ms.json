@@ -250,7 +250,15 @@
     "oneTimeTargetValue": "Nilai Sasaran",
     "oneTimeTargetValueDesc": "Nilai untuk dicapai sebelum tarikh akhir",
     "updateProgress": "Kemas Kini",
-    "markComplete": "Tandakan Selesai"
+    "markComplete": "Tandakan Selesai",
+    "targetCreated": "Sasaran Dicipta",
+    "targetCreatedDesc": "Sasaran baharu anda telah berjaya ditambah.",
+    "targetUpdated": "Sasaran Dikemas Kini",
+    "targetUpdatedDesc": "Sasaran anda telah berjaya dikemas kini.",
+    "createError": "Gagal mencipta sasaran. Sila cuba lagi.",
+    "updateError": "Gagal mengemas kini sasaran. Sila cuba lagi.",
+    "notFound": "Sasaran Tidak Dijumpai",
+    "notFoundDesc": "Sasaran yang anda cari tidak wujud."
   },
   "user": {
     "profile": "Profil",

@@ -250,7 +250,15 @@
     "oneTimeTargetValue": "Target Value",
     "oneTimeTargetValueDesc": "Value to achieve by deadline",
     "updateProgress": "Update",
-    "markComplete": "Mark as Complete"
+    "markComplete": "Mark as Complete",
+    "targetCreated": "Target Created",
+    "targetCreatedDesc": "Your new target has been added successfully.",
+    "targetUpdated": "Target Updated",
+    "targetUpdatedDesc": "Your target has been updated successfully.",
+    "createError": "Failed to create target. Please try again.",
+    "updateError": "Failed to update target. Please try again.",
+    "notFound": "Target Not Found",
+    "notFoundDesc": "The target you're looking for doesn't exist."
   },
   "user": {
     "profile": "Profile",

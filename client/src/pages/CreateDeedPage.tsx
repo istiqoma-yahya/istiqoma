@@ -468,36 +468,32 @@ export default function CreateDeedPage() {
               />
             </div>
 
-            <div className="space-y-6 pt-2 border-t border-border">
+            <div className="space-y-4 pt-2 border-t border-border">
               <p className="text-sm font-medium text-muted-foreground">{t("createDeed.dateTimeSection")}</p>
-              <div className="space-y-2">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  {t("createDeed.dateLabel")}
-                </label>
-                <div className="w-full">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 min-w-0">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    {t("createDeed.dateLabel")}
+                  </label>
                   <Input
                     type="date"
                     value={dateTime.date}
                     onChange={(e) => setDateTime({ ...dateTime, date: e.target.value })}
-                    className="glass-input !w-full"
-                    style={{ width: '100%', maxWidth: '100%' }}
+                    className="glass-input min-w-0"
                     data-testid="input-deed-date"
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  {t("createDeed.timeLabel")}
-                </label>
-                <div className="w-full">
+                <div className="space-y-2 min-w-0">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    {t("createDeed.timeLabel")}
+                  </label>
                   <Input
                     type="time"
                     value={dateTime.time}
                     onChange={(e) => setDateTime({ ...dateTime, time: e.target.value })}
-                    className="glass-input !w-full"
-                    style={{ width: '100%', maxWidth: '100%' }}
+                    className="glass-input min-w-0"
                     data-testid="input-deed-time"
                   />
                 </div>

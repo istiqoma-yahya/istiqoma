@@ -470,33 +470,31 @@ export default function CreateDeedPage() {
 
             <div className="space-y-4 pt-2 border-t border-border">
               <p className="text-sm font-medium text-muted-foreground">{t("createDeed.dateTimeSection")}</p>
-              <div className="flex gap-4">
-                <div className="space-y-2 flex-1 min-w-0">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    {t("createDeed.dateLabel")}
-                  </label>
-                  <Input
-                    type="date"
-                    value={dateTime.date}
-                    onChange={(e) => setDateTime({ ...dateTime, date: e.target.value })}
-                    className="glass-input w-full"
-                    data-testid="input-deed-date"
-                  />
-                </div>
-                <div className="space-y-2 flex-1 min-w-0">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    {t("createDeed.timeLabel")}
-                  </label>
-                  <Input
-                    type="time"
-                    value={dateTime.time}
-                    onChange={(e) => setDateTime({ ...dateTime, time: e.target.value })}
-                    className="glass-input w-full"
-                    data-testid="input-deed-time"
-                  />
-                </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  {t("createDeed.dateLabel")}
+                </label>
+                <Input
+                  type="date"
+                  value={dateTime.date}
+                  onChange={(e) => setDateTime({ ...dateTime, date: e.target.value })}
+                  className="glass-input"
+                  data-testid="input-deed-date"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  {t("createDeed.timeLabel")}
+                </label>
+                <Input
+                  type="time"
+                  value={dateTime.time}
+                  onChange={(e) => setDateTime({ ...dateTime, time: e.target.value })}
+                  className="glass-input"
+                  data-testid="input-deed-time"
+                />
               </div>
             </div>
 

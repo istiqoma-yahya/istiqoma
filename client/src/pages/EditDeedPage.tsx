@@ -461,8 +461,8 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
 
             <div className="space-y-4 pt-2 border-t border-border">
               <p className="text-sm font-medium text-muted-foreground">Record Date & Time</p>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="flex gap-4">
+                <div className="space-y-2 flex-1 min-w-0">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
                     Date
@@ -471,11 +471,11 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                     type="date"
                     value={dateTime.date}
                     onChange={(e) => setDateTime({ ...dateTime, date: e.target.value })}
-                    className="glass-input"
+                    className="glass-input w-full"
                     data-testid="input-edit-deed-date"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 flex-1 min-w-0">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Clock className="w-4 h-4" />
                     Time
@@ -484,7 +484,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                     type="time"
                     value={dateTime.time}
                     onChange={(e) => setDateTime({ ...dateTime, time: e.target.value })}
-                    className="glass-input"
+                    className="glass-input w-full"
                     data-testid="input-edit-deed-time"
                   />
                 </div>

@@ -1,7 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, type CreateCategoryRequest, type CategoryResponse } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
+
+export function useCategoryName() {
+  const { t } = useTranslation();
+  
+  return (categoryName: string): string => {
+    const translationKey = `categoryNames.${categoryName}`;
+    const translated = t(translationKey);
+    return translated === translationKey ? categoryName : translated;
+  };
+}
 
 export function useCategories() {
   const { toast } = useToast();

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
-import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory, useReorderCategories } from "@/hooks/use-categories";
+import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory, useReorderCategories, useCategoryName } from "@/hooks/use-categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -50,6 +50,7 @@ function SortableCategoryCard({
   isDeleting: boolean;
 }) {
   const { t } = useTranslation();
+  const translateCategoryName = useCategoryName();
   const {
     attributes,
     listeners,
@@ -111,7 +112,7 @@ function SortableCategoryCard({
             >
               <GripVertical className="w-5 h-5" />
             </button>
-            <h3 className="text-lg font-medium">{category.name}</h3>
+            <h3 className="text-lg font-medium">{translateCategoryName(category.name)}</h3>
           </div>
           <div className="flex items-center gap-2">
             {isProtectedCategory ? (

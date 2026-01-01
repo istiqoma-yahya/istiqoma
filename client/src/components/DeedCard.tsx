@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { type Deed } from "@shared/schema";
 import { useDeleteDeed } from "@/hooks/use-deeds";
+import { useCategoryName } from "@/hooks/use-categories";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import {
@@ -26,6 +27,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
   const [, navigate] = useLocation();
   const { mutate: deleteDeed, isPending } = useDeleteDeed();
   const { t } = useTranslation();
+  const translateCategoryName = useCategoryName();
 
   const isGood = deed.deedType === "good";
   const isIstighfar = deed.category === "Istighfar";
@@ -50,7 +52,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
       if (deed.fastingType && deed.fastingType !== "any") {
         return t(`fasting.types.${deed.fastingType}`);
       }
-      return deed.category;
+      return translateCategoryName(deed.category);
     }
     return deed.description;
   };
@@ -83,7 +85,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
               {isGood ? `+ ${t('deed.goodDeed')}` : isIstighfar ? `- ${t('deed.badDeed')}` : `+ ${t('deed.badDeed')}`}
             </span>
             <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-600 dark:text-blue-400">
-              {deed.category}
+              {translateCategoryName(deed.category)}
             </span>
           </div>
           <h3 className="text-lg font-medium text-foreground leading-tight mb-1">

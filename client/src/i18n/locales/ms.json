@@ -103,6 +103,15 @@
     "deleteConfirm": "Padam kategori ini?",
     "protectedCategory": "Kategori ini dilindungi dan tidak boleh diedit atau dipadam"
   },
+  "categoryNames": {
+    "Dzikir": "Zikir",
+    "Sholat Fardhu": "Solat Fardhu",
+    "Sholat Sunnah": "Solat Sunat",
+    "Fasting Fardhu": "Puasa Fardhu",
+    "Fasting Sunnah": "Puasa Sunat",
+    "Baca Quran": "Baca Quran",
+    "Shodaqoh": "Sedekah"
+  },
   "dzikir": {
     "title": "Kaunter Zikir",
     "counter": "Kaunter",

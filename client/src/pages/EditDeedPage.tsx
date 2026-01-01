@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { useUpdateDeed } from "@/hooks/use-deeds";
-import { useCategories } from "@/hooks/use-categories";
+import { useCategories, useCategoryName } from "@/hooks/use-categories";
 import { insertDeedSchema, type Deed } from "@shared/schema";
 import {
   Form,
@@ -51,6 +51,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const [, navigate] = useLocation();
   const { mutate, isPending } = useUpdateDeed();
   const { data: categories = [] } = useCategories();
+  const translateCategoryName = useCategoryName();
   const [dateTime, setDateTime] = useState(formatDateTimeForInput(deed.createdAt));
 
   const form = useForm<FormValues>({
@@ -229,7 +230,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                     </FormControl>
                     <SelectContent className="bg-popover border-border text-popover-foreground">
                       {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                        <SelectItem key={cat.id} value={cat.name}>{translateCategoryName(cat.name)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

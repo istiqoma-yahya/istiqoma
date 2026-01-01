@@ -103,6 +103,15 @@
     "deleteConfirm": "Delete this category?",
     "protectedCategory": "This category is protected and cannot be edited or deleted"
   },
+  "categoryNames": {
+    "Dzikir": "Dzikir",
+    "Sholat Fardhu": "Sholat Fardhu",
+    "Sholat Sunnah": "Sholat Sunnah",
+    "Fasting Fardhu": "Fasting Fardhu",
+    "Fasting Sunnah": "Fasting Sunnah",
+    "Baca Quran": "Baca Quran",
+    "Shodaqoh": "Shodaqoh"
+  },
   "dzikir": {
     "title": "Dzikir Counter",
     "counter": "Counter",

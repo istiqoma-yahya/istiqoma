@@ -103,6 +103,15 @@
     "deleteConfirm": "Hapus kategori ini?",
     "protectedCategory": "Kategori ini dilindungi dan tidak dapat diedit atau dihapus"
   },
+  "categoryNames": {
+    "Dzikir": "Dzikir",
+    "Sholat Fardhu": "Sholat Fardhu",
+    "Sholat Sunnah": "Sholat Sunnah",
+    "Fasting Fardhu": "Puasa Fardhu",
+    "Fasting Sunnah": "Puasa Sunnah",
+    "Baca Quran": "Baca Quran",
+    "Shodaqoh": "Shodaqoh"
+  },
   "dzikir": {
     "title": "Penghitung Dzikir",
     "counter": "Penghitung",

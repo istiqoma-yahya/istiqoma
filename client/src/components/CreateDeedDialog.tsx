@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useCreateDeed } from "@/hooks/use-deeds";
-import { useCategories } from "@/hooks/use-categories";
+import { useCategories, useCategoryName } from "@/hooks/use-categories";
 import { insertDeedSchema } from "@shared/schema";
 import {
   Dialog,
@@ -52,6 +52,7 @@ export function CreateDeedDialog() {
   const [open, setOpen] = useState(false);
   const { mutate, isPending } = useCreateDeed();
   const { data: categories = [] } = useCategories();
+  const translateCategoryName = useCategoryName();
   const [dateTime, setDateTime] = useState(getCurrentDateTime());
 
   const form = useForm<FormValues>({
@@ -146,7 +147,7 @@ export function CreateDeedDialog() {
                     </FormControl>
                     <SelectContent className="bg-popover border-border text-popover-foreground">
                       {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                        <SelectItem key={cat.id} value={cat.name}>{translateCategoryName(cat.name)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

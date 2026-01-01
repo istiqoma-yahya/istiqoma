@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useCategories } from "@/hooks/use-categories";
+import { useCategories, useCategoryName } from "@/hooks/use-categories";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +41,7 @@ export function TargetForm({
 }: TargetFormProps) {
   const { t } = useTranslation();
   const { data: categories } = useCategories();
+  const translateCategoryName = useCategoryName();
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
 
   const form = useForm<InsertTarget>({
@@ -328,7 +329,7 @@ export function TargetForm({
                 <SelectContent className="bg-popover border-border text-popover-foreground">
                   {availableCategories.map((cat) => (
                     <SelectItem key={cat.id} value={cat.name}>
-                      {cat.name}
+                      {translateCategoryName(cat.name)}
                     </SelectItem>
                   ))}
                 </SelectContent>

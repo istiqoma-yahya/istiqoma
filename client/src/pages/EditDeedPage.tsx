@@ -179,7 +179,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
-          <h1 className="font-display font-bold text-xl">Edit Deed</h1>
+          <h1 className="font-display font-bold text-xl">{t("editDeed.title")}</h1>
           <button
             onClick={() => navigate("/")}
             className="p-2 hover:bg-muted rounded-lg transition-colors"
@@ -198,10 +198,10 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t("editDeed.descriptionLabel")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Helped a neighbor, Missed prayer..."
+                      placeholder={t("editDeed.descriptionPlaceholder")}
                       className="glass-input"
                       {...field}
                       data-testid="input-edit-deed-description"
@@ -217,14 +217,14 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("createDeed.categoryLabel")}</FormLabel>
+                  <FormLabel>{t("editDeed.categoryLabel")}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger className="glass-input" data-testid="select-edit-deed-category">
-                        <SelectValue placeholder={t("createDeed.categoryPlaceholder")} />
+                        <SelectValue placeholder={t("editDeed.categoryPlaceholder")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -418,19 +418,19 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                 name="deedType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Type</FormLabel>
+                    <FormLabel>{t("editDeed.typeLabel")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger className="glass-input" data-testid="select-edit-deed-type">
-                          <SelectValue placeholder="Select type" />
+                          <SelectValue placeholder={t("editDeed.typePlaceholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-popover border-border text-popover-foreground">
-                        <SelectItem value="good">Good Deed</SelectItem>
-                        <SelectItem value="bad">Bad Deed</SelectItem>
+                        <SelectItem value="good">{t("deed.goodDeed")}</SelectItem>
+                        <SelectItem value="bad">{t("deed.badDeed")}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -443,7 +443,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                 name="points"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Points (Weight)</FormLabel>
+                    <FormLabel>{t("editDeed.pointsLabel")}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -460,12 +460,12 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
             </div>
 
             <div className="space-y-4 pt-2 border-t border-border">
-              <p className="text-sm font-medium text-muted-foreground">Record Date & Time</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("editDeed.dateTimeSection")}</p>
               <div className="flex gap-6">
                 <div className="space-y-2 min-w-0">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    Date
+                    {t("editDeed.dateLabel")}
                   </label>
                   <Input
                     type="date"
@@ -478,7 +478,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                 <div className="space-y-2">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Clock className="w-4 h-4" />
-                    Time
+                    {t("editDeed.timeLabel")}
                   </label>
                   <Input
                     type="time"
@@ -499,7 +499,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                 className="flex-1 py-2 text-base"
                 data-testid="button-cancel-edit-deed"
               >
-                Cancel
+                {t("editDeed.cancel")}
               </Button>
               <Button
                 type="submit"
@@ -510,10 +510,10 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                 {isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
+                    {t("editDeed.saving")}
                   </>
                 ) : (
-                  "Confirm Changes"
+                  t("editDeed.confirmChanges")
                 )}
               </Button>
             </div>

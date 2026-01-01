@@ -77,6 +77,22 @@
     "saving": "Menyimpan...",
     "saveDeed": "Simpan Amal"
   },
+  "editDeed": {
+    "title": "Edit Amal",
+    "descriptionLabel": "Penerangan",
+    "descriptionPlaceholder": "contoh: Membantu jiran, Terlepas solat...",
+    "categoryLabel": "Kategori",
+    "categoryPlaceholder": "Pilih kategori",
+    "typeLabel": "Jenis",
+    "typePlaceholder": "Pilih jenis",
+    "pointsLabel": "Mata (Berat)",
+    "dateTimeSection": "Tarikh & Masa",
+    "dateLabel": "Tarikh",
+    "timeLabel": "Masa",
+    "saving": "Menyimpan...",
+    "confirmChanges": "Sahkan Perubahan",
+    "cancel": "Batal"
+  },
   "categories": {
     "title": "Urus Kategori",
     "addCategory": "Tambah Kategori",

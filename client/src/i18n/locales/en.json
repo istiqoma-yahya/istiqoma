@@ -77,6 +77,22 @@
     "saving": "Saving...",
     "saveDeed": "Save Deed"
   },
+  "editDeed": {
+    "title": "Edit Deed",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "e.g., Helped a neighbor, Missed prayer...",
+    "categoryLabel": "Category",
+    "categoryPlaceholder": "Select category",
+    "typeLabel": "Type",
+    "typePlaceholder": "Select type",
+    "pointsLabel": "Points (Weight)",
+    "dateTimeSection": "Record Date & Time",
+    "dateLabel": "Date",
+    "timeLabel": "Time",
+    "saving": "Saving...",
+    "confirmChanges": "Confirm Changes",
+    "cancel": "Cancel"
+  },
   "categories": {
     "title": "Manage Categories",
     "addCategory": "Add Category",

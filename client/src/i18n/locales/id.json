@@ -269,6 +269,7 @@
     "statusCompleted": "Selesai",
     "statusExpired": "Kadaluarsa",
     "customDeadline": "Tanggal Kustom",
+    "pickDate": "Pilih tanggal",
     "oneTimeGoal": "Target Sekali",
     "oneTimeTargetValue": "Nilai Target",
     "oneTimeTargetValueDesc": "Nilai yang harus dicapai sebelum tenggat",

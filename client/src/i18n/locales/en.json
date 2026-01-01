@@ -269,6 +269,7 @@
     "statusCompleted": "Completed",
     "statusExpired": "Expired",
     "customDeadline": "Custom Date",
+    "pickDate": "Pick a date",
     "oneTimeGoal": "One-Time Goal",
     "oneTimeTargetValue": "Target Value",
     "oneTimeTargetValueDesc": "Value to achieve by deadline",

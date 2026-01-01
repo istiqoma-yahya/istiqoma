@@ -470,7 +470,7 @@ export default function CreateDeedPage() {
 
             <div className="space-y-4 pt-2 border-t border-border">
               <p className="text-sm font-medium text-muted-foreground">{t("createDeed.dateTimeSection")}</p>
-              <div className="grid grid-cols-[1fr_auto] gap-6">
+              <div className="flex gap-6">
                 <div className="space-y-2 min-w-0">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Calendar className="w-4 h-4" />

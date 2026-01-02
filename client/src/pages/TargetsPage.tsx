@@ -27,7 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { type TargetWithProgress } from "@shared/schema";
 import { type TargetHistoryWithStreak } from "@/hooks/use-targets";
-import { Loader2, Plus, Target, Pencil, Trash2, Trophy, TrendingUp, Calendar, ChevronDown, ChevronUp, CheckCircle, XCircle, History, Ban, Clock } from "lucide-react";
+import { Loader2, Plus, Target, Pencil, Trash2, Trophy, Calendar, ChevronDown, ChevronUp, CheckCircle, XCircle, History, Ban, Clock } from "lucide-react";
 import { format, formatDistanceToNow, isPast } from "date-fns";
 
 interface TargetCardProps {
@@ -423,10 +423,10 @@ export default function TargetsPage() {
 
   const getPeriodIcon = (period: string) => {
     switch (period) {
-      case "daily": return <TrendingUp className="w-4 h-4" />;
+      case "daily": return <Calendar className="w-4 h-4" />;
       case "weekly": return <Calendar className="w-4 h-4" />;
-      case "monthly": return <Trophy className="w-4 h-4" />;
-      default: return <Target className="w-4 h-4" />;
+      case "monthly": return <Calendar className="w-4 h-4" />;
+      default: return <Calendar className="w-4 h-4" />;
     }
   };
 

@@ -65,7 +65,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       className={`
-        group relative p-5 rounded-2xl border transition-all duration-300 cursor-pointer
+        group relative p-5 rounded-2xl border transition-all duration-300 cursor-pointer touch-manipulation
         ${isGood 
           ? "bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/30" 
           : "bg-rose-500/5 border-rose-500/20 hover:bg-rose-500/10 hover:border-rose-500/30"

@@ -110,7 +110,7 @@ export const insertCategorySchema = createInsertSchema(categories).pick({
   name: true,
   isProtected: true,
 }).extend({
-  isProtected: z.boolean().optional().default(false),
+  isProtected: z.boolean().optional(),
 });
 
 export const insertTargetSchema = createInsertSchema(targets).pick({

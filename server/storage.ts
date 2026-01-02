@@ -81,7 +81,12 @@ export class DatabaseStorage implements IStorage {
     const maxSortOrder = existing.length > 0 ? Math.max(...existing.map(c => c.sortOrder)) : -1;
     const [category] = await db
       .insert(categories)
-      .values({ ...insertCategory, userId, sortOrder: maxSortOrder + 1 })
+      .values({ 
+        ...insertCategory, 
+        userId, 
+        sortOrder: maxSortOrder + 1,
+        isProtected: insertCategory.isProtected ?? false,
+      })
       .returning();
     return category;
   }

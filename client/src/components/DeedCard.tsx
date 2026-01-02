@@ -37,24 +37,37 @@ export function DeedCard({ deed, index }: DeedCardProps) {
     if (isIstighfar) {
       return t('dzikir.istighfarDeedDesc', { count: deed.points || 0 });
     }
+    
     const isDzikirCategory = deed.category?.toLowerCase() === "dzikir" || deed.category?.toLowerCase() === "dzikr";
     if (isDzikirCategory) {
       if (deed.dzikirType) {
         const dzikirTypeLabel = t(`dzikir.types.${deed.dzikirType}`);
-        return t('dzikir.dzikirTypeDeedDesc', { type: dzikirTypeLabel, count: deed.points || 0 });
+        return dzikirTypeLabel;
       }
       return t('dzikir.dzikirDeedDesc', { count: deed.points || 0 });
     }
-    if (!deed.description || deed.description.trim() === "") {
-      if (deed.sholatType && deed.sholatType !== "any") {
-        return t(`sholat.types.${deed.sholatType}`);
-      }
-      if (deed.fastingType && deed.fastingType !== "any") {
-        return t(`fasting.types.${deed.fastingType}`);
-      }
-      return translateCategoryName(deed.category);
+    
+    if (deed.sholatType && deed.sholatType !== "any") {
+      return t(`sholat.types.${deed.sholatType}`);
     }
-    return deed.description;
+    
+    if (deed.fastingType && deed.fastingType !== "any") {
+      return t(`fasting.types.${deed.fastingType}`);
+    }
+    
+    if (deed.quranUnit) {
+      return t(`quran.units.${deed.quranUnit}`);
+    }
+    
+    if (deed.sedekahType) {
+      return t(`sedekah.types.${deed.sedekahType}`);
+    }
+    
+    if (deed.description && deed.description.trim() !== "") {
+      return deed.description;
+    }
+    
+    return translateCategoryName(deed.category);
   };
   
   const displayDescription = getDisplayDescription();

@@ -108,6 +108,9 @@ export const insertDeedSchema = createInsertSchema(deeds).pick({
 
 export const insertCategorySchema = createInsertSchema(categories).pick({
   name: true,
+  isProtected: true,
+}).extend({
+  isProtected: z.boolean().optional().default(false),
 });
 
 export const insertTargetSchema = createInsertSchema(targets).pick({

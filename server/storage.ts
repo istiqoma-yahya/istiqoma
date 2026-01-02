@@ -18,6 +18,7 @@ export interface IStorage {
   deleteCategory(id: number, userId: string): Promise<void>;
   updateCategory(id: number, userId: string, name: string): Promise<Category>;
   reorderCategories(userId: string, orderedIds: number[]): Promise<Category[]>;
+  markCategoryProtected(id: number, userId: string): Promise<void>;
   getTargets(userId: string): Promise<Target[]>;
   getTargetsWithProgress(userId: string): Promise<TargetWithProgress[]>;
   createTarget(userId: string, target: InsertTarget): Promise<Target>;
@@ -108,6 +109,13 @@ export class DatabaseStorage implements IStorage {
         .where(and(eq(categories.id, orderedIds[i]), eq(categories.userId, userId)));
     }
     return this.getCategories(userId);
+  }
+
+  async markCategoryProtected(id: number, userId: string): Promise<void> {
+    await db
+      .update(categories)
+      .set({ isProtected: true })
+      .where(and(eq(categories.id, id), eq(categories.userId, userId)));
   }
 
   async getTargets(userId: string): Promise<Target[]> {

@@ -100,6 +100,14 @@ export async function registerRoutes(
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid ID" });
     }
+    
+    // Check if category is protected
+    const categories = await storage.getCategories(userId);
+    const category = categories.find(c => c.id === id);
+    if (category?.isProtected) {
+      return res.status(403).json({ message: "Cannot delete protected category" });
+    }
+    
     await storage.deleteCategory(id, userId);
     res.status(204).send();
   });
@@ -115,6 +123,14 @@ export async function registerRoutes(
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid ID" });
       }
+      
+      // Check if category is protected
+      const categories = await storage.getCategories(userId);
+      const existingCategory = categories.find(c => c.id === id);
+      if (existingCategory?.isProtected) {
+        return res.status(403).json({ message: "Cannot edit protected category" });
+      }
+      
       const category = await storage.updateCategory(id, userId, name);
       res.json(category);
     } catch (err) {

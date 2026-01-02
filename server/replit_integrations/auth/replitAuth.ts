@@ -7,6 +7,16 @@ import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { authStorage } from "./storage";
+import { storage } from "../../storage";
+
+const DEFAULT_CATEGORIES = [
+  "Dzikir",
+  "Sholat Fardhu",
+  "Sholat Sunnah",
+  "Fasting Fardhu",
+  "Fasting Sunnah",
+  "Baca Quran",
+];
 
 const getOidcConfig = memoize(
   async () => {
@@ -51,13 +61,35 @@ function updateUserSession(
 }
 
 async function upsertUser(claims: any) {
+  const userId = claims["sub"];
+  
   await authStorage.upsertUser({
-    id: claims["sub"],
+    id: userId,
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
   });
+  
+  // Seed default categories for new users and ensure existing ones are protected
+  try {
+    const existingCategories = await storage.getCategories(userId);
+    const existingNames = existingCategories.map(c => c.name);
+    
+    for (const categoryName of DEFAULT_CATEGORIES) {
+      if (!existingNames.includes(categoryName)) {
+        await storage.createCategory(userId, { name: categoryName, isProtected: true });
+      } else {
+        // Mark existing default category as protected if not already
+        const existingCat = existingCategories.find(c => c.name === categoryName);
+        if (existingCat && !existingCat.isProtected) {
+          await storage.markCategoryProtected(existingCat.id, userId);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error seeding default categories:", error);
+  }
 }
 
 export async function setupAuth(app: Express) {

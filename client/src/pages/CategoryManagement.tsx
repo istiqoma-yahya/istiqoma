@@ -66,7 +66,7 @@ function SortableCategoryCard({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const isProtectedCategory = category.name === "Dzikir" || category.name === "Sholat Fardhu" || category.name === "Sholat Sunnah" || category.name === "Fasting Fardhu" || category.name === "Fasting Sunnah";
+  const isProtectedCategory = category.isProtected;
 
   return (
     <Card
@@ -221,7 +221,7 @@ export default function CategoryManagement() {
 
   const handleCreateCategory = () => {
     if (!newCategoryName.trim()) return;
-    createCategory({ name: newCategoryName }, {
+    createCategory({ name: newCategoryName, isProtected: false }, {
       onSuccess: () => {
         setNewCategoryName("");
         setOpenCreateDialog(false);

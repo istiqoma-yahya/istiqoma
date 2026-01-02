@@ -126,9 +126,43 @@ export class DatabaseStorage implements IStorage {
     return userTargets.map((target) => {
       const isOneTime = target.recurrence === "oneTime";
       
-      // For one-time targets, use manual progress instead of deed aggregation
+      // For one-time targets, count matching deeds + manual progress
       if (isOneTime) {
-        const currentValue = target.manualProgress || 0;
+        // Filter deeds by date range (startDate to dueDate) and matching category/subcategory
+        const isLimitTarget = target.targetType === "limit";
+        
+        const matchingDeeds = userDeeds.filter((deed) => {
+          const deedDate = new Date(deed.createdAt || now);
+          
+          // Check date range if specified
+          const afterStart = !target.startDate || deedDate >= new Date(target.startDate);
+          const beforeDue = !target.dueDate || deedDate <= new Date(target.dueDate);
+          const inDateRange = afterStart && beforeDue;
+          
+          // Match category
+          const matchesCategory = deed.category === target.category;
+          
+          // Match subcategories (metadata)
+          const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;
+          const matchesSholatType = !target.sholatType || deed.sholatType === target.sholatType;
+          const matchesFastingType = !target.fastingType || deed.fastingType === target.fastingType;
+          const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
+          const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
+          const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
+          
+          if (isLimitTarget) {
+            // For limit targets, count all deeds in this category
+            return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && inDateRange;
+          } else {
+            // For achievement targets, only count good deeds
+            return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && deed.deedType === "good" && inDateRange;
+          }
+        });
+        
+        // Sum deed points + manual progress
+        const deedProgress = matchingDeeds.reduce((sum, deed) => sum + deed.points, 0);
+        const currentValue = deedProgress + (target.manualProgress || 0);
+        
         const percentComplete = target.targetValue > 0 
           ? Math.min(100, Math.round((currentValue / target.targetValue) * 100))
           : 0;
@@ -171,19 +205,20 @@ export class DatabaseStorage implements IStorage {
         const inPeriod = deedDate >= periodStart && deedDate <= periodEnd;
         const matchesCategory = deed.category === target.category;
         
-        // For dzikir targets with specific type, also match dzikirType
+        // Match subcategories (metadata)
         const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;
-        // For sholat targets with specific type, also match sholatType
         const matchesSholatType = !target.sholatType || deed.sholatType === target.sholatType;
-        // For fasting targets with specific type, also match fastingType
         const matchesFastingType = !target.fastingType || deed.fastingType === target.fastingType;
+        const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
+        const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
+        const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
         
         if (isLimitTarget) {
           // For limit targets, count all deeds in this category (typically bad deeds like Maksiat)
-          return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && inPeriod;
+          return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && inPeriod;
         } else {
           // For achievement targets, only count good deeds
-          return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && deed.deedType === "good" && inPeriod;
+          return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && deed.deedType === "good" && inPeriod;
         }
       });
 

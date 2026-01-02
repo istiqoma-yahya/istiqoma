@@ -237,7 +237,7 @@ function TargetCard({
           </div>
           <Progress 
             value={Math.min(100, ((target.manualProgress || target.currentValue || 0) / target.targetValue) * 100)} 
-            className="h-2"
+            className="h-2 bg-gray-300 dark:bg-gray-600"
             data-testid={`progress-target-${target.id}`}
           />
           {oneTimeStatus === "active" && (
@@ -293,7 +293,7 @@ function TargetCard({
                 </div>
                 <Progress 
                   value={Math.min(100, (target.currentValue / target.targetValue) * 100)} 
-                  className={`h-2 ${isExceeded ? "[&>div]:bg-red-500" : "[&>div]:bg-green-500"}`}
+                  className={`h-2 bg-gray-300 dark:bg-gray-600 ${isExceeded ? "[&>div]:bg-red-500" : "[&>div]:bg-green-500"}`}
                   data-testid={`progress-target-${target.id}`}
                 />
                 <div className="flex items-center gap-1 text-sm">
@@ -320,7 +320,7 @@ function TargetCard({
                 </div>
                 <Progress 
                   value={target.percentComplete} 
-                  className="h-2"
+                  className="h-2 bg-gray-300 dark:bg-gray-600"
                   data-testid={`progress-target-${target.id}`}
                 />
                 {isAchieved && (

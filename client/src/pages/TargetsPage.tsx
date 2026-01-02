@@ -28,7 +28,8 @@ import { Input } from "@/components/ui/input";
 import { type TargetWithProgress } from "@shared/schema";
 import { type TargetHistoryWithStreak } from "@/hooks/use-targets";
 import { Loader2, Plus, Target, Pencil, Trash2, Trophy, Calendar, ChevronDown, ChevronUp, CheckCircle, XCircle, History, Ban, Clock } from "lucide-react";
-import { format, formatDistanceToNow, isPast } from "date-fns";
+import { format, formatDistanceToNow, isPast, type Locale } from "date-fns";
+import { id as idLocale, ms as msLocale, enUS } from "date-fns/locale";
 
 interface TargetCardProps {
   target: TargetWithProgress;
@@ -42,6 +43,7 @@ interface TargetCardProps {
   onUpdateProgress: (id: number, progress: number) => void;
   onComplete: (id: number) => void;
   isUpdatingProgress: boolean;
+  dateLocale: Locale;
 }
 
 function TargetCard({
@@ -56,6 +58,7 @@ function TargetCard({
   onUpdateProgress,
   onComplete,
   isUpdatingProgress,
+  dateLocale,
 }: TargetCardProps) {
   const { data: historyData, isLoading: historyLoading } = useTargetHistory(
     isExpanded ? target.id : null
@@ -92,10 +95,10 @@ function TargetCard({
     if (!target.dueDate) return null;
     const dueDate = new Date(target.dueDate);
     if (isPast(dueDate)) {
-      const distance = formatDistanceToNow(dueDate);
+      const distance = formatDistanceToNow(dueDate, { locale: dateLocale });
       return { text: t("targets.overdue", { time: distance }), isOverdue: true };
     }
-    const distance = formatDistanceToNow(dueDate);
+    const distance = formatDistanceToNow(dueDate, { locale: dateLocale });
     return { text: t("targets.dueIn", { time: distance }), isOverdue: false };
   };
   
@@ -394,7 +397,7 @@ function TargetCard({
 }
 
 export default function TargetsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [, navigate] = useLocation();
   const { data: targets, isLoading } = useTargetsWithProgress();
   const { user } = useAuth();
@@ -404,6 +407,15 @@ export default function TargetsPage() {
 
   const [deletingTarget, setDeletingTarget] = useState<TargetWithProgress | null>(null);
   const [expandedTargetId, setExpandedTargetId] = useState<number | null>(null);
+
+  const getDateLocale = () => {
+    switch (i18n.language) {
+      case "id": return idLocale;
+      case "ms": return msLocale;
+      default: return enUS;
+    }
+  };
+  const dateLocale = getDateLocale();
 
   const handleDelete = async () => {
     if (deletingTarget) {
@@ -486,6 +498,7 @@ export default function TargetsPage() {
                 onUpdateProgress={(id, progress) => updateProgress.mutate({ id, progress })}
                 onComplete={(id) => completeTarget.mutate(id)}
                 isUpdatingProgress={updateProgress.isPending || completeTarget.isPending}
+                dateLocale={dateLocale}
               />
             ))}
           </div>

@@ -59,6 +59,14 @@ export function DeedCard({ deed, index }: DeedCardProps) {
   
   const displayDescription = getDisplayDescription();
 
+  const handleCardTap = (event: MouseEvent | TouchEvent | PointerEvent) => {
+    const target = event.target as HTMLElement;
+    if (target.closest('button') || target.closest('[role="dialog"]')) {
+      return;
+    }
+    navigate(`/edit-deed/${deed.id}`);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -71,7 +79,11 @@ export function DeedCard({ deed, index }: DeedCardProps) {
           : "bg-rose-500/5 border-rose-500/20 hover:bg-rose-500/10 hover:border-rose-500/30"
         }
       `}
-      onClick={() => navigate(`/edit-deed/${deed.id}`)}
+      onTap={handleCardTap}
+      whileTap={{ scale: 0.98 }}
+      role="button"
+      tabIndex={0}
+      data-testid={`card-deed-${deed.id}`}
     >
       <div className="flex justify-between items-start gap-4">
         <div>

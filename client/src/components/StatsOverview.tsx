@@ -1,5 +1,5 @@
 import { type Deed } from "@shared/schema";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -23,7 +23,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
       label: t('stats.goodDeeds'),
       value: goodDeeds.length,
       points: goodPoints,
-      icon: TrendingUp,
+      icon: ThumbsUp,
       color: "text-emerald-600 dark:text-emerald-400",
       bg: "bg-emerald-500/10",
       border: "border-emerald-500/20",
@@ -33,7 +33,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
       label: t('stats.badDeeds'),
       value: badDeedsExcludingIstighfar.length,
       points: badPoints,
-      icon: TrendingDown,
+      icon: ThumbsDown,
       color: "text-rose-600 dark:text-rose-400",
       bg: "bg-rose-500/10",
       border: "border-rose-500/20",

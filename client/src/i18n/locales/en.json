@@ -251,7 +251,7 @@
     "limitType": "Avoid Sin",
     "achievementTypeDesc": "Reach a minimum number of points for good deeds",
     "limitTypeDesc": "Stay under a maximum limit to avoid sins",
-    "limitBadge": "Limit",
+    "limitBadge": "Avoid Sin",
     "usage": "Usage",
     "max": "max",
     "used": "used",

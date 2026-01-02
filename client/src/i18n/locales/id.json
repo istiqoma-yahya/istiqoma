@@ -91,7 +91,10 @@
     "timeLabel": "Waktu",
     "saving": "Menyimpan...",
     "confirmChanges": "Konfirmasi Perubahan",
-    "cancel": "Batal"
+    "delete": "Hapus",
+    "deleteConfirm": "Hapus amal ini?",
+    "deleteWarning": "Tindakan ini tidak dapat dibatalkan. Ini akan menghapus amal ini secara permanen dari riwayatmu.",
+    "deleting": "Menghapus..."
   },
   "categories": {
     "title": "Kelola Kategori",

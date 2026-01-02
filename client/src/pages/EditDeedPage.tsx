@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
-import { useUpdateDeed } from "@/hooks/use-deeds";
+import { useUpdateDeed, useDeleteDeed } from "@/hooks/use-deeds";
 import { useCategories, useCategoryName } from "@/hooks/use-categories";
 import { insertDeedSchema, type Deed } from "@shared/schema";
 import {
@@ -21,11 +21,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Calendar, Clock, X } from "lucide-react";
+import { Loader2, Calendar, Clock, X, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const formSchema = insertDeedSchema.extend({
   points: z.coerce.number().min(1, "Points must be at least 1"),
@@ -50,6 +61,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
   const { mutate, isPending } = useUpdateDeed();
+  const { mutate: deleteDeed, isPending: isDeleting } = useDeleteDeed();
   const { data: categories = [] } = useCategories();
   const translateCategoryName = useCategoryName();
   const [dateTime, setDateTime] = useState(formatDateTimeForInput(deed.createdAt));
@@ -171,6 +183,14 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
     mutate({ id: deed.id, data: { ...data, createdAt } }, {
       onSuccess: () => {
         form.reset();
+        navigate("/");
+      },
+    });
+  };
+
+  const handleDelete = () => {
+    deleteDeed(deed.id, {
+      onSuccess: () => {
         navigate("/");
       },
     });
@@ -493,18 +513,52 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
             </div>
 
             <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/")}
-                className="flex-1 py-2 text-base"
-                data-testid="button-cancel-edit-deed"
-              >
-                {t("editDeed.cancel")}
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="flex-1 py-2 text-base"
+                    disabled={isDeleting}
+                    data-testid="button-delete-edit-deed"
+                  >
+                    {isDeleting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t("editDeed.deleting")}
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        {t("editDeed.delete")}
+                      </>
+                    )}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("editDeed.deleteConfirm")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("editDeed.deleteWarning")}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel data-testid="button-cancel-delete-deed">
+                      {t("common.cancel")}
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      data-testid="button-confirm-delete-deed"
+                    >
+                      {t("editDeed.delete")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <Button
                 type="submit"
-                disabled={isPending}
+                disabled={isPending || isDeleting}
                 className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 text-base shadow-lg shadow-emerald-500/20"
                 data-testid="button-confirm-edit-deed"
               >

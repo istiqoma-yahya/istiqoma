@@ -91,7 +91,10 @@
     "timeLabel": "Time",
     "saving": "Saving...",
     "confirmChanges": "Confirm Changes",
-    "cancel": "Cancel"
+    "delete": "Delete",
+    "deleteConfirm": "Delete this deed?",
+    "deleteWarning": "This action cannot be undone. This will permanently delete this deed from your history.",
+    "deleting": "Deleting..."
   },
   "categories": {
     "title": "Manage Categories",

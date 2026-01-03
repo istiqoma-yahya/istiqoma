@@ -35,6 +35,7 @@ export const deeds = pgTable("deeds", {
 export const targets = pgTable("targets", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
+  name: text("name"),
   category: text("category").notNull(),
   targetValue: integer("target_value").notNull(),
   period: text("period", { enum: ["daily", "weekly", "monthly"] }),
@@ -114,6 +115,7 @@ export const insertCategorySchema = createInsertSchema(categories).pick({
 });
 
 export const insertTargetSchema = createInsertSchema(targets).pick({
+  name: true,
   category: true,
   targetValue: true,
   period: true,
@@ -129,6 +131,7 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   quranUnit: true,
   sedekahType: true,
 }).extend({
+  name: z.string().optional(),
   category: z.string().min(1, "Category is required"),
   targetValue: z.number().min(0, "Target value must be at least 0"),
   period: z.enum(["daily", "weekly", "monthly"]).optional(),

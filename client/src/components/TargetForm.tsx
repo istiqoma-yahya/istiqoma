@@ -48,6 +48,7 @@ export function TargetForm({
   const form = useForm<InsertTarget>({
     resolver: zodResolver(insertTargetSchema),
     defaultValues: defaultValues || {
+      name: undefined,
       category: "",
       targetValue: 10,
       period: "daily",
@@ -68,6 +69,7 @@ export function TargetForm({
   useEffect(() => {
     if (editingTarget) {
       form.reset({
+        name: editingTarget.name || undefined,
         category: editingTarget.category,
         targetValue: editingTarget.targetValue,
         period: editingTarget.period as "daily" | "weekly" | "monthly" | undefined,
@@ -244,10 +246,10 @@ export function TargetForm({
 
         <FormField
           control={form.control}
-          name="unitLabel"
+          name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("targets.targetName")} *</FormLabel>
+              <FormLabel>{t("targets.targetName")}</FormLabel>
               <FormControl>
                 <Input
                   placeholder={t("targets.targetNamePlaceholder")}

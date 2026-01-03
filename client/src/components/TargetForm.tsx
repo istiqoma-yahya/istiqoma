@@ -636,8 +636,23 @@ export function TargetForm({
                   type="number"
                   min={1}
                   className="glass-input"
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                  value={field.value ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "") {
+                      field.onChange(undefined);
+                    } else {
+                      const num = parseInt(val);
+                      if (!isNaN(num)) {
+                        field.onChange(num);
+                      }
+                    }
+                  }}
+                  onBlur={() => {
+                    if (field.value === undefined || field.value < 1) {
+                      field.onChange(1);
+                    }
+                  }}
                   data-testid="input-target-value"
                 />
               </FormControl>

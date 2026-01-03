@@ -111,6 +111,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
     { id: "alhamdulillah", labelKey: "dzikir.types.alhamdulillah" },
     { id: "allahuakbar", labelKey: "dzikir.types.allahuakbar" },
     { id: "lailahaillallah", labelKey: "dzikir.types.lailahaillallah" },
+    { id: "istighfar", labelKey: "dzikir.types.istighfar" },
   ];
 
   const SHOLAT_FARDHU_TYPES = [

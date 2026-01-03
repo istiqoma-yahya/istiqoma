@@ -151,7 +151,8 @@
     },
     "selectType": "Select Dzikir Type",
     "anyType": "Any (all types counted)",
-    "typeRequired": "Please select a dzikir type"
+    "typeRequired": "Please select a dzikir type",
+    "reducesBadDeeds": "Reduces bad deeds"
   },
   "qibla": {
     "title": "Qibla & Prayer Times",

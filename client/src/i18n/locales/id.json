@@ -151,7 +151,8 @@
     },
     "selectType": "Pilih Jenis Dzikir",
     "anyType": "Semua (semua jenis dihitung)",
-    "typeRequired": "Silakan pilih jenis dzikir"
+    "typeRequired": "Silakan pilih jenis dzikir",
+    "reducesBadDeeds": "Mengurangi amal buruk"
   },
   "qibla": {
     "title": "Kiblat & Waktu Sholat",

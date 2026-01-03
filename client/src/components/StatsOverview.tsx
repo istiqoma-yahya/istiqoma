@@ -10,11 +10,11 @@ interface StatsOverviewProps {
 export function StatsOverview({ deeds }: StatsOverviewProps) {
   const { t } = useTranslation();
   const goodDeeds = deeds.filter((d) => d.deedType === "good");
-  const badDeedsExcludingIstighfar = deeds.filter((d) => d.deedType === "bad" && d.category !== "Istighfar");
-  const istighfarDeeds = deeds.filter((d) => d.deedType === "bad" && d.category === "Istighfar");
+  const badDeeds = deeds.filter((d) => d.deedType === "bad");
+  const istighfarDeeds = deeds.filter((d) => d.dzikirType === "istighfar");
   
   const goodPoints = goodDeeds.reduce((acc, d) => acc + d.points, 0);
-  const rawBadPoints = badDeedsExcludingIstighfar.reduce((acc, d) => acc + d.points, 0);
+  const rawBadPoints = badDeeds.reduce((acc, d) => acc + d.points, 0);
   const istighfarPoints = istighfarDeeds.reduce((acc, d) => acc + d.points, 0);
   const badPoints = Math.max(0, rawBadPoints - istighfarPoints);
 
@@ -31,7 +31,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
     },
     {
       label: t('stats.badDeeds'),
-      value: badDeedsExcludingIstighfar.length,
+      value: badDeeds.length,
       points: badPoints,
       icon: ThumbsDown,
       color: "text-rose-600 dark:text-rose-400",

@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Trash2 } from "lucide-react";
+import { Trash2, Eraser } from "lucide-react";
 import { type Deed } from "@shared/schema";
 import { useDeleteDeed } from "@/hooks/use-deeds";
 import { useCategoryName } from "@/hooks/use-categories";
@@ -30,7 +30,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
   const translateCategoryName = useCategoryName();
 
   const isGood = deed.deedType === "good";
-  const isIstighfar = deed.category === "Istighfar";
+  const isIstighfar = deed.dzikirType === "istighfar";
   const date = deed.createdAt ? new Date(deed.createdAt) : new Date();
   
   const getDisplayDescription = () => {
@@ -100,18 +100,24 @@ export function DeedCard({ deed, index }: DeedCardProps) {
     >
       <div className="flex justify-between items-start gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <span 
               className={`
                 inline-block px-2 py-0.5 rounded-full text-xs font-medium
                 ${isGood ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/20 text-rose-600 dark:text-rose-400"}
               `}
             >
-              {isGood ? `+ ${t('deed.goodDeed')}` : isIstighfar ? `- ${t('deed.badDeed')}` : `+ ${t('deed.badDeed')}`}
+              {isGood ? `+ ${t('deed.goodDeed')}` : `+ ${t('deed.badDeed')}`}
             </span>
             <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-600 dark:text-blue-400">
               {translateCategoryName(deed.category)}
             </span>
+            {isIstighfar && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                <Eraser className="w-3 h-3" />
+                {t('dzikir.reducesBadDeeds')}
+              </span>
+            )}
           </div>
           <h3 className="text-lg font-medium text-foreground leading-tight mb-1">
             {displayDescription}
@@ -122,9 +128,16 @@ export function DeedCard({ deed, index }: DeedCardProps) {
         </div>
 
         <div className="flex flex-col items-end gap-2">
-          <span className={`text-xl font-bold ${isGood ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
-            {isGood ? "+" : isIstighfar ? "-" : "+"}{deed.points}
-          </span>
+          <div className="flex flex-col items-end">
+            <span className={`text-xl font-bold ${isGood ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+              +{deed.points}
+            </span>
+            {isIstighfar && (
+              <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
+                -{deed.points} {t('deed.badDeed')}
+              </span>
+            )}
+          </div>
           
           <AlertDialog>
             <AlertDialogTrigger asChild>

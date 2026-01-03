@@ -188,13 +188,6 @@ export function TargetForm({
   };
 
   const handleFormSubmit = async (data: InsertTarget) => {
-    if (!data.unitLabel?.trim()) {
-      form.setError("unitLabel", {
-        type: "manual",
-        message: t("targets.targetNameRequired"),
-      });
-      return;
-    }
     await onSubmit(data);
   };
 

@@ -43,6 +43,7 @@ export function TargetForm({
   const { data: categories } = useCategories();
   const translateCategoryName = useCategoryName();
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
+  const [targetValueInput, setTargetValueInput] = useState<string>("10");
 
   const form = useForm<InsertTarget>({
     resolver: zodResolver(insertTargetSchema),
@@ -82,6 +83,7 @@ export function TargetForm({
         quranUnit: (editingTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz" | undefined) || undefined,
         sedekahType: (editingTarget.sedekahType as "uang" | "hitungan" | undefined) || undefined,
       });
+      setTargetValueInput(String(editingTarget.targetValue));
     }
   }, [editingTarget, form]);
 
@@ -633,23 +635,23 @@ export function TargetForm({
               <FormLabel>{t("targets.targetValue")}</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
-                  min={1}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   className="glass-input"
-                  value={field.value ?? ""}
+                  value={targetValueInput}
                   onChange={(e) => {
                     const val = e.target.value;
-                    if (val === "") {
-                      field.onChange(undefined);
-                    } else {
-                      const num = parseInt(val);
-                      if (!isNaN(num)) {
-                        field.onChange(num);
+                    if (val === "" || /^\d+$/.test(val)) {
+                      setTargetValueInput(val);
+                      if (val !== "") {
+                        field.onChange(parseInt(val));
                       }
                     }
                   }}
                   onBlur={() => {
-                    if (field.value === undefined || field.value < 1) {
+                    if (targetValueInput === "" || parseInt(targetValueInput) < 1) {
+                      setTargetValueInput("1");
                       field.onChange(1);
                     }
                   }}

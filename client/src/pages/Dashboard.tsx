@@ -5,6 +5,7 @@ import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { getTargetDisplayTitle } from "@/lib/targets";
 import { Loader2, LogOut, User, Settings, Plus, Target, Trophy, ChevronRight, ThumbsDown, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -150,16 +151,7 @@ export default function Dashboard() {
                 <Card key={target.id} className="p-3" data-testid={`card-dashboard-target-${target.id}`}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-sm truncate">
-                      {target.recurrence === "oneTime" && target.unitLabel ? target.unitLabel : target.category}
-                      {target.recurrence !== "oneTime" && target.dzikirType && (
-                        <span className="text-muted-foreground font-normal"> ({t(`dzikir.types.${target.dzikirType}`)})</span>
-                      )}
-                      {target.recurrence !== "oneTime" && target.sholatType && (
-                        <span className="text-muted-foreground font-normal"> ({t(`sholat.types.${target.sholatType}`)})</span>
-                      )}
-                      {target.recurrence !== "oneTime" && target.fastingType && (
-                        <span className="text-muted-foreground font-normal"> ({t(`fasting.types.${target.fastingType}`)})</span>
-                      )}
+                      {getTargetDisplayTitle(target, t)}
                     </span>
                     {target.targetType === "limit" ? (
                       target.currentValue > target.targetValue && (

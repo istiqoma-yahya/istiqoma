@@ -4,6 +4,7 @@ import { useTargetsWithProgress, useDeleteTarget, useTargetHistory, useUpdateTar
 import { useAuth } from "@/hooks/use-auth";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { getTargetDisplayTitle } from "@/lib/targets";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -175,7 +176,7 @@ function TargetCard({
             )}
           </div>
           <h3 className="font-medium" data-testid={`text-target-category-${target.id}`}>
-            {target.unitLabel || target.category}
+            {getTargetDisplayTitle(target, t)}
           </h3>
           <p className="text-sm text-muted-foreground">
             {target.category}

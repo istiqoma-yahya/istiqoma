@@ -134,7 +134,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
             </span>
             {isIstighfar && (
               <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
-                -{deed.points} {t('deed.badDeed')}
+                -{deed.points}
               </span>
             )}
           </div>

@@ -17,6 +17,7 @@ const DZIKIR_TYPES = [
   { id: "alhamdulillah", labelKey: "dzikir.types.alhamdulillah" },
   { id: "allahuakbar", labelKey: "dzikir.types.allahuakbar" },
   { id: "lailahaillallah", labelKey: "dzikir.types.lailahaillallah" },
+  { id: "istighfar", labelKey: "dzikir.types.istighfar" },
 ] as const;
 
 export default function DzikirPage() {
@@ -60,9 +61,10 @@ export default function DzikirPage() {
     if (isIstighfar) {
       createDeed(
         {
-          deedType: "bad",
+          deedType: "good",
           description: t('dzikir.istighfarDeedDesc', { count }),
-          category: "Istighfar",
+          category: dzikirCategory?.name || "Dzikr",
+          dzikirType: "istighfar",
           points: count,
           createdAt: new Date(),
         },

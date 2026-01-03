@@ -48,26 +48,28 @@ export default function ProgressPage() {
   const deedsArray = deeds || [];
 
   // Calculate stats for good vs bad deeds
-  // Istighfar (category "Istighfar" with deedType "bad") reduces bad deeds
-  const goodDeeds = deedsArray.filter((d) => d.deedType === "good");
-  const badDeedsExcludingIstighfar = deedsArray.filter((d) => d.deedType === "bad" && d.category !== "Istighfar");
-  const istighfarDeeds = deedsArray.filter((d) => d.deedType === "bad" && d.category === "Istighfar");
+  // Istighfar (dzikirType "istighfar") reduces bad deeds
+  const istighfarDeeds = deedsArray.filter((d) => d.dzikirType === "istighfar");
+  const goodDeedsExcludingIstighfar = deedsArray.filter((d) => d.deedType === "good" && d.dzikirType !== "istighfar");
+  const badDeeds = deedsArray.filter((d) => d.deedType === "bad");
   
-  const goodPoints = goodDeeds.reduce((sum, d) => sum + d.points, 0);
-  const rawBadPoints = badDeedsExcludingIstighfar.reduce((sum, d) => sum + d.points, 0);
+  const goodPoints = goodDeedsExcludingIstighfar.reduce((sum, d) => sum + d.points, 0);
+  const rawBadPoints = badDeeds.reduce((sum, d) => sum + d.points, 0);
   const istighfarPoints = istighfarDeeds.reduce((sum, d) => sum + d.points, 0);
   const badPoints = Math.max(0, rawBadPoints - istighfarPoints);
 
   // Data for good vs bad deeds chart
+  // Include istighfar in good deeds count for display purposes
+  const goodDeeds = deedsArray.filter((d) => d.deedType === "good");
   const deedTypeData = [
     {
       name: t("stats.goodDeeds"),
       count: goodDeeds.length,
-      points: goodPoints,
+      points: goodPoints + istighfarPoints,
     },
     {
       name: t("stats.badDeeds"),
-      count: badDeedsExcludingIstighfar.length,
+      count: badDeeds.length,
       points: badPoints,
     },
   ];
@@ -106,10 +108,10 @@ export default function ProgressPage() {
       .filter((d) => d.deedType === "good")
       .reduce((sum, d) => sum + d.points, 0);
     const rawBadDaysPoints = dayDeeds
-      .filter((d) => d.deedType === "bad" && d.category !== "Istighfar")
+      .filter((d) => d.deedType === "bad")
       .reduce((sum, d) => sum + d.points, 0);
     const istighfarDaysPoints = dayDeeds
-      .filter((d) => d.deedType === "bad" && d.category === "Istighfar")
+      .filter((d) => d.dzikirType === "istighfar")
       .reduce((sum, d) => sum + d.points, 0);
     const badDaysPoints = Math.max(0, rawBadDaysPoints - istighfarDaysPoints);
 
@@ -142,7 +144,7 @@ export default function ProgressPage() {
     "#fca5a5",
   ];
 
-  const netPoints = goodPoints - badPoints;
+  const netPoints = (goodPoints + istighfarPoints) - badPoints;
 
   return (
     <>

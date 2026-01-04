@@ -47,11 +47,15 @@ type FormValues = z.infer<typeof formSchema>;
 
 function formatDateTimeForInput(date: Date | string | null) {
   const d = typeof date === 'string' ? new Date(date) : (date || new Date());
-  // Use UTC consistently for both date and time to match how we store dates
-  const isoString = d.toISOString();
+  // Use local timezone for display (user's perspective)
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
   return {
-    date: isoString.split('T')[0],
-    time: isoString.split('T')[1].slice(0, 5),
+    date: `${year}-${month}-${day}`,
+    time: `${hours}:${minutes}`,
   };
 }
 
@@ -177,8 +181,8 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const onSubmit = (data: FormValues) => {
     let createdAt = data.createdAt;
     if (dateTime.date && dateTime.time) {
-      // Append 'Z' to treat the date as UTC, preserving the exact date/time user entered
-      const combinedDateTime = new Date(`${dateTime.date}T${dateTime.time}:00Z`);
+      // Create date in local timezone (user's perspective)
+      const combinedDateTime = new Date(`${dateTime.date}T${dateTime.time}:00`);
       if (!isNaN(combinedDateTime.getTime())) {
         createdAt = combinedDateTime;
       }

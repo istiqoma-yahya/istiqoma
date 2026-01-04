@@ -2,6 +2,10 @@ import { db } from "./db";
 import { deeds, categories, targets, targetHistory, pushSubscriptions, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte } from "drizzle-orm";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
+
+// Default timezone for users (Indonesia)
+const DEFAULT_TIMEZONE = "Asia/Jakarta";
 
 export type TargetHistoryWithStreak = {
   history: TargetHistory[];
@@ -187,26 +191,30 @@ export class DatabaseStorage implements IStorage {
         };
       }
       
-      // Recurring target logic
+      // Recurring target logic - use user's timezone for period calculations
       let periodStart: Date;
       let periodEnd: Date;
+      
+      // Convert current time to user's timezone for period calculations
+      const nowInUserTz = toZonedTime(now, DEFAULT_TIMEZONE);
 
       switch (target.period) {
         case "daily":
-          periodStart = startOfDay(now);
-          periodEnd = endOfDay(now);
+          // Calculate start/end of day in user's timezone, then convert back to UTC
+          periodStart = fromZonedTime(startOfDay(nowInUserTz), DEFAULT_TIMEZONE);
+          periodEnd = fromZonedTime(endOfDay(nowInUserTz), DEFAULT_TIMEZONE);
           break;
         case "weekly":
-          periodStart = startOfWeek(now, { weekStartsOn: 1 });
-          periodEnd = endOfWeek(now, { weekStartsOn: 1 });
+          periodStart = fromZonedTime(startOfWeek(nowInUserTz, { weekStartsOn: 1 }), DEFAULT_TIMEZONE);
+          periodEnd = fromZonedTime(endOfWeek(nowInUserTz, { weekStartsOn: 1 }), DEFAULT_TIMEZONE);
           break;
         case "monthly":
-          periodStart = startOfMonth(now);
-          periodEnd = endOfMonth(now);
+          periodStart = fromZonedTime(startOfMonth(nowInUserTz), DEFAULT_TIMEZONE);
+          periodEnd = fromZonedTime(endOfMonth(nowInUserTz), DEFAULT_TIMEZONE);
           break;
         default:
-          periodStart = startOfDay(now);
-          periodEnd = endOfDay(now);
+          periodStart = fromZonedTime(startOfDay(nowInUserTz), DEFAULT_TIMEZONE);
+          periodEnd = fromZonedTime(endOfDay(nowInUserTz), DEFAULT_TIMEZONE);
       }
 
       // For achievement targets: count good deeds
@@ -340,6 +348,9 @@ export class DatabaseStorage implements IStorage {
     const userDeeds = await this.getDeeds(userId);
     const now = new Date();
     
+    // Convert to user's timezone for accurate period calculations
+    const nowInUserTz = toZonedTime(now, DEFAULT_TIMEZONE);
+    
     const periodBoundaries: Array<{ periodStart: Date; periodEnd: Date }> = [];
     for (let i = 1; i <= periodsBack; i++) {
       let periodStart: Date;
@@ -347,16 +358,19 @@ export class DatabaseStorage implements IStorage {
 
       switch (t.period) {
         case "daily":
-          periodStart = startOfDay(subDays(now, i));
-          periodEnd = endOfDay(subDays(now, i));
+          const dayInUserTz = subDays(nowInUserTz, i);
+          periodStart = fromZonedTime(startOfDay(dayInUserTz), DEFAULT_TIMEZONE);
+          periodEnd = fromZonedTime(endOfDay(dayInUserTz), DEFAULT_TIMEZONE);
           break;
         case "weekly":
-          periodStart = startOfWeek(subWeeks(now, i), { weekStartsOn: 1 });
-          periodEnd = endOfWeek(subWeeks(now, i), { weekStartsOn: 1 });
+          const weekInUserTz = subWeeks(nowInUserTz, i);
+          periodStart = fromZonedTime(startOfWeek(weekInUserTz, { weekStartsOn: 1 }), DEFAULT_TIMEZONE);
+          periodEnd = fromZonedTime(endOfWeek(weekInUserTz, { weekStartsOn: 1 }), DEFAULT_TIMEZONE);
           break;
         case "monthly":
-          periodStart = startOfMonth(subMonths(now, i));
-          periodEnd = endOfMonth(subMonths(now, i));
+          const monthInUserTz = subMonths(nowInUserTz, i);
+          periodStart = fromZonedTime(startOfMonth(monthInUserTz), DEFAULT_TIMEZONE);
+          periodEnd = fromZonedTime(endOfMonth(monthInUserTz), DEFAULT_TIMEZONE);
           break;
         default:
           continue;

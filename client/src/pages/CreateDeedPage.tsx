@@ -36,9 +36,11 @@ type FormValues = z.infer<typeof formSchema>;
 
 function getCurrentDateTime() {
   const now = new Date();
+  // Use UTC consistently for both date and time to match how we store dates
+  const isoString = now.toISOString();
   return {
-    date: now.toISOString().split('T')[0],
-    time: now.toTimeString().slice(0, 5),
+    date: isoString.split('T')[0],
+    time: isoString.split('T')[1].slice(0, 5),
   };
 }
 
@@ -165,7 +167,8 @@ export default function CreateDeedPage() {
   const onSubmit = (data: FormValues) => {
     let createdAt = data.createdAt;
     if (dateTime.date && dateTime.time) {
-      const combinedDateTime = new Date(`${dateTime.date}T${dateTime.time}:00`);
+      // Append 'Z' to treat the date as UTC, preserving the exact date/time user entered
+      const combinedDateTime = new Date(`${dateTime.date}T${dateTime.time}:00Z`);
       if (!isNaN(combinedDateTime.getTime())) {
         createdAt = combinedDateTime;
       }

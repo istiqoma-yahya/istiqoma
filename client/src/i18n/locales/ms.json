@@ -320,6 +320,7 @@
     "selectType": "Pilih Jenis Solat",
     "anyType": "Semua (semua jenis dikira)",
     "isJamaah": "Solat berjemaah",
+    "inCongregation": "Berjemaah",
     "types": {
       "subuh": "Subuh",
       "dzuhur": "Zuhur",

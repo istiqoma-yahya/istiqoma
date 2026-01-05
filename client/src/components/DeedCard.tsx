@@ -48,7 +48,11 @@ export function DeedCard({ deed, index }: DeedCardProps) {
     }
     
     if (deed.sholatType && deed.sholatType !== "any") {
-      return t(`sholat.types.${deed.sholatType}`);
+      const sholatLabel = t(`sholat.types.${deed.sholatType}`);
+      if (deed.isJamaah) {
+        return `${sholatLabel} ${t('sholat.inCongregation')}`;
+      }
+      return sholatLabel;
     }
     
     if (deed.fastingType && deed.fastingType !== "any") {

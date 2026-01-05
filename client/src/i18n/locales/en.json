@@ -320,6 +320,7 @@
     "selectType": "Select Prayer Type",
     "anyType": "Any (all types counted)",
     "isJamaah": "Prayed in congregation (Jamaah)",
+    "inCongregation": "In Congregation",
     "types": {
       "subuh": "Subuh (Fajr)",
       "dzuhur": "Dzuhur (Dhuhr)",

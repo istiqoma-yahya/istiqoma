@@ -578,7 +578,7 @@ export function TargetForm({
                     <PopoverContent className="w-auto p-0" align="start">
                       <CalendarComponent
                         mode="single"
-                        selected={field.value}
+                        selected={field.value ?? undefined}
                         onSelect={(date) => {
                           field.onChange(date);
                           setSelectedDuration(null);

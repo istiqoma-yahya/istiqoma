@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import testimonialAvatar from "@/assets/testimonial-yahya.png";
 
 export default function Landing() {
   const { t } = useTranslation();
@@ -137,6 +139,32 @@ export default function Landing() {
           </motion.div>
         </div>
       </main>
+
+      {/* Testimonial Section */}
+      <section className="relative z-10 py-20 bg-muted/30">
+        <div className="container mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="max-w-3xl mx-auto text-center"
+          >
+            <p className="text-xl md:text-2xl font-medium leading-relaxed mb-8" data-testid="text-testimonial-quote">
+              "{t('landing.testimonial.quote')}"
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <Avatar className="w-14 h-14 border-2 border-emerald-500/30" data-testid="img-testimonial-avatar">
+                <AvatarImage src={testimonialAvatar} alt={t('landing.testimonial.name')} />
+                <AvatarFallback>YPE</AvatarFallback>
+              </Avatar>
+              <div className="text-left">
+                <p className="font-bold" data-testid="text-testimonial-name">{t('landing.testimonial.name')}</p>
+                <p className="text-sm text-muted-foreground" data-testid="text-testimonial-role">{t('landing.testimonial.role')}</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">

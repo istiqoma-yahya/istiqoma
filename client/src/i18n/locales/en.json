@@ -37,6 +37,20 @@
       "privacyTitle": "Privacy First",
       "privacyDesc": "Your deeds are between you and Allah alone. We never share your spiritual journey with anyone."
     },
+    "personalize": {
+      "title": "Your deen, your pace.",
+      "subtitle": "Islam is a journey, not a sprint. Customize your dashboard to focus on the habits you want to build right now. Start small with the obligatory deeds (Fard), and gradually add voluntary ones (Nafl) as your spiritual endurance grows.",
+      "cardTitle": "Personalize Goals",
+      "quranGoal": "Daily Quran Goal",
+      "quranPages": "5 Pages",
+      "tahajjudTitle": "Tahajjud Reminders",
+      "tahajjudDesc": "Last 3rd of night",
+      "fastingTitle": "Monday/Thursday Fasting",
+      "fastingDesc": "Sunnah habit",
+      "benefit1": "Smart suggestions based on your location and calendar.",
+      "benefit2": "Privacy-first design. Your deeds are between you and Allah.",
+      "benefit3": "Offline capable for when you disconnect to reconnect."
+    },
     "testimonial": {
       "quote": "I used to struggle with consistency. Istiqoma didn't just give me a checklist; it gave me a visual representation of my relationship with my faith. It's minimal, beautiful, and distraction-free.",
       "name": "Yahya Pramudya Ekananta",

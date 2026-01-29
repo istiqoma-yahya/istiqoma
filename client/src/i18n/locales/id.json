@@ -37,6 +37,20 @@
       "privacyTitle": "Privasi Terjaga",
       "privacyDesc": "Amalmu hanya antara kamu dan Allah. Kami tidak pernah membagikan perjalanan spiritualmu kepada siapapun."
     },
+    "personalize": {
+      "title": "Agamamu, kecepatanmu.",
+      "subtitle": "Islam adalah perjalanan, bukan sprint. Sesuaikan dashboard untuk fokus pada kebiasaan yang ingin kamu bangun sekarang. Mulai dari yang wajib (Fardhu), lalu tambahkan yang sunnah secara bertahap seiring pertumbuhan spiritualmu.",
+      "cardTitle": "Personalisasi Target",
+      "quranGoal": "Target Quran Harian",
+      "quranPages": "5 Halaman",
+      "tahajjudTitle": "Pengingat Tahajjud",
+      "tahajjudDesc": "Sepertiga malam terakhir",
+      "fastingTitle": "Puasa Senin/Kamis",
+      "fastingDesc": "Kebiasaan sunnah",
+      "benefit1": "Saran cerdas berdasarkan lokasi dan kalendermu.",
+      "benefit2": "Desain mengutamakan privasi. Amalmu hanya antara kamu dan Allah.",
+      "benefit3": "Bisa offline untuk saat kamu memutuskan koneksi untuk menyambung kembali."
+    },
     "testimonial": {
       "quote": "Saya dulu kesulitan menjaga konsistensi. Istiqoma tidak hanya memberi saya checklist; tapi juga representasi visual dari hubungan saya dengan iman saya. Minimalis, indah, dan bebas distraksi.",
       "name": "Yahya Pramudya Ekananta",

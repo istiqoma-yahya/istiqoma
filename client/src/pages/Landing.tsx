@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins, Shield } from "lucide-react";
+import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins, Shield, Calendar, CheckCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -224,8 +224,112 @@ export default function Landing() {
           </motion.div>
         </div>
       </main>
+
+      {/* Personalize Section */}
+      <section className="relative z-10 py-20 bg-muted/30" data-testid="section-personalize">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
+            
+            {/* Left: Preferences Card */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="order-2 md:order-1 relative"
+            >
+              {/* Decorative BG */}
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 rounded-2xl transform rotate-2" />
+              
+              {/* Preferences Interface */}
+              <div className="relative bg-card border border-border rounded-xl px-6 py-6 md:p-8 max-w-md mx-auto md:mx-0 shadow-2xl" data-testid="card-personalize">
+                <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-6 border-b border-border pb-4" data-testid="text-personalize-card-title">
+                  {t('landing.personalize.cardTitle')}
+                </h4>
+                
+                <div className="space-y-6">
+                  {/* Control 1: Slider */}
+                  <div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-foreground font-medium" data-testid="text-quran-goal-label">{t('landing.personalize.quranGoal')}</span>
+                      <span className="text-emerald-500 font-medium" data-testid="text-quran-goal-value">{t('landing.personalize.quranPages')}</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full w-1/4 bg-emerald-500 rounded-full" />
+                    </div>
+                  </div>
+
+                  {/* Control 2: Toggle ON */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-muted rounded-md text-muted-foreground">
+                        <Bell className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground" data-testid="text-tahajjud-title">{t('landing.personalize.tahajjudTitle')}</p>
+                        <p className="text-xs text-muted-foreground" data-testid="text-tahajjud-desc">{t('landing.personalize.tahajjudDesc')}</p>
+                      </div>
+                    </div>
+                    {/* Toggle ON */}
+                    <div className="w-11 h-6 bg-emerald-500 rounded-full flex items-center px-1">
+                      <div className="w-4 h-4 bg-background rounded-full shadow-sm ml-auto" />
+                    </div>
+                  </div>
+
+                  {/* Control 3: Toggle OFF */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-muted rounded-md text-muted-foreground">
+                        <Calendar className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground" data-testid="text-fasting-title">{t('landing.personalize.fastingTitle')}</p>
+                        <p className="text-xs text-muted-foreground" data-testid="text-fasting-desc">{t('landing.personalize.fastingDesc')}</p>
+                      </div>
+                    </div>
+                    {/* Toggle OFF */}
+                    <div className="w-11 h-6 bg-muted rounded-full flex items-center px-1">
+                      <div className="w-4 h-4 bg-muted-foreground rounded-full shadow-sm" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Right: Text Content */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="order-1 md:order-2"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold font-display tracking-tight mb-6" data-testid="text-personalize-title">
+                {t('landing.personalize.title')}
+              </h2>
+              <p className="text-lg text-muted-foreground mb-8 leading-relaxed" data-testid="text-personalize-subtitle">
+                {t('landing.personalize.subtitle')}
+              </p>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-muted-foreground text-sm" data-testid="text-benefit-1">{t('landing.personalize.benefit1')}</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-muted-foreground text-sm" data-testid="text-benefit-2">{t('landing.personalize.benefit2')}</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-muted-foreground text-sm" data-testid="text-benefit-3">{t('landing.personalize.benefit3')}</span>
+                </li>
+              </ul>
+            </motion.div>
+
+          </div>
+        </div>
+      </section>
+
       {/* Testimonial Section */}
-      <section className="relative z-10 py-20 bg-muted/30">
+      <section className="relative z-10 py-20 bg-background">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

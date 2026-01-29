@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Calendar, Clock, X, Trash2 } from "lucide-react";
+import { Loader2, Calendar, Clock, X, Trash2, Plus } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +37,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { CreateCategoryDialog } from "@/components/CreateCategoryDialog";
 
 const formSchema = insertDeedSchema.extend({
   points: z.coerce.number().min(1, "Points must be at least 1"),
@@ -71,6 +72,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const { data: categories = [] } = useCategories();
   const translateCategoryName = useCategoryName();
   const [dateTime, setDateTime] = useState(formatDateTimeForInput(deed.createdAt));
+  const [showCreateCategoryDialog, setShowCreateCategoryDialog] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -240,6 +242,21 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                       {categories.map((cat) => (
                         <SelectItem key={cat.id} value={cat.name}>{translateCategoryName(cat.name)}</SelectItem>
                       ))}
+                      <div className="border-t border-border mt-1 pt-1">
+                        <button
+                          type="button"
+                          className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-primary hover:bg-accent rounded-sm transition-colors"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setShowCreateCategoryDialog(true);
+                          }}
+                          data-testid="button-create-category-from-dropdown"
+                        >
+                          <Plus className="w-4 h-4" />
+                          {t("categories.addCategory")}
+                        </button>
+                      </div>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -554,6 +571,14 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
             </div>
           </form>
         </Form>
+
+        <CreateCategoryDialog
+          open={showCreateCategoryDialog}
+          onOpenChange={setShowCreateCategoryDialog}
+          onCategoryCreated={(categoryName) => {
+            form.setValue("category", categoryName);
+          }}
+        />
       </main>
     </div>
   );

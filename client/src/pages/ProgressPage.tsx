@@ -1,4 +1,6 @@
+import { useState, useMemo } from "react";
 import { useDeeds } from "@/hooks/use-deeds";
+import { useCategoryName } from "@/hooks/use-categories";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
@@ -19,13 +21,24 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Card } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Filter } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function ProgressPage() {
   const { t } = useTranslation();
   const { data: deeds, isLoading } = useDeeds();
   const { theme } = useTheme();
+  const translateCategoryName = useCategoryName();
+  
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>("all");
   
   // Theme-aware chart colors
   const isDark = theme === "dark";
@@ -37,63 +50,97 @@ export default function ProgressPage() {
   const tooltipItemColor = isDark ? "#e2e8f0" : "#475569";
   const cursorFill = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-10 h-10 text-primary animate-spin" />
-      </div>
-    );
-  }
-
   const deedsArray = deeds || [];
 
+  // Filter categories and subcategories
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    deedsArray.forEach(d => set.add(d.category));
+    return Array.from(set).sort();
+  }, [deedsArray]);
+
+  const subCategories = useMemo(() => {
+    if (selectedCategory === "all") return [];
+    const set = new Set<string>();
+    deedsArray
+      .filter(d => d.category === selectedCategory)
+      .forEach(d => {
+        if (d.dzikirType) set.add(`dzikir:${d.dzikirType}`);
+        if (d.sholatType) set.add(`sholat:${d.sholatType}`);
+        if (d.fastingType) set.add(`fasting:${d.fastingType}`);
+        if (d.quranUnit) set.add(`quran:${d.quranUnit}`);
+        if (d.sedekahType) set.add(`sedekah:${d.sedekahType}`);
+      });
+    return Array.from(set).sort();
+  }, [deedsArray, selectedCategory]);
+
+  const filteredDeeds = useMemo(() => {
+    return deedsArray.filter(deed => {
+      const categoryMatch = selectedCategory === "all" || deed.category === selectedCategory;
+      if (!categoryMatch) return false;
+      
+      if (selectedSubCategory === "all") return true;
+      
+      const [type, value] = selectedSubCategory.split(":");
+      if (type === "dzikir") return deed.dzikirType === value;
+      if (type === "sholat") return deed.sholatType === value;
+      if (type === "fasting") return deed.fastingType === value;
+      if (type === "quran") return deed.quranUnit === value;
+      if (type === "sedekah") return deed.sedekahType === value;
+      
+      return true;
+    });
+  }, [deedsArray, selectedCategory, selectedSubCategory]);
+
   // Calculate total stats
-  const totalDeeds = deedsArray.length;
-  const totalPoints = deedsArray.reduce((sum, d) => sum + d.points, 0);
+  const totalDeeds = filteredDeeds.length;
+  const totalPoints = filteredDeeds.reduce((sum, d) => sum + d.points, 0);
 
   // Category breakdown
   const categoryMap = new Map<string, number>();
-  deedsArray.forEach((deed) => {
+  filteredDeeds.forEach((deed) => {
     const current = categoryMap.get(deed.category) || 0;
     categoryMap.set(deed.category, current + 1);
   });
 
   const categoryData = Array.from(categoryMap.entries()).map(
     ([name, count]) => ({
-      name,
+      name: translateCategoryName(name),
       value: count,
     })
   );
 
   // Points over time (daily)
-  const now = new Date();
-  const monthStart = startOfMonth(now);
-  const monthEnd = endOfMonth(now);
-  const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  const pointsOverTime = useMemo(() => {
+    const now = new Date();
+    const monthStart = startOfMonth(now);
+    const monthEnd = endOfMonth(now);
+    const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  const pointsOverTime = days.map((day) => {
-    const dayDeeds = deedsArray.filter((d) => {
-      const createdAt = typeof d.createdAt === 'string' ? new Date(d.createdAt) : (d.createdAt || new Date());
-      return (
-        createdAt.getDate() === day.getDate() &&
-        createdAt.getMonth() === day.getMonth() &&
-        createdAt.getFullYear() === day.getFullYear()
-      );
+    const data = days.map((day) => {
+      const dayDeeds = filteredDeeds.filter((d) => {
+        const createdAt = typeof d.createdAt === 'string' ? new Date(d.createdAt) : (d.createdAt || new Date());
+        return (
+          createdAt.getDate() === day.getDate() &&
+          createdAt.getMonth() === day.getMonth() &&
+          createdAt.getFullYear() === day.getFullYear()
+        );
+      });
+
+      const dayPoints = dayDeeds.reduce((sum, d) => sum + d.points, 0);
+
+      return {
+        date: format(day, "MMM d"),
+        points: dayPoints,
+      };
     });
 
-    const dayPoints = dayDeeds.reduce((sum, d) => sum + d.points, 0);
-
-    return {
-      date: format(day, "MMM d"),
-      points: dayPoints,
-    };
-  });
-
-  // Filter out empty days at the end
-  const filteredPointsOverTime = pointsOverTime.filter(
-    (_, index, arr) =>
-      arr.slice(index).some((d) => d.points !== 0)
-  );
+    // Filter out empty days at the end
+    return data.filter(
+      (_, index, arr) =>
+        arr.slice(index).some((d) => d.points !== 0)
+    );
+  }, [filteredDeeds]);
 
   const COLORS = [
     "#10b981",
@@ -110,11 +157,17 @@ export default function ProgressPage() {
     "#fca5a5",
   ];
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-10 h-10 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <>
       <div className="min-h-screen bg-background text-foreground pb-20">
-        {/* Header */}
         <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
           <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
             <h1 className="font-display font-bold text-xl">{t("progress.spiritualProgress")}</h1>
@@ -122,114 +175,173 @@ export default function ProgressPage() {
           </div>
         </header>
 
-        {/* Main Content */}
         <main className="container max-w-5xl mx-auto px-4 py-8">
-        {deedsArray.length === 0 ? (
-          <Card className="p-12 text-center flex flex-col items-center justify-center border-dashed">
-            <h3 className="text-lg font-medium mb-2">{t("progress.noData")}</h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              {t("progress.noDataDesc")}
-            </p>
-          </Card>
-        ) : (
-          <div className="space-y-8">
-            {/* Summary Card */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-display font-bold mb-2">
-                    {t("stats.goodDeeds")}
-                  </h2>
-                  <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                    {totalDeeds} {t("progress.deeds")}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground mb-1">{t("stats.totalPoints")}</p>
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                    {totalPoints}
-                  </p>
-                </div>
-              </div>
+          {deedsArray.length === 0 ? (
+            <Card className="p-12 text-center flex flex-col items-center justify-center border-dashed">
+              <h3 className="text-lg font-medium mb-2">{t("progress.noData")}</h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                {t("progress.noDataDesc")}
+              </p>
             </Card>
-
-            {/* Points Over Time */}
-            {filteredPointsOverTime.length > 0 && (
-              <Card className="p-6">
-                <h2 className="text-lg font-display font-bold mb-6">
-                  {t("progress.pointsOverTime")}
-                </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={filteredPointsOverTime} margin={{ left: -20, right: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                    <XAxis dataKey="date" stroke={axisColor} />
-                    <YAxis stroke={axisColor} width={50} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: tooltipBg,
-                        border: `1px solid ${tooltipBorder}`,
-                        borderRadius: "8px",
+          ) : (
+            <div className="space-y-8">
+              {/* Filters */}
+              <Card className="p-4 bg-emerald-500/5 border-emerald-500/10">
+                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                  <div className="flex items-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                    <Filter className="w-4 h-4" />
+                    <span>{t("common.filter")}</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full sm:w-auto flex-1">
+                    <Select 
+                      value={selectedCategory} 
+                      onValueChange={(val) => {
+                        setSelectedCategory(val);
+                        setSelectedSubCategory("all");
                       }}
-                      labelStyle={{ color: tooltipLabelColor, fontWeight: "bold" }}
-                      itemStyle={{ color: tooltipItemColor }}
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="points"
-                      stroke="#10b981"
-                      name={t("stats.points")}
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Card>
-            )}
-
-            {/* Category Breakdown */}
-            {categoryData.length > 0 && (
-              <Card className="p-6">
-                <h2 className="text-lg font-display font-bold mb-6">
-                  {t("progress.deedsByCategory")}
-                </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, value }) =>
-                        `${name}: ${value}`
-                      }
-                      outerRadius={100}
-                      fill="#10b981"
-                      dataKey="value"
                     >
-                      {categoryData.map((_, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: tooltipBg,
-                        border: `1px solid ${tooltipBorder}`,
-                        borderRadius: "8px",
-                      }}
-                      labelStyle={{ color: tooltipLabelColor, fontWeight: "bold" }}
-                      itemStyle={{ color: tooltipItemColor }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Card>
-            )}
+                      <SelectTrigger className="w-full sm:w-[200px] bg-background">
+                        <SelectValue placeholder={t("deed.category")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t("common.allCategories")}</SelectItem>
+                        {categories.map(cat => (
+                          <SelectItem key={cat} value={cat}>
+                            {translateCategoryName(cat)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
-          </div>
-        )}
+                    {selectedCategory !== "all" && subCategories.length > 0 && (
+                      <Select 
+                        value={selectedSubCategory} 
+                        onValueChange={setSelectedSubCategory}
+                      >
+                        <SelectTrigger className="w-full sm:w-[200px] bg-background">
+                          <SelectValue placeholder={t("deed.type")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">{t("common.allSubCategories")}</SelectItem>
+                          {subCategories.map(sub => {
+                            const [type, value] = sub.split(":");
+                            let label = value;
+                            if (type === "dzikir") label = t(`dzikir.types.${value}`);
+                            if (type === "sholat") label = t(`sholat.types.${value}`);
+                            if (type === "fasting") label = t(`fasting.types.${value}`);
+                            if (type === "quran") label = t(`quran.units.${value}`);
+                            if (type === "sedekah") label = t(`sedekah.types.${value}`);
+                            
+                            return (
+                              <SelectItem key={sub} value={sub}>
+                                {label}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                </div>
+              </Card>
+
+              {/* Summary Card */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-display font-bold mb-2">
+                      {t("stats.goodDeeds")}
+                    </h2>
+                    <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                      {totalDeeds} {t("progress.deeds")}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground mb-1">{t("stats.totalPoints")}</p>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      {totalPoints}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Points Over Time */}
+              {pointsOverTime.length > 0 && (
+                <Card className="p-6">
+                  <h2 className="text-lg font-display font-bold mb-6">
+                    {t("progress.pointsOverTime")}
+                  </h2>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={pointsOverTime} margin={{ left: -20, right: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                      <XAxis dataKey="date" stroke={axisColor} />
+                      <YAxis stroke={axisColor} width={50} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: tooltipBg,
+                          border: `1px solid ${tooltipBorder}`,
+                          borderRadius: "8px",
+                        }}
+                        labelStyle={{ color: tooltipLabelColor, fontWeight: "bold" }}
+                        itemStyle={{ color: tooltipItemColor }}
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="points"
+                        stroke="#10b981"
+                        name={t("stats.points")}
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Card>
+              )}
+
+              {/* Category Breakdown */}
+              {categoryData.length > 0 && (
+                <Card className="p-6">
+                  <h2 className="text-lg font-display font-bold mb-6">
+                    {t("progress.deedsByCategory")}
+                  </h2>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={categoryData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, value }) =>
+                          `${name}: ${value}`
+                        }
+                        outerRadius={100}
+                        fill="#10b981"
+                        dataKey="value"
+                      >
+                        {categoryData.map((_, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: tooltipBg,
+                          border: `1px solid ${tooltipBorder}`,
+                          borderRadius: "8px",
+                        }}
+                        labelStyle={{ color: tooltipLabelColor, fontWeight: "bold" }}
+                        itemStyle={{ color: tooltipItemColor }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </Card>
+              )}
+            </div>
+          )}
         </main>
       </div>
       <BottomNavigation />

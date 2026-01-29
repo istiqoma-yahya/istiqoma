@@ -344,7 +344,10 @@
     "add": "Add",
     "close": "Close",
     "back": "Back",
-    "language": "Language"
+    "language": "Language",
+    "filter": "Filter",
+    "allCategories": "All Categories",
+    "allSubCategories": "All Types"
   },
   "sholat": {
     "selectType": "Select Prayer Type",

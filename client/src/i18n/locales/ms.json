@@ -344,7 +344,10 @@
     "add": "Tambah",
     "close": "Tutup",
     "back": "Kembali",
-    "language": "Bahasa"
+    "language": "Bahasa",
+    "filter": "Filter",
+    "allCategories": "Semua Kategori",
+    "allSubCategories": "Semua Jenis"
   },
   "sholat": {
     "selectType": "Pilih Jenis Solat",

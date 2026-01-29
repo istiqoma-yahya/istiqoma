@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint } from "lucide-react";
+import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -37,16 +37,18 @@ export default function Landing() {
       </nav>
       {/* Hero Section */}
       <main className="container mx-auto px-6 pt-16 pb-24 md:pt-24 md:pb-32 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+          {/* Left Column - Hero Content (65%) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
+            className="w-full md:w-[65%]"
           >
             <h1 className="font-display md:text-7xl font-bold mb-6 bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent text-left text-[50px]" data-testid="text-hero-title">
               {t('landing.title')}<br />{t('landing.titleLine2')}
             </h1>
-            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed text-left ml-[0px] mr-[0px]" data-testid="text-hero-subtitle">
+            <p className="text-xl text-muted-foreground mb-10 max-w-2xl leading-relaxed text-left" data-testid="text-hero-subtitle">
               {t('landing.subtitle')}
             </p>
             
@@ -62,12 +64,90 @@ export default function Landing() {
             </div>
           </motion.div>
 
-          {/* Features Section */}
+          {/* Right Column - Illustration (35%) */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="w-full md:w-[35%]"
+          >
+            <div className="overflow-hidden bg-card max-w-sm border border-border rounded-2xl mx-auto shadow-2xl" data-testid="card-hero-illustration">
+              {/* Header UI */}
+              <div className="flex bg-muted/50 border-b border-border p-6 items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Today's Progress</p>
+                  <h3 className="text-2xl font-semibold text-foreground tracking-tight">14 Muharram</h3>
+                </div>
+                <div className="h-10 w-10 rounded-full border border-border flex items-center justify-center bg-background shadow-sm">
+                  <div className="relative w-5 h-5">
+                    <svg className="transform -rotate-90 w-full h-full">
+                      <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2" fill="none" className="text-muted" />
+                      <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2" fill="none" strokeDasharray="50.2" strokeDashoffset="12" className="text-emerald-500" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* List Items */}
+              <div className="p-2 space-y-1">
+                {/* Item 1: Completed */}
+                <div className="flex items-center gap-4 p-3 rounded-xl">
+                  <div className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center text-white shadow-sm">
+                    <Check className="w-4 h-4" strokeWidth={2.5} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="line-through text-sm font-medium text-foreground opacity-50">Fajr Prayer</p>
+                    <p className="text-xs text-muted-foreground">Completed at 5:45 AM</p>
+                  </div>
+                  <Moon className="w-5 h-5 text-muted-foreground/50" />
+                </div>
+
+                {/* Item 2: Pending */}
+                <div className="flex gap-4 rounded-xl p-3 items-center">
+                  <div className="w-6 h-6 rounded-md border border-border flex items-center justify-center" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">Read Surah Kahf</p>
+                    <p className="text-xs text-muted-foreground">Target: 20 mins</p>
+                  </div>
+                  <BookOpen className="w-5 h-5 text-emerald-500" />
+                </div>
+
+                {/* Item 3: Pending */}
+                <div className="flex items-center gap-4 p-3 rounded-xl">
+                  <div className="w-6 h-6 rounded-md border border-border flex items-center justify-center" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">Give Sadaqah</p>
+                    <p className="text-xs text-muted-foreground">Daily goal</p>
+                  </div>
+                  <HandCoins className="w-5 h-5 text-emerald-500" />
+                </div>
+              </div>
+
+              {/* Streak Footer */}
+              <div className="mt-2 mx-2 mb-2 p-3 bg-foreground rounded-xl flex items-center justify-between text-background">
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 bg-background/10 rounded-lg">
+                    <Flame className="w-[18px] h-[18px] text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-background/70">Current Streak</p>
+                    <p className="text-sm font-semibold">12 Days</p>
+                  </div>
+                </div>
+                <div className="text-xs text-background/60 bg-background/10 px-2 py-1 rounded">
+                  +40 pts
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Features Section */}
+        <div className="mt-24 text-center">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-24"
           >
             <p className="text-emerald-500 font-medium text-sm tracking-wider uppercase mb-3" data-testid="text-features-label">{t('landing.featuresLabel')}</p>
             <h2 className="text-3xl md:text-4xl font-bold font-display mb-4" data-testid="text-features-title">{t('landing.featuresTitle')}</h2>

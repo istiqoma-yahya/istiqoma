@@ -212,25 +212,6 @@ export default function CreateDeedPage() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("createDeed.descriptionLabel")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={t("createDeed.descriptionPlaceholder")}
-                      className="glass-input"
-                      {...field}
-                      data-testid="input-deed-description"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="category"
               render={({ field }) => (
                 <FormItem>
@@ -250,6 +231,45 @@ export default function CreateDeedPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="points"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("createDeed.pointsLabel")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      className="glass-input"
+                      {...field}
+                      data-testid="input-deed-points"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("createDeed.descriptionLabel")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={t("createDeed.descriptionPlaceholder")}
+                      className="glass-input"
+                      {...field}
+                      data-testid="input-deed-description"
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -428,26 +448,6 @@ export default function CreateDeedPage() {
                 )}
               />
             )}
-
-            <FormField
-              control={form.control}
-              name="points"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("createDeed.pointsLabel")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      className="glass-input"
-                      {...field}
-                      data-testid="input-deed-points"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <div className="space-y-4 pt-2 border-t border-border">
               <p className="text-sm font-medium text-muted-foreground">{t("createDeed.dateTimeSection")}</p>

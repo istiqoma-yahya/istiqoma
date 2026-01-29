@@ -270,7 +270,7 @@ export default function Landing() {
                     </div>
                     {/* Toggle ON */}
                     <div className="w-11 h-6 bg-emerald-500 rounded-full flex items-center px-1">
-                      <div className="w-4 h-4 bg-background rounded-full shadow-sm ml-auto" />
+                      <div className="w-4 h-4 rounded-full shadow-sm ml-auto bg-[#f8fafc]" />
                     </div>
                   </div>
 

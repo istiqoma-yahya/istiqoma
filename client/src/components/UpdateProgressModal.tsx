@@ -35,7 +35,10 @@ export function UpdateProgressModal({
 
   if (!target) return null;
 
-  const currentProgress = target.currentValue || 0;
+  const isOneTime = target.recurrence === "oneTime";
+  const currentProgress = isOneTime 
+    ? (target.manualProgress || target.currentValue || 0)
+    : (target.currentValue || 0);
   const newProgress = currentProgress + incrementValue;
   const percentComplete = Math.min(100, (newProgress / target.targetValue) * 100);
 

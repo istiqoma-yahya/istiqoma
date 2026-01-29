@@ -70,7 +70,6 @@ function TargetCard({
   const { data: historyData, isLoading: historyLoading } = useTargetHistory(
     isExpanded ? target.id : null
   );
-  const [progressInput, setProgressInput] = useState<string>(String(target.manualProgress || target.currentValue || 0));
 
   const formatPeriodDate = (date: Date | string, period: string) => {
     const d = new Date(date);
@@ -238,8 +237,8 @@ function TargetCard({
       </div>
 
       {isOneTime ? (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">{t("targets.progress")}:</span>
             <span className="font-medium" data-testid={`text-target-progress-${target.id}`}>
               {target.manualProgress || target.currentValue || 0} / {target.targetValue}
@@ -250,42 +249,28 @@ function TargetCard({
             className="h-2 bg-gray-300 dark:bg-gray-600"
             data-testid={`progress-target-${target.id}`}
           />
-          {oneTimeStatus === "active" && (
-            <div className="flex items-center gap-2 mt-2">
-              <Input
-                type="number"
-                min={0}
-                value={progressInput}
-                onChange={(e) => setProgressInput(e.target.value)}
-                className="w-24"
-                data-testid={`input-progress-${target.id}`}
-              />
+          <div className="flex items-center justify-between mt-2">
+            {oneTimeStatus === "completed" ? (
+              <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
+                <Trophy className="w-4 h-4" />
+                <span>{t("targets.completed")}</span>
+              </div>
+            ) : (
+              <div />
+            )}
+            {oneTimeStatus === "active" && (
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => {
-                  const value = parseInt(progressInput, 10);
-                  if (!isNaN(value) && value >= 0) {
-                    onUpdateProgress(target.id, value);
-                  }
-                }}
-                disabled={isUpdatingProgress}
-                data-testid={`button-update-progress-${target.id}`}
+                onClick={onOpenUpdateModal}
+                className="flex items-center gap-1"
+                data-testid={`button-update-onetime-${target.id}`}
               >
+                <TrendingUp className="w-3 h-3" />
                 {t("targets.updateProgress")}
               </Button>
-              {(target.manualProgress || target.currentValue || 0) >= target.targetValue && (
-                <Button
-                  size="sm"
-                  onClick={() => onComplete(target.id)}
-                  disabled={isUpdatingProgress}
-                  data-testid={`button-complete-target-${target.id}`}
-                >
-                  {t("targets.markComplete")}
-                </Button>
-              )}
-            </div>
-          )}
+            )}
+          </div>
         </div>
       ) : (
         <>
@@ -454,33 +439,66 @@ export default function TargetsPage() {
     
     setIsSavingProgress(true);
     try {
-      const targetTitle = getTargetDisplayTitle(updateModalTarget, t);
+      const isOneTimeTarget = updateModalTarget.recurrence === "oneTime";
       
-      const deedData: Parameters<typeof createDeed.mutate>[0] = {
-        deedType: "good",
-        description: t("targets.deedCreatedFromTarget", { target: targetTitle }),
-        category: updateModalTarget.category,
-        points: incrementValue,
-        createdAt: new Date(),
-      };
-      
-      if (updateModalTarget.dzikirType) deedData.dzikirType = updateModalTarget.dzikirType;
-      if (updateModalTarget.sholatType) deedData.sholatType = updateModalTarget.sholatType;
-      if (updateModalTarget.fastingType) deedData.fastingType = updateModalTarget.fastingType;
-      if (updateModalTarget.isJamaah) deedData.isJamaah = updateModalTarget.isJamaah;
-      if (updateModalTarget.quranUnit) deedData.quranUnit = updateModalTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz";
-      if (updateModalTarget.sedekahType) deedData.sedekahType = updateModalTarget.sedekahType as "uang" | "hitungan";
-      
-      createDeed.mutate(deedData, {
-        onSuccess: async () => {
-          await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
-          setUpdateModalTarget(null);
-          setIsSavingProgress(false);
-        },
-        onError: () => {
-          setIsSavingProgress(false);
-        }
-      });
+      if (isOneTimeTarget) {
+        const currentProgress = updateModalTarget.manualProgress || updateModalTarget.currentValue || 0;
+        const newProgress = currentProgress + incrementValue;
+        
+        updateProgress.mutate({ id: targetId, progress: newProgress }, {
+          onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+            
+            if (newProgress >= updateModalTarget.targetValue) {
+              completeTarget.mutate(targetId, {
+                onSuccess: async () => {
+                  await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+                  setUpdateModalTarget(null);
+                  setIsSavingProgress(false);
+                },
+                onError: async () => {
+                  await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+                  setUpdateModalTarget(null);
+                  setIsSavingProgress(false);
+                }
+              });
+            } else {
+              setUpdateModalTarget(null);
+              setIsSavingProgress(false);
+            }
+          },
+          onError: () => {
+            setIsSavingProgress(false);
+          }
+        });
+      } else {
+        const targetTitle = getTargetDisplayTitle(updateModalTarget, t);
+        
+        const deedData: Parameters<typeof createDeed.mutate>[0] = {
+          description: t("targets.deedCreatedFromTarget", { target: targetTitle }),
+          category: updateModalTarget.category,
+          points: incrementValue,
+          createdAt: new Date(),
+        };
+        
+        if (updateModalTarget.dzikirType) deedData.dzikirType = updateModalTarget.dzikirType;
+        if (updateModalTarget.sholatType) deedData.sholatType = updateModalTarget.sholatType;
+        if (updateModalTarget.fastingType) deedData.fastingType = updateModalTarget.fastingType;
+        if (updateModalTarget.isJamaah) deedData.isJamaah = updateModalTarget.isJamaah;
+        if (updateModalTarget.quranUnit) deedData.quranUnit = updateModalTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz";
+        if (updateModalTarget.sedekahType) deedData.sedekahType = updateModalTarget.sedekahType as "uang" | "hitungan";
+        
+        createDeed.mutate(deedData, {
+          onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+            setUpdateModalTarget(null);
+            setIsSavingProgress(false);
+          },
+          onError: () => {
+            setIsSavingProgress(false);
+          }
+        });
+      }
     } catch (error) {
       setIsSavingProgress(false);
     }

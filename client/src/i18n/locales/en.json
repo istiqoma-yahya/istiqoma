@@ -278,7 +278,7 @@
     "noTargetsDesc": "Set spiritual goals to track your progress automatically based on your deeds.",
     "addFirstTarget": "Set your first target",
     "selectCategory": "Select a category",
-    "targetValue": "Target Points",
+    "targetValue": "Target Amount",
     "targetValueDesc": "Minimum points to achieve this period",
     "maxValue": "Maximum Allowed",
     "maxValueDesc": "Maximum occurrences to stay within limit",

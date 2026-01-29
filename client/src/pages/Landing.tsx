@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins } from "lucide-react";
+import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins, Shield } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -156,6 +156,13 @@ export default function Landing() {
             <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-5">
               {[
                 {
+                  icon: Target,
+                  title: t('landing.features.targetsTitle'),
+                  desc: t('landing.features.targetsDesc'),
+                  iconBg: "bg-rose-500/10",
+                  iconColor: "text-rose-500"
+                },
+                {
                   icon: Fingerprint,
                   title: t('landing.features.dzikirTitle'),
                   desc: t('landing.features.dzikirDesc'),
@@ -170,13 +177,6 @@ export default function Landing() {
                   iconColor: "text-blue-500"
                 },
                 {
-                  icon: TrendingUp,
-                  title: t('landing.features.analyticsTitle'),
-                  desc: t('landing.features.analyticsDesc'),
-                  iconBg: "bg-violet-500/10",
-                  iconColor: "text-violet-500"
-                },
-                {
                   icon: Bell,
                   title: t('landing.features.remindersTitle'),
                   desc: t('landing.features.remindersDesc'),
@@ -184,11 +184,11 @@ export default function Landing() {
                   iconColor: "text-amber-500"
                 },
                 {
-                  icon: Target,
-                  title: t('landing.features.targetsTitle'),
-                  desc: t('landing.features.targetsDesc'),
-                  iconBg: "bg-rose-500/10",
-                  iconColor: "text-rose-500"
+                  icon: TrendingUp,
+                  title: t('landing.features.analyticsTitle'),
+                  desc: t('landing.features.analyticsDesc'),
+                  iconBg: "bg-violet-500/10",
+                  iconColor: "text-violet-500"
                 },
                 {
                   icon: Users,
@@ -203,6 +203,13 @@ export default function Landing() {
                   desc: t('landing.features.badgesDesc'),
                   iconBg: "bg-orange-500/10",
                   iconColor: "text-orange-500"
+                },
+                {
+                  icon: Shield,
+                  title: t('landing.features.privacyTitle'),
+                  desc: t('landing.features.privacyDesc'),
+                  iconBg: "bg-slate-500/10",
+                  iconColor: "text-slate-500"
                 }
               ].map((feature, i) => (
                 <div key={i} className="glass-card p-5 text-left hover-elevate" data-testid={`card-feature-${i}`}>

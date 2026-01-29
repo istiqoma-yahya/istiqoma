@@ -253,7 +253,7 @@ export default function ProgressPage() {
                     <span>{t("common.filter")}</span>
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full sm:w-auto flex-1">
+                  <div className="flex flex-row gap-4 w-full sm:w-auto flex-1">
                     <Select 
                       value={selectedCategory} 
                       onValueChange={(val) => {

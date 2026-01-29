@@ -55,6 +55,19 @@
       "quote": "I used to struggle with consistency. Istiqoma didn't just give me a checklist; it gave me a visual representation of my relationship with my faith. It's minimal, beautiful, and distraction-free.",
       "name": "Yahya Pramudya Ekananta",
       "role": "Ordinary Muslim, Indonesia"
+    },
+    "heroCard": {
+      "todaysProgress": "Today's Progress",
+      "muharramDate": "14 Muharram",
+      "fajrPrayer": "Fajr Prayer",
+      "completedAt": "Completed at 5:45 AM",
+      "readSurahKahf": "Read Surah Kahf",
+      "target20mins": "Target: 20 mins",
+      "giveSadaqah": "Give Sadaqah",
+      "dailyGoal": "Daily goal",
+      "currentStreak": "Current Streak",
+      "days": "Days",
+      "pts": "pts"
     }
   },
   "dashboard": {

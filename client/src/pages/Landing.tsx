@@ -97,8 +97,8 @@ export default function Landing() {
               {/* Header UI */}
               <div className="flex bg-muted/50 border-b border-border p-6 items-start justify-between">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Today's Progress</p>
-                  <h3 className="text-2xl font-semibold text-foreground tracking-tight">14 Muharram</h3>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">{t('landing.heroCard.todaysProgress')}</p>
+                  <h3 className="text-2xl font-semibold text-foreground tracking-tight">{t('landing.heroCard.muharramDate')}</h3>
                 </div>
                 <div className="h-10 w-10 rounded-full border border-border flex items-center justify-center bg-background shadow-sm">
                   <div className="relative w-5 h-5">
@@ -118,8 +118,8 @@ export default function Landing() {
                     <Check className="w-4 h-4" strokeWidth={2.5} />
                   </div>
                   <div className="flex-1">
-                    <p className="line-through text-sm font-medium text-foreground opacity-50">Fajr Prayer</p>
-                    <p className="text-xs text-muted-foreground">Completed at 5:45 AM</p>
+                    <p className="line-through text-sm font-medium text-foreground opacity-50">{t('landing.heroCard.fajrPrayer')}</p>
+                    <p className="text-xs text-muted-foreground">{t('landing.heroCard.completedAt')}</p>
                   </div>
                   <Moon className="w-5 h-5 text-muted-foreground/50" />
                 </div>
@@ -128,8 +128,8 @@ export default function Landing() {
                 <div className="flex gap-4 rounded-xl p-3 items-center">
                   <div className="w-6 h-6 rounded-md border border-border flex items-center justify-center" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">Read Surah Kahf</p>
-                    <p className="text-xs text-muted-foreground">Target: 20 mins</p>
+                    <p className="text-sm font-medium text-foreground">{t('landing.heroCard.readSurahKahf')}</p>
+                    <p className="text-xs text-muted-foreground">{t('landing.heroCard.target20mins')}</p>
                   </div>
                   <BookOpen className="w-5 h-5 text-emerald-500" />
                 </div>
@@ -138,8 +138,8 @@ export default function Landing() {
                 <div className="flex items-center gap-4 p-3 rounded-xl">
                   <div className="w-6 h-6 rounded-md border border-border flex items-center justify-center" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">Give Sadaqah</p>
-                    <p className="text-xs text-muted-foreground">Daily goal</p>
+                    <p className="text-sm font-medium text-foreground">{t('landing.heroCard.giveSadaqah')}</p>
+                    <p className="text-xs text-muted-foreground">{t('landing.heroCard.dailyGoal')}</p>
                   </div>
                   <HandCoins className="w-5 h-5 text-emerald-500" />
                 </div>
@@ -152,12 +152,12 @@ export default function Landing() {
                     <Flame className="w-[18px] h-[18px] text-amber-400" />
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-slate-300">Current Streak</p>
-                    <p className="text-sm font-semibold">12 Days</p>
+                    <p className="text-xs font-medium text-slate-300">{t('landing.heroCard.currentStreak')}</p>
+                    <p className="text-sm font-semibold">12 {t('landing.heroCard.days')}</p>
                   </div>
                 </div>
                 <div className="text-xs text-slate-400 bg-white/5 px-2 py-1 rounded">
-                  +40 pts
+                  +40 {t('landing.heroCard.pts')}
                 </div>
               </div>
             </div>

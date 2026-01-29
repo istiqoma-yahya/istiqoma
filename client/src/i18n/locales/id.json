@@ -55,6 +55,19 @@
       "quote": "Saya dulu kesulitan menjaga konsistensi. Istiqoma tidak hanya memberi saya checklist; tapi juga representasi visual dari hubungan saya dengan iman saya. Minimalis, indah, dan bebas distraksi.",
       "name": "Yahya Pramudya Ekananta",
       "role": "Muslim Biasa, Indonesia"
+    },
+    "heroCard": {
+      "todaysProgress": "Progres Hari Ini",
+      "muharramDate": "14 Muharram",
+      "fajrPrayer": "Sholat Subuh",
+      "completedAt": "Selesai pukul 05:45",
+      "readSurahKahf": "Baca Surah Al-Kahf",
+      "target20mins": "Target: 20 menit",
+      "giveSadaqah": "Bersedekah",
+      "dailyGoal": "Target harian",
+      "currentStreak": "Streak Saat Ini",
+      "days": "Hari",
+      "pts": "poin"
     }
   },
   "dashboard": {

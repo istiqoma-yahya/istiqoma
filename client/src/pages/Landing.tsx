@@ -316,10 +316,6 @@ export default function Landing() {
                   <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground text-sm" data-testid="text-benefit-2">{t('landing.personalize.benefit2')}</span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground text-sm" data-testid="text-benefit-3">{t('landing.personalize.benefit3')}</span>
-                </li>
               </ul>
             </motion.div>
 

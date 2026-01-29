@@ -124,17 +124,17 @@ export default function Landing() {
               </div>
 
               {/* Streak Footer */}
-              <div className="mt-2 mx-2 mb-2 p-3 bg-foreground rounded-xl flex items-center justify-between text-background">
+              <div className="mt-2 mx-2 mb-2 p-3 bg-slate-900 rounded-xl flex items-center justify-between text-white">
                 <div className="flex items-center gap-3">
-                  <div className="p-1.5 bg-background/10 rounded-lg">
+                  <div className="p-1.5 bg-white/10 rounded-lg">
                     <Flame className="w-[18px] h-[18px] text-amber-400" />
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-background/70">Current Streak</p>
+                    <p className="text-xs font-medium text-slate-300">Current Streak</p>
                     <p className="text-sm font-semibold">12 Days</p>
                   </div>
                 </div>
-                <div className="text-xs text-background/60 bg-background/10 px-2 py-1 rounded">
+                <div className="text-xs text-slate-400 bg-white/5 px-2 py-1 rounded">
                   +40 pts
                 </div>
               </div>

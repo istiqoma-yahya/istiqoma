@@ -82,7 +82,7 @@ export class DatabaseStorage implements IStorage {
 
   async createCategory(userId: string, insertCategory: InsertCategory): Promise<Category> {
     const existing = await this.getCategories(userId);
-    const maxSortOrder = existing.length > 0 ? Math.max(...existing.map(c => c.sortOrder)) : -1;
+    let maxSortOrder = existing.length > 0 ? Math.max(...existing.map(c => c.sortOrder)) : -1;
     const [category] = await db
       .insert(categories)
       .values({ 
@@ -92,6 +92,31 @@ export class DatabaseStorage implements IStorage {
         isProtected: insertCategory.isProtected ?? false,
       })
       .returning();
+    
+    // If this is a new user (only 1 category), seed other protected categories
+    if (existing.length === 0) {
+      const defaultProtected = [
+        "Sholat Fardhu", 
+        "Sholat Sunnah", 
+        "Puasa Fardhu", 
+        "Puasa Sunnah", 
+        "Dzikir", 
+        "Baca Quran", 
+        "Shodaqoh"
+      ];
+      
+      for (const name of defaultProtected) {
+        if (name !== insertCategory.name) {
+          await db.insert(categories).values({
+            name,
+            userId,
+            isProtected: true,
+            sortOrder: ++maxSortOrder + 1
+          });
+        }
+      }
+    }
+    
     return category;
   }
 

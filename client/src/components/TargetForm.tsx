@@ -73,7 +73,7 @@ export function TargetForm({
         category: editingTarget.category,
         targetValue: editingTarget.targetValue,
         period: editingTarget.period as "daily" | "weekly" | "monthly" | undefined,
-        targetType: (editingTarget.targetType as "achievement" | "limit") || "achievement",
+        targetType: "achievement",
         recurrence: (editingTarget.recurrence as "recurring" | "oneTime") || "recurring",
         startDate: editingTarget.startDate ? new Date(editingTarget.startDate) : undefined,
         dueDate: editingTarget.dueDate ? new Date(editingTarget.dueDate) : undefined,
@@ -89,7 +89,6 @@ export function TargetForm({
     }
   }, [editingTarget, form]);
 
-  const watchedTargetType = form.watch("targetType");
   const watchedCategory = form.watch("category");
   const watchedRecurrence = form.watch("recurrence");
 
@@ -192,9 +191,7 @@ export function TargetForm({
     await onSubmit(data);
   };
 
-  const goodCategories = categories?.filter(c => c.name !== "Istighfar" && c.name !== "Maksiat") || [];
-  const limitCategories = categories?.filter(c => c.name !== "Istighfar") || [];
-  const availableCategories = watchedTargetType === "limit" ? limitCategories : goodCategories;
+  const availableCategories = categories?.filter(c => c.name !== "Istighfar" && c.name !== "Maksiat") || [];
 
   return (
     <Form {...form}>
@@ -257,39 +254,6 @@ export function TargetForm({
             </FormItem>
           )}
         />
-
-        {watchedRecurrence === "recurring" && (
-          <FormField
-            control={form.control}
-            name="targetType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("targets.targetType")}</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    form.setValue("category", "");
-                  }}
-                  value={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="glass-input" data-testid="select-target-type">
-                      <SelectValue placeholder={t("targets.selectType")} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="achievement">{t("targets.achievementType")}</SelectItem>
-                    <SelectItem value="limit">{t("targets.limitType")}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  {field.value === "limit" ? t("targets.limitTypeDesc") : t("targets.achievementTypeDesc")}
-                </p>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
 
         <FormField
           control={form.control}
@@ -435,7 +399,7 @@ export function TargetForm({
             control={form.control}
             name="isJamaah"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                 <FormControl>
                   <Checkbox
                     checked={field.value || false}
@@ -444,7 +408,7 @@ export function TargetForm({
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel>{t("sholat.isJamaah")}</FormLabel>
+                  <FormLabel className="font-normal">{t("sholat.isJamaah")}</FormLabel>
                 </div>
               </FormItem>
             )}

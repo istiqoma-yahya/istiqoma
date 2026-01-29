@@ -45,14 +45,14 @@ export default function Landing() {
             transition={{ duration: 0.6 }}
             className="w-full md:w-[65%]"
           >
-            <h1 className="font-display md:text-7xl font-bold mb-6 bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent text-left text-[50px]" data-testid="text-hero-title">
+            <h1 className="font-display text-[32px] md:text-7xl font-bold mb-6 bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent text-center md:text-left leading-tight" data-testid="text-hero-title">
               {t('landing.title')}<br />{t('landing.titleLine2')}
             </h1>
-            <p className="text-xl text-muted-foreground mb-10 max-w-2xl leading-relaxed text-left" data-testid="text-hero-subtitle">
+            <p className="text-xl text-muted-foreground mb-10 max-w-2xl leading-relaxed text-center md:text-left" data-testid="text-hero-subtitle">
               {t('landing.subtitle')}
             </p>
             
-            <div className="flex flex-col sm:flex-row items-start justify-start gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center md:items-start md:justify-start gap-4">
               <button 
                 onClick={handleLogin}
                 className="btn-primary w-full sm:w-auto text-lg px-8 py-4 flex items-center justify-center gap-2 group"

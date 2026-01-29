@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins, Shield, Calendar, CheckCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -5,11 +6,26 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import testimonialAvatar from "@/assets/testimonial-yahya.png";
 
+declare global {
+  interface Window {
+    UnicornStudio?: {
+      init: () => void;
+      isInitialized?: boolean;
+    };
+  }
+}
+
 export default function Landing() {
   const { t } = useTranslation();
   const handleLogin = () => {
     window.location.href = "/api/login";
   };
+
+  useEffect(() => {
+    if (window.UnicornStudio && window.UnicornStudio.init) {
+      window.UnicornStudio.init();
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-hidden relative">

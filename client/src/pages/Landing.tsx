@@ -54,7 +54,7 @@ export default function Landing() {
       {/* Hero Section */}
       <section className="relative min-h-[600px] md:min-h-[700px]">
         {/* Unicorn Studio Animation Background */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40">
           <div data-us-project="xHUd2xqFoER642lhnH69" className="w-full h-full" data-testid="hero-animation-background" />
         </div>
         

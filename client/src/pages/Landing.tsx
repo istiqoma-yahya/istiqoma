@@ -163,9 +163,12 @@ export default function Landing() {
             </div>
           </motion.div>
         </div>
+      </main>
+      </section>
 
-        {/* Features Section */}
-        <div className="mt-24 text-center">
+      {/* Features Section */}
+      <section className="relative z-10 py-20 bg-background" data-testid="section-features">
+        <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -245,7 +248,6 @@ export default function Landing() {
             </div>
           </motion.div>
         </div>
-      </main>
       </section>
       {/* Personalize Section */}
       <section className="relative z-10 py-20 bg-muted/30" data-testid="section-personalize">

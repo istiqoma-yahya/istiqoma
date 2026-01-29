@@ -1,4 +1,4 @@
-import { Check, Moon, BookOpen, Heart, Flame } from "lucide-react";
+import { Check, Moon, BookOpen, Heart, Flame, Bell, Calendar } from "lucide-react";
 
 export function AppMockups() {
   return (
@@ -74,58 +74,52 @@ export function AppMockups() {
       </div>
       
       {/* Personalize Goals Card */}
-      <div className="shadow-slate-200/50 overflow-hidden transform transition-transform hover:-translate-y-1 duration-500 bg-white max-w-sm border-slate-100 border rounded-2xl shadow-2xl" data-testid="mockup-personalize-goals">
-        {/* Header */}
-        <div className="bg-slate-50/50 border-slate-50 border-b pt-6 pr-6 pb-6 pl-6">
-          <p className="text-xs font-medium text-slate-400 uppercase tracking-wide" data-testid="text-mockup-goals-label">Personalize Goals</p>
-        </div>
-
-        <div className="p-4 space-y-4">
-          {/* Daily Quran Goal */}
+      <div className="bg-white max-w-md border-slate-200 border rounded-xl px-6 py-6 relative shadow-xl transform transition-transform hover:-translate-y-1 duration-500" data-testid="mockup-personalize-goals">
+        <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-6 border-b border-slate-100 pb-4" data-testid="text-mockup-goals-label">Personalize Goals</h4>
+        
+        <div className="space-y-6">
+          {/* Control 1: Slider */}
           <div>
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <p className="text-sm font-medium text-slate-900" data-testid="text-mockup-quran-goal-label">Daily Quran Goal</p>
-              <p className="text-sm font-medium text-emerald-600" data-testid="text-mockup-quran-goal-value">5 Pages</p>
+            <div className="flex flex-wrap justify-between gap-2 text-sm mb-2">
+              <span className="text-slate-700 font-medium" data-testid="text-mockup-quran-goal-label">Daily Quran Goal</span>
+              <span className="text-emerald-600 font-medium" data-testid="text-mockup-quran-goal-value">5 Pages</span>
             </div>
-            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-              <div className="h-full w-2/5 bg-emerald-500 rounded-full transition-all" />
+            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full w-1/4 bg-emerald-500 rounded-full" />
             </div>
           </div>
 
-          {/* Toggle Items */}
-          <div className="space-y-3 pt-2">
-            {/* Tahajjud Reminders */}
-            <div className="group flex flex-wrap items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-              <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                </svg>
+          {/* Control 2: Toggles */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="p-2 bg-slate-50 rounded-md text-slate-600">
+                <Bell className="w-5 h-5" />
               </div>
-              <div className="flex-1">
+              <div>
                 <p className="text-sm font-medium text-slate-900" data-testid="text-mockup-reminder-1-title">Tahajjud Reminders</p>
-                <p className="text-xs text-slate-400" data-testid="text-mockup-reminder-1-desc">Last 3rd of night</p>
-              </div>
-              {/* Toggle ON */}
-              <div className="w-11 h-6 bg-emerald-500 rounded-full flex items-center px-0.5 cursor-pointer transition-colors">
-                <div className="w-5 h-5 bg-white rounded-full shadow-sm ml-auto" />
+                <p className="text-xs text-slate-500" data-testid="text-mockup-reminder-1-desc">Last 3rd of night</p>
               </div>
             </div>
+            {/* Custom Toggle */}
+            <div className="w-11 h-6 bg-emerald-500 rounded-full flex items-center px-1 cursor-pointer">
+              <div className="w-4 h-4 bg-white rounded-full shadow-sm ml-auto" />
+            </div>
+          </div>
 
-            {/* Monday/Thursday Fasting */}
-            <div className="group flex flex-wrap items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-              <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                </svg>
+          {/* Control 3: Toggles */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="p-2 bg-slate-50 rounded-md text-slate-600">
+                <Calendar className="w-5 h-5" />
               </div>
-              <div className="flex-1">
+              <div>
                 <p className="text-sm font-medium text-slate-900" data-testid="text-mockup-reminder-2-title">Monday/Thursday Fasting</p>
-                <p className="text-xs text-slate-400" data-testid="text-mockup-reminder-2-desc">Sunnah habit</p>
+                <p className="text-xs text-slate-500" data-testid="text-mockup-reminder-2-desc">Sunnah habit</p>
               </div>
-              {/* Toggle OFF */}
-              <div className="w-11 h-6 bg-slate-200 rounded-full flex items-center px-0.5 cursor-pointer transition-colors">
-                <div className="w-5 h-5 bg-white rounded-full shadow-sm" />
-              </div>
+            </div>
+            {/* Custom Toggle Off */}
+            <div className="w-11 h-6 bg-slate-200 rounded-full flex items-center px-1 cursor-pointer hover:bg-slate-300 transition-colors">
+              <div className="w-4 h-4 bg-white rounded-full shadow-sm" />
             </div>
           </div>
         </div>

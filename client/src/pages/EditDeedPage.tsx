@@ -247,45 +247,6 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="points"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("editDeed.pointsLabel")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      className="glass-input"
-                      {...field}
-                      data-testid="input-edit-deed-points"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("editDeed.descriptionLabel")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={t("editDeed.descriptionPlaceholder")}
-                      className="glass-input"
-                      {...field}
-                      data-testid="input-edit-deed-description"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {isDzikirCategory && (
               <FormField
                 control={form.control}
@@ -379,27 +340,6 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
               />
             )}
 
-            {isSholatCategory && (
-              <FormField
-                control={form.control}
-                name="isJamaah"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value || false}
-                        onCheckedChange={field.onChange}
-                        data-testid="checkbox-edit-deed-jamaah"
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>{t("sholat.isJamaah")}</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-            )}
-
             {isQuranCategory && (
               <FormField
                 control={form.control}
@@ -459,6 +399,66 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                 )}
               />
             )}
+
+            {isSholatCategory && (
+              <FormField
+                control={form.control}
+                name="isJamaah"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value || false}
+                        onCheckedChange={field.onChange}
+                        data-testid="checkbox-edit-deed-jamaah"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>{t("sholat.isJamaah")}</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <FormField
+              control={form.control}
+              name="points"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("editDeed.pointsLabel")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      className="glass-input"
+                      {...field}
+                      data-testid="input-edit-deed-points"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("editDeed.descriptionLabel")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={t("editDeed.descriptionPlaceholder")}
+                      className="glass-input"
+                      {...field}
+                      data-testid="input-edit-deed-description"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="space-y-4 pt-2 border-t border-border">
               <p className="text-sm font-medium text-muted-foreground">{t("editDeed.dateTimeSection")}</p>

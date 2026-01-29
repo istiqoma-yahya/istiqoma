@@ -131,6 +131,20 @@ export default function ProgressPage() {
     const monthEnd = endOfMonth(now);
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
+    // Determine sub-categories to track if a category is selected
+    let trackingSubCategories: string[] = [];
+    if (selectedCategory !== "all") {
+      const set = new Set<string>();
+      filteredDeeds.forEach(d => {
+        if (d.dzikirType) set.add(t(`dzikir.types.${d.dzikirType}`));
+        else if (d.sholatType) set.add(t(`sholat.types.${d.sholatType}`));
+        else if (d.fastingType) set.add(t(`fasting.types.${d.fastingType}`));
+        else if (d.quranUnit) set.add(t(`quran.units.${d.quranUnit}`));
+        else if (d.sedekahType) set.add(t(`sedekah.types.${d.sedekahType}`));
+      });
+      trackingSubCategories = Array.from(set).sort();
+    }
+
     const data = days.map((day) => {
       const dayDeeds = filteredDeeds.filter((d) => {
         const createdAt = typeof d.createdAt === 'string' ? new Date(d.createdAt) : (d.createdAt || new Date());
@@ -142,11 +156,30 @@ export default function ProgressPage() {
       });
 
       const dayPoints = dayDeeds.reduce((sum, d) => sum + d.points, 0);
-
-      return {
+      
+      const res: any = {
         date: format(day, "MMM d"),
         points: dayPoints,
       };
+
+      // Add points per sub-category if tracking
+      if (trackingSubCategories.length > 0) {
+        trackingSubCategories.forEach(sub => {
+          res[sub] = dayDeeds
+            .filter(d => {
+              let label = "";
+              if (d.dzikirType) label = t(`dzikir.types.${d.dzikirType}`);
+              else if (d.sholatType) label = t(`sholat.types.${d.sholatType}`);
+              else if (d.fastingType) label = t(`fasting.types.${d.fastingType}`);
+              else if (d.quranUnit) label = t(`quran.units.${d.quranUnit}`);
+              else if (d.sedekahType) label = t(`sedekah.types.${d.sedekahType}`);
+              return label === sub;
+            })
+            .reduce((sum, d) => sum + d.points, 0);
+        });
+      }
+
+      return res;
     });
 
     // Filter out empty days at the end
@@ -154,7 +187,20 @@ export default function ProgressPage() {
       (_, index, arr) =>
         arr.slice(index).some((d) => d.points !== 0)
     );
-  }, [filteredDeeds]);
+  }, [filteredDeeds, selectedCategory, t]);
+
+  const subCategoryList = useMemo(() => {
+    if (selectedCategory === "all") return [];
+    const set = new Set<string>();
+    filteredDeeds.forEach(d => {
+      if (d.dzikirType) set.add(t(`dzikir.types.${d.dzikirType}`));
+      else if (d.sholatType) set.add(t(`sholat.types.${d.sholatType}`));
+      else if (d.fastingType) set.add(t(`fasting.types.${d.fastingType}`));
+      else if (d.quranUnit) set.add(t(`quran.units.${d.quranUnit}`));
+      else if (d.sedekahType) set.add(t(`sedekah.types.${d.sedekahType}`));
+    });
+    return Array.from(set).sort();
+  }, [filteredDeeds, selectedCategory, t]);
 
   const COLORS = [
     "#10b981",
@@ -301,14 +347,28 @@ export default function ProgressPage() {
                         itemStyle={{ color: tooltipItemColor }}
                       />
                       <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="points"
-                        stroke="#10b981"
-                        name={t("stats.points")}
-                        strokeWidth={2}
-                        dot={false}
-                      />
+                      {subCategoryList.length > 0 ? (
+                        subCategoryList.map((sub, index) => (
+                          <Line
+                            key={sub}
+                            type="monotone"
+                            dataKey={sub}
+                            stroke={COLORS[index % COLORS.length]}
+                            name={sub}
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                        ))
+                      ) : (
+                        <Line
+                          type="monotone"
+                          dataKey="points"
+                          stroke="#10b981"
+                          name={t("stats.points")}
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                      )}
                     </LineChart>
                   </ResponsiveContainer>
                 </Card>

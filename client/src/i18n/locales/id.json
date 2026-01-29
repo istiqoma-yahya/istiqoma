@@ -403,6 +403,19 @@
       "hitungan": "Hitungan (Kali)"
     }
   },
+  "customUnit": {
+    "selectUnit": "Pilih Satuan",
+    "units": {
+      "hitungan": "Hitungan (Kali)",
+      "ayat": "Ayat",
+      "halaman": "Halaman",
+      "surat": "Surat",
+      "juz": "Juz",
+      "rakaat": "Rakaat",
+      "hari": "Hari",
+      "uang": "Uang (Jumlah)"
+    }
+  },
   "notifications": {
     "title": "Notifikasi",
     "subtitle": "Kelola pengaturan notifikasi Anda",

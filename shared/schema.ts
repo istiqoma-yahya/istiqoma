@@ -29,6 +29,7 @@ export const deeds = pgTable("deeds", {
   isJamaah: boolean("is_jamaah"),
   quranUnit: text("quran_unit"),
   sedekahType: text("sedekah_type"),
+  customUnit: text("custom_unit"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -52,6 +53,7 @@ export const targets = pgTable("targets", {
   isJamaah: boolean("is_jamaah"),
   quranUnit: text("quran_unit"),
   sedekahType: text("sedekah_type"),
+  customUnit: text("custom_unit"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -95,6 +97,7 @@ export const insertDeedSchema = createInsertSchema(deeds).pick({
   isJamaah: true,
   quranUnit: true,
   sedekahType: true,
+  customUnit: true,
   createdAt: true,
 }).extend({
   createdAt: z.coerce.date().optional(),
@@ -104,6 +107,7 @@ export const insertDeedSchema = createInsertSchema(deeds).pick({
   isJamaah: z.boolean().optional(),
   quranUnit: z.enum(["ayat", "halaman", "surat", "juz"]).optional(),
   sedekahType: z.enum(["uang", "hitungan"]).optional(),
+  customUnit: z.enum(["hitungan", "ayat", "halaman", "surat", "juz", "rakaat", "hari", "uang"]).optional(),
 });
 
 export const insertCategorySchema = createInsertSchema(categories).pick({
@@ -129,6 +133,7 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   isJamaah: true,
   quranUnit: true,
   sedekahType: true,
+  customUnit: true,
 }).extend({
   name: z.string().optional(),
   category: z.string().min(1, "Category is required"),
@@ -145,6 +150,7 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   isJamaah: z.boolean().optional(),
   quranUnit: z.enum(["ayat", "halaman", "surat", "juz"]).optional(),
   sedekahType: z.enum(["uang", "hitungan"]).optional(),
+  customUnit: z.enum(["hitungan", "ayat", "halaman", "surat", "juz", "rakaat", "hari", "uang"]).optional(),
 });
 
 export const insertTargetHistorySchema = createInsertSchema(targetHistory).pick({

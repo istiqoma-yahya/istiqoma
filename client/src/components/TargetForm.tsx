@@ -63,6 +63,7 @@ export function TargetForm({
       isJamaah: undefined,
       quranUnit: undefined,
       sedekahType: undefined,
+      customUnit: undefined,
     },
   });
 
@@ -84,6 +85,7 @@ export function TargetForm({
         isJamaah: editingTarget.isJamaah || undefined,
         quranUnit: (editingTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz" | undefined) || undefined,
         sedekahType: (editingTarget.sedekahType as "uang" | "hitungan" | undefined) || undefined,
+        customUnit: (editingTarget.customUnit as "hitungan" | "ayat" | "halaman" | "surat" | "juz" | "rakaat" | "hari" | "uang" | undefined) || undefined,
       });
       setTargetValueInput(String(editingTarget.targetValue));
     }
@@ -101,6 +103,20 @@ export function TargetForm({
   const isFastingCategory = isFastingFardhuCategory || isFastingSunnahCategory;
   const isQuranCategory = watchedCategory?.toLowerCase() === "baca quran" || watchedCategory?.toLowerCase() === "quran";
   const isSedekahCategory = watchedCategory?.toLowerCase() === "shodaqoh" || watchedCategory?.toLowerCase() === "sedekah" || watchedCategory?.toLowerCase() === "sodaqoh";
+
+  const isBuiltInCategory = isDzikirCategory || isSholatCategory || isFastingCategory || isQuranCategory || isSedekahCategory;
+  const isCustomCategory = watchedCategory && !isBuiltInCategory;
+
+  const CUSTOM_UNITS = [
+    { id: "hitungan", labelKey: "customUnit.units.hitungan" },
+    { id: "ayat", labelKey: "customUnit.units.ayat" },
+    { id: "halaman", labelKey: "customUnit.units.halaman" },
+    { id: "surat", labelKey: "customUnit.units.surat" },
+    { id: "juz", labelKey: "customUnit.units.juz" },
+    { id: "rakaat", labelKey: "customUnit.units.rakaat" },
+    { id: "hari", labelKey: "customUnit.units.hari" },
+    { id: "uang", labelKey: "customUnit.units.uang" },
+  ];
 
   const DZIKIR_TYPES = [
     { id: "subhanallah", labelKey: "dzikir.types.subhanallah" },
@@ -300,6 +316,36 @@ export function TargetForm({
             </FormItem>
           )}
         />
+
+        {isCustomCategory && (
+          <FormField
+            control={form.control}
+            name="customUnit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("customUnit.selectUnit")}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || ""}
+                >
+                  <FormControl>
+                    <SelectTrigger className="glass-input" data-testid="select-target-custom-unit">
+                      <SelectValue placeholder={t("customUnit.selectUnit")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
+                    {CUSTOM_UNITS.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {t(unit.labelKey)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         {isDzikirCategory && (
           <FormField

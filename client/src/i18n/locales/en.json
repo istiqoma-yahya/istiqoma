@@ -403,6 +403,19 @@
       "hitungan": "Count (Times)"
     }
   },
+  "customUnit": {
+    "selectUnit": "Select Unit",
+    "units": {
+      "hitungan": "Count (Times)",
+      "ayat": "Verses (Ayat)",
+      "halaman": "Pages",
+      "surat": "Chapters (Surah)",
+      "juz": "Juz",
+      "rakaat": "Rakaat",
+      "hari": "Days",
+      "uang": "Money (Amount)"
+    }
+  },
   "notifications": {
     "title": "Notifications",
     "subtitle": "Manage your notification preferences",

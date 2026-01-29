@@ -167,7 +167,7 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="relative z-20 py-20 bg-background -mt-16" data-testid="section-features">
+      <section className="relative z-20 py-20 bg-background -mt-24" data-testid="section-features">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 40 }}

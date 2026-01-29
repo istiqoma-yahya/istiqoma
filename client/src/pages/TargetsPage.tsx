@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTargetsWithProgress, useDeleteTarget, useTargetHistory, useUpdateTargetProgress, useCompleteTarget } from "@/hooks/use-targets";
+import { useCreateDeed } from "@/hooks/use-deeds";
 import { useAuth } from "@/hooks/use-auth";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UpdateProgressModal } from "@/components/UpdateProgressModal";
 import { getTargetDisplayTitle } from "@/lib/targets";
+import { api } from "@shared/routes";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +32,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { type TargetWithProgress } from "@shared/schema";
 import { type TargetHistoryWithStreak } from "@/hooks/use-targets";
-import { Loader2, Plus, Target, Pencil, Trash2, Trophy, Calendar, ChevronDown, ChevronUp, CheckCircle, XCircle, History, Ban, Clock } from "lucide-react";
+import { Loader2, Plus, Target, Pencil, Trash2, Trophy, Calendar, ChevronDown, ChevronUp, CheckCircle, XCircle, History, Ban, Clock, TrendingUp } from "lucide-react";
 import { format, formatDistanceToNow, isPast, type Locale } from "date-fns";
 import { id as idLocale, ms as msLocale, enUS } from "date-fns/locale";
 
@@ -38,6 +42,7 @@ interface TargetCardProps {
   onToggleExpand: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onOpenUpdateModal: () => void;
   getPeriodIcon: (period: string) => JSX.Element;
   getPeriodLabel: (period: string) => string;
   t: (key: string, options?: Record<string, string>) => string;
@@ -53,6 +58,7 @@ function TargetCard({
   onToggleExpand,
   onEdit,
   onDelete,
+  onOpenUpdateModal,
   getPeriodIcon,
   getPeriodLabel,
   t,
@@ -327,12 +333,26 @@ function TargetCard({
                   className="h-2 bg-gray-300 dark:bg-gray-600"
                   data-testid={`progress-target-${target.id}`}
                 />
-                {isAchieved && (
-                  <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-                    <Trophy className="w-4 h-4" />
-                    <span>{t("targets.completed")}</span>
-                  </div>
-                )}
+                <div className="flex items-center justify-between mt-2">
+                  {isAchieved ? (
+                    <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
+                      <Trophy className="w-4 h-4" />
+                      <span>{t("targets.completed")}</span>
+                    </div>
+                  ) : (
+                    <div />
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={onOpenUpdateModal}
+                    className="flex items-center gap-1"
+                    data-testid={`button-update-recurring-${target.id}`}
+                  >
+                    <TrendingUp className="w-3 h-3" />
+                    {t("targets.updateProgress")}
+                  </Button>
+                </div>
               </>
             )}
           </div>
@@ -400,14 +420,18 @@ function TargetCard({
 export default function TargetsPage() {
   const { t, i18n } = useTranslation();
   const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
   const { data: targets, isLoading } = useTargetsWithProgress();
   const { user } = useAuth();
   const deleteTarget = useDeleteTarget();
   const updateProgress = useUpdateTargetProgress();
   const completeTarget = useCompleteTarget();
+  const createDeed = useCreateDeed();
 
   const [deletingTarget, setDeletingTarget] = useState<TargetWithProgress | null>(null);
   const [expandedTargetId, setExpandedTargetId] = useState<number | null>(null);
+  const [updateModalTarget, setUpdateModalTarget] = useState<TargetWithProgress | null>(null);
+  const [isSavingProgress, setIsSavingProgress] = useState(false);
 
   const getDateLocale = () => {
     switch (i18n.language) {
@@ -422,6 +446,43 @@ export default function TargetsPage() {
     if (deletingTarget) {
       await deleteTarget.mutateAsync(deletingTarget.id);
       setDeletingTarget(null);
+    }
+  };
+
+  const handleUpdateProgressWithDeed = async (targetId: number, incrementValue: number) => {
+    if (!updateModalTarget) return;
+    
+    setIsSavingProgress(true);
+    try {
+      const targetTitle = getTargetDisplayTitle(updateModalTarget, t);
+      
+      const deedData: Parameters<typeof createDeed.mutate>[0] = {
+        deedType: "good",
+        description: t("targets.deedCreatedFromTarget", { target: targetTitle }),
+        category: updateModalTarget.category,
+        points: incrementValue,
+        createdAt: new Date(),
+      };
+      
+      if (updateModalTarget.dzikirType) deedData.dzikirType = updateModalTarget.dzikirType;
+      if (updateModalTarget.sholatType) deedData.sholatType = updateModalTarget.sholatType;
+      if (updateModalTarget.fastingType) deedData.fastingType = updateModalTarget.fastingType;
+      if (updateModalTarget.isJamaah) deedData.isJamaah = updateModalTarget.isJamaah;
+      if (updateModalTarget.quranUnit) deedData.quranUnit = updateModalTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz";
+      if (updateModalTarget.sedekahType) deedData.sedekahType = updateModalTarget.sedekahType as "uang" | "hitungan";
+      
+      createDeed.mutate(deedData, {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+          setUpdateModalTarget(null);
+          setIsSavingProgress(false);
+        },
+        onError: () => {
+          setIsSavingProgress(false);
+        }
+      });
+    } catch (error) {
+      setIsSavingProgress(false);
     }
   };
 
@@ -493,6 +554,7 @@ export default function TargetsPage() {
                 onToggleExpand={() => setExpandedTargetId(expandedTargetId === target.id ? null : target.id)}
                 onEdit={() => navigate(`/targets/${target.id}/edit`)}
                 onDelete={() => setDeletingTarget(target)}
+                onOpenUpdateModal={() => setUpdateModalTarget(target)}
                 getPeriodIcon={getPeriodIcon}
                 getPeriodLabel={getPeriodLabel}
                 t={t}
@@ -528,6 +590,14 @@ export default function TargetsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <UpdateProgressModal
+        target={updateModalTarget}
+        isOpen={!!updateModalTarget}
+        onClose={() => setUpdateModalTarget(null)}
+        onSave={handleUpdateProgressWithDeed}
+        isSaving={isSavingProgress}
+      />
 
       <BottomNavigation />
     </div>

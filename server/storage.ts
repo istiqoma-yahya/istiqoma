@@ -105,14 +105,19 @@ export class DatabaseStorage implements IStorage {
         "Shodaqoh"
       ];
       
+      // Get current categories again to avoid race conditions
+      const currentCategories = await this.getCategories(userId);
+      const existingNames = new Set(currentCategories.map(c => c.name));
+      
       for (const name of defaultProtected) {
-        if (name !== insertCategory.name) {
+        if (!existingNames.has(name)) {
           await db.insert(categories).values({
             name,
             userId,
             isProtected: true,
             sortOrder: ++maxSortOrder + 1
           });
+          existingNames.add(name);
         }
       }
     }

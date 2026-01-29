@@ -64,6 +64,25 @@ When users create deeds or targets with custom (non-built-in) categories, they c
 
 Built-in categories (Dzikir, Sholat, Puasa, Baca Quran, Shodaqoh) have their own specialized type selectors and don't show the generic unit dropdown.
 
+### Automatic Point Calculation
+Points are calculated automatically by the backend based on category and quantity. The calculation logic is in `server/calculatePoints.ts`:
+
+**Flat points per session (ignores quantity):**
+- Dzikir = 10 points
+- Shodaqoh/Sedekah = 100 points
+- Custom categories = 50 points
+
+**Points multiplied by quantity:**
+- Sholat Fardhu = 100 × quantity (+50 if jamaah)
+- Sholat Sunnah = 50 × quantity (+50 if jamaah)
+- Puasa Fardhu = 500 × quantity
+- Puasa Sunnah = 250 × quantity
+- Baca Quran:
+  - Ayat = 1 × quantity
+  - Halaman = 10 × quantity
+  - Juz = 200 × quantity
+  - Surat = 200 × quantity
+
 ### Authentication
 - **Provider**: Replit Auth (OpenID Connect)
 - **Implementation**: Located in `server/replit_integrations/auth/`

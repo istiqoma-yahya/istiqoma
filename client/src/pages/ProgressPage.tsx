@@ -99,14 +99,28 @@ export default function ProgressPage() {
   // Category breakdown
   const categoryMap = new Map<string, number>();
   filteredDeeds.forEach((deed) => {
-    const current = categoryMap.get(deed.category) || 0;
-    categoryMap.set(deed.category, current + 1);
+    let breakdownKey = deed.category;
+    
+    // If a specific category is selected, break down by its specific type/sub-category
+    if (selectedCategory !== "all") {
+      if (deed.dzikirType) breakdownKey = t(`dzikir.types.${deed.dzikirType}`);
+      else if (deed.sholatType) breakdownKey = t(`sholat.types.${deed.sholatType}`);
+      else if (deed.fastingType) breakdownKey = t(`fasting.types.${deed.fastingType}`);
+      else if (deed.quranUnit) breakdownKey = t(`quran.units.${deed.quranUnit}`);
+      else if (deed.sedekahType) breakdownKey = t(`sedekah.types.${deed.sedekahType}`);
+      else breakdownKey = translateCategoryName(deed.category);
+    } else {
+      breakdownKey = translateCategoryName(deed.category);
+    }
+
+    const current = categoryMap.get(breakdownKey) || 0;
+    categoryMap.set(breakdownKey, current + 1);
   });
 
   const categoryData = Array.from(categoryMap.entries()).map(
-    ([name, count]) => ({
-      name: translateCategoryName(name),
-      value: count,
+    ([name, value]) => ({
+      name,
+      value,
     })
   );
 

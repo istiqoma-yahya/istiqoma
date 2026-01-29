@@ -50,7 +50,7 @@ export default function Landing() {
               {t('landing.subtitle')}
             </p>
             
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start justify-start gap-4">
               <button 
                 onClick={handleLogin}
                 className="btn-primary w-full sm:w-auto text-lg px-8 py-4 flex items-center justify-center gap-2 group"

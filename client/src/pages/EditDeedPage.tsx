@@ -245,7 +245,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                       <div className="border-t border-border mt-1 pt-1">
                         <button
                           type="button"
-                          className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-primary hover:bg-accent rounded-sm transition-colors"
+                          className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-primary hover:bg-accent hover:text-accent-foreground rounded-sm transition-colors"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();

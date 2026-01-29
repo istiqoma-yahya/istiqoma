@@ -13,7 +13,7 @@
   "landing": {
     "title": "A better you.",
     "titleLine2": "One deed at a time.",
-    "subtitle": "A spiritual companion for the modern Muslim. Grow steadily on your path toward Allah.",
+    "subtitle": "Istiqoma helps you build consistent habits in prayer, good deeds, and self-reflection. Track your journey to become a better believer, one deed at a time.",
     "startTracking": "Start Tracking Now",
     "login": "Login",
     "featuresLabel": "Features",
@@ -38,8 +38,8 @@
       "privacyDesc": "Your deeds are between you and Allah alone. We never share your spiritual journey with anyone."
     },
     "personalize": {
-      "title": "Your deen, your pace.",
-      "subtitle": "Islam is a journey, not a sprint. Customize your dashboard to focus on the habits you want to build right now. Start small with the obligatory deeds (Fard), and gradually add voluntary ones (Nafl) as your spiritual endurance grows.",
+      "title": "Personalize your worship goals",
+      "subtitle": "Customize your dashboard to focus on the habits you want to build right now. Start with the obligatory (Fard), then gradually add voluntary ones (Sunnah) as your spiritual growth progresses.",
       "cardTitle": "Personalize Goals",
       "quranGoal": "Daily Quran Goal",
       "quranPages": "5 Pages",
@@ -47,8 +47,8 @@
       "tahajjudDesc": "Last 3rd of night",
       "fastingTitle": "Monday/Thursday Fasting",
       "fastingDesc": "Sunnah habit",
-      "benefit1": "Smart suggestions based on your location and calendar.",
-      "benefit2": "Privacy-first design. Your deeds are between you and Allah.",
+      "benefit1": "Smart reminders based on your location and calendar.",
+      "benefit2": "Privacy first. Your deeds are between you and Allah.",
       "benefit3": "Offline capable for when you disconnect to reconnect."
     },
     "testimonial": {

@@ -13,7 +13,7 @@
   "landing": {
     "title": "Menjadi lebih baik.",
     "titleLine2": "Satu amal pada satu masa.",
-    "subtitle": "Teman rohani untuk Muslim moden. Berkembang istiqamah di jalan anda menuju Allah.",
+    "subtitle": "Istiqoma membantu anda membina tabiat konsisten dalam berdoa, beramal, dan muhasabah diri. Jejaki perjalanan anda untuk menjadi mukmin yang lebih baik, satu amal pada satu masa.",
     "startTracking": "Mula Menjejak Sekarang",
     "login": "Log Masuk",
     "featuresLabel": "Ciri-ciri",
@@ -38,8 +38,8 @@
       "privacyDesc": "Amal anda hanya antara anda dan Allah. Kami tidak pernah berkongsi perjalanan rohani anda dengan sesiapa."
     },
     "personalize": {
-      "title": "Agama anda, rentak anda.",
-      "subtitle": "Islam adalah perjalanan, bukan larian. Sesuaikan papan pemuka untuk fokus pada tabiat yang ingin anda bina sekarang. Mulakan dengan yang wajib (Fardhu), kemudian tambah yang sunat secara beransur-ansur.",
+      "title": "Peribadikan sasaran ibadah",
+      "subtitle": "Sesuaikan papan pemuka untuk fokus pada tabiat yang ingin anda bina sekarang. Mulakan dengan yang wajib (Fardhu), kemudian tambah yang sunat secara beransur-ansur seiring pertumbuhan rohani anda.",
       "cardTitle": "Peribadikan Matlamat",
       "quranGoal": "Matlamat Quran Harian",
       "quranPages": "5 Halaman",
@@ -47,8 +47,8 @@
       "tahajjudDesc": "Sepertiga malam terakhir",
       "fastingTitle": "Puasa Isnin/Khamis",
       "fastingDesc": "Tabiat sunat",
-      "benefit1": "Cadangan pintar berdasarkan lokasi dan kalendar anda.",
-      "benefit2": "Reka bentuk mengutamakan privasi. Amal anda hanya antara anda dan Allah.",
+      "benefit1": "Peringatan pintar berdasarkan lokasi dan kalendar anda.",
+      "benefit2": "Mengutamakan privasi. Amal anda hanya antara anda dan Allah.",
       "benefit3": "Boleh offline untuk masa anda memutuskan sambungan untuk menyambung semula."
     },
     "testimonial": {

@@ -444,28 +444,58 @@ export default function TargetsPage() {
       if (isOneTimeTarget) {
         const currentProgress = updateModalTarget.manualProgress || updateModalTarget.currentValue || 0;
         const newProgress = currentProgress + incrementValue;
+        const targetTitle = getTargetDisplayTitle(updateModalTarget, t);
         
+        // First update progress, then create deed if successful (to avoid orphan deeds on failure)
         updateProgress.mutate({ id: targetId, progress: newProgress }, {
           onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+            // Progress updated successfully, now create the deed
+            const deedData: Parameters<typeof createDeed.mutate>[0] = {
+              description: t("targets.deedCreatedFromTarget", { target: targetTitle }),
+              category: updateModalTarget.category,
+              points: incrementValue,
+              createdAt: new Date(),
+            };
             
-            if (newProgress >= updateModalTarget.targetValue) {
-              completeTarget.mutate(targetId, {
-                onSuccess: async () => {
-                  await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
-                  setUpdateModalTarget(null);
-                  setIsSavingProgress(false);
-                },
-                onError: async () => {
-                  await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+            if (updateModalTarget.dzikirType) deedData.dzikirType = updateModalTarget.dzikirType;
+            if (updateModalTarget.sholatType) deedData.sholatType = updateModalTarget.sholatType;
+            if (updateModalTarget.fastingType) deedData.fastingType = updateModalTarget.fastingType;
+            if (updateModalTarget.isJamaah) deedData.isJamaah = updateModalTarget.isJamaah;
+            if (updateModalTarget.quranUnit) deedData.quranUnit = updateModalTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz";
+            if (updateModalTarget.sedekahType) deedData.sedekahType = updateModalTarget.sedekahType as "uang" | "hitungan";
+            
+            createDeed.mutate(deedData, {
+              onSuccess: async () => {
+                await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+                await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
+                
+                if (newProgress >= updateModalTarget.targetValue) {
+                  completeTarget.mutate(targetId, {
+                    onSuccess: async () => {
+                      await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+                      await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
+                      setUpdateModalTarget(null);
+                      setIsSavingProgress(false);
+                    },
+                    onError: async () => {
+                      await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+                      await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
+                      setUpdateModalTarget(null);
+                      setIsSavingProgress(false);
+                    }
+                  });
+                } else {
                   setUpdateModalTarget(null);
                   setIsSavingProgress(false);
                 }
-              });
-            } else {
-              setUpdateModalTarget(null);
-              setIsSavingProgress(false);
-            }
+              },
+              onError: async () => {
+                // Deed creation failed, but progress was updated - still invalidate and close
+                await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+                setUpdateModalTarget(null);
+                setIsSavingProgress(false);
+              }
+            });
           },
           onError: () => {
             setIsSavingProgress(false);
@@ -491,6 +521,7 @@ export default function TargetsPage() {
         createDeed.mutate(deedData, {
           onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+            await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
             setUpdateModalTarget(null);
             setIsSavingProgress(false);
           },

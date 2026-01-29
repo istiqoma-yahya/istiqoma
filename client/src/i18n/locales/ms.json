@@ -16,13 +16,24 @@
     "subtitle": "Teman rohani untuk Muslim moden. Berkembang istiqamah di jalan anda menuju Allah.",
     "startTracking": "Mula Menjejak Sekarang",
     "login": "Log Masuk",
+    "featuresLabel": "Ciri-ciri",
+    "featuresTitle": "Alat untuk Mukmin Moden",
+    "featuresSubtitle": "Set alat lengkap yang direka untuk membantu anda mengimbangi kehidupan duniawi dengan tanggungjawab rohani.",
     "features": {
-      "targetsTitle": "Tetapkan Sasaran",
-      "targetsDesc": "Tetapkan matlamat rohani untuk kategori yang anda ambil berat dan jejaki kemajuan anda untuk mencapainya.",
-      "trackTitle": "Jejak dengan Mudah",
-      "trackDesc": "Rekod amal baik dan buruk anda dengan serta-merta menggunakan antara muka yang ringkas dan intuitif.",
-      "visualizeTitle": "Visualisasi Pertumbuhan",
-      "visualizeDesc": "Lihat kemajuan rohani anda dari semasa ke semasa dengan carta dan ringkasan yang cantik."
+      "dzikirTitle": "Kaunter Zikir",
+      "dzikirDesc": "Tasbih digital dengan maklum balas haptic. Jejaki zikir harian anda dengan mudah dan selesa.",
+      "quranTitle": "Perjalanan Quran",
+      "quranDesc": "Tetapkan matlamat bacaan peribadi. Jejaki halaman, Juzuk, atau masa yang dihabiskan merenungi Al-Quran.",
+      "analyticsTitle": "Analisis Amal",
+      "analyticsDesc": "Visualisasikan pertumbuhan rohani anda. Kenalpasti bidang untuk penambahbaikan dengan pandangan berasaskan data.",
+      "remindersTitle": "Peringatan Pintar",
+      "remindersDesc": "Jangan terlepas solat. Dapatkan pemberitahuan tepat pada masanya untuk solat dan matlamat rohani anda.",
+      "targetsTitle": "Sasaran Rohani",
+      "targetsDesc": "Tetapkan sasaran bermakna untuk ibadah. Jejaki konsistensi anda dan bina tabiat yang berkekalan.",
+      "communityTitle": "Cabaran Komuniti",
+      "communityDesc": "Sertai cabaran global untuk puasa, zikir, atau sedekah. Berlumba dalam kebaikan (Khair).",
+      "badgesTitle": "Lencana Penghormatan",
+      "badgesDesc": "Raih pencapaian rohani untuk konsistensi, mendorong anda terus berusaha ke arah Ihsan."
     }
   },
   "dashboard": {

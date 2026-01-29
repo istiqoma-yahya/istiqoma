@@ -16,13 +16,24 @@
     "subtitle": "Pendamping spiritual untuk Muslim modern. Tumbuh istiqomah di jalanmu menuju Allah.",
     "startTracking": "Mulai Mencatat Sekarang",
     "login": "Masuk",
+    "featuresLabel": "Fitur",
+    "featuresTitle": "Alat untuk Muslim Modern",
+    "featuresSubtitle": "Rangkaian alat lengkap yang dirancang untuk membantumu menyeimbangkan kehidupan dunia dengan kewajiban spiritual.",
     "features": {
-      "targetsTitle": "Tetapkan Target",
-      "targetsDesc": "Tetapkan tujuan spiritual untuk kategori yang kamu pedulikan dan lacak kemajuanmu untuk mencapainya.",
-      "trackTitle": "Catat dengan Mudah",
-      "trackDesc": "Rekam amal baik dan burukmu secara instan dengan antarmuka yang sederhana dan intuitif.",
-      "visualizeTitle": "Visualisasi Pertumbuhan",
-      "visualizeDesc": "Lihat kemajuan spiritualmu dari waktu ke waktu dengan grafik dan ringkasan yang indah."
+      "dzikirTitle": "Penghitung Dzikir",
+      "dzikirDesc": "Tasbih digital dengan feedback haptic. Lacak dzikir harianmu dengan mudah dan nyaman.",
+      "quranTitle": "Perjalanan Quran",
+      "quranDesc": "Tetapkan target bacaan personal. Lacak halaman, Juz, atau waktu yang dihabiskan merenungi Al-Quran.",
+      "analyticsTitle": "Analisis Amal",
+      "analyticsDesc": "Visualisasi pertumbuhan spiritualmu. Kenali area yang perlu diperbaiki dengan insight berbasis data.",
+      "remindersTitle": "Pengingat Cerdas",
+      "remindersDesc": "Jangan pernah lewatkan sholat. Dapatkan notifikasi tepat waktu untuk sholat dan target spiritualmu.",
+      "targetsTitle": "Target Spiritual",
+      "targetsDesc": "Tetapkan target bermakna untuk ibadah. Lacak konsistensimu dan bangun kebiasaan yang langgeng.",
+      "communityTitle": "Tantangan Komunitas",
+      "communityDesc": "Ikuti tantangan global untuk puasa, dzikir, atau sedekah. Berlomba dalam kebaikan.",
+      "badgesTitle": "Lencana Kehormatan",
+      "badgesDesc": "Raih pencapaian spiritual untuk konsistensi, mendorongmu terus berusaha menuju Ihsan."
     }
   },
   "dashboard": {

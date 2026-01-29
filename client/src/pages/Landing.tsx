@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, Target, TrendingUp } from "lucide-react";
+import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
@@ -16,18 +16,19 @@ export default function Landing() {
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Navbar */}
-      <nav className="container mx-auto px-6 py-6 relative z-10 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-            <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-2xl">I</span>
+      <nav className="container mx-auto px-6 py-6 relative z-10 flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20" data-testid="img-logo">
+            <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-2xl" data-testid="text-logo-initial">I</span>
           </div>
-          <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-2xl tracking-tight">Istiqoma</span>
+          <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-2xl tracking-tight" data-testid="text-app-name">Istiqoma</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <LanguageSwitcher />
           <button 
             onClick={handleLogin}
             className="btn-secondary text-sm px-5 py-2.5"
+            data-testid="button-login"
           >
             {t('landing.login')}
           </button>
@@ -42,10 +43,10 @@ export default function Landing() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="font-display text-5xl md:text-7xl font-bold leading-tight mb-6 bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent">
+            <h1 className="font-display text-5xl md:text-7xl font-bold leading-tight mb-6 bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent" data-testid="text-hero-title">
               {t('landing.title')}<br />{t('landing.titleLine2')}
             </h1>
-            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed" data-testid="text-hero-subtitle">
               {t('landing.subtitle')}
             </p>
             
@@ -53,53 +54,93 @@ export default function Landing() {
               <button 
                 onClick={handleLogin}
                 className="btn-primary w-full sm:w-auto text-lg px-8 py-4 flex items-center justify-center gap-2 group"
+                data-testid="button-start-tracking"
               >
                 {t('landing.startTracking')}
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5" />
               </button>
             </div>
           </motion.div>
 
-          {/* Feature Grid */}
-          <motion.div 
+          {/* Features Section */}
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="grid md:grid-cols-3 gap-6 mt-20"
+            className="mt-24"
           >
-            {[
-              {
-                icon: Target,
-                title: t('landing.features.targetsTitle'),
-                desc: t('landing.features.targetsDesc'),
-                color: "text-purple-600 dark:text-purple-400"
-              },
-              {
-                icon: CheckCircle2,
-                title: t('landing.features.trackTitle'),
-                desc: t('landing.features.trackDesc'),
-                color: "text-emerald-600 dark:text-emerald-400"
-              },
-              {
-                icon: TrendingUp,
-                title: t('landing.features.visualizeTitle'),
-                desc: t('landing.features.visualizeDesc'),
-                color: "text-blue-600 dark:text-blue-400"
-              }
-            ].map((feature, i) => (
-              <div key={i} className="glass-card p-6 text-left hover:border-primary/20 transition-colors">
-                <feature.icon className={`w-8 h-8 ${feature.color} mb-4`} />
-                <h3 className="text-lg font-bold font-display mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
+            <p className="text-emerald-500 font-medium text-sm tracking-wider uppercase mb-3" data-testid="text-features-label">{t('landing.featuresLabel')}</p>
+            <h2 className="text-3xl md:text-4xl font-bold font-display mb-4" data-testid="text-features-title">{t('landing.featuresTitle')}</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto mb-12" data-testid="text-features-subtitle">{t('landing.featuresSubtitle')}</p>
+            
+            <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {[
+                {
+                  icon: Fingerprint,
+                  title: t('landing.features.dzikirTitle'),
+                  desc: t('landing.features.dzikirDesc'),
+                  iconBg: "bg-emerald-500/10",
+                  iconColor: "text-emerald-500"
+                },
+                {
+                  icon: BookOpen,
+                  title: t('landing.features.quranTitle'),
+                  desc: t('landing.features.quranDesc'),
+                  iconBg: "bg-blue-500/10",
+                  iconColor: "text-blue-500"
+                },
+                {
+                  icon: TrendingUp,
+                  title: t('landing.features.analyticsTitle'),
+                  desc: t('landing.features.analyticsDesc'),
+                  iconBg: "bg-violet-500/10",
+                  iconColor: "text-violet-500"
+                },
+                {
+                  icon: Bell,
+                  title: t('landing.features.remindersTitle'),
+                  desc: t('landing.features.remindersDesc'),
+                  iconBg: "bg-amber-500/10",
+                  iconColor: "text-amber-500"
+                },
+                {
+                  icon: Target,
+                  title: t('landing.features.targetsTitle'),
+                  desc: t('landing.features.targetsDesc'),
+                  iconBg: "bg-rose-500/10",
+                  iconColor: "text-rose-500"
+                },
+                {
+                  icon: Users,
+                  title: t('landing.features.communityTitle'),
+                  desc: t('landing.features.communityDesc'),
+                  iconBg: "bg-cyan-500/10",
+                  iconColor: "text-cyan-500"
+                },
+                {
+                  icon: Award,
+                  title: t('landing.features.badgesTitle'),
+                  desc: t('landing.features.badgesDesc'),
+                  iconBg: "bg-orange-500/10",
+                  iconColor: "text-orange-500"
+                }
+              ].map((feature, i) => (
+                <div key={i} className="glass-card p-5 text-left hover-elevate" data-testid={`card-feature-${i}`}>
+                  <div className={`w-11 h-11 rounded-xl ${feature.iconBg} flex items-center justify-center mb-4`}>
+                    <feature.icon className={`w-5 h-5 ${feature.iconColor}`} />
+                  </div>
+                  <h3 className="text-base font-bold font-display mb-2" data-testid={`text-feature-title-${i}`}>{feature.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed" data-testid={`text-feature-desc-${i}`}>{feature.desc}</p>
+                </div>
+              ))}
+            </div>
           </motion.div>
         </div>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} {t('app.name')}. {t('app.tagline')}</p>
+        <p data-testid="text-footer-copyright">© {new Date().getFullYear()} {t('app.name')}. {t('app.tagline')}</p>
       </footer>
     </div>
   );

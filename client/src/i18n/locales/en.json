@@ -16,13 +16,24 @@
     "subtitle": "A spiritual companion for the modern Muslim. Grow steadily on your path toward Allah.",
     "startTracking": "Start Tracking Now",
     "login": "Login",
+    "featuresLabel": "Features",
+    "featuresTitle": "Tools for the Modern Believer",
+    "featuresSubtitle": "A comprehensive suite of tools designed to help you balance worldly life with your spiritual obligations.",
     "features": {
-      "targetsTitle": "Set Targets",
-      "targetsDesc": "Set spiritual goals for categories you care about and track your progress toward achieving them.",
-      "trackTitle": "Track Easily",
-      "trackDesc": "Record your good and bad deeds instantly with a simple, intuitive interface.",
-      "visualizeTitle": "Visualize Growth",
-      "visualizeDesc": "See your spiritual progress over time with beautiful charts and summaries."
+      "dzikirTitle": "Dzikir Counter",
+      "dzikirDesc": "Digital tasbih with haptic feedback. Track your daily remembrance of Allah with ease.",
+      "quranTitle": "Quran Journey",
+      "quranDesc": "Set personalized reading goals. Track pages, Juz, or time spent reflecting on the Holy Book.",
+      "analyticsTitle": "Deed Analytics",
+      "analyticsDesc": "Visualize your spiritual growth. Identify areas for improvement with gentle, data-driven insights.",
+      "remindersTitle": "Smart Reminders",
+      "remindersDesc": "Never miss a Salah. Get timely notifications for prayers and your spiritual goals.",
+      "targetsTitle": "Spiritual Goals",
+      "targetsDesc": "Set meaningful targets for worship. Track your consistency and build lasting habits.",
+      "communityTitle": "Community Challenges",
+      "communityDesc": "Join global challenges for fasting, Dhikr, or charity. Compete in goodness (Khair).",
+      "badgesTitle": "Badges of Honor",
+      "badgesDesc": "Earn spiritual milestones for consistency, encouraging you to keep striving for Ihsan."
     }
   },
   "dashboard": {

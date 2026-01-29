@@ -4,8 +4,6 @@ import { useCreateDeed } from "@/hooks/use-deeds";
 import { useCategories } from "@/hooks/use-categories";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { RotateCcw, Save, Loader2 } from "lucide-react";
@@ -23,7 +21,6 @@ const DZIKIR_TYPES = [
 export default function DzikirPage() {
   const [, navigate] = useLocation();
   const [count, setCount] = useState(0);
-  const [isIstighfar, setIsIstighfar] = useState(false);
   const [selectedDzikirType, setSelectedDzikirType] = useState<string>(() => {
     return localStorage.getItem("lastDzikirType") || "subhanallah";
   });
@@ -58,62 +55,33 @@ export default function DzikirPage() {
       return;
     }
 
-    if (isIstighfar) {
-      createDeed(
-        {
-          deedType: "good",
-          description: t('dzikir.istighfarDeedDesc', { count }),
-          category: dzikirCategory?.name || "Dzikr",
-          dzikirType: "istighfar",
-          points: count,
-          createdAt: new Date(),
+    const dzikirTypeLabel = t(`dzikir.types.${selectedDzikirType}`);
+    createDeed(
+      {
+        deedType: "good",
+        description: t('dzikir.dzikirTypeDeedDesc', { type: dzikirTypeLabel, count }),
+        category: dzikirCategory?.name || "Dzikr",
+        points: count,
+        dzikirType: selectedDzikirType,
+        createdAt: new Date(),
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: t('dzikir.dzikirSaved'),
+            description: t('dzikir.dzikirTypeSavedDesc', { type: dzikirTypeLabel, count }),
+          });
+          setCount(0);
         },
-        {
-          onSuccess: () => {
-            toast({
-              title: t('dzikir.istighfarSaved'),
-              description: t('dzikir.istighfarSavedDesc', { count }),
-            });
-            setCount(0);
-          },
-          onError: () => {
-            toast({
-              title: t('dzikir.failedToSave'),
-              description: t('dzikir.tryAgain'),
-              variant: "destructive",
-            });
-          },
-        }
-      );
-    } else {
-      const dzikirTypeLabel = t(`dzikir.types.${selectedDzikirType}`);
-      createDeed(
-        {
-          deedType: "good",
-          description: t('dzikir.dzikirTypeDeedDesc', { type: dzikirTypeLabel, count }),
-          category: dzikirCategory?.name || "Dzikr",
-          points: count,
-          dzikirType: selectedDzikirType,
-          createdAt: new Date(),
+        onError: () => {
+          toast({
+            title: t('dzikir.failedToSave'),
+            description: t('dzikir.tryAgain'),
+            variant: "destructive",
+          });
         },
-        {
-          onSuccess: () => {
-            toast({
-              title: t('dzikir.dzikirSaved'),
-              description: t('dzikir.dzikirTypeSavedDesc', { type: dzikirTypeLabel, count }),
-            });
-            setCount(0);
-          },
-          onError: () => {
-            toast({
-              title: t('dzikir.failedToSave'),
-              description: t('dzikir.tryAgain'),
-              variant: "destructive",
-            });
-          },
-        }
-      );
-    }
+      }
+    );
   };
 
   return (
@@ -128,58 +96,38 @@ export default function DzikirPage() {
       <main className="container max-w-5xl mx-auto px-4 py-8 flex flex-col items-center">
         <div className="text-center mb-8">
           <p className="text-muted-foreground">
-            {isIstighfar 
-              ? t('dzikir.istighfarDesc')
-              : t('dzikir.dzikirDesc')}
+            {t('dzikir.dzikirDesc')}
           </p>
         </div>
 
-        <div className="flex items-center gap-3 mb-6">
-          <Switch
-            id="istighfar-toggle"
-            checked={isIstighfar}
-            onCheckedChange={setIsIstighfar}
-            data-testid="switch-istighfar"
-          />
-          <Label htmlFor="istighfar-toggle" className="text-base font-medium cursor-pointer">
-            {t('dzikir.istighfarMode')}
-          </Label>
+        <div className="flex flex-wrap justify-center gap-2 mb-6">
+          {DZIKIR_TYPES.map((type) => (
+            <Button
+              key={type.id}
+              variant={selectedDzikirType === type.id ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedDzikirType(type.id)}
+              className={selectedDzikirType === type.id ? "bg-emerald-500 hover:bg-emerald-600" : ""}
+              data-testid={`button-dzikir-type-${type.id}`}
+            >
+              {t(type.labelKey)}
+            </Button>
+          ))}
         </div>
-
-        {!isIstighfar && (
-          <div className="flex flex-wrap justify-center gap-2 mb-6">
-            {DZIKIR_TYPES.map((type) => (
-              <Button
-                key={type.id}
-                variant={selectedDzikirType === type.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedDzikirType(type.id)}
-                className={selectedDzikirType === type.id ? "bg-emerald-500 hover:bg-emerald-600" : ""}
-                data-testid={`button-dzikir-type-${type.id}`}
-              >
-                {t(type.labelKey)}
-              </Button>
-            ))}
-          </div>
-        )}
 
         <Card className="w-full max-w-sm p-8 flex flex-col items-center gap-6">
           <button
             onClick={handleTap}
-            className={`w-48 h-48 rounded-full flex items-center justify-center transition-all active:scale-95 ${
-              isIstighfar 
-                ? "bg-rose-500/20 border-4 border-rose-500 active:bg-rose-500/30 hover:bg-rose-500/25"
-                : "bg-emerald-500/20 border-4 border-emerald-500 active:bg-emerald-500/30 hover:bg-emerald-500/25"
-            }`}
+            className="w-48 h-48 rounded-full flex items-center justify-center transition-all active:scale-95 bg-emerald-500/20 border-4 border-emerald-500 active:bg-emerald-500/30 hover:bg-emerald-500/25"
             data-testid="button-dzikir-tap"
           >
-            <span className={`text-6xl font-bold ${isIstighfar ? "text-rose-500" : "text-emerald-500"}`} data-testid="text-dzikir-count">
+            <span className="text-6xl font-bold text-emerald-500" data-testid="text-dzikir-count">
               {count}
             </span>
           </button>
 
           <p className="text-sm text-muted-foreground">
-            {isIstighfar ? t('dzikir.tapIstighfar') : t('dzikir.tapToCount')}
+            {t('dzikir.tapToCount')}
           </p>
         </Card>
 
@@ -198,11 +146,7 @@ export default function DzikirPage() {
           <Button
             onClick={handleSave}
             disabled={count === 0 || isSaving}
-            className={`flex items-center gap-2 py-2 text-base font-medium ${
-              isIstighfar 
-                ? "bg-rose-500 hover:bg-rose-600"
-                : "bg-emerald-500 hover:bg-emerald-600"
-            }`}
+            className="flex items-center gap-2 py-2 text-base font-medium bg-emerald-500 hover:bg-emerald-600"
             data-testid="button-dzikir-save"
           >
             {isSaving ? (
@@ -210,15 +154,13 @@ export default function DzikirPage() {
             ) : (
               <Save className="w-4 h-4" />
             )}
-            {isIstighfar ? `${t('dzikir.save')} (-${count})` : `${t('dzikir.save')} (+${count})`}
+            {`${t('dzikir.save')} (+${count})`}
           </Button>
         </div>
 
         <div className="mt-12 text-center">
           <p className="text-xs text-muted-foreground max-w-xs">
-            {isIstighfar 
-              ? t('dzikir.istighfarReminder')
-              : t('dzikir.dzikirReminder')}
+            {t('dzikir.dzikirReminder')}
           </p>
         </div>
       </main>

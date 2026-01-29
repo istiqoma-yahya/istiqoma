@@ -56,8 +56,6 @@ export default function Landing() {
         {/* Unicorn Studio Animation Background */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <div data-us-project="xHUd2xqFoER642lhnH69" className="w-full h-full" data-testid="hero-animation-background" />
-          {/* Overlay to cover Unicorn Studio watermark */}
-          <div className="absolute bottom-0 left-0 right-0 h-12 bg-background" />
         </div>
         
       <main className="container mx-auto px-6 pt-16 pb-24 md:pt-24 md:pb-32 relative z-10">
@@ -169,7 +167,7 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="relative z-10 py-20 bg-background" data-testid="section-features">
+      <section className="relative z-20 py-20 bg-background -mt-16" data-testid="section-features">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 40 }}

@@ -58,7 +58,6 @@ export default function DzikirPage() {
     const dzikirTypeLabel = t(`dzikir.types.${selectedDzikirType}`);
     createDeed(
       {
-        deedType: "good",
         description: t('dzikir.dzikirTypeDeedDesc', { type: dzikirTypeLabel, count }),
         category: dzikirCategory?.name || "Dzikr",
         points: count,

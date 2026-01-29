@@ -20,7 +20,7 @@ export const deeds = pgTable("deeds", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   description: text("description").notNull(),
-  deedType: text("deed_type", { enum: ["good", "bad"] }).notNull(),
+  deedType: text("deed_type", { enum: ["good", "bad"] }).notNull().default("good"),
   category: text("category").notNull(),
   points: integer("points").notNull().default(1),
   dzikirType: text("dzikir_type"),
@@ -87,7 +87,6 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
 
 export const insertDeedSchema = createInsertSchema(deeds).pick({
   description: true,
-  deedType: true,
   category: true,
   points: true,
   dzikirType: true,

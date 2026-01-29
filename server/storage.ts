@@ -48,7 +48,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDeed(userId: string, insertDeed: InsertDeed): Promise<Deed> {
-    const values: any = { ...insertDeed, userId };
+    const values: any = { ...insertDeed, userId, deedType: "good" };
     const [deed] = await db
       .insert(deeds)
       .values(values)
@@ -167,13 +167,8 @@ export class DatabaseStorage implements IStorage {
           const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
           const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
           
-          if (isLimitTarget) {
-            // For limit targets, count all deeds in this category
-            return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && inDateRange;
-          } else {
-            // For achievement targets, only count good deeds
-            return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && deed.deedType === "good" && inDateRange;
-          }
+          // All deeds are now good deeds - count matching deeds
+          return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && inDateRange;
         });
         
         // Sum deed points + manual progress
@@ -234,13 +229,8 @@ export class DatabaseStorage implements IStorage {
         const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
         const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
         
-        if (isLimitTarget) {
-          // For limit targets, count all deeds in this category (typically bad deeds like Maksiat)
-          return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && inPeriod;
-        } else {
-          // For achievement targets, only count good deeds
-          return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && deed.deedType === "good" && inPeriod;
-        }
+        // All deeds are now good deeds - count matching deeds
+        return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && inPeriod;
       });
 
       const currentValue = deedsInPeriod.reduce((sum, deed) => sum + deed.points, 0);
@@ -416,13 +406,8 @@ export class DatabaseStorage implements IStorage {
         // For fasting targets with specific type, also match fastingType
         const matchesFastingType = !t.fastingType || deed.fastingType === t.fastingType;
         
-        if (isLimitTarget) {
-          // For limit targets, count all deeds in this category
-          return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && inPeriod;
-        } else {
-          // For achievement targets, only count good deeds
-          return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && deed.deedType === "good" && inPeriod;
-        }
+        // All deeds are now good deeds - count matching deeds
+        return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && inPeriod;
       });
 
       const achievedValue = deedsInPeriod.reduce((sum, deed) => sum + deed.points, 0);

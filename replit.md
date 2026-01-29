@@ -2,7 +2,9 @@
 
 ## Overview
 
-Istiqoma is a spiritual self-improvement application designed for Muslims to track their daily good and bad deeds. Users can log deeds with descriptions, categories, and point values, then visualize their progress through statistics. The application features user authentication via Replit Auth, category management, and a modern dark-themed UI with emerald green accents inspired by Islamic art.
+Istiqoma is a spiritual self-improvement application designed for Muslims to track their daily good deeds. Users can log deeds with descriptions, categories, and point values, then visualize their progress through statistics. The application features user authentication via Replit Auth, category management, and a modern dark-themed UI with emerald green accents inspired by Islamic art.
+
+**Note**: The app exclusively tracks good deeds - all bad deed tracking functionality has been removed. The `deedType` field in the database defaults to "good" for backward compatibility.
 
 ## User Preferences
 
@@ -45,7 +47,7 @@ The server handles:
 Database tables:
 - `users` - User accounts (managed by Replit Auth)
 - `sessions` - Session storage for authentication
-- `deeds` - User deed entries with type, description, category, and points
+- `deeds` - User deed entries with description, category, and points (deedType defaults to "good")
 - `categories` - Custom user-defined categories
 
 ### Authentication

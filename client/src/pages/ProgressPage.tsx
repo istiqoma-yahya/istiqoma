@@ -47,32 +47,9 @@ export default function ProgressPage() {
 
   const deedsArray = deeds || [];
 
-  // Calculate stats for good vs bad deeds
-  // Istighfar (dzikirType "istighfar") reduces bad deeds
-  const istighfarDeeds = deedsArray.filter((d) => d.dzikirType === "istighfar");
-  const goodDeedsExcludingIstighfar = deedsArray.filter((d) => d.deedType === "good" && d.dzikirType !== "istighfar");
-  const badDeeds = deedsArray.filter((d) => d.deedType === "bad");
-  
-  const goodPoints = goodDeedsExcludingIstighfar.reduce((sum, d) => sum + d.points, 0);
-  const rawBadPoints = badDeeds.reduce((sum, d) => sum + d.points, 0);
-  const istighfarPoints = istighfarDeeds.reduce((sum, d) => sum + d.points, 0);
-  const badPoints = Math.max(0, rawBadPoints - istighfarPoints);
-
-  // Data for good vs bad deeds chart
-  // Include istighfar in good deeds count for display purposes
-  const goodDeeds = deedsArray.filter((d) => d.deedType === "good");
-  const deedTypeData = [
-    {
-      name: t("stats.goodDeeds"),
-      count: goodDeeds.length,
-      points: goodPoints + istighfarPoints,
-    },
-    {
-      name: t("stats.badDeeds"),
-      count: badDeeds.length,
-      points: badPoints,
-    },
-  ];
+  // Calculate total stats
+  const totalDeeds = deedsArray.length;
+  const totalPoints = deedsArray.reduce((sum, d) => sum + d.points, 0);
 
   // Category breakdown
   const categoryMap = new Map<string, number>();
@@ -104,29 +81,18 @@ export default function ProgressPage() {
       );
     });
 
-    const goodDaysPoints = dayDeeds
-      .filter((d) => d.deedType === "good")
-      .reduce((sum, d) => sum + d.points, 0);
-    const rawBadDaysPoints = dayDeeds
-      .filter((d) => d.deedType === "bad")
-      .reduce((sum, d) => sum + d.points, 0);
-    const istighfarDaysPoints = dayDeeds
-      .filter((d) => d.dzikirType === "istighfar")
-      .reduce((sum, d) => sum + d.points, 0);
-    const badDaysPoints = Math.max(0, rawBadDaysPoints - istighfarDaysPoints);
+    const dayPoints = dayDeeds.reduce((sum, d) => sum + d.points, 0);
 
     return {
       date: format(day, "MMM d"),
-      good: goodDaysPoints,
-      bad: badDaysPoints,
-      total: goodDaysPoints - badDaysPoints,
+      points: dayPoints,
     };
   });
 
   // Filter out empty days at the end
   const filteredPointsOverTime = pointsOverTime.filter(
     (_, index, arr) =>
-      arr.slice(index).some((d) => d.good !== 0 || d.bad !== 0)
+      arr.slice(index).some((d) => d.points !== 0)
   );
 
   const COLORS = [
@@ -144,7 +110,6 @@ export default function ProgressPage() {
     "#fca5a5",
   ];
 
-  const netPoints = (goodPoints + istighfarPoints) - badPoints;
 
   return (
     <>
@@ -168,31 +133,24 @@ export default function ProgressPage() {
           </Card>
         ) : (
           <div className="space-y-8">
-            {/* Good vs Bad Deeds Chart */}
+            {/* Summary Card */}
             <Card className="p-6">
-              <h2 className="text-lg font-display font-bold mb-6">
-                {t("progress.goodVsBad")}
-              </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={deedTypeData} margin={{ left: -20, right: 10 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                  <XAxis dataKey="name" stroke={axisColor} />
-                  <YAxis stroke={axisColor} width={50} />
-                  <Tooltip
-                    cursor={{ fill: cursorFill }}
-                    contentStyle={{
-                      backgroundColor: tooltipBg,
-                      border: `1px solid ${tooltipBorder}`,
-                      borderRadius: "8px",
-                    }}
-                    labelStyle={{ color: tooltipLabelColor, fontWeight: "bold" }}
-                    itemStyle={{ color: tooltipItemColor }}
-                  />
-                  <Legend />
-                  <Bar dataKey="count" fill="#10b981" name={t("progress.count")} />
-                  <Bar dataKey="points" fill="#3b82f6" name={t("progress.points")} />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-display font-bold mb-2">
+                    {t("stats.goodDeeds")}
+                  </h2>
+                  <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {totalDeeds} {t("progress.deeds")}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground mb-1">{t("stats.totalPoints")}</p>
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {totalPoints}
+                  </p>
+                </div>
+              </div>
             </Card>
 
             {/* Points Over Time */}
@@ -218,25 +176,9 @@ export default function ProgressPage() {
                     <Legend />
                     <Line
                       type="monotone"
-                      dataKey="good"
+                      dataKey="points"
                       stroke="#10b981"
-                      name={t("progress.goodDeedsPoints")}
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="bad"
-                      stroke="#f87171"
-                      name={t("progress.badDeedsPoints")}
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="total"
-                      stroke="#fbbf24"
-                      name={t("progress.netPointsLabel")}
+                      name={t("stats.points")}
                       strokeWidth={2}
                       dot={false}
                     />

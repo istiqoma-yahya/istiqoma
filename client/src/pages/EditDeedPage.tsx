@@ -76,7 +76,6 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: deed.description,
-      deedType: deed.deedType,
       category: deed.category,
       points: deed.points,
       createdAt: undefined,
@@ -441,52 +440,25 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
               />
             )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="deedType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("editDeed.typeLabel")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="glass-input" data-testid="select-edit-deed-type">
-                          <SelectValue placeholder={t("editDeed.typePlaceholder")} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="bg-popover border-border text-popover-foreground">
-                        <SelectItem value="good">{t("deed.goodDeed")}</SelectItem>
-                        <SelectItem value="bad">{t("deed.badDeed")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="points"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("editDeed.pointsLabel")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min={1}
-                        className="glass-input"
-                        {...field}
-                        data-testid="input-edit-deed-points"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="points"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("editDeed.pointsLabel")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      className="glass-input"
+                      {...field}
+                      data-testid="input-edit-deed-points"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="space-y-4 pt-2 border-t border-border">
               <p className="text-sm font-medium text-muted-foreground">{t("editDeed.dateTimeSection")}</p>

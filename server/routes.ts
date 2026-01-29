@@ -6,6 +6,7 @@ import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
 import { insertPushSubscriptionSchema } from "@shared/schema";
+import { calculatePoints } from "./calculatePoints";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -26,7 +27,25 @@ export async function registerRoutes(
     try {
       const input = api.deeds.create.input.parse(req.body);
       const userId = req.user.claims.sub;
-      const deed = await storage.createDeed(userId, input);
+      
+      const calculatedPoints = calculatePoints({
+        category: input.category,
+        quantity: input.points || 1,
+        isJamaah: input.isJamaah,
+        quranUnit: input.quranUnit,
+        dzikirType: input.dzikirType,
+        sholatType: input.sholatType,
+        fastingType: input.fastingType,
+        sedekahType: input.sedekahType,
+        customUnit: input.customUnit,
+      });
+      
+      const deedWithCalculatedPoints = {
+        ...input,
+        points: calculatedPoints,
+      };
+      
+      const deed = await storage.createDeed(userId, deedWithCalculatedPoints);
       res.status(201).json(deed);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -57,7 +76,25 @@ export async function registerRoutes(
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid ID" });
       }
-      const deed = await storage.updateDeed(id, userId, input);
+      
+      const calculatedPoints = calculatePoints({
+        category: input.category,
+        quantity: input.points || 1,
+        isJamaah: input.isJamaah,
+        quranUnit: input.quranUnit,
+        dzikirType: input.dzikirType,
+        sholatType: input.sholatType,
+        fastingType: input.fastingType,
+        sedekahType: input.sedekahType,
+        customUnit: input.customUnit,
+      });
+      
+      const deedWithCalculatedPoints = {
+        ...input,
+        points: calculatedPoints,
+      };
+      
+      const deed = await storage.updateDeed(id, userId, deedWithCalculatedPoints);
       res.json(deed);
     } catch (err) {
       if (err instanceof z.ZodError) {

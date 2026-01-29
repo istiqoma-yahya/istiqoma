@@ -3,6 +3,7 @@ import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerpri
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { AppMockups } from "@/components/AppMockups";
 import testimonialAvatar from "@/assets/testimonial-yahya.png";
 
 export default function Landing() {
@@ -45,6 +46,7 @@ export default function Landing() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
+            <AppMockups />
             <h1 className="font-display text-5xl md:text-7xl font-bold leading-tight mb-6 bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent" data-testid="text-hero-title">
               {t('landing.title')}<br />{t('landing.titleLine2')}
             </h1>

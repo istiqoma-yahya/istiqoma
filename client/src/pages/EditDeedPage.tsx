@@ -405,7 +405,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                 control={form.control}
                 name="isJamaah"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                     <FormControl>
                       <Checkbox
                         checked={field.value || false}
@@ -414,7 +414,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>{t("sholat.isJamaah")}</FormLabel>
+                      <FormLabel className="font-normal">{t("sholat.isJamaah")}</FormLabel>
                     </div>
                   </FormItem>
                 )}

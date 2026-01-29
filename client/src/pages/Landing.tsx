@@ -224,7 +224,6 @@ export default function Landing() {
           </motion.div>
         </div>
       </main>
-
       {/* Personalize Section */}
       <section className="relative z-10 py-20 bg-muted/30" data-testid="section-personalize">
         <div className="container mx-auto px-6">
@@ -253,7 +252,7 @@ export default function Landing() {
                       <span className="text-foreground font-medium" data-testid="text-quran-goal-label">{t('landing.personalize.quranGoal')}</span>
                       <span className="text-emerald-500 font-medium" data-testid="text-quran-goal-value">{t('landing.personalize.quranPages')}</span>
                     </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="h-2 rounded-full overflow-hidden bg-[#43546b]">
                       <div className="h-full w-1/4 bg-emerald-500 rounded-full" />
                     </div>
                   </div>
@@ -327,7 +326,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Testimonial Section */}
       <section className="relative z-10 py-20 bg-background">
         <div className="container mx-auto px-6">

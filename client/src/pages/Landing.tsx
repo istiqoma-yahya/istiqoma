@@ -36,6 +36,12 @@ export default function Landing() {
         </div>
       </nav>
       {/* Hero Section */}
+      <section className="relative min-h-[600px] md:min-h-[700px]">
+        {/* Unicorn Studio Animation Background */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <div data-us-project="xHUd2xqFoER642lhnH69" className="w-full h-full" data-testid="hero-animation-background" />
+        </div>
+        
       <main className="container mx-auto px-6 pt-16 pb-24 md:pt-24 md:pb-32 relative z-10">
         <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
           {/* Left Column - Hero Content (65%) */}
@@ -224,6 +230,7 @@ export default function Landing() {
           </motion.div>
         </div>
       </main>
+      </section>
       {/* Personalize Section */}
       <section className="relative z-10 py-20 bg-muted/30" data-testid="section-personalize">
         <div className="container mx-auto px-6">

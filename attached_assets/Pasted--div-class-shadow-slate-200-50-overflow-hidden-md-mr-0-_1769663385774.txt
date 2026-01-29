@@ -1,0 +1,76 @@
+<div class="shadow-slate-200/50 overflow-hidden md:mr-0 transform transition-transform hover:-translate-y-1 duration-500 bg-white max-w-sm border-slate-100 border rounded-2xl mr-auto ml-auto shadow-2xl">
+    <!-- Header UI -->
+    <div class="flex bg-slate-50/50 border-slate-50 border-b pt-6 pr-6 pb-6 pl-6 items-start justify-between">
+      <div class="">
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">Today's Progress</p>
+        <h3 class="text-2xl font-semibold text-slate-900 tracking-tight">14 Muharram</h3>
+      </div>
+      <div class="h-10 w-10 rounded-full border border-slate-200 flex items-center justify-center bg-white shadow-sm">
+        <div class="relative w-5 h-5">
+          <svg class="transform -rotate-90 w-full h-full">
+            <circle cx="10" cy="10" r="8" stroke="#e2e8f0" stroke-width="2" fill="none"></circle>
+            <circle cx="10" cy="10" r="8" stroke="#10b981" stroke-width="2" fill="none" stroke-dasharray="50.2" stroke-dashoffset="12" class=""></circle>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- List Items -->
+    <div class="pt-2 pr-2 pb-2 pl-2 space-y-1">
+      <!-- Item 1: Active/Checked -->
+      <div class="group flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
+        <div class="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center text-white shadow-sm transition-all">
+          <iconify-icon icon="solar:check-read-linear" width="16" stroke-width="2.5" class=""></iconify-icon>
+        </div>
+        <div class="flex-1">
+          <p class="decoration-slate-300 line-through text-sm font-medium text-slate-900 opacity-50">Fajr Prayer</p>
+          <p class="text-xs text-slate-400">Completed at 5:45 AM</p>
+        </div>
+        <iconify-icon icon="solar:moon-stars-linear" class="text-slate-300" width="20" height="20" style="color: rgb(203, 213, 225);"></iconify-icon>
+      </div>
+
+      <!-- Item 2: Pending -->
+      <div class="group flex gap-4 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl pt-3 pr-3 pb-3 pl-3 gap-x-4 gap-y-4 items-center">
+        <div class="w-6 h-6 rounded-md border border-slate-300 group-hover:border-emerald-500 group-hover:text-emerald-500 flex items-center justify-center text-transparent transition-all">
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-slate-900">Read Surah Kahf</p>
+          <p class="text-xs text-slate-400">Target: 20 mins</p>
+        </div>
+        <iconify-icon icon="solar:book-2-linear" class="group-hover:text-emerald-500 transition-colors text-slate-400" width="20" height="20" style="color: rgb(16, 185, 129);"></iconify-icon>
+      </div>
+
+      <!-- Item 3: Pending -->
+      <div class="group flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
+        <div class="w-6 h-6 rounded-md border border-slate-300 group-hover:border-emerald-500 group-hover:text-emerald-500 flex items-center justify-center text-transparent transition-all">
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-slate-900">Give Sadaqah</p>
+          <p class="text-xs text-slate-400">Daily goal</p>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="group-hover:text-emerald-500 transition-colors w-[20px] h-[20px]" style="width: 20px; height: 20px; color: rgb(16, 185, 129)" data-icon-set="solar" data-solar="hand-money-linear" stroke-width="2" data-icon-replaced="true">
+          <g fill="none" stroke="currentColor" stroke-width="1.5" class="">
+            <path d="M17.414 10.414C18 9.828 18 8.886 18 7s0-2.828-.586-3.414m0 6.828C16.828 11 15.886 11 14 11h-4c-1.886 0-2.828 0-3.414-.586m10.828 0Zm0-6.828C16.828 3 15.886 3 14 3h-4c-1.886 0-2.828 0-3.414.586m10.828 0Zm-10.828 0C6 4.172 6 5.114 6 7s0 2.828.586 3.414m0-6.828Zm0 6.828ZM13 7a1 1 0 1 1-2 0a1 1 0 0 1 2 0Z" class=""></path>
+            <path stroke-linecap="round" d="M18 6a3 3 0 0 1-3-3m3 5a3 3 0 0 0-3 3M6 6a3 3 0 0 0 3-3M6 8a3 3 0 0 1 3 3m-4 9.388h2.26c1.01 0 2.033.106 3.016.308a14.9 14.9 0 0 0 5.33.118c.868-.14 1.72-.355 2.492-.727c.696-.337 1.549-.81 2.122-1.341c.572-.53 1.168-1.397 1.59-2.075c.364-.582.188-1.295-.386-1.728a1.89 1.89 0 0 0-2.22 0l-1.807 1.365c-.7.53-1.465 1.017-2.376 1.162q-.165.026-.345.047m0 0l-.11.012m.11-.012a1 1 0 0 0 .427-.24a1.49 1.49 0 0 0 .126-2.134a1.9 1.9 0 0 0-.45-.367c-2.797-1.669-7.15-.398-9.779 1.467m9.676 1.274a.5.5 0 0 1-.11.012m0 0a9.3 9.3 0 0 1-1.814.004" class=""></path>
+            <rect width="3" height="8" x="2" y="14" rx="1.5" class=""></rect>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Streak Footer -->
+    <div class="mt-2 mx-2 mb-2 p-3 bg-slate-900 rounded-xl flex items-center justify-between text-white">
+      <div class="flex items-center gap-3">
+        <div class="p-1.5 bg-white/10 rounded-lg">
+          <iconify-icon icon="solar:flame-linear" width="18" class="text-orange-400"></iconify-icon>
+        </div>
+        <div class="">
+          <p class="text-xs font-medium text-slate-300">Current Streak</p>
+          <p class="text-sm font-semibold">12 Days</p>
+        </div>
+      </div>
+      <div class="text-xs text-slate-400 bg-white/5 px-2 py-1 rounded">
+        +40 pts
+      </div>
+    </div>
+  </div>

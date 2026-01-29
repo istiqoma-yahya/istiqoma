@@ -47,8 +47,22 @@ The server handles:
 Database tables:
 - `users` - User accounts (managed by Replit Auth)
 - `sessions` - Session storage for authentication
-- `deeds` - User deed entries with description, category, and points (deedType defaults to "good")
+- `deeds` - User deed entries with description, category, points, and customUnit for custom categories (deedType defaults to "good")
+- `targets` - User target/goal entries with customUnit support for custom categories
 - `categories` - Custom user-defined categories
+
+### Custom Unit System
+When users create deeds or targets with custom (non-built-in) categories, they can select a unit type from 8 options:
+- hitungan (Kali) - Count-based
+- ayat - Quran verses
+- halaman - Pages
+- surat - Surahs/chapters
+- juz - Juz (30-part Quran divisions)
+- rakaat - Prayer units
+- hari - Days
+- uang (Jumlah) - Money amount
+
+Built-in categories (Dzikir, Sholat, Puasa, Baca Quran, Shodaqoh) have their own specialized type selectors and don't show the generic unit dropdown.
 
 ### Authentication
 - **Provider**: Replit Auth (OpenID Connect)

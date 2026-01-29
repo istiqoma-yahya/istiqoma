@@ -154,7 +154,7 @@ export default function Landing() {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Avatar className="w-14 h-14 border-2 border-emerald-500/30" data-testid="img-testimonial-avatar">
-                <AvatarImage src={testimonialAvatar} alt={t('landing.testimonial.name')} />
+                <AvatarImage src={testimonialAvatar} alt={t('landing.testimonial.name')} className="object-cover" />
                 <AvatarFallback>YPE</AvatarFallback>
               </Avatar>
               <div className="text-left">

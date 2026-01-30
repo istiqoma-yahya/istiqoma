@@ -237,9 +237,7 @@
     "noDataDesc": "Start recording your deeds to see your progress charts here.",
     "count": "Count",
     "points": "Points",
-    "pointsOverTime": "Points Over Time",
     "deedsByCategory": "Deeds by Category",
-    "pointsByCategory": "Points by Category",
     "targetsProgress": "Targets Progress"
   },
   "targets": {

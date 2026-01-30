@@ -94,7 +94,6 @@ export default function ProgressPage() {
 
   // Calculate total stats
   const totalDeeds = filteredDeeds.length;
-  const totalPoints = filteredDeeds.reduce((sum, d) => sum + d.points, 0);
 
   // Category breakdown
   const categoryMap = new Map<string, number>();
@@ -124,119 +123,12 @@ export default function ProgressPage() {
     })
   );
 
-  // Points per category (for pie chart)
-  const pointsCategoryMap = new Map<string, number>();
-  filteredDeeds.forEach((deed) => {
-    let breakdownKey: string;
-    if (selectedCategory !== "all") {
-      if (deed.dzikirType) breakdownKey = t(`dzikir.types.${deed.dzikirType}`);
-      else if (deed.sholatType) breakdownKey = t(`sholat.types.${deed.sholatType}`);
-      else if (deed.fastingType) breakdownKey = t(`fasting.types.${deed.fastingType}`);
-      else if (deed.quranUnit) breakdownKey = t(`quran.units.${deed.quranUnit}`);
-      else if (deed.sedekahType) breakdownKey = t(`sedekah.types.${deed.sedekahType}`);
-      else breakdownKey = translateCategoryName(deed.category);
-    } else {
-      breakdownKey = translateCategoryName(deed.category);
-    }
-    const current = pointsCategoryMap.get(breakdownKey) || 0;
-    pointsCategoryMap.set(breakdownKey, current + deed.points);
-  });
-
-  const pointsPerCategory = Array.from(pointsCategoryMap.entries()).map(
-    ([name, value]) => ({
-      name,
-      value,
-    })
-  );
-
   // Get unique categories for "all" filter breakdown
   const categoryList = useMemo(() => {
     const set = new Set<string>();
     deedsArray.forEach(d => set.add(translateCategoryName(d.category)));
     return Array.from(set).sort();
   }, [deedsArray, translateCategoryName]);
-
-  // Points over time (daily)
-  const pointsOverTime = useMemo(() => {
-    const now = new Date();
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
-    const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
-
-    // Determine what to track based on filter
-    let trackingSubCategories: string[] = [];
-    let trackingCategories: string[] = [];
-    
-    if (selectedCategory === "all") {
-      // When "all" is selected, track per category
-      const set = new Set<string>();
-      filteredDeeds.forEach(d => set.add(translateCategoryName(d.category)));
-      trackingCategories = Array.from(set).sort();
-    } else {
-      // When specific category is selected, track per sub-category
-      const set = new Set<string>();
-      filteredDeeds.forEach(d => {
-        if (d.dzikirType) set.add(t(`dzikir.types.${d.dzikirType}`));
-        else if (d.sholatType) set.add(t(`sholat.types.${d.sholatType}`));
-        else if (d.fastingType) set.add(t(`fasting.types.${d.fastingType}`));
-        else if (d.quranUnit) set.add(t(`quran.units.${d.quranUnit}`));
-        else if (d.sedekahType) set.add(t(`sedekah.types.${d.sedekahType}`));
-      });
-      trackingSubCategories = Array.from(set).sort();
-    }
-
-    const data = days.map((day) => {
-      const dayDeeds = filteredDeeds.filter((d) => {
-        const createdAt = typeof d.createdAt === 'string' ? new Date(d.createdAt) : (d.createdAt || new Date());
-        return (
-          createdAt.getDate() === day.getDate() &&
-          createdAt.getMonth() === day.getMonth() &&
-          createdAt.getFullYear() === day.getFullYear()
-        );
-      });
-
-      const dayPoints = dayDeeds.reduce((sum, d) => sum + d.points, 0);
-      
-      const res: any = {
-        date: format(day, "MMM d"),
-        points: dayPoints,
-      };
-
-      // Add points per category if tracking categories (when "all" is selected)
-      if (trackingCategories.length > 0) {
-        trackingCategories.forEach(cat => {
-          res[cat] = dayDeeds
-            .filter(d => translateCategoryName(d.category) === cat)
-            .reduce((sum, d) => sum + d.points, 0);
-        });
-      }
-
-      // Add points per sub-category if tracking (when specific category is selected)
-      if (trackingSubCategories.length > 0) {
-        trackingSubCategories.forEach(sub => {
-          res[sub] = dayDeeds
-            .filter(d => {
-              let label = "";
-              if (d.dzikirType) label = t(`dzikir.types.${d.dzikirType}`);
-              else if (d.sholatType) label = t(`sholat.types.${d.sholatType}`);
-              else if (d.fastingType) label = t(`fasting.types.${d.fastingType}`);
-              else if (d.quranUnit) label = t(`quran.units.${d.quranUnit}`);
-              else if (d.sedekahType) label = t(`sedekah.types.${d.sedekahType}`);
-              return label === sub;
-            })
-            .reduce((sum, d) => sum + d.points, 0);
-        });
-      }
-
-      return res;
-    });
-
-    // Filter out empty days at the end
-    return data.filter(
-      (_, index, arr) =>
-        arr.slice(index).some((d) => d.points !== 0)
-    );
-  }, [filteredDeeds, selectedCategory, t, translateCategoryName]);
 
   // Deeds count over time (daily) - tracks number of deeds, not points
   const deedsOverTime = useMemo(() => {
@@ -442,12 +334,6 @@ export default function ProgressPage() {
                       {totalDeeds} {t("progress.deeds")}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-muted-foreground mb-1">{t("stats.totalPoints")}</p>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {totalPoints}
-                    </p>
-                  </div>
                 </div>
               </Card>
 
@@ -511,69 +397,6 @@ export default function ProgressPage() {
                 </Card>
               )}
 
-              {/* Points Over Time */}
-              {pointsOverTime.length > 0 && (
-                <Card className="p-6">
-                  <h2 className="text-lg font-display font-bold mb-6">
-                    {t("progress.pointsOverTime")}
-                  </h2>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={pointsOverTime} margin={{ left: -20, right: 10 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                      <XAxis dataKey="date" stroke={axisColor} />
-                      <YAxis stroke={axisColor} width={50} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: tooltipBg,
-                          border: `1px solid ${tooltipBorder}`,
-                          borderRadius: "8px",
-                        }}
-                        labelStyle={{ color: tooltipLabelColor, fontWeight: "bold" }}
-                        itemStyle={{ color: tooltipItemColor }}
-                      />
-                      <Legend />
-                      {selectedCategory === "all" && categoryList.length > 0 ? (
-                        // Show breakdown per category when "all" is selected
-                        categoryList.map((cat, index) => (
-                          <Line
-                            key={cat}
-                            type="monotone"
-                            dataKey={cat}
-                            stroke={COLORS[index % COLORS.length]}
-                            name={cat}
-                            strokeWidth={2}
-                            dot={false}
-                          />
-                        ))
-                      ) : subCategoryList.length > 0 ? (
-                        // Show breakdown per sub-category when specific category is selected
-                        subCategoryList.map((sub, index) => (
-                          <Line
-                            key={sub}
-                            type="monotone"
-                            dataKey={sub}
-                            stroke={COLORS[index % COLORS.length]}
-                            name={sub}
-                            strokeWidth={2}
-                            dot={false}
-                          />
-                        ))
-                      ) : (
-                        // Fallback to single line
-                        <Line
-                          type="monotone"
-                          dataKey="points"
-                          stroke="#10b981"
-                          name={t("stats.points")}
-                          strokeWidth={2}
-                          dot={false}
-                        />
-                      )}
-                    </LineChart>
-                  </ResponsiveContainer>
-                </Card>
-              )}
-
               {/* Category Breakdown */}
               {categoryData.length > 0 && (
                 <Card className="p-6">
@@ -597,47 +420,6 @@ export default function ProgressPage() {
                         {categoryData.map((_, index) => (
                           <Cell
                             key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: tooltipBg,
-                          border: `1px solid ${tooltipBorder}`,
-                          borderRadius: "8px",
-                        }}
-                        labelStyle={{ color: tooltipLabelColor, fontWeight: "bold" }}
-                        itemStyle={{ color: tooltipItemColor }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </Card>
-              )}
-
-              {/* Points by Category */}
-              {pointsPerCategory.length > 0 && (
-                <Card className="p-6">
-                  <h2 className="text-lg font-display font-bold mb-6">
-                    {t("progress.pointsByCategory")}
-                  </h2>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={pointsPerCategory}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, value }) =>
-                          `${name}: ${value}`
-                        }
-                        outerRadius={100}
-                        fill="#60a5fa"
-                        dataKey="value"
-                      >
-                        {pointsPerCategory.map((_, index) => (
-                          <Cell
-                            key={`points-cell-${index}`}
                             fill={COLORS[index % COLORS.length]}
                           />
                         ))}

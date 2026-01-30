@@ -124,6 +124,31 @@ export default function ProgressPage() {
     })
   );
 
+  // Points per category (for pie chart)
+  const pointsCategoryMap = new Map<string, number>();
+  filteredDeeds.forEach((deed) => {
+    let breakdownKey: string;
+    if (selectedCategory !== "all") {
+      if (deed.dzikirType) breakdownKey = t(`dzikir.types.${deed.dzikirType}`);
+      else if (deed.sholatType) breakdownKey = t(`sholat.types.${deed.sholatType}`);
+      else if (deed.fastingType) breakdownKey = t(`fasting.types.${deed.fastingType}`);
+      else if (deed.quranUnit) breakdownKey = t(`quran.units.${deed.quranUnit}`);
+      else if (deed.sedekahType) breakdownKey = t(`sedekah.types.${deed.sedekahType}`);
+      else breakdownKey = translateCategoryName(deed.category);
+    } else {
+      breakdownKey = translateCategoryName(deed.category);
+    }
+    const current = pointsCategoryMap.get(breakdownKey) || 0;
+    pointsCategoryMap.set(breakdownKey, current + deed.points);
+  });
+
+  const pointsPerCategory = Array.from(pointsCategoryMap.entries()).map(
+    ([name, value]) => ({
+      name,
+      value,
+    })
+  );
+
   // Get unique categories for "all" filter breakdown
   const categoryList = useMemo(() => {
     const set = new Set<string>();
@@ -572,6 +597,47 @@ export default function ProgressPage() {
                         {categoryData.map((_, index) => (
                           <Cell
                             key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: tooltipBg,
+                          border: `1px solid ${tooltipBorder}`,
+                          borderRadius: "8px",
+                        }}
+                        labelStyle={{ color: tooltipLabelColor, fontWeight: "bold" }}
+                        itemStyle={{ color: tooltipItemColor }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </Card>
+              )}
+
+              {/* Points by Category */}
+              {pointsPerCategory.length > 0 && (
+                <Card className="p-6">
+                  <h2 className="text-lg font-display font-bold mb-6">
+                    {t("progress.pointsByCategory")}
+                  </h2>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={pointsPerCategory}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, value }) =>
+                          `${name}: ${value}`
+                        }
+                        outerRadius={100}
+                        fill="#60a5fa"
+                        dataKey="value"
+                      >
+                        {pointsPerCategory.map((_, index) => (
+                          <Cell
+                            key={`points-cell-${index}`}
                             fill={COLORS[index % COLORS.length]}
                           />
                         ))}

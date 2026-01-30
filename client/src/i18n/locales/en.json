@@ -239,6 +239,7 @@
     "points": "Points",
     "pointsOverTime": "Points Over Time",
     "deedsByCategory": "Deeds by Category",
+    "pointsByCategory": "Points by Category",
     "targetsProgress": "Targets Progress"
   },
   "targets": {

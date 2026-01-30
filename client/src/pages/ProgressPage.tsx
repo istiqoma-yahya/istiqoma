@@ -124,6 +124,13 @@ export default function ProgressPage() {
     })
   );
 
+  // Get unique categories for "all" filter breakdown
+  const categoryList = useMemo(() => {
+    const set = new Set<string>();
+    deedsArray.forEach(d => set.add(translateCategoryName(d.category)));
+    return Array.from(set).sort();
+  }, [deedsArray, translateCategoryName]);
+
   // Points over time (daily)
   const pointsOverTime = useMemo(() => {
     const now = new Date();
@@ -131,9 +138,17 @@ export default function ProgressPage() {
     const monthEnd = endOfMonth(now);
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-    // Determine sub-categories to track if a category is selected
+    // Determine what to track based on filter
     let trackingSubCategories: string[] = [];
-    if (selectedCategory !== "all") {
+    let trackingCategories: string[] = [];
+    
+    if (selectedCategory === "all") {
+      // When "all" is selected, track per category
+      const set = new Set<string>();
+      filteredDeeds.forEach(d => set.add(translateCategoryName(d.category)));
+      trackingCategories = Array.from(set).sort();
+    } else {
+      // When specific category is selected, track per sub-category
       const set = new Set<string>();
       filteredDeeds.forEach(d => {
         if (d.dzikirType) set.add(t(`dzikir.types.${d.dzikirType}`));
@@ -162,7 +177,16 @@ export default function ProgressPage() {
         points: dayPoints,
       };
 
-      // Add points per sub-category if tracking
+      // Add points per category if tracking categories (when "all" is selected)
+      if (trackingCategories.length > 0) {
+        trackingCategories.forEach(cat => {
+          res[cat] = dayDeeds
+            .filter(d => translateCategoryName(d.category) === cat)
+            .reduce((sum, d) => sum + d.points, 0);
+        });
+      }
+
+      // Add points per sub-category if tracking (when specific category is selected)
       if (trackingSubCategories.length > 0) {
         trackingSubCategories.forEach(sub => {
           res[sub] = dayDeeds
@@ -187,7 +211,7 @@ export default function ProgressPage() {
       (_, index, arr) =>
         arr.slice(index).some((d) => d.points !== 0)
     );
-  }, [filteredDeeds, selectedCategory, t]);
+  }, [filteredDeeds, selectedCategory, t, translateCategoryName]);
 
   const subCategoryList = useMemo(() => {
     if (selectedCategory === "all") return [];
@@ -347,7 +371,21 @@ export default function ProgressPage() {
                         itemStyle={{ color: tooltipItemColor }}
                       />
                       <Legend />
-                      {subCategoryList.length > 0 ? (
+                      {selectedCategory === "all" && categoryList.length > 0 ? (
+                        // Show breakdown per category when "all" is selected
+                        categoryList.map((cat, index) => (
+                          <Line
+                            key={cat}
+                            type="monotone"
+                            dataKey={cat}
+                            stroke={COLORS[index % COLORS.length]}
+                            name={cat}
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                        ))
+                      ) : subCategoryList.length > 0 ? (
+                        // Show breakdown per sub-category when specific category is selected
                         subCategoryList.map((sub, index) => (
                           <Line
                             key={sub}
@@ -360,6 +398,7 @@ export default function ProgressPage() {
                           />
                         ))
                       ) : (
+                        // Fallback to single line
                         <Line
                           type="monotone"
                           dataKey="points"

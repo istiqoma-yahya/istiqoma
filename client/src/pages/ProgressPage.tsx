@@ -213,6 +213,82 @@ export default function ProgressPage() {
     );
   }, [filteredDeeds, selectedCategory, t, translateCategoryName]);
 
+  // Deeds count over time (daily) - tracks number of deeds, not points
+  const deedsOverTime = useMemo(() => {
+    const now = new Date();
+    const monthStart = startOfMonth(now);
+    const monthEnd = endOfMonth(now);
+    const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+    // Determine what to track based on filter
+    let trackingSubCategories: string[] = [];
+    let trackingCategories: string[] = [];
+    
+    if (selectedCategory === "all") {
+      const set = new Set<string>();
+      filteredDeeds.forEach(d => set.add(translateCategoryName(d.category)));
+      trackingCategories = Array.from(set).sort();
+    } else {
+      const set = new Set<string>();
+      filteredDeeds.forEach(d => {
+        if (d.dzikirType) set.add(t(`dzikir.types.${d.dzikirType}`));
+        else if (d.sholatType) set.add(t(`sholat.types.${d.sholatType}`));
+        else if (d.fastingType) set.add(t(`fasting.types.${d.fastingType}`));
+        else if (d.quranUnit) set.add(t(`quran.units.${d.quranUnit}`));
+        else if (d.sedekahType) set.add(t(`sedekah.types.${d.sedekahType}`));
+      });
+      trackingSubCategories = Array.from(set).sort();
+    }
+
+    const data = days.map((day) => {
+      const dayDeeds = filteredDeeds.filter((d) => {
+        const createdAt = typeof d.createdAt === 'string' ? new Date(d.createdAt) : (d.createdAt || new Date());
+        return (
+          createdAt.getDate() === day.getDate() &&
+          createdAt.getMonth() === day.getMonth() &&
+          createdAt.getFullYear() === day.getFullYear()
+        );
+      });
+
+      const dayCount = dayDeeds.length;
+      
+      const res: any = {
+        date: format(day, "MMM d"),
+        count: dayCount,
+      };
+
+      // Add count per category if tracking categories (when "all" is selected)
+      if (trackingCategories.length > 0) {
+        trackingCategories.forEach(cat => {
+          res[cat] = dayDeeds.filter(d => translateCategoryName(d.category) === cat).length;
+        });
+      }
+
+      // Add count per sub-category if tracking (when specific category is selected)
+      if (trackingSubCategories.length > 0) {
+        trackingSubCategories.forEach(sub => {
+          res[sub] = dayDeeds.filter(d => {
+            let label = "";
+            if (d.dzikirType) label = t(`dzikir.types.${d.dzikirType}`);
+            else if (d.sholatType) label = t(`sholat.types.${d.sholatType}`);
+            else if (d.fastingType) label = t(`fasting.types.${d.fastingType}`);
+            else if (d.quranUnit) label = t(`quran.units.${d.quranUnit}`);
+            else if (d.sedekahType) label = t(`sedekah.types.${d.sedekahType}`);
+            return label === sub;
+          }).length;
+        });
+      }
+
+      return res;
+    });
+
+    // Filter out empty days at the end
+    return data.filter(
+      (_, index, arr) =>
+        arr.slice(index).some((d) => d.count !== 0)
+    );
+  }, [filteredDeeds, selectedCategory, t, translateCategoryName]);
+
   const subCategoryList = useMemo(() => {
     if (selectedCategory === "all") return [];
     const set = new Set<string>();
@@ -349,6 +425,66 @@ export default function ProgressPage() {
                   </div>
                 </div>
               </Card>
+
+              {/* Deeds Over Time */}
+              {deedsOverTime.length > 0 && (
+                <Card className="p-6">
+                  <h2 className="text-lg font-display font-bold mb-6">
+                    {t("progress.deedsOverTime")}
+                  </h2>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={deedsOverTime} margin={{ left: -20, right: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                      <XAxis dataKey="date" stroke={axisColor} />
+                      <YAxis stroke={axisColor} width={50} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: tooltipBg,
+                          border: `1px solid ${tooltipBorder}`,
+                          borderRadius: "8px",
+                        }}
+                        labelStyle={{ color: tooltipLabelColor, fontWeight: "bold" }}
+                        itemStyle={{ color: tooltipItemColor }}
+                      />
+                      <Legend />
+                      {selectedCategory === "all" && categoryList.length > 0 ? (
+                        categoryList.map((cat, index) => (
+                          <Line
+                            key={`deeds-${cat}`}
+                            type="monotone"
+                            dataKey={cat}
+                            stroke={COLORS[index % COLORS.length]}
+                            name={cat}
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                        ))
+                      ) : subCategoryList.length > 0 ? (
+                        subCategoryList.map((sub, index) => (
+                          <Line
+                            key={`deeds-${sub}`}
+                            type="monotone"
+                            dataKey={sub}
+                            stroke={COLORS[index % COLORS.length]}
+                            name={sub}
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                        ))
+                      ) : (
+                        <Line
+                          type="monotone"
+                          dataKey="count"
+                          stroke="#60a5fa"
+                          name={t("progress.count")}
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                      )}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Card>
+              )}
 
               {/* Points Over Time */}
               {pointsOverTime.length > 0 && (

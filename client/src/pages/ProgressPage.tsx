@@ -22,7 +22,7 @@ import {
 } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Loader2, Filter } from "lucide-react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
+import { format, subDays, subMonths, subYears, eachDayOfInterval } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -39,6 +39,32 @@ export default function ProgressPage() {
   
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<string>("month");
+  
+  // Calculate date range bounds
+  const dateRangeBounds = useMemo(() => {
+    const now = new Date();
+    let start: Date;
+    
+    switch (dateRange) {
+      case "week":
+        start = subDays(now, 7);
+        break;
+      case "month":
+        start = subDays(now, 30);
+        break;
+      case "quarter":
+        start = subMonths(now, 3);
+        break;
+      case "year":
+        start = subYears(now, 1);
+        break;
+      default:
+        start = subDays(now, 30);
+    }
+    
+    return { start, end: now };
+  }, [dateRange]);
   
   // Theme-aware chart colors
   const isDark = theme === "dark";
@@ -92,50 +118,55 @@ export default function ProgressPage() {
     });
   }, [deedsArray, selectedCategory, selectedSubCategory]);
 
-  // Calculate total stats
-  const totalDeeds = filteredDeeds.length;
-
-  // Category breakdown
-  const categoryMap = new Map<string, number>();
-  filteredDeeds.forEach((deed) => {
-    let breakdownKey = deed.category;
-    
-    // If a specific category is selected, break down by its specific type/sub-category
-    if (selectedCategory !== "all") {
-      if (deed.dzikirType) breakdownKey = t(`dzikir.types.${deed.dzikirType}`);
-      else if (deed.sholatType) breakdownKey = t(`sholat.types.${deed.sholatType}`);
-      else if (deed.fastingType) breakdownKey = t(`fasting.types.${deed.fastingType}`);
-      else if (deed.quranUnit) breakdownKey = t(`quran.units.${deed.quranUnit}`);
-      else if (deed.sedekahType) breakdownKey = t(`sedekah.types.${deed.sedekahType}`);
-      else breakdownKey = translateCategoryName(deed.category);
-    } else {
-      breakdownKey = translateCategoryName(deed.category);
-    }
-
-    const current = categoryMap.get(breakdownKey) || 0;
-    categoryMap.set(breakdownKey, current + 1);
-  });
-
-  const categoryData = Array.from(categoryMap.entries()).map(
-    ([name, value]) => ({
-      name,
-      value,
-    })
-  );
-
-  // Get unique categories for "all" filter breakdown
-  const categoryList = useMemo(() => {
+  // Category breakdown - computed inside useMemo after dateFilteredDeeds is available
+  // (placeholder - will be recalculated after dateFilteredDeeds)
+  const categoryListFromDeeds = useMemo(() => {
     const set = new Set<string>();
     deedsArray.forEach(d => set.add(translateCategoryName(d.category)));
     return Array.from(set).sort();
   }, [deedsArray, translateCategoryName]);
 
+  // Get unique categories for "all" filter breakdown
+  const categoryList = categoryListFromDeeds;
+
+  // Filter deeds by date range first
+  const dateFilteredDeeds = useMemo(() => {
+    return filteredDeeds.filter(deed => {
+      const createdAt = typeof deed.createdAt === 'string' ? new Date(deed.createdAt) : (deed.createdAt || new Date());
+      return createdAt >= dateRangeBounds.start && createdAt <= dateRangeBounds.end;
+    });
+  }, [filteredDeeds, dateRangeBounds]);
+
+  // Calculate total stats based on date range
+  const totalDeeds = dateFilteredDeeds.length;
+
+  // Category breakdown based on date range
+  const categoryData = useMemo(() => {
+    const categoryMap = new Map<string, number>();
+    dateFilteredDeeds.forEach((deed) => {
+      let breakdownKey = deed.category;
+      
+      if (selectedCategory !== "all") {
+        if (deed.dzikirType) breakdownKey = t(`dzikir.types.${deed.dzikirType}`);
+        else if (deed.sholatType) breakdownKey = t(`sholat.types.${deed.sholatType}`);
+        else if (deed.fastingType) breakdownKey = t(`fasting.types.${deed.fastingType}`);
+        else if (deed.quranUnit) breakdownKey = t(`quran.units.${deed.quranUnit}`);
+        else if (deed.sedekahType) breakdownKey = t(`sedekah.types.${deed.sedekahType}`);
+        else breakdownKey = translateCategoryName(deed.category);
+      } else {
+        breakdownKey = translateCategoryName(deed.category);
+      }
+
+      const current = categoryMap.get(breakdownKey) || 0;
+      categoryMap.set(breakdownKey, current + 1);
+    });
+
+    return Array.from(categoryMap.entries()).map(([name, value]) => ({ name, value }));
+  }, [dateFilteredDeeds, selectedCategory, t, translateCategoryName]);
+
   // Deeds count over time (daily) - tracks number of deeds, not points
   const deedsOverTime = useMemo(() => {
-    const now = new Date();
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
-    const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
+    const days = eachDayOfInterval({ start: dateRangeBounds.start, end: dateRangeBounds.end });
 
     // Determine what to track based on filter
     let trackingSubCategories: string[] = [];
@@ -143,11 +174,11 @@ export default function ProgressPage() {
     
     if (selectedCategory === "all") {
       const set = new Set<string>();
-      filteredDeeds.forEach(d => set.add(translateCategoryName(d.category)));
+      dateFilteredDeeds.forEach(d => set.add(translateCategoryName(d.category)));
       trackingCategories = Array.from(set).sort();
     } else {
       const set = new Set<string>();
-      filteredDeeds.forEach(d => {
+      dateFilteredDeeds.forEach(d => {
         if (d.dzikirType) set.add(t(`dzikir.types.${d.dzikirType}`));
         else if (d.sholatType) set.add(t(`sholat.types.${d.sholatType}`));
         else if (d.fastingType) set.add(t(`fasting.types.${d.fastingType}`));
@@ -158,7 +189,7 @@ export default function ProgressPage() {
     }
 
     const data = days.map((day) => {
-      const dayDeeds = filteredDeeds.filter((d) => {
+      const dayDeeds = dateFilteredDeeds.filter((d) => {
         const createdAt = typeof d.createdAt === 'string' ? new Date(d.createdAt) : (d.createdAt || new Date());
         return (
           createdAt.getDate() === day.getDate() &&
@@ -204,12 +235,12 @@ export default function ProgressPage() {
       (_, index, arr) =>
         arr.slice(index).some((d) => d.count !== 0)
     );
-  }, [filteredDeeds, selectedCategory, t, translateCategoryName]);
+  }, [dateFilteredDeeds, dateRangeBounds, selectedCategory, t, translateCategoryName]);
 
   const subCategoryList = useMemo(() => {
     if (selectedCategory === "all") return [];
     const set = new Set<string>();
-    filteredDeeds.forEach(d => {
+    dateFilteredDeeds.forEach(d => {
       if (d.dzikirType) set.add(t(`dzikir.types.${d.dzikirType}`));
       else if (d.sholatType) set.add(t(`sholat.types.${d.sholatType}`));
       else if (d.fastingType) set.add(t(`fasting.types.${d.fastingType}`));
@@ -217,7 +248,7 @@ export default function ProgressPage() {
       else if (d.sedekahType) set.add(t(`sedekah.types.${d.sedekahType}`));
     });
     return Array.from(set).sort();
-  }, [filteredDeeds, selectedCategory, t]);
+  }, [dateFilteredDeeds, selectedCategory, t]);
 
   const COLORS = [
     "#10b981",
@@ -270,7 +301,21 @@ export default function ProgressPage() {
                     <span>{t("common.filter")}</span>
                   </div>
                   
-                  <div className="flex flex-row gap-4 w-full sm:w-auto flex-1">
+                  <div className="flex flex-row flex-wrap gap-4 w-full sm:w-auto flex-1">
+                    {/* Date Range Filter */}
+                    <Select value={dateRange} onValueChange={setDateRange}>
+                      <SelectTrigger className="w-full sm:w-[160px] bg-background" data-testid="select-date-range">
+                        <SelectValue placeholder={t("progress.dateRange")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="week">{t("progress.lastWeek")}</SelectItem>
+                        <SelectItem value="month">{t("progress.lastMonth")}</SelectItem>
+                        <SelectItem value="quarter">{t("progress.lastQuarter")}</SelectItem>
+                        <SelectItem value="year">{t("progress.lastYear")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {/* Category Filter */}
                     <Select 
                       value={selectedCategory} 
                       onValueChange={(val) => {
@@ -278,7 +323,7 @@ export default function ProgressPage() {
                         setSelectedSubCategory("all");
                       }}
                     >
-                      <SelectTrigger className="w-full sm:w-[200px] bg-background">
+                      <SelectTrigger className="w-full sm:w-[180px] bg-background" data-testid="select-category">
                         <SelectValue placeholder={t("deed.category")} />
                       </SelectTrigger>
                       <SelectContent>
@@ -296,7 +341,7 @@ export default function ProgressPage() {
                         value={selectedSubCategory} 
                         onValueChange={setSelectedSubCategory}
                       >
-                        <SelectTrigger className="w-full sm:w-[200px] bg-background">
+                        <SelectTrigger className="w-full sm:w-[180px] bg-background" data-testid="select-subcategory">
                           <SelectValue placeholder={t("deed.type")} />
                         </SelectTrigger>
                         <SelectContent>

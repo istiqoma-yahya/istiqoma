@@ -13,6 +13,7 @@ interface StreakDialogProps {
   open: boolean;
   streakCount: number;
   weekDays: boolean[];
+  hasActivityToday?: boolean;
   onClose: () => void;
 }
 
@@ -43,7 +44,7 @@ function AnimatedStreakCounter({ target, duration = 1200 }: { target: number; du
   return <span>{current}</span>;
 }
 
-export function StreakDialog({ open, streakCount, weekDays, onClose }: StreakDialogProps) {
+export function StreakDialog({ open, streakCount, weekDays, hasActivityToday = true, onClose }: StreakDialogProps) {
   const { t } = useTranslation();
   const weekDayLabels = t("streak.weekDays", { returnObjects: true }) as string[];
 
@@ -51,6 +52,8 @@ export function StreakDialog({ open, streakCount, weekDays, onClose }: StreakDia
     const day = new Date().getDay();
     return day === 0 ? 6 : day - 1;
   })();
+
+  const isActive = hasActivityToday;
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
@@ -67,13 +70,23 @@ export function StreakDialog({ open, streakCount, weekDays, onClose }: StreakDia
             transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.2 }}
             className="mb-4"
           >
-            <div className="w-20 h-20 rounded-full bg-orange-500/15 flex items-center justify-center">
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center relative ${isActive ? "bg-orange-500/15" : "bg-gray-400/15"}`}>
               <motion.div
-                animate={{ rotate: [0, -10, 10, -5, 5, 0], scale: [1, 1.1, 1] }}
+                animate={isActive ? { rotate: [0, -10, 10, -5, 5, 0], scale: [1, 1.1, 1] } : {}}
                 transition={{ duration: 0.8, delay: 0.5 }}
               >
-                <Flame className="w-10 h-10 text-orange-500" />
+                <Flame className={`w-10 h-10 ${isActive ? "text-orange-500" : "text-gray-400 dark:text-gray-500"}`} />
               </motion.div>
+              {!isActive && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", damping: 10, stiffness: 200, delay: 0.5 }}
+                  className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-red-500 flex items-center justify-center shadow-md"
+                >
+                  <span className="text-white text-sm font-bold leading-none">!</span>
+                </motion.div>
+              )}
             </div>
           </motion.div>
 
@@ -81,7 +94,7 @@ export function StreakDialog({ open, streakCount, weekDays, onClose }: StreakDia
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-5xl font-bold text-orange-500 mb-1"
+            className={`text-5xl font-bold mb-1 ${isActive ? "text-orange-500" : "text-gray-400 dark:text-gray-500"}`}
             data-testid="text-streak-count"
           >
             <AnimatedStreakCounter target={streakCount} />
@@ -91,7 +104,7 @@ export function StreakDialog({ open, streakCount, weekDays, onClose }: StreakDia
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-lg font-semibold text-orange-600 dark:text-orange-400 mb-6"
+            className={`text-lg font-semibold mb-6 ${isActive ? "text-orange-600 dark:text-orange-400" : "text-gray-500 dark:text-gray-400"}`}
           >
             {t("streak.daysInARow")}
           </motion.p>
@@ -103,26 +116,26 @@ export function StreakDialog({ open, streakCount, weekDays, onClose }: StreakDia
             className="flex items-center gap-3 mb-6"
           >
             {weekDayLabels.map((label: string, index: number) => {
-              const isActive = weekDays[index];
+              const dayActive = weekDays[index];
               const isToday = index === todayIndex;
 
               return (
                 <div key={label} className="flex flex-col items-center gap-1.5">
-                  <span className={`text-xs font-medium ${isToday ? "text-orange-500 font-bold" : "text-muted-foreground"}`}>
+                  <span className={`text-xs font-medium ${isToday ? (isActive ? "text-orange-500" : "text-gray-500") + " font-bold" : "text-muted-foreground"}`}>
                     {label}
                   </span>
                   <motion.div
-                    initial={isActive ? { scale: 0 } : { scale: 1 }}
+                    initial={dayActive ? { scale: 0 } : { scale: 1 }}
                     animate={{ scale: 1 }}
-                    transition={isActive ? { type: "spring", damping: 10, stiffness: 300, delay: 0.6 + index * 0.08 } : {}}
+                    transition={dayActive ? { type: "spring", damping: 10, stiffness: 300, delay: 0.6 + index * 0.08 } : {}}
                     className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      isActive
+                      dayActive
                         ? "bg-orange-500 text-white"
                         : "bg-muted text-muted-foreground"
-                    } ${isToday && !isActive ? "ring-2 ring-orange-500/40" : ""}`}
+                    } ${isToday && !dayActive ? "ring-2 ring-orange-500/40" : ""}`}
                     data-testid={`streak-day-${index}`}
                   >
-                    {isActive && <Check className="w-4 h-4" strokeWidth={3} />}
+                    {dayActive && <Check className="w-4 h-4" strokeWidth={3} />}
                   </motion.div>
                 </div>
               );
@@ -147,7 +160,7 @@ export function StreakDialog({ open, streakCount, weekDays, onClose }: StreakDia
           >
             <Button
               onClick={onClose}
-              className="w-full bg-orange-500 text-white font-semibold"
+              className={`w-full font-semibold ${isActive ? "bg-orange-500 text-white" : "bg-gray-400 text-white"}`}
               data-testid="button-streak-continue"
             >
               {t("streak.continue")}

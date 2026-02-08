@@ -63,7 +63,7 @@ export default function CreateDeedPage() {
   const [rewardPoints, setRewardPoints] = useState<number | null>(null);
   const [showStreakDialog, setShowStreakDialog] = useState(false);
   const queryClient = useQueryClient();
-  const { data: streakData } = useQuery<{ streakCount: number; weekDays: boolean[] }>({
+  const { data: streakData } = useQuery<{ streakCount: number; weekDays: boolean[]; hasActivityToday: boolean }>({
     queryKey: ["/api/streak"],
   });
 
@@ -715,6 +715,7 @@ export default function CreateDeedPage() {
         open={showStreakDialog}
         streakCount={streakData?.streakCount ?? 0}
         weekDays={streakData?.weekDays ?? [false, false, false, false, false, false, false]}
+        hasActivityToday={streakData?.hasActivityToday ?? false}
         onClose={() => {
           setShowStreakDialog(false);
           setRewardPoints(null);

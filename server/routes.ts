@@ -416,7 +416,8 @@ export async function registerRoutes(
         weekDays.push(deedDates.has(dStr));
       }
 
-      res.json({ streakCount, weekDays });
+      const hasActivityToday = deedDates.has(todayStr);
+      res.json({ streakCount, weekDays, hasActivityToday });
     } catch (err) {
       throw err;
     }

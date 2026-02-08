@@ -462,5 +462,9 @@
     "settingsSaved": "Pengaturan disimpan",
     "subscribed": "Berlangganan",
     "notSubscribed": "Tidak berlangganan"
+  },
+  "reward": {
+    "congratsMessage": "Selamat telah melakukan amal baik! Terus pertahankan!",
+    "continue": "Lanjutkan"
   }
 }

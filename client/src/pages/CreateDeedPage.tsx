@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
 import { CreateCategoryDialog } from "@/components/CreateCategoryDialog";
+import { PointsRewardDialog } from "@/components/PointsRewardDialog";
 
 const formSchema = insertDeedSchema.extend({
   points: z.coerce.number().min(1, "Points must be at least 1"),
@@ -57,6 +58,7 @@ export default function CreateDeedPage() {
   const translateCategoryName = useCategoryName();
   const [dateTime, setDateTime] = useState(getCurrentDateTime());
   const [showCreateCategoryDialog, setShowCreateCategoryDialog] = useState(false);
+  const [rewardPoints, setRewardPoints] = useState<number | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -217,10 +219,10 @@ export default function CreateDeedPage() {
     }
 
     mutate({ ...data, createdAt }, {
-      onSuccess: () => {
+      onSuccess: (createdDeed) => {
         form.reset();
         setDateTime(getCurrentDateTime());
-        navigate("/");
+        setRewardPoints(createdDeed?.points ?? data.points);
       },
     });
   };
@@ -692,6 +694,15 @@ export default function CreateDeedPage() {
           }}
         />
       </main>
+
+      <PointsRewardDialog
+        open={rewardPoints !== null}
+        points={rewardPoints ?? 0}
+        onClose={() => {
+          setRewardPoints(null);
+          navigate("/");
+        }}
+      />
     </div>
   );
 }

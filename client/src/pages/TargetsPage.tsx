@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UpdateProgressModal } from "@/components/UpdateProgressModal";
+import { PointsRewardDialog } from "@/components/PointsRewardDialog";
 import { getTargetDisplayTitle, getTargetCategoryLine, getTargetUnitLabel } from "@/lib/targets";
 import { api } from "@shared/routes";
 import { useTranslation } from "react-i18next";
@@ -151,6 +152,7 @@ export default function TargetsPage() {
   const [deletingTarget, setDeletingTarget] = useState<TargetWithProgress | null>(null);
   const [updateModalTarget, setUpdateModalTarget] = useState<TargetWithProgress | null>(null);
   const [isSavingProgress, setIsSavingProgress] = useState(false);
+  const [rewardPoints, setRewardPoints] = useState<number | null>(null);
 
   const getDateLocale = () => {
     switch (i18n.language) {
@@ -199,9 +201,11 @@ export default function TargetsPage() {
             if (updateModalTarget.sedekahType) deedData.sedekahType = updateModalTarget.sedekahType as "uang" | "hitungan";
             
             createDeed.mutate(deedData, {
-              onSuccess: async () => {
+              onSuccess: async (createdDeed) => {
                 await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
                 await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
+                
+                const earnedPoints = createdDeed?.points ?? deedData.points;
                 
                 if (newProgress >= updateModalTarget.targetValue) {
                   completeTarget.mutate(targetId, {
@@ -210,21 +214,23 @@ export default function TargetsPage() {
                       await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
                       setUpdateModalTarget(null);
                       setIsSavingProgress(false);
+                      setRewardPoints(earnedPoints);
                     },
                     onError: async () => {
                       await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
                       await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
                       setUpdateModalTarget(null);
                       setIsSavingProgress(false);
+                      setRewardPoints(earnedPoints);
                     }
                   });
                 } else {
                   setUpdateModalTarget(null);
                   setIsSavingProgress(false);
+                  setRewardPoints(earnedPoints);
                 }
               },
               onError: async () => {
-                // Deed creation failed, but progress was updated - still invalidate and close
                 await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
                 setUpdateModalTarget(null);
                 setIsSavingProgress(false);
@@ -253,11 +259,12 @@ export default function TargetsPage() {
         if (updateModalTarget.sedekahType) deedData.sedekahType = updateModalTarget.sedekahType as "uang" | "hitungan";
         
         createDeed.mutate(deedData, {
-          onSuccess: async () => {
+          onSuccess: async (createdDeed) => {
             await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
             await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
             setUpdateModalTarget(null);
             setIsSavingProgress(false);
+            setRewardPoints(createdDeed?.points ?? deedData.points);
           },
           onError: () => {
             setIsSavingProgress(false);
@@ -354,6 +361,12 @@ export default function TargetsPage() {
         onClose={() => setUpdateModalTarget(null)}
         onSave={handleUpdateProgressWithDeed}
         isSaving={isSavingProgress}
+      />
+
+      <PointsRewardDialog
+        open={rewardPoints !== null}
+        points={rewardPoints ?? 0}
+        onClose={() => setRewardPoints(null)}
       />
 
       <BottomNavigation />

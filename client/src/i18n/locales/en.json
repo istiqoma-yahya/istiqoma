@@ -462,5 +462,9 @@
     "settingsSaved": "Settings saved",
     "subscribed": "Subscribed",
     "notSubscribed": "Not subscribed"
+  },
+  "reward": {
+    "congratsMessage": "Congratulations on performing a good deed! Keep it up!",
+    "continue": "Continue"
   }
 }

@@ -462,5 +462,9 @@
     "settingsSaved": "Tetapan disimpan",
     "subscribed": "Dilanggan",
     "notSubscribed": "Tidak dilanggan"
+  },
+  "reward": {
+    "congratsMessage": "Tahniah kerana melakukan amalan baik! Teruskan usaha anda!",
+    "continue": "Teruskan"
   }
 }

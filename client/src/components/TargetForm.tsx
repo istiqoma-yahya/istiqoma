@@ -317,64 +317,6 @@ export function TargetForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="targetValue"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("targets.targetValue")}</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  min={1}
-                  className="glass-input"
-                  {...field}
-                  value={targetValueInput}
-                  onChange={(e) => {
-                    setTargetValueInput(e.target.value);
-                    const val = parseInt(e.target.value, 10);
-                    if (!isNaN(val)) {
-                      field.onChange(val);
-                    }
-                  }}
-                  data-testid="input-target-value"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {isCustomCategory && (
-          <FormField
-            control={form.control}
-            name="customUnit"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("customUnit.selectUnit")}</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value || ""}
-                >
-                  <FormControl>
-                    <SelectTrigger className="glass-input" data-testid="select-target-custom-unit">
-                      <SelectValue placeholder={t("customUnit.selectUnit")} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    {CUSTOM_UNITS.map((unit) => (
-                      <SelectItem key={unit.id} value={unit.id}>
-                        {t(unit.labelKey)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
         {isDzikirCategory && (
           <FormField
             control={form.control}
@@ -468,22 +410,86 @@ export function TargetForm({
           />
         )}
 
-        {isSholatCategory && (
+        {isSedekahCategory && (
           <FormField
             control={form.control}
-            name="isJamaah"
+            name="sedekahType"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value || false}
-                    onCheckedChange={field.onChange}
-                    data-testid="checkbox-target-jamaah"
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel className="font-normal">{t("sholat.isJamaah")}</FormLabel>
-                </div>
+              <FormItem>
+                <FormLabel>{t("sedekah.selectType")}</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <FormControl>
+                    <SelectTrigger className="glass-input" data-testid="select-target-sedekah-type">
+                      <SelectValue placeholder={t("sedekah.selectType")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
+                    {SEDEKAH_TYPES.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {t(type.labelKey)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <FormField
+          control={form.control}
+          name="targetValue"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("targets.targetValue")}</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={1}
+                  className="glass-input"
+                  {...field}
+                  value={targetValueInput}
+                  onChange={(e) => {
+                    setTargetValueInput(e.target.value);
+                    const val = parseInt(e.target.value, 10);
+                    if (!isNaN(val)) {
+                      field.onChange(val);
+                    }
+                  }}
+                  data-testid="input-target-value"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {isCustomCategory && (
+          <FormField
+            control={form.control}
+            name="customUnit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("customUnit.selectUnit")}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || ""}
+                >
+                  <FormControl>
+                    <SelectTrigger className="glass-input" data-testid="select-target-custom-unit">
+                      <SelectValue placeholder={t("customUnit.selectUnit")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
+                    {CUSTOM_UNITS.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {t(unit.labelKey)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -516,28 +522,22 @@ export function TargetForm({
           />
         )}
 
-        {isSedekahCategory && (
+        {isSholatCategory && (
           <FormField
             control={form.control}
-            name="sedekahType"
+            name="isJamaah"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("sedekah.selectType")}</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || ""}>
-                  <FormControl>
-                    <SelectTrigger className="glass-input" data-testid="select-target-sedekah-type">
-                      <SelectValue placeholder={t("sedekah.selectType")} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    {SEDEKAH_TYPES.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {t(type.labelKey)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value || false}
+                    onCheckedChange={field.onChange}
+                    data-testid="checkbox-target-jamaah"
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="font-normal">{t("sholat.isJamaah")}</FormLabel>
+                </div>
               </FormItem>
             )}
           />

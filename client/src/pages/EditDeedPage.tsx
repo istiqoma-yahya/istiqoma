@@ -282,56 +282,6 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="points"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("editDeed.pointsLabel")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      className="glass-input"
-                      {...field}
-                      data-testid="input-edit-deed-points"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {isCustomCategory && (
-              <FormField
-                control={form.control}
-                name="customUnit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("customUnit.selectUnit")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value || ""}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="glass-input" data-testid="select-edit-deed-custom-unit">
-                          <SelectValue placeholder={t("customUnit.selectUnit")} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="bg-popover border-border text-popover-foreground">
-                        {CUSTOM_UNITS.map((unit) => (
-                          <SelectItem key={unit.id} value={unit.id}>
-                            {t(unit.labelKey)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
             {isDzikirCategory && (
               <FormField
                 control={form.control}
@@ -425,36 +375,6 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
               />
             )}
 
-            {isQuranCategory && (
-              <FormField
-                control={form.control}
-                name="quranUnit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quran.selectUnit")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value || ""}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="glass-input" data-testid="select-edit-deed-quran-unit">
-                          <SelectValue placeholder={t("quran.selectUnit")} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="bg-popover border-border text-popover-foreground">
-                        {QURAN_UNITS.map((unit) => (
-                          <SelectItem key={unit.id} value={unit.id}>
-                            {t(unit.labelKey)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
             {isSedekahCategory && (
               <FormField
                 control={form.control}
@@ -475,6 +395,86 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                         {SEDEKAH_TYPES.map((type) => (
                           <SelectItem key={type.id} value={type.id}>
                             {t(type.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <FormField
+              control={form.control}
+              name="points"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("editDeed.pointsLabel")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      className="glass-input"
+                      {...field}
+                      data-testid="input-edit-deed-points"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {isCustomCategory && (
+              <FormField
+                control={form.control}
+                name="customUnit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("customUnit.selectUnit")}</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="glass-input" data-testid="select-edit-deed-custom-unit">
+                          <SelectValue placeholder={t("customUnit.selectUnit")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
+                        {CUSTOM_UNITS.map((unit) => (
+                          <SelectItem key={unit.id} value={unit.id}>
+                            {t(unit.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {isQuranCategory && (
+              <FormField
+                control={form.control}
+                name="quranUnit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("quran.selectUnit")}</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="glass-input" data-testid="select-edit-deed-quran-unit">
+                          <SelectValue placeholder={t("quran.selectUnit")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
+                        {QURAN_UNITS.map((unit) => (
+                          <SelectItem key={unit.id} value={unit.id}>
+                            {t(unit.labelKey)}
                           </SelectItem>
                         ))}
                       </SelectContent>

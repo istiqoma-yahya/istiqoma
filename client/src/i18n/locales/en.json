@@ -324,7 +324,7 @@
     "targetWillBeCompleted": "Target will be completed!",
     "progressSaved": "Progress Saved",
     "progressSavedDesc": "{{count}} points added to target {{target}}",
-    "deedCreatedFromTarget": "Deed recorded from target: {{target}}",
+    "deedCreatedFromTarget": "{{target}}",
     "markComplete": "Mark as Complete",
     "targetLabel": "Target:",
     "categoryLabel": "Category:",

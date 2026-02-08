@@ -324,7 +324,7 @@
     "targetWillBeCompleted": "Sasaran akan tercapai!",
     "progressSaved": "Progres Disimpan",
     "progressSavedDesc": "{{count}} mata ditambah ke progres {{target}}",
-    "deedCreatedFromTarget": "Amal direkodkan daripada sasaran: {{target}}",
+    "deedCreatedFromTarget": "{{target}}",
     "markComplete": "Tandakan Selesai",
     "targetLabel": "Sasaran:",
     "categoryLabel": "Kategori:",

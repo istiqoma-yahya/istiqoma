@@ -29,7 +29,7 @@ export async function registerRoutes(
       const input = api.deeds.create.input.parse(req.body);
       const userId = req.user.claims.sub;
       
-      const originalQuantity = input.points || 1;
+      const originalQuantity = input.quantity || 1;
       const calculatedPoints = calculatePoints({
         category: input.category,
         quantity: originalQuantity,
@@ -80,7 +80,7 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Invalid ID" });
       }
       
-      const originalQuantity = input.points || 1;
+      const originalQuantity = input.quantity || 1;
       const calculatedPoints = calculatePoints({
         category: input.category,
         quantity: originalQuantity,

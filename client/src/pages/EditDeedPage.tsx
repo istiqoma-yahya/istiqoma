@@ -79,7 +79,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
     defaultValues: {
       description: deed.description,
       category: deed.category,
-      points: deed.points,
+      points: deed.quantity || 1,
       createdAt: undefined,
       dzikirType: deed.dzikirType || undefined,
       sholatType: deed.sholatType || undefined,

@@ -776,42 +776,6 @@ export function TargetForm({
           />
         )}
 
-        <FormField
-          control={form.control}
-          name="targetValue"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("targets.targetValue")}</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  className="glass-input"
-                  value={targetValueInput}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === "" || /^\d+$/.test(val)) {
-                      setTargetValueInput(val);
-                      if (val !== "") {
-                        field.onChange(parseInt(val));
-                      }
-                    }
-                  }}
-                  onBlur={() => {
-                    if (targetValueInput === "" || parseInt(targetValueInput) < 1) {
-                      setTargetValueInput("1");
-                      field.onChange(1);
-                    }
-                  }}
-                  data-testid="input-target-value"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <div className="flex gap-3 pt-4">
           <Button
             type="button"

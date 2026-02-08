@@ -37,7 +37,7 @@ export const deeds = pgTable("deeds", {
 export const targets = pgTable("targets", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  name: text("name"),
+  name: text("name").notNull(),
   category: text("category").notNull(),
   targetValue: integer("target_value").notNull(),
   period: text("period", { enum: ["daily", "weekly", "monthly"] }),
@@ -137,7 +137,7 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   sedekahType: true,
   customUnit: true,
 }).extend({
-  name: z.string().optional(),
+  name: z.string().min(1, "Target name is required"),
   category: z.string().min(1, "Category is required"),
   targetValue: z.number().min(0, "Target value must be at least 0"),
   period: z.enum(["daily", "weekly", "monthly"]).nullish(),

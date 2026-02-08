@@ -48,7 +48,7 @@ export function TargetForm({
   const form = useForm<InsertTarget>({
     resolver: zodResolver(insertTargetSchema),
     defaultValues: defaultValues || {
-      name: undefined,
+      name: "",
       category: "",
       targetValue: 10,
       period: "daily",

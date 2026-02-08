@@ -106,8 +106,8 @@ export function DeedCard({ deed, index }: DeedCardProps) {
         </div>
 
         <div className="flex flex-col items-end gap-2">
-          <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
-            +{deed.points}
+          <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400" data-testid={`text-deed-points-${deed.id}`}>
+            +{deed.points} {t('stats.points')}
           </span>
           
           <AlertDialog>

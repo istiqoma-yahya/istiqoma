@@ -1,19 +1,18 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { useTargetsWithProgress, useDeleteTarget, useTargetHistory, useUpdateTargetProgress, useCompleteTarget } from "@/hooks/use-targets";
+import { useTargetsWithProgress, useDeleteTarget, useUpdateTargetProgress, useCompleteTarget } from "@/hooks/use-targets";
 import { useCreateDeed } from "@/hooks/use-deeds";
 import { useAuth } from "@/hooks/use-auth";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UpdateProgressModal } from "@/components/UpdateProgressModal";
-import { getTargetDisplayTitle } from "@/lib/targets";
+import { getTargetDisplayTitle, getTargetCategoryLine, getTargetUnitLabel } from "@/lib/targets";
 import { api } from "@shared/routes";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,380 +23,116 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Input } from "@/components/ui/input";
 import { type TargetWithProgress } from "@shared/schema";
-import { type TargetHistoryWithStreak } from "@/hooks/use-targets";
-import { Loader2, Plus, Target, Pencil, Trash2, Trophy, Calendar, ChevronDown, ChevronUp, CheckCircle, XCircle, History, Ban, Clock, TrendingUp } from "lucide-react";
-import { format, formatDistanceToNow, isPast, type Locale } from "date-fns";
+import { Loader2, Plus, Target } from "lucide-react";
+import { format, isPast, type Locale } from "date-fns";
 import { id as idLocale, ms as msLocale, enUS } from "date-fns/locale";
 
 interface TargetCardProps {
   target: TargetWithProgress;
-  isExpanded: boolean;
-  onToggleExpand: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
   onOpenUpdateModal: () => void;
-  getPeriodIcon: (period: string) => JSX.Element;
-  getPeriodLabel: (period: string) => string;
   t: (key: string, options?: Record<string, string>) => string;
-  onUpdateProgress: (id: number, progress: number) => void;
-  onComplete: (id: number) => void;
-  isUpdatingProgress: boolean;
   dateLocale: Locale;
 }
 
 function TargetCard({
   target,
-  isExpanded,
-  onToggleExpand,
-  onEdit,
-  onDelete,
   onOpenUpdateModal,
-  getPeriodIcon,
-  getPeriodLabel,
   t,
-  onUpdateProgress,
-  onComplete,
-  isUpdatingProgress,
   dateLocale,
 }: TargetCardProps) {
-  const { data: historyData, isLoading: historyLoading } = useTargetHistory(
-    isExpanded ? target.id : null
-  );
-
-  const formatPeriodDate = (date: Date | string, period: string) => {
-    const d = new Date(date);
-    switch (period) {
-      case "daily":
-        return format(d, "MMM d, yyyy");
-      case "weekly":
-        return format(d, "MMM d");
-      case "monthly":
-        return format(d, "MMM yyyy");
-      default:
-        return format(d, "MMM d, yyyy");
-    }
-  };
-
-  const isLimitTarget = target.targetType === "limit";
-  const isWithinLimit = isLimitTarget && target.currentValue <= target.targetValue;
-  const isExceeded = isLimitTarget && target.currentValue > target.targetValue;
-  const isAchieved = !isLimitTarget && target.percentComplete >= 100;
   const isOneTime = target.recurrence === "oneTime";
-  
+
   const getOneTimeStatus = () => {
     if (target.completedAt) return "completed";
     if (target.dueDate && isPast(new Date(target.dueDate))) return "expired";
     return "active";
   };
-  
-  const getDeadlineDisplay = () => {
-    if (!target.dueDate) return null;
-    const dueDate = new Date(target.dueDate);
-    if (isPast(dueDate)) {
-      const distance = formatDistanceToNow(dueDate, { locale: dateLocale });
-      return { text: t("targets.overdue", { time: distance }), isOverdue: true };
-    }
-    const distance = formatDistanceToNow(dueDate, { locale: dateLocale });
-    return { text: t("targets.dueIn", { time: distance }), isOverdue: false };
-  };
-  
+
   const oneTimeStatus = isOneTime ? getOneTimeStatus() : null;
-  const deadlineDisplay = isOneTime ? getDeadlineDisplay() : null;
+
+  const getPeriodWord = (period: string) => {
+    switch (period) {
+      case "daily": return t("targets.periodDay");
+      case "weekly": return t("targets.periodWeek");
+      case "monthly": return t("targets.periodMonth");
+      default: return period;
+    }
+  };
+
+  const unitLabel = getTargetUnitLabel(target, t);
+
+  const getTargetLine = () => {
+    const amount = target.targetValue;
+    const unitPart = unitLabel ? ` ${unitLabel}` : "";
+
+    if (isOneTime) {
+      if (target.dueDate) {
+        const formattedDate = format(new Date(target.dueDate), "d MMMM yyyy", { locale: dateLocale });
+        return `${t("targets.targetLabel")} ${amount}${unitPart} ${t("targets.untilDate", { date: formattedDate })}`;
+      }
+      return `${t("targets.targetLabel")} ${amount}${unitPart}`;
+    } else {
+      const periodWord = getPeriodWord(target.period || "daily");
+      return `${t("targets.targetLabel")} ${amount}${unitPart} ${t("targets.perPeriod", { period: periodWord })}`;
+    }
+  };
+
+  const currentProgress = isOneTime
+    ? (target.manualProgress || target.currentValue || 0)
+    : (target.currentValue || 0);
+  const percentComplete = target.targetValue > 0
+    ? Math.min(100, (currentProgress / target.targetValue) * 100)
+    : 0;
+  const isCompleted = isOneTime ? oneTimeStatus === "completed" : target.percentComplete >= 100;
+  const canUpdate = isOneTime ? oneTimeStatus === "active" : true;
 
   return (
     <Card className="p-4" data-testid={`card-target-${target.id}`}>
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <div>
-          <div className="flex items-center gap-1 flex-wrap mb-1">
-            {isOneTime ? (
-              <>
-                <Badge 
-                  variant="secondary" 
-                  className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
-                >
-                  {t("targets.oneTime")}
-                </Badge>
-                {oneTimeStatus === "completed" && (
-                  <Badge 
-                    variant="secondary" 
-                    className="text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300"
-                    data-testid={`badge-status-${target.id}`}
-                  >
-                    <CheckCircle className="w-3 h-3 mr-1" />
-                    {t("targets.statusCompleted")}
-                  </Badge>
-                )}
-                {oneTimeStatus === "active" && (
-                  <Badge 
-                    variant="secondary" 
-                    className="text-xs bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300"
-                    data-testid={`badge-status-${target.id}`}
-                  >
-                    <Clock className="w-3 h-3 mr-1" />
-                    {t("targets.statusActive")}
-                  </Badge>
-                )}
-                {oneTimeStatus === "expired" && (
-                  <Badge 
-                    variant="secondary" 
-                    className="text-xs bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300"
-                    data-testid={`badge-status-${target.id}`}
-                  >
-                    <XCircle className="w-3 h-3 mr-1" />
-                    {t("targets.statusExpired")}
-                  </Badge>
-                )}
-              </>
-            ) : (
-              <>
-                <Badge 
-                  variant="secondary" 
-                  className={`text-xs ${isLimitTarget ? "bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300" : "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300"}`}
-                >
-                  {isLimitTarget ? (
-                    <>
-                      <Ban className="w-3 h-3 mr-1" />
-                      {t("targets.limitBadge")}
-                    </>
-                  ) : (
-                    <>
-                      <Target className="w-3 h-3 mr-1" />
-                      {t("targets.recurring")}
-                    </>
-                  )}
-                </Badge>
-                <Badge variant="outline" className="text-xs">
-                  {getPeriodIcon(target.period || "daily")}
-                  <span className="ml-1">{getPeriodLabel(target.period || "daily")}</span>
-                </Badge>
-                              </>
-            )}
-          </div>
-          <h3 className="font-medium" data-testid={`text-target-category-${target.id}`}>
-            {getTargetDisplayTitle(target, t)}
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            {target.category}
-            {target.dzikirType && (
-              <span> - {t(`dzikir.types.${target.dzikirType}`)}</span>
-            )}
-            {target.sholatType && (
-              <span> - {t(`sholat.types.${target.sholatType}`)}</span>
-            )}
-            {target.fastingType && (
-              <span> - {t(`fasting.types.${target.fastingType}`)}</span>
-            )}
-            {target.isJamaah && (
-              <span> ({t("sholat.isJamaah")})</span>
-            )}
-            {target.quranUnit && (
-              <span> - {t(`quran.units.${target.quranUnit}`)}</span>
-            )}
-            {target.sedekahType && (
-              <span> - {t(`sedekah.types.${target.sedekahType}`)}</span>
-            )}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {isOneTime && deadlineDisplay ? (
-              <span className={deadlineDisplay.isOverdue ? "text-red-500 dark:text-red-400" : ""}>
-                {deadlineDisplay.text}
-              </span>
-            ) : (
-              isLimitTarget 
-                ? `${t("targets.max")}: ${target.targetValue}` 
-                : `${t("targets.targetValue")}: ${target.targetValue}`
-            )}
-          </p>
+      <div className="space-y-3">
+        <h3 className="text-lg font-bold text-foreground" data-testid={`text-target-title-${target.id}`}>
+          {getTargetDisplayTitle(target, t)}
+        </h3>
+
+        <p className="text-sm text-muted-foreground" data-testid={`text-target-line-${target.id}`}>
+          {getTargetLine()}
+        </p>
+
+        <p className="text-sm text-muted-foreground" data-testid={`text-target-category-${target.id}`}>
+          {t("targets.categoryLabel")} {getTargetCategoryLine(target, t)}
+        </p>
+
+        <div className="flex items-center gap-2">
+          <Progress
+            value={percentComplete}
+            className="h-2 flex-1 bg-gray-300 dark:bg-gray-600"
+            data-testid={`progress-target-${target.id}`}
+          />
+          <span className="text-sm text-muted-foreground whitespace-nowrap" data-testid={`text-target-percent-${target.id}`}>
+            {Math.round(percentComplete)}%
+          </span>
         </div>
-        <div className="flex gap-1">
+
+        <div className="flex gap-3 pt-1">
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={onEdit}
-            data-testid={`button-edit-target-${target.id}`}
+            variant="outline"
+            className="flex-1"
+            disabled
+            data-testid={`button-detail-${target.id}`}
           >
-            <Pencil className="w-4 h-4" />
+            {t("targets.detail")}
           </Button>
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={onDelete}
-            data-testid={`button-delete-target-${target.id}`}
+            variant="outline"
+            className="flex-1"
+            onClick={onOpenUpdateModal}
+            disabled={!canUpdate || isCompleted}
+            data-testid={`button-update-${target.id}`}
           >
-            <Trash2 className="w-4 h-4" />
+            {t("targets.update")}
           </Button>
         </div>
       </div>
-
-      {isOneTime ? (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">{t("targets.progress")}:</span>
-            <span className="font-medium" data-testid={`text-target-progress-${target.id}`}>
-              {target.manualProgress || target.currentValue || 0} / {target.targetValue}
-            </span>
-          </div>
-          <Progress 
-            value={Math.min(100, ((target.manualProgress || target.currentValue || 0) / target.targetValue) * 100)} 
-            className="h-2 bg-gray-300 dark:bg-gray-600"
-            data-testid={`progress-target-${target.id}`}
-          />
-          <div className="flex items-center justify-between mt-2">
-            {oneTimeStatus === "completed" ? (
-              <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-                <Trophy className="w-4 h-4" />
-                <span>{t("targets.completed")}</span>
-              </div>
-            ) : (
-              <div />
-            )}
-            {oneTimeStatus === "active" && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={onOpenUpdateModal}
-                className="flex items-center gap-1"
-                data-testid={`button-update-onetime-${target.id}`}
-              >
-                <TrendingUp className="w-3 h-3" />
-                {t("targets.updateProgress")}
-              </Button>
-            )}
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="space-y-2">
-            {isLimitTarget ? (
-              <>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{t("targets.usage")}:</span>
-                  <span 
-                    className={`font-medium ${isExceeded ? "text-red-500" : "text-green-500"}`}
-                    data-testid={`text-target-usage-${target.id}`}
-                  >
-                    {target.currentValue} / {target.targetValue} {t("targets.used")}
-                  </span>
-                </div>
-                <Progress 
-                  value={Math.min(100, (target.currentValue / target.targetValue) * 100)} 
-                  className={`h-2 bg-gray-300 dark:bg-gray-600 ${isExceeded ? "[&>div]:bg-red-500" : "[&>div]:bg-green-500"}`}
-                  data-testid={`progress-target-${target.id}`}
-                />
-                <div className="flex items-center gap-1 text-sm">
-                  {isWithinLimit ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                      <span className="text-green-600 dark:text-green-400">{t("targets.withinLimit")}</span>
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="w-4 h-4 text-red-500" />
-                      <span className="text-red-600 dark:text-red-400">{t("targets.exceeded")}</span>
-                    </>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{t("targets.progress")}:</span>
-                  <span className="font-medium" data-testid={`text-target-progress-${target.id}`}>
-                    {target.currentValue} / {target.targetValue}
-                  </span>
-                </div>
-                <Progress 
-                  value={target.percentComplete} 
-                  className="h-2 bg-gray-300 dark:bg-gray-600"
-                  data-testid={`progress-target-${target.id}`}
-                />
-                <div className="flex items-center justify-between mt-2">
-                  {isAchieved ? (
-                    <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-                      <Trophy className="w-4 h-4" />
-                      <span>{t("targets.completed")}</span>
-                    </div>
-                  ) : (
-                    <div />
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={onOpenUpdateModal}
-                    className="flex items-center gap-1"
-                    data-testid={`button-update-recurring-${target.id}`}
-                  >
-                    <TrendingUp className="w-3 h-3" />
-                    {t("targets.updateProgress")}
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-
-      <Collapsible open={isExpanded} onOpenChange={onToggleExpand}>
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full mt-3"
-            data-testid={`button-expand-history-${target.id}`}
-          >
-            <History className="w-4 h-4 mr-1" />
-            {t("targets.history")}
-            {isExpanded ? (
-              <ChevronUp className="w-4 h-4 ml-auto" />
-            ) : (
-              <ChevronDown className="w-4 h-4 ml-auto" />
-            )}
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-2">
-          {historyLoading ? (
-            <div className="flex justify-center py-4">
-              <Loader2 className="w-6 h-6 animate-spin" />
-            </div>
-          ) : historyData && historyData.history && historyData.history.length > 0 ? (
-            <div className="space-y-2">
-              <p className="text-sm font-medium">{t("targets.pastPeriods")}</p>
-              {historyData.history.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="flex items-center justify-between p-2 rounded-md bg-muted/50"
-                  data-testid={`history-entry-${entry.id}`}
-                >
-                  <div className="flex items-center gap-2">
-                    {entry.completed ? (
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-red-400" />
-                    )}
-                    <span className="text-sm">
-                      {formatPeriodDate(entry.periodStart, target.period || "daily")}
-                    </span>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {entry.achievedValue} / {entry.targetValue}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-4 text-sm text-muted-foreground">
-              {t("targets.noHistory")}
-            </div>
-          )}
-        </CollapsibleContent>
-      </Collapsible>
-      </>
-      )}
     </Card>
   );
 }
@@ -414,7 +149,6 @@ export default function TargetsPage() {
   const createDeed = useCreateDeed();
 
   const [deletingTarget, setDeletingTarget] = useState<TargetWithProgress | null>(null);
-  const [expandedTargetId, setExpandedTargetId] = useState<number | null>(null);
   const [updateModalTarget, setUpdateModalTarget] = useState<TargetWithProgress | null>(null);
   const [isSavingProgress, setIsSavingProgress] = useState(false);
 
@@ -535,23 +269,6 @@ export default function TargetsPage() {
     }
   };
 
-  const getPeriodLabel = (period: string) => {
-    switch (period) {
-      case "daily": return t("targets.daily");
-      case "weekly": return t("targets.weekly");
-      case "monthly": return t("targets.monthly");
-      default: return period;
-    }
-  };
-
-  const getPeriodIcon = (period: string) => {
-    switch (period) {
-      case "daily": return <Calendar className="w-4 h-4" />;
-      case "weekly": return <Calendar className="w-4 h-4" />;
-      case "monthly": return <Calendar className="w-4 h-4" />;
-      default: return <Calendar className="w-4 h-4" />;
-    }
-  };
 
   if (isLoading) {
     return (
@@ -599,17 +316,8 @@ export default function TargetsPage() {
               <TargetCard
                 key={target.id}
                 target={target}
-                isExpanded={expandedTargetId === target.id}
-                onToggleExpand={() => setExpandedTargetId(expandedTargetId === target.id ? null : target.id)}
-                onEdit={() => navigate(`/targets/${target.id}/edit`)}
-                onDelete={() => setDeletingTarget(target)}
                 onOpenUpdateModal={() => setUpdateModalTarget(target)}
-                getPeriodIcon={getPeriodIcon}
-                getPeriodLabel={getPeriodLabel}
                 t={t}
-                onUpdateProgress={(id, progress) => updateProgress.mutate({ id, progress })}
-                onComplete={(id) => completeTarget.mutate(id)}
-                isUpdatingProgress={updateProgress.isPending || completeTarget.isPending}
                 dateLocale={dateLocale}
               />
             ))}

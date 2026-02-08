@@ -1,12 +1,21 @@
 import type { TargetWithProgress } from "@shared/schema";
 
-function translateCategory(category: string, t: (key: string, options?: Record<string, string>) => string): string {
+type TFunc = (key: string, options?: Record<string, string>) => string;
+
+function translateCategory(category: string, t: TFunc): string {
   const key = `categoryNames.${category}`;
   const translated = t(key);
   return translated === key ? category : translated;
 }
 
-export function getTargetDisplayTitle(target: TargetWithProgress, t: (key: string, options?: Record<string, string>) => string): string {
+export function getTargetDisplayTitle(target: TargetWithProgress, t: TFunc): string {
+  if (target.name) {
+    return target.name;
+  }
+  return getTargetCategoryLine(target, t);
+}
+
+export function getTargetCategoryLine(target: TargetWithProgress, t: TFunc): string {
   const parts: string[] = [];
 
   parts.push(translateCategory(target.category, t));
@@ -21,17 +30,22 @@ export function getTargetDisplayTitle(target: TargetWithProgress, t: (key: strin
     parts.push(t(`sedekah.types.${target.sedekahType}`));
   }
 
+  return parts.join(" - ");
+}
+
+export function getTargetUnitLabel(target: TargetWithProgress, t: TFunc): string {
   if (target.quranUnit) {
-    parts.push(t(`quran.units.${target.quranUnit}`));
-  } else if (target.customUnit) {
+    return t(`quran.units.${target.quranUnit}`);
+  }
+  if (target.customUnit) {
     const unitKey = target.customUnit === "times" ? "sholat.units.times"
       : target.customUnit === "days" ? "fasting.units.days"
       : target.customUnit === "rakaat" ? "sholat.units.rakaat"
       : `customUnit.units.${target.customUnit}`;
-    parts.push(t(unitKey));
-  } else if (target.unitLabel) {
-    parts.push(target.unitLabel);
+    return t(unitKey);
   }
-
-  return parts.join(" - ");
+  if (target.unitLabel) {
+    return target.unitLabel;
+  }
+  return "";
 }

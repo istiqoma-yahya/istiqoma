@@ -466,5 +466,14 @@
   "reward": {
     "congratsMessage": "Tahniah kerana melakukan amalan baik! Teruskan usaha anda!",
     "continue": "Teruskan"
+  },
+  "streak": {
+    "title": "Streak",
+    "daysInARow": "hari berturut-turut",
+    "weekDays": ["Isn", "Sel", "Rab", "Kha", "Jum", "Sab", "Ahd"],
+    "motivationalMessage": "Anda konsisten melakukan amalan baik hari ini. Teruskan istiqomah anda setiap hari!",
+    "continue": "Teruskan",
+    "noStreak": "Mulakan streak anda hari ini!",
+    "day": "Hari"
   }
 }

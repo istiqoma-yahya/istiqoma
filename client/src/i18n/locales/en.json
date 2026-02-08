@@ -466,5 +466,14 @@
   "reward": {
     "congratsMessage": "Congratulations on performing a good deed! Keep it up!",
     "continue": "Continue"
+  },
+  "streak": {
+    "title": "Streak",
+    "daysInARow": "days in a row",
+    "weekDays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "motivationalMessage": "You are consistent in doing good deeds today. Keep it up being Istiqomah every single day!",
+    "continue": "Continue",
+    "noStreak": "Start your streak today!",
+    "day": "Day"
   }
 }

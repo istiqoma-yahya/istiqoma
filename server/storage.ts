@@ -1,4 +1,5 @@
 import { db } from "./db";
+export { db };
 import { deeds, categories, targets, targetHistory, pushSubscriptions, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte } from "drizzle-orm";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from "date-fns";

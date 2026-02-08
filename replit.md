@@ -36,6 +36,7 @@ The frontend follows a component-based architecture with:
 The server handles:
 - Authentication via Replit Auth integration
 - CRUD operations for deeds and categories
+- Streak calculation (GET /api/streak) - consecutive days with deeds + weekly active days
 - Static file serving in production
 
 ### Data Storage

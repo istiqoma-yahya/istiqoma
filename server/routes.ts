@@ -1,12 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage, db } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
-import { insertPushSubscriptionSchema } from "@shared/schema";
+import { insertPushSubscriptionSchema, deeds } from "@shared/schema";
 import { calculatePoints } from "./calculatePoints";
+import { sql, eq, and, gte, lte } from "drizzle-orm";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -365,6 +366,60 @@ export async function registerRoutes(
       url: "/"
     });
     res.json({ success });
+  });
+
+  // Streak Route - Protected
+  app.get("/api/streak", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const now = new Date();
+      const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+      const distinctDatesResult = await db
+        .select({ date: sql<string>`DATE(${deeds.createdAt})` })
+        .from(deeds)
+        .where(eq(deeds.userId, userId))
+        .groupBy(sql`DATE(${deeds.createdAt})`)
+        .orderBy(sql`DATE(${deeds.createdAt}) DESC`);
+
+      const deedDates = new Set(
+        distinctDatesResult.map((r) => r.date)
+      );
+
+      const todayStr = todayUTC.toISOString().split("T")[0];
+      let streakCount = 0;
+
+      if (deedDates.has(todayStr)) {
+        streakCount = 1;
+        let checkDate = new Date(todayUTC);
+        while (true) {
+          checkDate.setUTCDate(checkDate.getUTCDate() - 1);
+          const checkStr = checkDate.toISOString().split("T")[0];
+          if (deedDates.has(checkStr)) {
+            streakCount++;
+          } else {
+            break;
+          }
+        }
+      }
+
+      const dayOfWeek = todayUTC.getUTCDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const monday = new Date(todayUTC);
+      monday.setUTCDate(monday.getUTCDate() + mondayOffset);
+
+      const weekDays: boolean[] = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setUTCDate(d.getUTCDate() + i);
+        const dStr = d.toISOString().split("T")[0];
+        weekDays.push(deedDates.has(dStr));
+      }
+
+      res.json({ streakCount, weekDays });
+    } catch (err) {
+      throw err;
+    }
   });
 
   return httpServer;

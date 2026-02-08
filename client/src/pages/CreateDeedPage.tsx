@@ -26,8 +26,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { CreateCategoryDialog } from "@/components/CreateCategoryDialog";
 import { PointsRewardDialog } from "@/components/PointsRewardDialog";
+import { StreakDialog } from "@/components/StreakDialog";
 
 const formSchema = insertDeedSchema.extend({
   points: z.coerce.number().min(1, "Points must be at least 1"),
@@ -59,6 +61,11 @@ export default function CreateDeedPage() {
   const [dateTime, setDateTime] = useState(getCurrentDateTime());
   const [showCreateCategoryDialog, setShowCreateCategoryDialog] = useState(false);
   const [rewardPoints, setRewardPoints] = useState<number | null>(null);
+  const [showStreakDialog, setShowStreakDialog] = useState(false);
+  const queryClient = useQueryClient();
+  const { data: streakData } = useQuery<{ streakCount: number; weekDays: boolean[] }>({
+    queryKey: ["/api/streak"],
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -670,7 +677,7 @@ export default function CreateDeedPage() {
               <Button
                 type="submit"
                 disabled={isPending}
-                className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 text-base shadow-lg shadow-emerald-500/20"
+                className="flex-1 bg-emerald-500 text-white font-medium py-2 text-base shadow-lg shadow-emerald-500/20"
                 data-testid="button-submit-deed"
               >
                 {isPending ? (
@@ -696,9 +703,20 @@ export default function CreateDeedPage() {
       </main>
 
       <PointsRewardDialog
-        open={rewardPoints !== null}
+        open={rewardPoints !== null && !showStreakDialog}
         points={rewardPoints ?? 0}
         onClose={() => {
+          queryClient.invalidateQueries({ queryKey: ["/api/streak"] });
+          setShowStreakDialog(true);
+        }}
+      />
+
+      <StreakDialog
+        open={showStreakDialog}
+        streakCount={streakData?.streakCount ?? 0}
+        weekDays={streakData?.weekDays ?? [false, false, false, false, false, false, false]}
+        onClose={() => {
+          setShowStreakDialog(false);
           setRewardPoints(null);
           navigate("/");
         }}

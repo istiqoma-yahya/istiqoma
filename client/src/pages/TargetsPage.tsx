@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useTargetsWithProgress, useDeleteTarget, useUpdateTargetProgress, useCompleteTarget } from "@/hooks/use-targets";
 import { useCreateDeed } from "@/hooks/use-deeds";
 import { useAuth } from "@/hooks/use-auth";
@@ -8,6 +8,7 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UpdateProgressModal } from "@/components/UpdateProgressModal";
 import { PointsRewardDialog } from "@/components/PointsRewardDialog";
+import { StreakDialog } from "@/components/StreakDialog";
 import { getTargetDisplayTitle, getTargetCategoryLine, getTargetUnitLabel } from "@/lib/targets";
 import { api } from "@shared/routes";
 import { useTranslation } from "react-i18next";
@@ -153,6 +154,11 @@ export default function TargetsPage() {
   const [updateModalTarget, setUpdateModalTarget] = useState<TargetWithProgress | null>(null);
   const [isSavingProgress, setIsSavingProgress] = useState(false);
   const [rewardPoints, setRewardPoints] = useState<number | null>(null);
+  const [showStreakDialog, setShowStreakDialog] = useState(false);
+
+  const { data: streakData } = useQuery<{ streakCount: number; weekDays: boolean[] }>({
+    queryKey: ["/api/streak"],
+  });
 
   const getDateLocale = () => {
     switch (i18n.language) {
@@ -364,9 +370,22 @@ export default function TargetsPage() {
       />
 
       <PointsRewardDialog
-        open={rewardPoints !== null}
+        open={rewardPoints !== null && !showStreakDialog}
         points={rewardPoints ?? 0}
-        onClose={() => setRewardPoints(null)}
+        onClose={() => {
+          queryClient.invalidateQueries({ queryKey: ["/api/streak"] });
+          setShowStreakDialog(true);
+        }}
+      />
+
+      <StreakDialog
+        open={showStreakDialog}
+        streakCount={streakData?.streakCount ?? 0}
+        weekDays={streakData?.weekDays ?? [false, false, false, false, false, false, false]}
+        onClose={() => {
+          setShowStreakDialog(false);
+          setRewardPoints(null);
+        }}
       />
 
       <BottomNavigation />

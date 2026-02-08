@@ -90,6 +90,7 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
 
 export const insertDeedSchema = createInsertSchema(deeds).pick({
   description: true,
+  deedType: true,
   category: true,
   points: true,
   quantity: true,
@@ -102,6 +103,7 @@ export const insertDeedSchema = createInsertSchema(deeds).pick({
   customUnit: true,
   createdAt: true,
 }).extend({
+  deedType: z.enum(["good", "bad"]).optional(),
   createdAt: z.coerce.date().optional(),
   dzikirType: z.string().optional(),
   sholatType: z.string().optional(),

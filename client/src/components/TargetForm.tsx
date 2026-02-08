@@ -317,6 +317,34 @@ export function TargetForm({
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="targetValue"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("targets.targetValue")}</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={1}
+                  className="glass-input"
+                  {...field}
+                  value={targetValueInput}
+                  onChange={(e) => {
+                    setTargetValueInput(e.target.value);
+                    const val = parseInt(e.target.value, 10);
+                    if (!isNaN(val)) {
+                      field.onChange(val);
+                    }
+                  }}
+                  data-testid="input-target-value"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {isCustomCategory && (
           <FormField
             control={form.control}

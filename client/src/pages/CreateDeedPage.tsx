@@ -271,6 +271,26 @@ export default function CreateDeedPage() {
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="points"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("createDeed.pointsLabel")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      className="glass-input"
+                      {...field}
+                      data-testid="input-deed-points"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {isCustomCategory && (
               <FormField
                 control={form.control}
@@ -474,26 +494,6 @@ export default function CreateDeedPage() {
                 )}
               />
             )}
-
-            <FormField
-              control={form.control}
-              name="points"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("createDeed.pointsLabel")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      className="glass-input"
-                      {...field}
-                      data-testid="input-deed-points"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}

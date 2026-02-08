@@ -282,6 +282,26 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="points"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("editDeed.pointsLabel")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      className="glass-input"
+                      {...field}
+                      data-testid="input-edit-deed-points"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {isCustomCategory && (
               <FormField
                 control={form.control}
@@ -485,26 +505,6 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                 )}
               />
             )}
-
-            <FormField
-              control={form.control}
-              name="points"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("editDeed.pointsLabel")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      className="glass-input"
-                      {...field}
-                      data-testid="input-edit-deed-points"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}

@@ -1,9 +1,32 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
 import { rm, readFile } from "fs/promises";
+import pg from "pg";
 
-// server deps to bundle to reduce openat(2) syscalls
-// which helps cold start times
+async function fixNullTargetNames() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    console.log("No DATABASE_URL set, skipping null name fix");
+    return;
+  }
+  const client = new pg.Client({ connectionString: databaseUrl });
+  try {
+    await client.connect();
+    const result = await client.query(
+      `UPDATE targets SET name = COALESCE(category, 'Target') WHERE name IS NULL`
+    );
+    if (result.rowCount && result.rowCount > 0) {
+      console.log(`Fixed ${result.rowCount} targets with null names`);
+    } else {
+      console.log("No null target names found");
+    }
+  } catch (err) {
+    console.error("Warning: could not fix null names:", err);
+  } finally {
+    await client.end();
+  }
+}
+
 const allowlist = [
   "@google/generative-ai",
   "axios",
@@ -33,6 +56,9 @@ const allowlist = [
 ];
 
 async function buildAll() {
+  console.log("fixing null target names...");
+  await fixNullTargetNames();
+
   await rm("dist", { recursive: true, force: true });
 
   console.log("building client...");

@@ -37,7 +37,7 @@ export const deeds = pgTable("deeds", {
 export const targets = pgTable("targets", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  name: text("name").notNull(),
+  name: text("name").default("Target"),
   category: text("category").notNull(),
   targetValue: integer("target_value").notNull(),
   period: text("period", { enum: ["daily", "weekly", "monthly"] }),

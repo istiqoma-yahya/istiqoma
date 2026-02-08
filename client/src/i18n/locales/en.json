@@ -183,8 +183,12 @@
       "any": "Any Type"
     },
     "selectType": "Select Dzikir Type",
+    "selectUnit": "Select Unit",
     "anyType": "Any (all types counted)",
-    "typeRequired": "Please select a dzikir type"
+    "typeRequired": "Please select a dzikir type",
+    "units": {
+      "times": "Times"
+    }
   },
   "qibla": {
     "title": "Qibla & Prayer Times",
@@ -355,9 +359,14 @@
   },
   "sholat": {
     "selectType": "Select Prayer Type",
+    "selectUnit": "Select Unit",
     "anyType": "Any (all types counted)",
     "isJamaah": "Prayed in congregation (Jamaah)",
     "inCongregation": "In Congregation",
+    "units": {
+      "times": "Times",
+      "rakaat": "Rakaat"
+    },
     "types": {
       "subuh": "Subuh (Fajr)",
       "dzuhur": "Dzuhur (Dhuhr)",
@@ -377,7 +386,11 @@
   },
   "fasting": {
     "selectType": "Select Fasting Type",
+    "selectUnit": "Select Unit",
     "anyType": "Any (all types counted)",
+    "units": {
+      "days": "Days"
+    },
     "types": {
       "ramadhan": "Ramadhan",
       "qadha": "Qadha (Make-up)",

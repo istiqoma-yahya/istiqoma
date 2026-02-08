@@ -183,8 +183,12 @@
       "any": "Semua Jenis"
     },
     "selectType": "Pilih Jenis Zikir",
+    "selectUnit": "Pilih Unit",
     "anyType": "Semua (semua jenis dikira)",
-    "typeRequired": "Sila pilih jenis zikir"
+    "typeRequired": "Sila pilih jenis zikir",
+    "units": {
+      "times": "Kali"
+    }
   },
   "qibla": {
     "title": "Kiblat & Waktu Solat",
@@ -355,9 +359,14 @@
   },
   "sholat": {
     "selectType": "Pilih Jenis Solat",
+    "selectUnit": "Pilih Unit",
     "anyType": "Semua (semua jenis dikira)",
     "isJamaah": "Solat berjemaah",
     "inCongregation": "Berjemaah",
+    "units": {
+      "times": "Kali",
+      "rakaat": "Rakaat"
+    },
     "types": {
       "subuh": "Subuh",
       "dzuhur": "Zuhur",
@@ -377,7 +386,11 @@
   },
   "fasting": {
     "selectType": "Pilih Jenis Puasa",
+    "selectUnit": "Pilih Unit",
     "anyType": "Semua (semua jenis dikira)",
+    "units": {
+      "days": "Hari"
+    },
     "types": {
       "ramadhan": "Ramadan",
       "qadha": "Qadha (Ganti)",

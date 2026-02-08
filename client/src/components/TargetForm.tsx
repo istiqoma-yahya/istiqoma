@@ -85,7 +85,7 @@ export function TargetForm({
         isJamaah: editingTarget.isJamaah || undefined,
         quranUnit: (editingTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz" | undefined) || undefined,
         sedekahType: (editingTarget.sedekahType as "uang" | "hitungan" | undefined) || undefined,
-        customUnit: (editingTarget.customUnit as "hitungan" | "ayat" | "halaman" | "surat" | "juz" | "rakaat" | "hari" | "uang" | undefined) || undefined,
+        customUnit: (editingTarget.customUnit as "hitungan" | "ayat" | "halaman" | "surat" | "juz" | "rakaat" | "hari" | "uang" | "times" | "days" | undefined) || undefined,
       });
       setTargetValueInput(String(editingTarget.targetValue));
     }
@@ -106,6 +106,18 @@ export function TargetForm({
 
   const isBuiltInCategory = isDzikirCategory || isSholatCategory || isFastingCategory || isQuranCategory || isSedekahCategory;
   const isCustomCategory = watchedCategory && !isBuiltInCategory;
+
+  useEffect(() => {
+    if (isSholatCategory) {
+      if (!form.getValues("customUnit")) form.setValue("customUnit", "times");
+    } else if (isFastingCategory) {
+      form.setValue("customUnit", "days");
+    } else if (isDzikirCategory) {
+      form.setValue("customUnit", "times");
+    } else if (!isCustomCategory) {
+      form.setValue("customUnit", undefined);
+    }
+  }, [watchedCategory, isDzikirCategory, isSholatCategory, isFastingCategory, isCustomCategory, form]);
 
   const CUSTOM_UNITS = [
     { id: "hitungan", labelKey: "customUnit.units.hitungan" },
@@ -172,6 +184,19 @@ export function TargetForm({
   const SEDEKAH_TYPES = [
     { id: "uang", labelKey: "sedekah.types.uang" },
     { id: "hitungan", labelKey: "sedekah.types.hitungan" },
+  ];
+
+  const SHOLAT_UNITS = [
+    { id: "times", labelKey: "sholat.units.times" },
+    { id: "rakaat", labelKey: "sholat.units.rakaat" },
+  ];
+
+  const FASTING_UNITS = [
+    { id: "days", labelKey: "fasting.units.days" },
+  ];
+
+  const DZIKIR_UNITS = [
+    { id: "times", labelKey: "dzikir.units.times" },
   ];
 
   const currentSholatTypes = isSholatFardhuCategory ? SHOLAT_FARDHU_TYPES : SHOLAT_SUNNAH_TYPES;
@@ -464,6 +489,96 @@ export function TargetForm({
             </FormItem>
           )}
         />
+
+        {isSholatCategory && (
+          <FormField
+            control={form.control}
+            name="customUnit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("sholat.selectUnit")}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || "times"}
+                >
+                  <FormControl>
+                    <SelectTrigger className="glass-input" data-testid="select-target-sholat-unit">
+                      <SelectValue placeholder={t("sholat.selectUnit")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
+                    {SHOLAT_UNITS.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {t(unit.labelKey)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {isFastingCategory && (
+          <FormField
+            control={form.control}
+            name="customUnit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("fasting.selectUnit")}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || "days"}
+                >
+                  <FormControl>
+                    <SelectTrigger className="glass-input" data-testid="select-target-fasting-unit">
+                      <SelectValue placeholder={t("fasting.selectUnit")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
+                    {FASTING_UNITS.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {t(unit.labelKey)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {isDzikirCategory && (
+          <FormField
+            control={form.control}
+            name="customUnit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("dzikir.selectUnit")}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || "times"}
+                >
+                  <FormControl>
+                    <SelectTrigger className="glass-input" data-testid="select-target-dzikir-unit">
+                      <SelectValue placeholder={t("dzikir.selectUnit")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
+                    {DZIKIR_UNITS.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {t(unit.labelKey)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         {isCustomCategory && (
           <FormField

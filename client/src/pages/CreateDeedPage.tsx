@@ -156,6 +156,19 @@ export default function CreateDeedPage() {
     { id: "daud", labelKey: "fasting.types.daud" },
   ];
 
+  const SHOLAT_UNITS = [
+    { id: "times", labelKey: "sholat.units.times" },
+    { id: "rakaat", labelKey: "sholat.units.rakaat" },
+  ];
+
+  const FASTING_UNITS = [
+    { id: "days", labelKey: "fasting.units.days" },
+  ];
+
+  const DZIKIR_UNITS = [
+    { id: "times", labelKey: "dzikir.units.times" },
+  ];
+
   const currentSholatTypes = isSholatFardhuCategory ? SHOLAT_FARDHU_TYPES : SHOLAT_SUNNAH_TYPES;
   const currentFastingTypes = isFastingFardhuCategory ? FASTING_FARDHU_TYPES : FASTING_SUNNAH_TYPES;
 
@@ -182,7 +195,13 @@ export default function CreateDeedPage() {
     if (!isSedekahCategory) {
       form.setValue("sedekahType", undefined);
     }
-    if (!isCustomCategory) {
+    if (isSholatCategory) {
+      if (!form.getValues("customUnit")) form.setValue("customUnit", "times");
+    } else if (isFastingCategory) {
+      form.setValue("customUnit", "days");
+    } else if (isDzikirCategory) {
+      form.setValue("customUnit", "times");
+    } else if (!isCustomCategory) {
       form.setValue("customUnit", undefined);
     }
   }, [watchedCategory, isDzikirCategory, isSholatCategory, isFastingCategory, isQuranCategory, isSedekahCategory, isCustomCategory, form]);
@@ -413,6 +432,96 @@ export default function CreateDeedPage() {
                 </FormItem>
               )}
             />
+
+            {isSholatCategory && (
+              <FormField
+                control={form.control}
+                name="customUnit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("sholat.selectUnit")}</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || "times"}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="glass-input" data-testid="select-deed-sholat-unit">
+                          <SelectValue placeholder={t("sholat.selectUnit")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
+                        {SHOLAT_UNITS.map((unit) => (
+                          <SelectItem key={unit.id} value={unit.id}>
+                            {t(unit.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {isFastingCategory && (
+              <FormField
+                control={form.control}
+                name="customUnit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("fasting.selectUnit")}</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || "days"}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="glass-input" data-testid="select-deed-fasting-unit">
+                          <SelectValue placeholder={t("fasting.selectUnit")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
+                        {FASTING_UNITS.map((unit) => (
+                          <SelectItem key={unit.id} value={unit.id}>
+                            {t(unit.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {isDzikirCategory && (
+              <FormField
+                control={form.control}
+                name="customUnit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("dzikir.selectUnit")}</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || "times"}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="glass-input" data-testid="select-deed-dzikir-unit">
+                          <SelectValue placeholder={t("dzikir.selectUnit")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
+                        {DZIKIR_UNITS.map((unit) => (
+                          <SelectItem key={unit.id} value={unit.id}>
+                            {t(unit.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             {isCustomCategory && (
               <FormField

@@ -107,7 +107,7 @@ export const insertDeedSchema = createInsertSchema(deeds).pick({
   isJamaah: z.boolean().optional(),
   quranUnit: z.enum(["ayat", "halaman", "surat", "juz"]).optional(),
   sedekahType: z.enum(["uang", "hitungan"]).optional(),
-  customUnit: z.enum(["hitungan", "ayat", "halaman", "surat", "juz", "rakaat", "hari", "uang"]).optional(),
+  customUnit: z.enum(["hitungan", "ayat", "halaman", "surat", "juz", "rakaat", "hari", "uang", "times", "days"]).optional(),
 });
 
 export const insertCategorySchema = createInsertSchema(categories).pick({
@@ -150,7 +150,7 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   isJamaah: z.boolean().optional(),
   quranUnit: z.enum(["ayat", "halaman", "surat", "juz"]).optional(),
   sedekahType: z.enum(["uang", "hitungan"]).optional(),
-  customUnit: z.enum(["hitungan", "ayat", "halaman", "surat", "juz", "rakaat", "hari", "uang"]).optional(),
+  customUnit: z.enum(["hitungan", "ayat", "halaman", "surat", "juz", "rakaat", "hari", "uang", "times", "days"]).optional(),
 });
 
 export const insertTargetHistorySchema = createInsertSchema(targetHistory).pick({

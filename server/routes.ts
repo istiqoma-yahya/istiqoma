@@ -28,9 +28,10 @@ export async function registerRoutes(
       const input = api.deeds.create.input.parse(req.body);
       const userId = req.user.claims.sub;
       
+      const originalQuantity = input.points || 1;
       const calculatedPoints = calculatePoints({
         category: input.category,
-        quantity: input.points || 1,
+        quantity: originalQuantity,
         isJamaah: input.isJamaah,
         quranUnit: input.quranUnit,
         dzikirType: input.dzikirType,
@@ -43,6 +44,7 @@ export async function registerRoutes(
       const deedWithCalculatedPoints = {
         ...input,
         points: calculatedPoints,
+        quantity: originalQuantity,
       };
       
       const deed = await storage.createDeed(userId, deedWithCalculatedPoints);
@@ -77,9 +79,10 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Invalid ID" });
       }
       
+      const originalQuantity = input.points || 1;
       const calculatedPoints = calculatePoints({
         category: input.category,
-        quantity: input.points || 1,
+        quantity: originalQuantity,
         isJamaah: input.isJamaah,
         quranUnit: input.quranUnit,
         dzikirType: input.dzikirType,
@@ -92,6 +95,7 @@ export async function registerRoutes(
       const deedWithCalculatedPoints = {
         ...input,
         points: calculatedPoints,
+        quantity: originalQuantity,
       };
       
       const deed = await storage.updateDeed(id, userId, deedWithCalculatedPoints);

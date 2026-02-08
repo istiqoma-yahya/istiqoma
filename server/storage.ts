@@ -201,8 +201,7 @@ export class DatabaseStorage implements IStorage {
           return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && inDateRange;
         });
         
-        // Sum deed points + manual progress
-        const deedProgress = matchingDeeds.reduce((sum, deed) => sum + deed.points, 0);
+        const deedProgress = matchingDeeds.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
         const currentValue = deedProgress + (target.manualProgress || 0);
         
         const percentComplete = target.targetValue > 0 
@@ -263,7 +262,7 @@ export class DatabaseStorage implements IStorage {
         return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && inPeriod;
       });
 
-      const currentValue = deedsInPeriod.reduce((sum, deed) => sum + deed.points, 0);
+      const currentValue = deedsInPeriod.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
       
       let percentComplete: number;
       if (isLimitTarget) {

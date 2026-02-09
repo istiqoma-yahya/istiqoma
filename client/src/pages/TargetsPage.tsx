@@ -33,6 +33,7 @@ import { id as idLocale, ms as msLocale, enUS } from "date-fns/locale";
 interface TargetCardProps {
   target: TargetWithProgress;
   onOpenUpdateModal: () => void;
+  onDetail: () => void;
   t: (key: string, options?: Record<string, string>) => string;
   dateLocale: Locale;
 }
@@ -40,6 +41,7 @@ interface TargetCardProps {
 function TargetCard({
   target,
   onOpenUpdateModal,
+  onDetail,
   t,
   dateLocale,
 }: TargetCardProps) {
@@ -119,7 +121,7 @@ function TargetCard({
           <Button
             variant="outline"
             className="flex-1"
-            disabled
+            onClick={onDetail}
             data-testid={`button-detail-${target.id}`}
           >
             {t("targets.detail")}
@@ -330,6 +332,7 @@ export default function TargetsPage() {
                 key={target.id}
                 target={target}
                 onOpenUpdateModal={() => setUpdateModalTarget(target)}
+                onDetail={() => navigate(`/targets/${target.id}`)}
                 t={t}
                 dateLocale={dateLocale}
               />

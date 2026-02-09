@@ -270,6 +270,67 @@ export async function registerRoutes(
     res.json(result);
   });
 
+  app.get("/api/targets/:id/detail", isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+
+    const targetsWithProgress = await storage.getTargetsWithProgress(userId);
+    const target = targetsWithProgress.find(t => t.id === id);
+    if (!target) {
+      return res.status(404).json({ message: "Target not found" });
+    }
+
+    const periodsBack = 90;
+    await storage.calculateAndSaveTargetHistory(id, userId, periodsBack);
+    const { history, currentStreak } = await storage.getTargetHistoryWithStreak(id, userId, periodsBack);
+
+    const totalAccumulated = history.reduce((sum, h) => sum + h.achievedValue, 0);
+
+    const userDeeds = await storage.getDeeds(userId);
+    const matchingDeeds = userDeeds.filter(deed => {
+      const matchesCategory = deed.category === target.category;
+      const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;
+      const matchesSholatType = !target.sholatType || deed.sholatType === target.sholatType;
+      const matchesFastingType = !target.fastingType || deed.fastingType === target.fastingType;
+      const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
+      const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
+      return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType;
+    });
+    const totalPoints = matchingDeeds.reduce((sum, d) => sum + d.points, 0);
+    const totalQuantity = matchingDeeds.reduce((sum, d) => sum + (d.quantity || 1), 0);
+
+    const completedPeriods = history.filter(h => h.completed).length;
+    const averagePercentage = history.length > 0
+      ? Math.round((completedPeriods / history.length) * 100)
+      : 0;
+
+    let longestStreak = 0;
+    let tempStreak = 0;
+    const sortedHistory = [...history].sort((a, b) => new Date(a.periodStart).getTime() - new Date(b.periodStart).getTime());
+    for (const entry of sortedHistory) {
+      if (entry.completed) {
+        tempStreak++;
+        if (tempStreak > longestStreak) longestStreak = tempStreak;
+      } else {
+        tempStreak = 0;
+      }
+    }
+
+    res.json({
+      target,
+      currentStreak,
+      longestStreak,
+      totalAccumulated,
+      totalQuantity,
+      totalPoints,
+      averagePercentage,
+      history,
+    });
+  });
+
   app.patch(api.targets.updateProgress.path, isAuthenticated, async (req: any, res) => {
     try {
       const { progress } = api.targets.updateProgress.input.parse(req.body);

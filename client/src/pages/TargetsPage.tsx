@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { type TargetWithProgress } from "@shared/schema";
+import { formatNumber } from "@/lib/utils";
 import { Loader2, Plus, Target } from "lucide-react";
 import { format, isPast, type Locale } from "date-fns";
 import { id as idLocale, ms as msLocale, enUS } from "date-fns/locale";
@@ -67,7 +68,7 @@ function TargetCard({
   const unitLabel = getTargetUnitLabel(target, t);
 
   const getTargetLine = () => {
-    const amount = target.targetValue;
+    const amount = formatNumber(target.targetValue);
     const unitPart = unitLabel ? ` ${unitLabel}` : "";
 
     if (isOneTime) {

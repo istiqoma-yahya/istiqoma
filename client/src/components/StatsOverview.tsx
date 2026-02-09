@@ -3,6 +3,7 @@ import { ThumbsUp, Flame } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
+import { formatNumber } from "@/lib/utils";
 
 interface StatsOverviewProps {
   deeds: Deed[];
@@ -33,13 +34,13 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
             <ThumbsUp className="w-5 h-5" />
           </div>
           <span className="text-xs font-medium bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-lg">
-            {totalPoints} {t('stats.points')}
+            {formatNumber(totalPoints)} {t('stats.points')}
           </span>
         </div>
         <div>
           <p className="text-muted-foreground font-medium text-sm mb-0.5">{t('stats.goodDeeds')}</p>
           <h3 className="text-2xl font-bold font-display text-foreground">
-            {totalDeeds}
+            {formatNumber(totalDeeds)}
           </h3>
         </div>
       </motion.div>
@@ -67,7 +68,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
         <div>
           <p className="text-muted-foreground font-medium text-sm mb-0.5">{t('streak.daysInARow')}</p>
           <h3 className={`text-2xl font-bold font-display ${hasActivityToday ? "text-orange-500" : "text-gray-400 dark:text-gray-500"}`} data-testid="text-homepage-streak">
-            {streakCount}
+            {formatNumber(streakCount)}
           </h3>
         </div>
       </motion.div>

@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { type Deed } from "@shared/schema";
+import { formatNumber } from "@/lib/utils";
 import { useDeleteDeed } from "@/hooks/use-deeds";
 import { useCategoryName } from "@/hooks/use-categories";
 import { useLocation } from "wouter";
@@ -38,7 +39,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
         const dzikirTypeLabel = t(`dzikir.types.${deed.dzikirType}`);
         return dzikirTypeLabel;
       }
-      return t('dzikir.dzikirDeedDesc', { count: deed.points || 0 });
+      return t('dzikir.dzikirDeedDesc', { count: formatNumber(deed.points || 0) });
     }
     
     if (deed.sholatType && deed.sholatType !== "any") {
@@ -107,7 +108,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
 
         <div className="flex flex-col items-end gap-2">
           <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400" data-testid={`text-deed-points-${deed.id}`}>
-            +{deed.points} {t('stats.points')}
+            +{formatNumber(deed.points)} {t('stats.points')}
           </span>
           
           <AlertDialog>

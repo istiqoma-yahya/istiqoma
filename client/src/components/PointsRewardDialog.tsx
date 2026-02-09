@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gem } from "lucide-react";
+import { formatNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import {
@@ -38,7 +39,7 @@ function AnimatedCounter({ target, duration = 1200 }: { target: number; duration
     return () => clearInterval(timer);
   }, [target, duration]);
 
-  return <span>+{current}</span>;
+  return <span>+{formatNumber(current)}</span>;
 }
 
 export function PointsRewardDialog({ open, points, onClose }: PointsRewardDialogProps) {

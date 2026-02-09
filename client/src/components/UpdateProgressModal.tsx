@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { type TargetWithProgress } from "@shared/schema";
+import { formatNumber } from "@/lib/utils";
 import { Plus, Minus, Loader2 } from "lucide-react";
 import { getTargetDisplayTitle } from "@/lib/targets";
 
@@ -79,7 +80,7 @@ export function UpdateProgressModal({
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">{t("targets.currentProgress")}:</span>
               <span className="font-medium" data-testid="text-current-progress">
-                {currentProgress} / {target.targetValue}
+                {formatNumber(currentProgress)} / {formatNumber(target.targetValue)}
               </span>
             </div>
             <Progress 
@@ -125,7 +126,7 @@ export function UpdateProgressModal({
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">{t("targets.newProgress")}:</span>
               <span className="font-medium text-emerald-600 dark:text-emerald-400" data-testid="text-new-progress">
-                {newProgress} / {target.targetValue}
+                {formatNumber(newProgress)} / {formatNumber(target.targetValue)}
               </span>
             </div>
             <Progress 

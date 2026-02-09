@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { getFadhilahForCategory } from "@/lib/fadhilah";
 import { getTargetDisplayTitle, getTargetCategoryLine, getTargetUnitLabel } from "@/lib/targets";
+import { formatNumber } from "@/lib/utils";
 import { useDeleteTarget } from "@/hooks/use-targets";
 import type { TargetWithProgress, TargetHistory } from "@shared/schema";
 import {
@@ -167,7 +168,7 @@ function HighlightCards({
             <span className="text-xs text-muted-foreground">{card.label}</span>
           </div>
           <p className="text-2xl font-bold text-foreground" data-testid={`text-${card.testId}-value`}>
-            {card.value.toLocaleString()}{card.suffix}
+            {formatNumber(card.value)}{card.suffix}
           </p>
         </Card>
       ))}
@@ -250,7 +251,7 @@ function ConsistencyCalendar({
 
       <div className="flex items-center gap-3 mb-4">
         <Badge variant="secondary" className="text-xs" data-testid="badge-completed-count">
-          {completedCount} hari tercapai
+          {formatNumber(completedCount)} hari tercapai
         </Badge>
       </div>
 

@@ -39,7 +39,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
         const dzikirTypeLabel = t(`dzikir.types.${deed.dzikirType}`);
         return dzikirTypeLabel;
       }
-      return t('dzikir.dzikirDeedDesc', { count: formatNumber(deed.points || 0) });
+      return t('dzikir.dzikirDeedDesc', { count: formatNumber(deed.points || 0) } as Record<string, string>);
     }
     
     if (deed.sholatType && deed.sholatType !== "any") {

@@ -484,7 +484,7 @@ function DeleteTargetSection({ targetId, targetName }: { targetId: number; targe
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleteTarget.isPending}
-              className="bg-rose-500 text-white"
+              className="bg-none bg-rose-500 text-white"
               data-testid="button-confirm-delete-target"
             >
               {deleteTarget.isPending ? (

@@ -702,7 +702,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                     </AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDelete}
-                      className="bg-rose-500 text-white"
+                      className="bg-none bg-rose-500 text-white"
                       data-testid="button-confirm-delete-deed"
                     >
                       {t("editDeed.delete")}

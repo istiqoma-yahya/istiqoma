@@ -7,8 +7,20 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { getFadhilahForCategory } from "@/lib/fadhilah";
 import { getTargetDisplayTitle, getTargetCategoryLine, getTargetUnitLabel } from "@/lib/targets";
+import { useDeleteTarget } from "@/hooks/use-targets";
 import type { TargetWithProgress, TargetHistory } from "@shared/schema";
 import {
   BarChart,
@@ -29,6 +41,7 @@ import {
   ChevronLeft,
   ChevronRight,
   BookOpen,
+  Trash2,
 } from "lucide-react";
 import {
   format,
@@ -434,6 +447,58 @@ function TrendChart({
   );
 }
 
+function DeleteTargetSection({ targetId, targetName }: { targetId: number; targetName: string }) {
+  const { t } = useTranslation();
+  const [, navigate] = useLocation();
+  const deleteTarget = useDeleteTarget();
+
+  const handleDelete = async () => {
+    await deleteTarget.mutateAsync(targetId);
+    navigate("/targets");
+  };
+
+  return (
+    <div className="pt-4 pb-8">
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button
+            variant="outline"
+            className="w-full border-rose-500/30 text-rose-500"
+            data-testid="button-delete-target"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            {t("targets.deleteTarget")}
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent className="bg-card border-border text-card-foreground">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("targets.deleteConfirm")}</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              {t("targets.deleteWarning")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-secondary border-border text-foreground">
+              {t("common.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleteTarget.isPending}
+              className="bg-rose-500 text-white"
+              data-testid="button-confirm-delete-target"
+            >
+              {deleteTarget.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : null}
+              {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
 export default function TargetDetailPage() {
   const { t, i18n } = useTranslation();
   const [, navigate] = useLocation();
@@ -516,6 +581,8 @@ export default function TargetDetailPage() {
         <ConsistencyCalendar history={history} period={target.period} />
 
         <TrendChart history={history} period={target.period} />
+
+        <DeleteTargetSection targetId={target.id} targetName={displayTitle} />
       </div>
       <BottomNavigation />
     </div>

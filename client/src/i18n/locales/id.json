@@ -274,6 +274,7 @@
     "monthly": "Bulanan",
     "progress": "Progres",
     "completed": "Selesai",
+    "deleteTarget": "Hapus Target",
     "deleteConfirm": "Hapus target ini?",
     "deleteWarning": "Tindakan ini tidak dapat dibatalkan. Ini akan menghapus target ini secara permanen.",
     "history": "Riwayat",

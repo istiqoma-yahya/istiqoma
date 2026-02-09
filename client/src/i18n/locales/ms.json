@@ -274,6 +274,7 @@
     "monthly": "Bulanan",
     "progress": "Progres",
     "completed": "Selesai",
+    "deleteTarget": "Padam Sasaran",
     "deleteConfirm": "Padam sasaran ini?",
     "deleteWarning": "Tindakan ini tidak boleh dibatalkan. Ini akan memadam sasaran ini secara kekal.",
     "history": "Sejarah",

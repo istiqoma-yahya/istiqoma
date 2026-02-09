@@ -409,6 +409,7 @@ function TrendChart({
               className="text-muted-foreground"
             />
             <Tooltip
+              cursor={{ fill: "hsl(var(--primary) / 0.1)" }}
               contentStyle={{
                 borderRadius: "8px",
                 fontSize: "12px",

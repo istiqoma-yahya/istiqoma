@@ -450,9 +450,25 @@ export async function registerRoutes(
       const todayStr = todayUTC.toISOString().split("T")[0];
       let streakCount = 0;
 
+      const yesterdayUTC = new Date(todayUTC);
+      yesterdayUTC.setUTCDate(yesterdayUTC.getUTCDate() - 1);
+      const yesterdayStr = yesterdayUTC.toISOString().split("T")[0];
+
       if (deedDates.has(todayStr)) {
         streakCount = 1;
         let checkDate = new Date(todayUTC);
+        while (true) {
+          checkDate.setUTCDate(checkDate.getUTCDate() - 1);
+          const checkStr = checkDate.toISOString().split("T")[0];
+          if (deedDates.has(checkStr)) {
+            streakCount++;
+          } else {
+            break;
+          }
+        }
+      } else if (deedDates.has(yesterdayStr)) {
+        streakCount = 1;
+        let checkDate = new Date(yesterdayUTC);
         while (true) {
           checkDate.setUTCDate(checkDate.getUTCDate() - 1);
           const checkStr = checkDate.toISOString().split("T")[0];

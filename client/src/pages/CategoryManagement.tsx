@@ -158,7 +158,7 @@ function SortableCategoryCard({
                       <AlertDialogAction
                         onClick={() => deleteCategory(category.id)}
                         disabled={isDeleting}
-                        className="bg-rose-500 hover:bg-rose-600 text-white"
+                        className="bg-rose-500 text-white"
                       >
                         {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('common.delete')}
                       </AlertDialogAction>

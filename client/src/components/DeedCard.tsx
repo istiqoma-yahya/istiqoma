@@ -140,7 +140,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
                     e.stopPropagation();
                     deleteDeed(deed.id);
                   }}
-                  className="bg-rose-500 hover:bg-rose-600 text-white"
+                  className="bg-rose-500 text-white"
                 >
                   {t('common.delete')}
                 </AlertDialogAction>

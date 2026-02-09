@@ -355,7 +355,7 @@ export default function TargetsPage() {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground"
+              className="bg-rose-500 text-white"
               data-testid="button-confirm-delete-target"
             >
               {t("common.delete")}

@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins, Shield, Calendar, CheckCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -17,9 +17,25 @@ declare global {
 
 export default function Landing() {
   const { t } = useTranslation();
+  const [showSticky, setShowSticky] = useState(false);
+
   const handleLogin = () => {
     window.location.href = "/api/login";
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show sticky after scrolling 400px (roughly past hero button)
+      if (window.scrollY > 400) {
+        setShowSticky(true);
+      } else {
+        setShowSticky(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     if (window.UnicornStudio && window.UnicornStudio.init) {
@@ -29,6 +45,43 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-hidden relative">
+      <AnimatePresence>
+        {showSticky && (
+          <motion.div
+            initial={{ y: -100 }}
+            animate={{ y: 0 }}
+            exit={{ y: -100 }}
+            className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border py-3 px-6 shadow-xl"
+          >
+            <div className="container mx-auto flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                  <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-lg">I</span>
+                </div>
+                <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-xl tracking-tight hidden sm:block">Istiqoma</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleLogin}
+                  className="btn-secondary text-sm px-4 py-2 whitespace-nowrap"
+                  data-testid="sticky-button-login"
+                >
+                  {t('landing.login')}
+                </button>
+                <button
+                  onClick={handleLogin}
+                  className="btn-primary text-sm px-4 py-2 flex items-center gap-2 whitespace-nowrap"
+                  data-testid="sticky-button-start-tracking"
+                >
+                  {t('landing.startTracking')}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Background Gradients */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />

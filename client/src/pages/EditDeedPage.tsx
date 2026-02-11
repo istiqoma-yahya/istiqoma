@@ -154,6 +154,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
     { id: "istikharah", labelKey: "sholat.types.istikharah" },
     { id: "hajat", labelKey: "sholat.types.hajat" },
     { id: "taubat", labelKey: "sholat.types.taubat" },
+    { id: "tasbih", labelKey: "sholat.types.tasbih" },
   ];
 
   const FASTING_FARDHU_TYPES = [

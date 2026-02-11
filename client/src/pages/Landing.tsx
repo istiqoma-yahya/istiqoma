@@ -73,7 +73,7 @@ export default function Landing() {
                   className="btn-primary text-sm px-4 py-2 flex items-center gap-2 whitespace-nowrap"
                   data-testid="sticky-button-start-tracking"
                 >
-                  {t('landing.startTracking').replace(" Now", "")}
+                  {t('landing.startTracking')}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

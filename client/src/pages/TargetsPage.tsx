@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
-import { useTargetsWithProgress, useDeleteTarget, useUpdateTargetProgress, useCompleteTarget } from "@/hooks/use-targets";
+import { useTargetsWithProgress, useDeleteTarget, useUpdateTargetProgress, useCompleteTarget, useUpdateTarget } from "@/hooks/use-targets";
 import { useCreateDeed } from "@/hooks/use-deeds";
 import { useAuth } from "@/hooks/use-auth";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -15,6 +15,16 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,7 +37,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { type TargetWithProgress } from "@shared/schema";
 import { formatNumber } from "@/lib/utils";
-import { Loader2, Plus, Target } from "lucide-react";
+import { Loader2, Plus, Target, Pencil } from "lucide-react";
 import { format, isPast, type Locale } from "date-fns";
 import { id as idLocale, ms as msLocale, enUS } from "date-fns/locale";
 
@@ -35,6 +45,7 @@ interface TargetCardProps {
   target: TargetWithProgress;
   onOpenUpdateModal: () => void;
   onDetail: () => void;
+  onRename: (target: TargetWithProgress) => void;
   t: (key: string, options?: Record<string, string>) => string;
   dateLocale: Locale;
 }
@@ -43,6 +54,7 @@ function TargetCard({
   target,
   onOpenUpdateModal,
   onDetail,
+  onRename,
   t,
   dateLocale,
 }: TargetCardProps) {
@@ -95,9 +107,19 @@ function TargetCard({
   return (
     <Card className="p-4" data-testid={`card-target-${target.id}`}>
       <div className="space-y-3">
-        <h3 className="text-lg font-bold text-foreground" data-testid={`text-target-title-${target.id}`}>
-          {getTargetDisplayTitle(target, t)}
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-bold text-foreground" data-testid={`text-target-title-${target.id}`}>
+            {getTargetDisplayTitle(target, t)}
+          </h3>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => onRename(target)}
+            data-testid={`button-rename-target-${target.id}`}
+          >
+            <Pencil className="w-4 h-4" />
+          </Button>
+        </div>
 
         <p className="text-sm text-muted-foreground" data-testid={`text-target-line-${target.id}`}>
           {getTargetLine()}
@@ -152,12 +174,15 @@ export default function TargetsPage() {
   const updateProgress = useUpdateTargetProgress();
   const completeTarget = useCompleteTarget();
   const createDeed = useCreateDeed();
+  const updateTarget = useUpdateTarget();
 
   const [deletingTarget, setDeletingTarget] = useState<TargetWithProgress | null>(null);
   const [updateModalTarget, setUpdateModalTarget] = useState<TargetWithProgress | null>(null);
   const [isSavingProgress, setIsSavingProgress] = useState(false);
   const [rewardPoints, setRewardPoints] = useState<number | null>(null);
   const [showStreakDialog, setShowStreakDialog] = useState(false);
+  const [renamingTarget, setRenamingTarget] = useState<TargetWithProgress | null>(null);
+  const [renameValue, setRenameValue] = useState("");
 
   const { data: streakData } = useQuery<{ streakCount: number; weekDays: boolean[] }>({
     queryKey: ["/api/streak"],
@@ -177,6 +202,44 @@ export default function TargetsPage() {
       await deleteTarget.mutateAsync(deletingTarget.id);
       setDeletingTarget(null);
     }
+  };
+
+  const handleOpenRename = (target: TargetWithProgress) => {
+    setRenamingTarget(target);
+    setRenameValue(getTargetDisplayTitle(target, t));
+  };
+
+  const handleRename = () => {
+    if (!renamingTarget || !renameValue.trim()) return;
+    const rt = renamingTarget;
+    const data: Record<string, any> = {
+      name: renameValue.trim(),
+      category: rt.category,
+      targetValue: rt.targetValue,
+      period: rt.period,
+      targetType: rt.targetType,
+      recurrence: rt.recurrence,
+    };
+    if (rt.startDate) data.startDate = new Date(rt.startDate);
+    if (rt.dueDate) data.dueDate = new Date(rt.dueDate);
+    if (rt.unitLabel) data.unitLabel = rt.unitLabel;
+    if (rt.dzikirType) data.dzikirType = rt.dzikirType;
+    if (rt.sholatType) data.sholatType = rt.sholatType;
+    if (rt.fastingType) data.fastingType = rt.fastingType;
+    if (rt.isJamaah != null) data.isJamaah = rt.isJamaah;
+    if (rt.quranUnit) data.quranUnit = rt.quranUnit;
+    if (rt.sedekahType) data.sedekahType = rt.sedekahType;
+    if (rt.customUnit) data.customUnit = rt.customUnit;
+
+    updateTarget.mutate(
+      { id: rt.id, data: data as any },
+      {
+        onSuccess: () => {
+          setRenamingTarget(null);
+          setRenameValue("");
+        },
+      }
+    );
   };
 
   const handleUpdateProgressWithDeed = async (targetId: number, incrementValue: number) => {
@@ -334,6 +397,7 @@ export default function TargetsPage() {
                 target={target}
                 onOpenUpdateModal={() => setUpdateModalTarget(target)}
                 onDetail={() => navigate(`/targets/${target.id}`)}
+                onRename={handleOpenRename}
                 t={t}
                 dateLocale={dateLocale}
               />
@@ -391,6 +455,42 @@ export default function TargetsPage() {
           setRewardPoints(null);
         }}
       />
+
+      <Dialog open={!!renamingTarget} onOpenChange={(open) => { if (!open) { setRenamingTarget(null); setRenameValue(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle data-testid="text-rename-dialog-title">{t("targets.renameTarget")}</DialogTitle>
+            <DialogDescription>{t("targets.renameTargetDesc")}</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="rename-target-input">{t("targets.targetName")}</Label>
+            <Input
+              id="rename-target-input"
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              data-testid="input-rename-target"
+              className="mt-2"
+              onKeyDown={(e) => { if (e.key === "Enter") handleRename(); }}
+            />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => { setRenamingTarget(null); setRenameValue(""); }}
+              data-testid="button-cancel-rename"
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              onClick={handleRename}
+              disabled={!renameValue.trim() || updateTarget.isPending}
+              data-testid="button-save-rename"
+            >
+              {updateTarget.isPending ? t("common.saving") : t("targets.saveChanges")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <BottomNavigation />
     </div>

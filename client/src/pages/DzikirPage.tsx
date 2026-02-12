@@ -61,6 +61,7 @@ export default function DzikirPage() {
         description: t('dzikir.dzikirTypeDeedDesc', { type: dzikirTypeLabel, count }),
         category: dzikirCategory?.name || "Dzikr",
         points: count,
+        quantity: count,
         dzikirType: selectedDzikirType,
         createdAt: new Date(),
       },

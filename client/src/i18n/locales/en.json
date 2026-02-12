@@ -187,7 +187,7 @@
     "anyType": "Any (all types counted)",
     "typeRequired": "Please select a dzikir type",
     "units": {
-      "times": "Times"
+      "times": "Counts"
     }
   },
   "qibla": {

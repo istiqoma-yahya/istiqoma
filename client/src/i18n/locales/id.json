@@ -187,7 +187,7 @@
     "anyType": "Semua (semua jenis dihitung)",
     "typeRequired": "Silakan pilih jenis dzikir",
     "units": {
-      "times": "Kali"
+      "times": "Hitungan"
     }
   },
   "qibla": {

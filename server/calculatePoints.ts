@@ -33,7 +33,7 @@ export function calculatePoints(input: CalculatePointsInput): number {
   const quantity = input.quantity || 1;
 
   if (categoryLower === "dzikir" || categoryLower === "dzikr") {
-    return 10;
+    return 1 * quantity;
   }
 
   if (categoryLower === "sholat fardhu") {

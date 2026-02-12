@@ -227,7 +227,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
       }
     }
 
-    mutate({ id: deed.id, data: { ...data, createdAt } }, {
+    mutate({ id: deed.id, data: { ...data, quantity: data.points, createdAt } }, {
       onSuccess: () => {
         form.reset();
         navigate("/");

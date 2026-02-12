@@ -86,7 +86,7 @@ export function CreateDeedDialog() {
       }
     }
     
-    mutate({ ...data, createdAt }, {
+    mutate({ ...data, quantity: data.points, createdAt }, {
       onSuccess: () => {
         setOpen(false);
         form.reset();

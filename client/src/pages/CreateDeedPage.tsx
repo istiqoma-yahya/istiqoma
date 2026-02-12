@@ -226,7 +226,7 @@ export default function CreateDeedPage() {
       }
     }
 
-    mutate({ ...data, createdAt }, {
+    mutate({ ...data, quantity: data.points, createdAt }, {
       onSuccess: (createdDeed) => {
         form.reset();
         setDateTime(getCurrentDateTime());

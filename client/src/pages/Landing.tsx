@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins, Shield, Calendar, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins, Shield, Calendar, CheckCircle2, Download } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import testimonialAvatar from "@/assets/testimonial-yahya.png";
+import { useInstallPWA } from "@/hooks/use-install-pwa";
 
 declare global {
   interface Window {
@@ -18,6 +19,7 @@ declare global {
 export default function Landing() {
   const { t } = useTranslation();
   const [showSticky, setShowSticky] = useState(false);
+  const { isInstallable, isInstalled, install } = useInstallPWA();
 
   const handleLogin = () => {
     window.location.href = "/api/login";
@@ -137,6 +139,23 @@ export default function Landing() {
                 <ArrowRight className="w-5 h-5" />
               </button>
             </div>
+            {isInstallable && !isInstalled && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+                className="mt-4 flex justify-center md:justify-start"
+              >
+                <button
+                  onClick={install}
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  data-testid="button-download-app-hero"
+                >
+                  <Download className="w-4 h-4" />
+                  {t('landing.downloadApp')}
+                </button>
+              </motion.div>
+            )}
           </motion.div>
 
           {/* Right Column - Illustration (35%) */}
@@ -429,6 +448,30 @@ export default function Landing() {
           </motion.div>
         </div>
       </section>
+      {isInstallable && !isInstalled && (
+        <section className="relative z-10 pb-16 bg-background">
+          <div className="container mx-auto px-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="max-w-md mx-auto text-center"
+            >
+              <button
+                onClick={install}
+                className="btn-primary w-full sm:w-auto text-base px-8 py-3.5 flex items-center justify-center gap-2 mx-auto"
+                data-testid="button-download-app-bottom"
+              >
+                <Download className="w-5 h-5" />
+                {t('landing.downloadApp')}
+              </button>
+              <p className="text-sm text-muted-foreground mt-3" data-testid="text-download-app-desc">
+                {t('landing.downloadAppDesc')}
+              </p>
+            </motion.div>
+          </div>
+        </section>
+      )}
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
         <p data-testid="text-footer-copyright">© {new Date().getFullYear()} {t('app.name')}. {t('app.tagline')}</p>

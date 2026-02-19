@@ -18,6 +18,14 @@ const DEFAULT_CATEGORIES = [
   "Shodaqoh",
 ];
 
+const OLD_NAME_MAPPINGS: Record<string, string> = {
+  "Recite Quran": "Baca Quran",
+  "Fasting Fardhu": "Puasa",
+  "Fasting Sunnah": "Puasa",
+  "Puasa Fardhu": "Puasa",
+  "Puasa Sunnah": "Puasa",
+};
+
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
@@ -71,35 +79,44 @@ async function upsertUser(claims: any) {
     profileImageUrl: claims["profile_image_url"],
   });
   
-  // Seed default categories for new users and ensure existing ones are protected
   try {
-    const existingCategories = await storage.getCategories(userId);
-    const existingNames = existingCategories.map(c => c.name);
-    
-    for (const categoryName of DEFAULT_CATEGORIES) {
-      if (!existingNames.includes(categoryName)) {
-        await storage.createCategory(userId, { name: categoryName, isProtected: true });
-      } else {
-        // Mark existing default category as protected if not already
-        const existingCat = existingCategories.find(c => c.name === categoryName);
-        if (existingCat && !existingCat.isProtected) {
-          await storage.markCategoryProtected(existingCat.id, userId);
+    let categories = await storage.getCategories(userId);
+
+    // Step 1: Rename old category names to current names
+    for (const cat of categories) {
+      const newName = OLD_NAME_MAPPINGS[cat.name];
+      if (newName) {
+        const alreadyHasNew = categories.some(c => c.id !== cat.id && c.name === newName);
+        if (alreadyHasNew) {
+          await storage.deleteCategory(cat.id, userId);
+        } else {
+          await storage.updateCategory(cat.id, userId, newName);
         }
       }
     }
 
-    // Migrate old fasting categories to "Puasa"
-    const OLD_FASTING_NAMES = ["Fasting Fardhu", "Fasting Sunnah", "Puasa Fardhu", "Puasa Sunnah"];
-    const refreshedCategories = await storage.getCategories(userId);
-    const hasPuasa = refreshedCategories.some(c => c.name === "Puasa");
-    let renamedOne = false;
-    for (const cat of refreshedCategories) {
-      if (OLD_FASTING_NAMES.includes(cat.name)) {
-        if (!hasPuasa && !renamedOne) {
-          await storage.updateCategory(cat.id, userId, "Puasa");
-          renamedOne = true;
-        } else {
-          await storage.deleteCategory(cat.id, userId);
+    // Step 2: Re-fetch and remove duplicate default categories only (keep the first, delete extras)
+    categories = await storage.getCategories(userId);
+    const defaultNameSet = new Set(DEFAULT_CATEGORIES);
+    const seen = new Set<string>();
+    for (const cat of categories) {
+      if (defaultNameSet.has(cat.name) && seen.has(cat.name)) {
+        await storage.deleteCategory(cat.id, userId);
+      } else {
+        seen.add(cat.name);
+      }
+    }
+
+    // Step 3: Seed any missing default categories and ensure protection
+    categories = await storage.getCategories(userId);
+    const existingNames = new Set(categories.map(c => c.name));
+    for (const categoryName of DEFAULT_CATEGORIES) {
+      if (!existingNames.has(categoryName)) {
+        await storage.createCategory(userId, { name: categoryName, isProtected: true });
+      } else {
+        const existingCat = categories.find(c => c.name === categoryName);
+        if (existingCat && !existingCat.isProtected) {
+          await storage.markCategoryProtected(existingCat.id, userId);
         }
       }
     }

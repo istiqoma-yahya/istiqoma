@@ -65,6 +65,7 @@ function updateUserSession(
   user.claims = tokens.claims();
   user.access_token = tokens.access_token;
   user.refresh_token = tokens.refresh_token;
+  user.id_token = tokens.id_token;
   user.expires_at = user.claims?.exp;
 }
 
@@ -170,7 +171,7 @@ export async function setupAuth(app: Express) {
   app.get("/api/login", (req, res, next) => {
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
-      prompt: "consent",
+      prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
@@ -205,10 +206,15 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/logout", (req, res) => {
-    const redirectUrl = client.buildEndSessionUrl(config, {
+    const user = req.user as any;
+    const endSessionParams: Record<string, string> = {
       client_id: process.env.REPL_ID!,
-      post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-    }).href;
+      post_logout_redirect_uri: `https://${req.hostname}`,
+    };
+    if (user?.id_token) {
+      endSessionParams.id_token_hint = user.id_token;
+    }
+    const redirectUrl = client.buildEndSessionUrl(config, endSessionParams).href;
 
     req.logout(() => {
       req.session.destroy(() => {

@@ -129,7 +129,7 @@ export default function Landing() {
               {t('landing.subtitle')}
             </p>
             
-            <div className="flex flex-col sm:flex-row items-center justify-center md:items-start md:justify-start gap-4">
+            <div className="flex flex-col items-center justify-center md:flex-row md:items-center md:justify-start gap-4">
               <button 
                 onClick={handleLogin}
                 className="btn-primary w-full sm:w-auto text-lg px-8 py-4 flex items-center justify-center gap-2 group"
@@ -138,24 +138,23 @@ export default function Landing() {
                 {t('landing.startTracking')}
                 <ArrowRight className="w-5 h-5" />
               </button>
-            </div>
-            {isInstallable && !isInstalled && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-                className="mt-4 flex justify-center md:justify-start"
-              >
-                <button
-                  onClick={install}
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  data-testid="button-download-app-hero"
+              {isInstallable && !isInstalled && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.3 }}
                 >
-                  <Download className="w-4 h-4" />
-                  {t('landing.downloadApp')}
-                </button>
-              </motion.div>
-            )}
+                  <button
+                    onClick={install}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    data-testid="button-download-app-hero"
+                  >
+                    <Download className="w-4 h-4" />
+                    {t('landing.downloadApp')}
+                  </button>
+                </motion.div>
+              )}
+            </div>
           </motion.div>
 
           {/* Right Column - Illustration (35%) */}

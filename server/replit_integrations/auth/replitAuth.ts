@@ -95,15 +95,15 @@ async function upsertUser(claims: any) {
       }
     }
 
-    // Step 2: Re-fetch and remove duplicate default categories only (keep the first, delete extras)
+    // Step 2: Re-fetch and remove ALL duplicate categories (keep the first, delete extras)
     categories = await storage.getCategories(userId);
-    const defaultNameSet = new Set(DEFAULT_CATEGORIES);
     const seen = new Set<string>();
     for (const cat of categories) {
-      if (defaultNameSet.has(cat.name) && seen.has(cat.name)) {
+      const normalizedName = cat.name.toLowerCase();
+      if (seen.has(normalizedName)) {
         await storage.deleteCategory(cat.id, userId);
       } else {
-        seen.add(cat.name);
+        seen.add(normalizedName);
       }
     }
 

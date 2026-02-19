@@ -91,6 +91,10 @@ export class DatabaseStorage implements IStorage {
 
   async createCategory(userId: string, insertCategory: InsertCategory): Promise<Category> {
     const existing = await this.getCategories(userId);
+    const duplicateCheck = existing.find(c => c.name.toLowerCase() === insertCategory.name.toLowerCase());
+    if (duplicateCheck) {
+      return duplicateCheck;
+    }
     let maxSortOrder = existing.length > 0 ? Math.max(...existing.map(c => c.sortOrder)) : -1;
     const [category] = await db
       .insert(categories)

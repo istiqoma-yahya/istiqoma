@@ -106,7 +106,6 @@ export default function Dashboard() {
           </div>
         </div>
       </header>
-
       {/* Main Content */}
       <main className="container max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -128,7 +127,7 @@ export default function Dashboard() {
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
+            <h3 className="flex items-center gap-2 text-[20px] font-bold">
               <Target className="w-5 h-5 text-emerald-500" />
               {t('dashboard.activeTargets')}
             </h3>

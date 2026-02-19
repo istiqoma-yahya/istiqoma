@@ -684,8 +684,6 @@ export default function TargetDetailPage() {
 
         <FadhilahCard category={target.category} />
 
-        <NotificationTimesCard targetId={target.id} initialTimes={target.notificationTimes || []} />
-
         <HighlightCards
           currentStreak={currentStreak}
           totalQuantity={totalQuantity}
@@ -697,6 +695,8 @@ export default function TargetDetailPage() {
         <ConsistencyCalendar history={history} period={target.period} />
 
         <TrendChart history={history} period={target.period} />
+
+        <NotificationTimesCard targetId={target.id} initialTimes={target.notificationTimes || []} />
 
         <DeleteTargetSection targetId={target.id} targetName={displayTitle} />
       </div>

@@ -93,6 +93,77 @@ export async function sendTargetAlert(userId: string, targetName: string, messag
   });
 }
 
+const sentTargetAlerts = new Map<string, number>();
+
+function cleanupSentAlerts(): void {
+  const now = Date.now();
+  for (const [key, timestamp] of sentTargetAlerts) {
+    if (now - timestamp > 120000) {
+      sentTargetAlerts.delete(key);
+    }
+  }
+}
+
+export async function sendTargetReminders(): Promise<void> {
+  cleanupSentAlerts();
+
+  const subscriptions = await storage.getAllPushSubscriptions();
+  const nowUtc = new Date();
+
+  for (const subscription of subscriptions) {
+    if (!subscription.targetAlerts) continue;
+
+    const userTimezone = subscription.timezone || "Asia/Jakarta";
+    const nowInUserTz = toZonedTime(nowUtc, userTimezone);
+    const currentHour = nowInUserTz.getHours();
+    const currentMinute = nowInUserTz.getMinutes();
+    const currentTotalMinutes = currentHour * 60 + currentMinute;
+    const todayStr = `${nowInUserTz.getFullYear()}-${String(nowInUserTz.getMonth() + 1).padStart(2, '0')}-${String(nowInUserTz.getDate()).padStart(2, '0')}`;
+
+    const targetsWithProgress = await storage.getTargetsWithProgress(subscription.userId);
+
+    for (const target of targetsWithProgress) {
+      if (!target.isActive) continue;
+      const times = target.notificationTimes;
+      if (!times || times.length === 0) continue;
+
+      for (const timeStr of times) {
+        const [h, m] = timeStr.split(':').map(Number);
+        if (isNaN(h) || isNaN(m)) continue;
+
+        const reminderTotalMinutes = h * 60 + m;
+        if (Math.abs(currentTotalMinutes - reminderTotalMinutes) > 1) continue;
+
+        const dedupKey = `${subscription.userId}-${target.id}-${timeStr}-${todayStr}`;
+        if (sentTargetAlerts.has(dedupKey)) continue;
+
+        sentTargetAlerts.set(dedupKey, Date.now());
+
+        const targetName = target.name || target.category;
+        const progress = target.currentValue;
+        const goal = target.targetValue;
+        const percentComplete = target.percentComplete;
+
+        let body: string;
+        if (target.targetType === "limit") {
+          body = `${targetName}: ${progress}/${goal} used. ${percentComplete <= 100 ? 'Within limit.' : 'Limit exceeded!'}`;
+        } else if (percentComplete >= 100) {
+          body = `${targetName}: Target achieved! ${progress}/${goal}. MasyaAllah!`;
+        } else {
+          body = `${targetName}: ${progress}/${goal} (${percentComplete}%). Keep going!`;
+        }
+
+        await sendToSubscription(subscription, {
+          title: 'Target Reminder',
+          body,
+          url: `/targets/${target.id}`,
+          tag: `target-reminder-${target.id}`,
+        });
+      }
+    }
+  }
+}
+
 export function isPushConfigured(): boolean {
   return !!(VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY);
 }

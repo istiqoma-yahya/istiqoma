@@ -2,7 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
-import { sendDailyReminders, isPushConfigured } from "./pushNotifications";
+import { sendDailyReminders, sendTargetReminders, isPushConfigured } from "./pushNotifications";
 
 const app = express();
 const httpServer = createServer(app);
@@ -100,6 +100,9 @@ app.use((req, res, next) => {
         setInterval(() => {
           sendDailyReminders().catch(err => {
             console.error('Error sending daily reminders:', err);
+          });
+          sendTargetReminders().catch(err => {
+            console.error('Error sending target reminders:', err);
           });
         }, 60000); // Check every minute
         log('Push notification scheduler started');

@@ -55,6 +55,7 @@ export const targets = pgTable("targets", {
   quranUnit: text("quran_unit"),
   sedekahType: text("sedekah_type"),
   customUnit: text("custom_unit"),
+  notificationTimes: text("notification_times").array().default([]),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -139,6 +140,7 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   quranUnit: true,
   sedekahType: true,
   customUnit: true,
+  notificationTimes: true,
 }).extend({
   name: z.string().min(1, "Target name is required"),
   category: z.string().min(1, "Category is required"),
@@ -156,6 +158,7 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   quranUnit: z.enum(["ayat", "halaman", "surat", "juz"]).optional(),
   sedekahType: z.enum(["uang", "hitungan"]).optional(),
   customUnit: z.enum(["hitungan", "ayat", "halaman", "surat", "juz", "rakaat", "hari", "uang", "times", "days"]).optional(),
+  notificationTimes: z.array(z.string().regex(/^\d{2}:\d{2}$/)).max(5).optional().default([]),
 });
 
 export const insertTargetHistorySchema = createInsertSchema(targetHistory).pick({

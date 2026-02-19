@@ -95,13 +95,9 @@ function TargetCard({
     }
   };
 
-  const currentProgress = isOneTime
-    ? (target.manualProgress || target.currentValue || 0)
-    : (target.currentValue || 0);
-  const percentComplete = target.targetValue > 0
-    ? Math.min(100, (currentProgress / target.targetValue) * 100)
-    : 0;
-  const isCompleted = isOneTime ? oneTimeStatus === "completed" : target.percentComplete >= 100;
+  const currentProgress = target.currentValue || 0;
+  const percentComplete = target.percentComplete || 0;
+  const isCompleted = isOneTime ? oneTimeStatus === "completed" : percentComplete >= 100;
   const canUpdate = isOneTime ? oneTimeStatus === "active" : true;
 
   return (
@@ -250,7 +246,7 @@ export default function TargetsPage() {
       const isOneTimeTarget = updateModalTarget.recurrence === "oneTime";
       
       if (isOneTimeTarget) {
-        const currentProgress = updateModalTarget.manualProgress || updateModalTarget.currentValue || 0;
+        const currentProgress = updateModalTarget.currentValue || 0;
         const newProgress = currentProgress + incrementValue;
         const targetTitle = getTargetDisplayTitle(updateModalTarget, t);
         

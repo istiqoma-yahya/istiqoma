@@ -137,7 +137,7 @@ export const api = {
     update: {
       method: "PATCH" as const,
       path: "/api/targets/:id",
-      input: insertTargetSchema,
+      input: insertTargetSchema.partial(),
       responses: {
         200: z.custom<typeof targets.$inferSelect>(),
         400: errorSchemas.validation,

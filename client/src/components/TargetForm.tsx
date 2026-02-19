@@ -18,7 +18,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTargetSchema, type InsertTarget, type TargetWithProgress } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2, CalendarIcon } from "lucide-react";
+import { Loader2, CalendarIcon, Plus, X, Bell } from "lucide-react";
 import { format, addDays, addWeeks, addMonths } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -64,6 +64,7 @@ export function TargetForm({
       quranUnit: undefined,
       sedekahType: undefined,
       customUnit: undefined,
+      notificationTimes: [],
     },
   });
 
@@ -86,6 +87,7 @@ export function TargetForm({
         quranUnit: (editingTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz" | undefined) || undefined,
         sedekahType: (editingTarget.sedekahType as "uang" | "hitungan" | undefined) || undefined,
         customUnit: (editingTarget.customUnit as "hitungan" | "ayat" | "halaman" | "surat" | "juz" | "rakaat" | "hari" | "uang" | "times" | "days" | undefined) || undefined,
+        notificationTimes: editingTarget.notificationTimes || [],
       });
       setTargetValueInput(String(editingTarget.targetValue));
     }
@@ -773,6 +775,73 @@ export function TargetForm({
           />
         )}
 
+        <FormField
+          control={form.control}
+          name="notificationTimes"
+          render={({ field }) => {
+            const times = field.value || [];
+            return (
+              <FormItem>
+                <div className="flex items-center gap-2">
+                  <Bell className="h-4 w-4 text-muted-foreground" />
+                  <FormLabel>{t("targets.notificationTimes")}</FormLabel>
+                </div>
+                <p className="text-xs text-muted-foreground">{t("targets.notificationTimesDesc")}</p>
+                <div className="space-y-2">
+                  {times.map((time: string, index: number) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <Label className="text-xs text-muted-foreground whitespace-nowrap min-w-[80px]">
+                        {t("targets.reminderTimeLabel", { number: index + 1 })}
+                      </Label>
+                      <Input
+                        type="time"
+                        value={time}
+                        className="glass-input flex-1"
+                        onChange={(e) => {
+                          const newTimes = [...times];
+                          newTimes[index] = e.target.value;
+                          field.onChange(newTimes);
+                        }}
+                        data-testid={`input-reminder-time-${index}`}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const newTimes = times.filter((_: string, i: number) => i !== index);
+                          field.onChange(newTimes);
+                        }}
+                        data-testid={`button-remove-reminder-${index}`}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {times.length < 5 ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        field.onChange([...times, "08:00"]);
+                      }}
+                      className="w-full"
+                      data-testid="button-add-reminder-time"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      {t("targets.addReminderTime")}
+                    </Button>
+                  ) : (
+                    <p className="text-xs text-muted-foreground text-center">{t("targets.maxReminders")}</p>
+                  )}
+                </div>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+
         <div className="flex gap-3 pt-4">
           <Button
             type="button"
@@ -786,7 +855,7 @@ export function TargetForm({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 text-base shadow-lg shadow-emerald-500/20"
+            className="flex-1"
             data-testid="button-submit-target"
           >
             {isSubmitting ? (

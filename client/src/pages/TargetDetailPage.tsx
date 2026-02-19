@@ -32,6 +32,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import {
   Loader2,
   ArrowLeft,
@@ -43,6 +47,9 @@ import {
   ChevronRight,
   BookOpen,
   Trash2,
+  Bell,
+  Plus,
+  X,
 } from "lucide-react";
 import {
   format,
@@ -449,6 +456,111 @@ function TrendChart({
   );
 }
 
+function NotificationTimesCard({ targetId, initialTimes }: { targetId: number; initialTimes: string[] }) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [times, setTimes] = useState<string[]>(initialTimes || []);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  const updateTime = (index: number, value: string) => {
+    const newTimes = [...times];
+    newTimes[index] = value;
+    setTimes(newTimes);
+    setHasChanges(true);
+  };
+
+  const removeTime = (index: number) => {
+    setTimes(times.filter((_, i) => i !== index));
+    setHasChanges(true);
+  };
+
+  const addTime = () => {
+    if (times.length < 5) {
+      setTimes([...times, "08:00"]);
+      setHasChanges(true);
+    }
+  };
+
+  const saveChanges = async () => {
+    setIsSaving(true);
+    const uniqueTimes = [...new Set(times)];
+    try {
+      await apiRequest("PATCH", `/api/targets/${targetId}`, { notificationTimes: uniqueTimes });
+      await queryClient.invalidateQueries({ queryKey: [`/api/targets/${targetId}/detail`] });
+      setHasChanges(false);
+      toast({ title: t("targets.targetUpdated"), description: t("targets.targetUpdatedDesc") });
+    } catch {
+      toast({ title: t("common.error"), variant: "destructive" });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <Card className="p-4" data-testid="card-notification-times">
+      <div className="flex items-center gap-2 mb-2">
+        <Bell className="w-4 h-4 text-muted-foreground" />
+        <h3 className="text-sm font-semibold text-foreground">{t("targets.notificationTimes")}</h3>
+      </div>
+      <p className="text-xs text-muted-foreground mb-3">{t("targets.notificationTimesDesc")}</p>
+      <div className="space-y-2">
+        {times.map((time, index) => (
+          <div key={index} className="flex items-center gap-2">
+            <Label className="text-xs text-muted-foreground whitespace-nowrap min-w-[80px]">
+              {t("targets.reminderTimeLabel", { number: index + 1 })}
+            </Label>
+            <Input
+              type="time"
+              value={time}
+              className="flex-1"
+              onChange={(e) => updateTime(index, e.target.value)}
+              data-testid={`input-detail-reminder-time-${index}`}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => removeTime(index)}
+              data-testid={`button-detail-remove-reminder-${index}`}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+        {times.length < 5 && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addTime}
+            className="w-full"
+            data-testid="button-detail-add-reminder"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            {t("targets.addReminderTime")}
+          </Button>
+        )}
+        {times.length >= 5 && (
+          <p className="text-xs text-muted-foreground text-center">{t("targets.maxReminders")}</p>
+        )}
+        {hasChanges && (
+          <Button
+            onClick={saveChanges}
+            disabled={isSaving}
+            size="sm"
+            className="w-full"
+            data-testid="button-save-reminders"
+          >
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+            {t("common.save")}
+          </Button>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 function DeleteTargetSection({ targetId, targetName }: { targetId: number; targetName: string }) {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
@@ -571,6 +683,8 @@ export default function TargetDetailPage() {
         </header>
 
         <FadhilahCard category={target.category} />
+
+        <NotificationTimesCard targetId={target.id} initialTimes={target.notificationTimes || []} />
 
         <HighlightCards
           currentStreak={currentStreak}

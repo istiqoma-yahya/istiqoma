@@ -76,8 +76,8 @@ Points are calculated automatically by the backend based on category and quantit
 **Points multiplied by quantity:**
 - Sholat Fardhu = 100 × quantity (+50 if jamaah)
 - Sholat Sunnah = 50 × quantity (+50 if jamaah)
-- Puasa Fardhu = 500 × quantity
-- Puasa Sunnah = 250 × quantity
+- Puasa (Fardhu types: ramadhan, qadha, kaffarah, nadzar) = 500 × quantity
+- Puasa (Sunnah types: seninkamis, ayyamulbidh, arafah, asyura, syawal, daud) = 250 × quantity
 - Baca Quran:
   - Ayat = 1 × quantity
   - Halaman = 10 × quantity

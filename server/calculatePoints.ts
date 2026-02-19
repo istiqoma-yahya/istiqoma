@@ -14,8 +14,10 @@ const PROTECTED_CATEGORIES = [
   "dzikir",
   "sholat fardhu",
   "sholat sunnah",
+  "puasa",
   "puasa fardhu",
   "puasa sunnah",
+  "fasting",
   "fasting fardhu",
   "fasting sunnah",
   "baca quran",
@@ -48,11 +50,15 @@ export function calculatePoints(input: CalculatePointsInput): number {
     return basePoints + jamaahBonus;
   }
 
-  if (categoryLower === "puasa fardhu" || categoryLower === "fasting fardhu") {
-    return 500 * quantity;
-  }
-
-  if (categoryLower === "puasa sunnah" || categoryLower === "fasting sunnah") {
+  if (categoryLower === "puasa" || categoryLower === "fasting" || categoryLower === "puasa fardhu" || categoryLower === "fasting fardhu" || categoryLower === "puasa sunnah" || categoryLower === "fasting sunnah") {
+    const FARDHU_FASTING_TYPES = ["ramadhan", "qadha", "kaffarah", "nadzar"];
+    const fastingTypeLower = input.fastingType?.toLowerCase();
+    if (fastingTypeLower && FARDHU_FASTING_TYPES.includes(fastingTypeLower)) {
+      return 500 * quantity;
+    }
+    if (categoryLower === "puasa fardhu" || categoryLower === "fasting fardhu") {
+      return 500 * quantity;
+    }
     return 250 * quantity;
   }
 

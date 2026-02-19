@@ -96,9 +96,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const isSholatFardhuCategory = watchedCategory?.toLowerCase() === "sholat fardhu";
   const isSholatSunnahCategory = watchedCategory?.toLowerCase() === "sholat sunnah";
   const isSholatCategory = isSholatFardhuCategory || isSholatSunnahCategory;
-  const isFastingFardhuCategory = watchedCategory?.toLowerCase() === "fasting fardhu" || watchedCategory?.toLowerCase() === "puasa fardhu";
-  const isFastingSunnahCategory = watchedCategory?.toLowerCase() === "fasting sunnah" || watchedCategory?.toLowerCase() === "puasa sunnah";
-  const isFastingCategory = isFastingFardhuCategory || isFastingSunnahCategory;
+  const isFastingCategory = watchedCategory?.toLowerCase() === "puasa" || watchedCategory?.toLowerCase() === "fasting" || watchedCategory?.toLowerCase() === "fasting fardhu" || watchedCategory?.toLowerCase() === "puasa fardhu" || watchedCategory?.toLowerCase() === "fasting sunnah" || watchedCategory?.toLowerCase() === "puasa sunnah";
   const isQuranCategory = watchedCategory?.toLowerCase() === "baca quran" || watchedCategory?.toLowerCase() === "quran";
   const isSedekahCategory = watchedCategory?.toLowerCase() === "shodaqoh" || watchedCategory?.toLowerCase() === "sedekah" || watchedCategory?.toLowerCase() === "sodaqoh";
   
@@ -158,14 +156,11 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
     { id: "tasbih", labelKey: "sholat.types.tasbih" },
   ];
 
-  const FASTING_FARDHU_TYPES = [
+  const FASTING_TYPES = [
     { id: "ramadhan", labelKey: "fasting.types.ramadhan" },
     { id: "qadha", labelKey: "fasting.types.qadha" },
     { id: "kaffarah", labelKey: "fasting.types.kaffarah" },
     { id: "nadzar", labelKey: "fasting.types.nadzar" },
-  ];
-
-  const FASTING_SUNNAH_TYPES = [
     { id: "seninkamis", labelKey: "fasting.types.seninkamis" },
     { id: "ayyamulbidh", labelKey: "fasting.types.ayyamulbidh" },
     { id: "arafah", labelKey: "fasting.types.arafah" },
@@ -188,7 +183,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   ];
 
   const currentSholatTypes = isSholatFardhuCategory ? SHOLAT_FARDHU_TYPES : SHOLAT_SUNNAH_TYPES;
-  const currentFastingTypes = isFastingFardhuCategory ? FASTING_FARDHU_TYPES : FASTING_SUNNAH_TYPES;
+  const currentFastingTypes = FASTING_TYPES;
   
   useEffect(() => {
     if (!isDzikirCategory) {

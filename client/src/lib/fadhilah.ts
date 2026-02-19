@@ -49,6 +49,26 @@ const fadhilahMap: Record<string, FadhilahData[]> = {
       source: "HR. Muslim no. 804",
     },
   ],
+  puasa: [
+    {
+      translation: "Setiap amalan anak Adam dilipat gandakan, satu kebaikan bernilai sepuluh hingga tujuh ratus kali lipat. Allah berfirman: 'Kecuali puasa, karena puasa itu untuk-Ku, dan Aku sendiri yang akan membalasnya.'",
+      source: "HR. Bukhari no. 1904 & Muslim no. 1151",
+    },
+    {
+      translation: "Barang siapa berpuasa satu hari di jalan Allah, niscaya Allah menjauhkan wajahnya dari api neraka sejauh perjalanan tujuh puluh tahun.",
+      source: "HR. Bukhari no. 2840 & Muslim no. 1153",
+    },
+  ],
+  fasting: [
+    {
+      translation: "Setiap amalan anak Adam dilipat gandakan, satu kebaikan bernilai sepuluh hingga tujuh ratus kali lipat. Allah berfirman: 'Kecuali puasa, karena puasa itu untuk-Ku, dan Aku sendiri yang akan membalasnya.'",
+      source: "HR. Bukhari no. 1904 & Muslim no. 1151",
+    },
+    {
+      translation: "Barang siapa berpuasa satu hari di jalan Allah, niscaya Allah menjauhkan wajahnya dari api neraka sejauh perjalanan tujuh puluh tahun.",
+      source: "HR. Bukhari no. 2840 & Muslim no. 1153",
+    },
+  ],
   "puasa fardhu": [
     {
       translation: "Setiap amalan anak Adam dilipat gandakan, satu kebaikan bernilai sepuluh hingga tujuh ratus kali lipat. Allah berfirman: 'Kecuali puasa, karena puasa itu untuk-Ku, dan Aku sendiri yang akan membalasnya.'",

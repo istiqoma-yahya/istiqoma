@@ -13,9 +13,9 @@ const DEFAULT_CATEGORIES = [
   "Dzikir",
   "Sholat Fardhu",
   "Sholat Sunnah",
-  "Fasting Fardhu",
-  "Fasting Sunnah",
+  "Puasa",
   "Baca Quran",
+  "Shodaqoh",
 ];
 
 const getOidcConfig = memoize(
@@ -84,6 +84,22 @@ async function upsertUser(claims: any) {
         const existingCat = existingCategories.find(c => c.name === categoryName);
         if (existingCat && !existingCat.isProtected) {
           await storage.markCategoryProtected(existingCat.id, userId);
+        }
+      }
+    }
+
+    // Migrate old fasting categories to "Puasa"
+    const OLD_FASTING_NAMES = ["Fasting Fardhu", "Fasting Sunnah", "Puasa Fardhu", "Puasa Sunnah"];
+    const refreshedCategories = await storage.getCategories(userId);
+    const hasPuasa = refreshedCategories.some(c => c.name === "Puasa");
+    let renamedOne = false;
+    for (const cat of refreshedCategories) {
+      if (OLD_FASTING_NAMES.includes(cat.name)) {
+        if (!hasPuasa && !renamedOne) {
+          await storage.updateCategory(cat.id, userId, "Puasa");
+          renamedOne = true;
+        } else {
+          await storage.deleteCategory(cat.id, userId);
         }
       }
     }

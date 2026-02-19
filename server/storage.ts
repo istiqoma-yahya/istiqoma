@@ -8,6 +8,14 @@ import { toZonedTime, fromZonedTime } from "date-fns-tz";
 // Default timezone for users (Indonesia)
 const DEFAULT_TIMEZONE = "Asia/Jakarta";
 
+const FASTING_CATEGORY_VARIANTS = ["puasa", "fasting", "puasa fardhu", "puasa sunnah", "fasting fardhu", "fasting sunnah"];
+function isFastingCategory(cat: string): boolean {
+  return FASTING_CATEGORY_VARIANTS.includes(cat.toLowerCase());
+}
+function matchesFastingCategories(cat1: string, cat2: string): boolean {
+  return cat1 === cat2 || (isFastingCategory(cat1) && isFastingCategory(cat2));
+}
+
 export type TargetHistoryWithStreak = {
   history: TargetHistory[];
   currentStreak: number;
@@ -99,8 +107,7 @@ export class DatabaseStorage implements IStorage {
       const defaultProtected = [
         "Sholat Fardhu", 
         "Sholat Sunnah", 
-        "Puasa Fardhu", 
-        "Puasa Sunnah", 
+        "Puasa", 
         "Dzikir", 
         "Baca Quran", 
         "Shodaqoh"
@@ -187,8 +194,8 @@ export class DatabaseStorage implements IStorage {
           const beforeDue = !target.dueDate || deedDate <= new Date(target.dueDate);
           const inDateRange = afterStart && beforeDue;
           
-          // Match category
-          const matchesCategory = deed.category === target.category;
+          // Match category (with backward compat for merged fasting categories)
+          const matchesCategory = matchesFastingCategories(deed.category, target.category) || deed.category === target.category;
           
           // Match subcategories (metadata)
           const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;
@@ -249,7 +256,7 @@ export class DatabaseStorage implements IStorage {
       const deedsInPeriod = userDeeds.filter((deed) => {
         const deedDate = new Date(deed.createdAt || now);
         const inPeriod = deedDate >= periodStart && deedDate <= periodEnd;
-        const matchesCategory = deed.category === target.category;
+        const matchesCategory = matchesFastingCategories(deed.category, target.category) || deed.category === target.category;
         
         // Match subcategories (metadata)
         const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;
@@ -427,7 +434,7 @@ export class DatabaseStorage implements IStorage {
       const deedsInPeriod = userDeeds.filter((deed) => {
         const deedDate = new Date(deed.createdAt || now);
         const inPeriod = deedDate >= periodStart && deedDate <= periodEnd;
-        const matchesCategory = deed.category === t.category;
+        const matchesCategory = matchesFastingCategories(deed.category, t.category) || deed.category === t.category;
         
         // For dzikir targets with specific type, also match dzikirType
         const matchesDzikirType = !t.dzikirType || deed.dzikirType === t.dzikirType;

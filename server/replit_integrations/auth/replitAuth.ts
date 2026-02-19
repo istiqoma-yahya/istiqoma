@@ -176,14 +176,29 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
+    if (req.query.error) {
+      console.error("OIDC error in callback URL:", {
+        error: req.query.error,
+        error_description: req.query.error_description,
+        hostname: req.hostname,
+      });
+      return res.redirect("/");
+    }
+
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
+      failureRedirect: "/",
     })(req, res, (err: any) => {
       if (err) {
         console.error("Auth callback error:", err.message || err);
-        return res.redirect("/api/login");
+        console.error("Auth error details:", JSON.stringify({
+          error: err.error,
+          error_description: err.error_description,
+          code: err.code,
+          status: err.status,
+        }, null, 2));
+        return res.redirect("/");
       }
       next();
     });

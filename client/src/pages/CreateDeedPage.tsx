@@ -135,6 +135,7 @@ export default function CreateDeedPage() {
     { id: "ashar", labelKey: "sholat.types.ashar" },
     { id: "maghrib", labelKey: "sholat.types.maghrib" },
     { id: "isya", labelKey: "sholat.types.isya" },
+    { id: "jumat", labelKey: "sholat.types.jumat" },
   ];
 
   const SHOLAT_SUNNAH_TYPES = [

@@ -1,4 +1,5 @@
 import webpush from 'web-push';
+import { toZonedTime } from 'date-fns-tz';
 import { storage } from './storage';
 import type { PushSubscription } from '@shared/schema';
 
@@ -52,18 +53,22 @@ export async function sendNotificationToUser(userId: string, payload: Notificati
 
 export async function sendDailyReminders(): Promise<void> {
   const subscriptions = await storage.getAllPushSubscriptions();
-  const now = new Date();
-  const currentHour = now.getHours().toString().padStart(2, '0');
-  const currentMinute = now.getMinutes().toString().padStart(2, '0');
-  const currentTime = `${currentHour}:${currentMinute}`;
+  const nowUtc = new Date();
   
   for (const subscription of subscriptions) {
     if (!subscription.dailyReminder) continue;
     
-    const [reminderHour, reminderMinute] = subscription.reminderTime.split(':');
-    const reminderTime = `${reminderHour}:${reminderMinute}`;
+    const userTimezone = subscription.timezone || "Asia/Jakarta";
+    const nowInUserTz = toZonedTime(nowUtc, userTimezone);
+    const currentHour = nowInUserTz.getHours();
+    const currentMinute = nowInUserTz.getMinutes();
     
-    if (Math.abs(parseInt(currentHour) * 60 + parseInt(currentMinute) - parseInt(reminderHour) * 60 - parseInt(reminderMinute)) <= 1) {
+    const [reminderHour, reminderMinute] = subscription.reminderTime.split(':').map(Number);
+    
+    const currentTotalMinutes = currentHour * 60 + currentMinute;
+    const reminderTotalMinutes = reminderHour * 60 + reminderMinute;
+    
+    if (Math.abs(currentTotalMinutes - reminderTotalMinutes) <= 1) {
       await sendToSubscription(subscription, {
         title: 'Istiqoma Daily Reminder',
         body: 'Time to log your deeds for today!',

@@ -84,6 +84,7 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   auth: text("auth").notNull(),
   dailyReminder: boolean("daily_reminder").notNull().default(true),
   reminderTime: text("reminder_time").notNull().default("08:00"),
+  timezone: text("timezone").notNull().default("Asia/Jakarta"),
   targetAlerts: boolean("target_alerts").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -199,6 +200,7 @@ export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions
   auth: true,
   dailyReminder: true,
   reminderTime: true,
+  timezone: true,
   targetAlerts: true,
 }).extend({
   endpoint: z.string().min(1),
@@ -206,6 +208,7 @@ export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions
   auth: z.string().min(1),
   dailyReminder: z.boolean().optional().default(true),
   reminderTime: z.string().optional().default("08:00"),
+  timezone: z.string().optional().default("Asia/Jakarta"),
   targetAlerts: z.boolean().optional().default(true),
 });
 

@@ -46,7 +46,7 @@ export function NotificationSettings() {
   }, []);
 
   const subscribeMutation = useMutation({
-    mutationFn: async (subscriptionData: { endpoint: string; p256dh: string; auth: string }) => {
+    mutationFn: async (subscriptionData: { endpoint: string; p256dh: string; auth: string; timezone?: string }) => {
       const res = await apiRequest("POST", "/api/push/subscribe", subscriptionData);
       return res.json();
     },
@@ -68,8 +68,9 @@ export function NotificationSettings() {
   });
 
   const updateSettingsMutation = useMutation({
-    mutationFn: async (settings: Partial<{ dailyReminder: boolean; reminderTime: string; targetAlerts: boolean }>) => {
-      const res = await apiRequest("PATCH", "/api/push/settings", settings);
+    mutationFn: async (settings: Partial<{ dailyReminder: boolean; reminderTime: string; targetAlerts: boolean; timezone: string }>) => {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Jakarta";
+      const res = await apiRequest("PATCH", "/api/push/settings", { ...settings, timezone });
       return res.json();
     },
     onSuccess: () => {
@@ -111,7 +112,8 @@ export function NotificationSettings() {
       const subscription = await subscribeToPush();
       if (subscription) {
         const data = getSubscriptionData(subscription);
-        await subscribeMutation.mutateAsync(data);
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Jakarta";
+        await subscribeMutation.mutateAsync({ ...data, timezone });
       }
     } catch (error) {
       console.error("Failed to enable notifications:", error);

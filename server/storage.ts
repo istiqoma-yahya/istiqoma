@@ -506,6 +506,7 @@ export class DatabaseStorage implements IStorage {
           auth: subscription.auth,
           dailyReminder: subscription.dailyReminder ?? existing.dailyReminder,
           reminderTime: subscription.reminderTime ?? existing.reminderTime,
+          timezone: subscription.timezone ?? existing.timezone,
           targetAlerts: subscription.targetAlerts ?? existing.targetAlerts,
         })
         .where(eq(pushSubscriptions.userId, userId))

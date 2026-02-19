@@ -397,10 +397,11 @@ export async function registerRoutes(
   app.patch("/api/push/settings", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { dailyReminder, reminderTime, targetAlerts } = req.body;
+      const { dailyReminder, reminderTime, targetAlerts, timezone } = req.body;
       const settings: any = {};
       if (typeof dailyReminder === 'boolean') settings.dailyReminder = dailyReminder;
       if (typeof reminderTime === 'string') settings.reminderTime = reminderTime;
+      if (typeof timezone === 'string') settings.timezone = timezone;
       if (typeof targetAlerts === 'boolean') settings.targetAlerts = targetAlerts;
       
       const subscription = await storage.updatePushSubscriptionSettings(userId, settings);

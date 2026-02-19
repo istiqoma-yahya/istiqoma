@@ -115,7 +115,7 @@ export default function Dashboard() {
           </div>
           <button 
             onClick={() => navigate("/create-deed")}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary flex items-center justify-center gap-2"
             data-testid="button-create-deed"
           >
             <Plus className="w-5 h-5" />
@@ -217,7 +217,7 @@ export default function Dashboard() {
               </p>
               <button 
                 onClick={() => navigate("/create-deed")}
-                className="btn-primary flex items-center gap-2"
+                className="btn-primary flex items-center justify-center gap-2"
                 data-testid="button-create-deed-empty"
               >
                 <Plus className="w-5 h-5" />

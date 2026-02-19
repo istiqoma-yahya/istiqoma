@@ -65,7 +65,6 @@ function updateUserSession(
   user.claims = tokens.claims();
   user.access_token = tokens.access_token;
   user.refresh_token = tokens.refresh_token;
-  user.id_token = tokens.id_token;
   user.expires_at = user.claims?.exp;
 }
 
@@ -171,56 +170,27 @@ export async function setupAuth(app: Express) {
   app.get("/api/login", (req, res, next) => {
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
-      prompt: "select_account login consent",
+      prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    if (req.query.error) {
-      console.error("OIDC error in callback URL:", {
-        error: req.query.error,
-        error_description: req.query.error_description,
-        hostname: req.hostname,
-      });
-      return res.redirect("/");
-    }
-
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
-      failureRedirect: "/",
-    })(req, res, (err: any) => {
-      if (err) {
-        console.error("Auth callback error:", err.message || err);
-        console.error("Auth error details:", JSON.stringify({
-          error: err.error,
-          error_description: err.error_description,
-          code: err.code,
-          status: err.status,
-        }, null, 2));
-        return res.redirect("/");
-      }
-      next();
-    });
+      failureRedirect: "/api/login",
+    })(req, res, next);
   });
 
   app.get("/api/logout", (req, res) => {
-    const user = req.user as any;
-    const endSessionParams: Record<string, string> = {
-      client_id: process.env.REPL_ID!,
-      post_logout_redirect_uri: `https://${req.hostname}`,
-    };
-    if (user?.id_token) {
-      endSessionParams.id_token_hint = user.id_token;
-    }
-    const redirectUrl = client.buildEndSessionUrl(config, endSessionParams).href;
-
     req.logout(() => {
-      req.session.destroy(() => {
-        res.clearCookie("connect.sid");
-        res.redirect(redirectUrl);
-      });
+      res.redirect(
+        client.buildEndSessionUrl(config, {
+          client_id: process.env.REPL_ID!,
+          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+        }).href
+      );
     });
   });
 }

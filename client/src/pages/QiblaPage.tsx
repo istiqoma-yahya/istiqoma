@@ -393,27 +393,6 @@ export default function QiblaPage() {
                 </div>
               </Card>
 
-              <div className="grid grid-cols-2 gap-4">
-                <Card className="p-6">
-                  <div className="text-muted-foreground text-sm mb-2">{t("qibla.distanceToKaaba")}</div>
-                  <div className="text-2xl font-bold text-foreground">
-                    {distanceToKaaba !== null
-                      ? distanceToKaaba > 1000
-                        ? `${(distanceToKaaba / 1000).toFixed(0)}k km`
-                        : `${Math.round(distanceToKaaba)} km`
-                      : "--"}
-                  </div>
-                </Card>
-                <Card className="p-6">
-                  <div className="text-muted-foreground text-sm mb-2">{t("qibla.yourLocation")}</div>
-                  <div className="text-sm font-medium text-foreground">
-                    {location.latitude !== null && location.longitude !== null
-                      ? `${location.latitude.toFixed(4)}°, ${location.longitude.toFixed(4)}°`
-                      : "--"}
-                  </div>
-                </Card>
-              </div>
-
               <Card className="p-6">
                 <div className="flex items-center justify-between gap-2 mb-4">
                   <h3 className="font-medium flex items-center gap-2">
@@ -467,6 +446,27 @@ export default function QiblaPage() {
                   })}
                 </div>
               </Card>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="p-6">
+                  <div className="text-muted-foreground text-sm mb-2">{t("qibla.distanceToKaaba")}</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {distanceToKaaba !== null
+                      ? distanceToKaaba > 1000
+                        ? `${(distanceToKaaba / 1000).toFixed(0)}k km`
+                        : `${Math.round(distanceToKaaba)} km`
+                      : "--"}
+                  </div>
+                </Card>
+                <Card className="p-6">
+                  <div className="text-muted-foreground text-sm mb-2">{t("qibla.yourLocation")}</div>
+                  <div className="text-sm font-medium text-foreground">
+                    {location.latitude !== null && location.longitude !== null
+                      ? `${location.latitude.toFixed(4)}°, ${location.longitude.toFixed(4)}°`
+                      : "--"}
+                  </div>
+                </Card>
+              </div>
 
               <Card className="p-6">
                 <h3 className="font-medium mb-2">{t("qibla.howToUse")}</h3>

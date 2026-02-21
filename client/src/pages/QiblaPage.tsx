@@ -16,14 +16,37 @@ interface LocationState {
   requested: boolean;
 }
 
+const LOCATION_STORAGE_KEY = "qibla_last_location";
+
+function getSavedLocation(): { latitude: number; longitude: number } | null {
+  try {
+    const saved = localStorage.getItem(LOCATION_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (typeof parsed.latitude === "number" && typeof parsed.longitude === "number") {
+        return parsed;
+      }
+    }
+  } catch {}
+  return null;
+}
+
+function saveLocation(latitude: number, longitude: number) {
+  try {
+    localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify({ latitude, longitude }));
+  } catch {}
+}
+
 export default function QiblaPage() {
   const { t } = useTranslation();
+
+  const saved = getSavedLocation();
   const [location, setLocation] = useState<LocationState>({
-    latitude: null,
-    longitude: null,
+    latitude: saved?.latitude ?? null,
+    longitude: saved?.longitude ?? null,
     error: null,
     loading: false,
-    requested: false,
+    requested: saved !== null,
   });
   const [compassHeading, setCompassHeading] = useState<number | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
@@ -36,6 +59,26 @@ export default function QiblaPage() {
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        saveLocation(lat, lng);
+        setLocation({
+          latitude: lat,
+          longitude: lng,
+          error: null,
+          loading: false,
+          requested: true,
+        });
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+    );
   }, []);
 
   const dateString = currentTime.toDateString();
@@ -110,9 +153,12 @@ export default function QiblaPage() {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        saveLocation(lat, lng);
         setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude: lat,
+          longitude: lng,
           error: null,
           loading: false,
           requested: true,
@@ -128,13 +174,13 @@ export default function QiblaPage() {
         } else if (error.code === error.TIMEOUT) {
           errorMessage = t("qibla.errors.timeout");
         }
-        setLocation({
-          latitude: null,
-          longitude: null,
-          error: errorMessage,
+        setLocation(prev => ({
+          latitude: prev.latitude,
+          longitude: prev.longitude,
+          error: prev.latitude !== null ? null : errorMessage,
           loading: false,
           requested: true,
-        });
+        }));
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );

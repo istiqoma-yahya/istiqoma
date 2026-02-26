@@ -185,7 +185,7 @@ export class DatabaseStorage implements IStorage {
     return userTargets.map((target) => {
       const isOneTime = target.recurrence === "oneTime";
       
-      // For one-time targets, count matching deeds + manual progress
+      // For one-time targets, count matching deeds only
       if (isOneTime) {
         // Filter deeds by date range (startDate to dueDate) and matching category/subcategory
         const isLimitTarget = target.targetType === "limit";
@@ -214,7 +214,7 @@ export class DatabaseStorage implements IStorage {
         });
         
         const deedProgress = matchingDeeds.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
-        const currentValue = (target.manualProgress || 0) + deedProgress;
+        const currentValue = deedProgress;
         
         const percentComplete = target.targetValue > 0 
           ? Math.min(100, Math.round((currentValue / target.targetValue) * 100))

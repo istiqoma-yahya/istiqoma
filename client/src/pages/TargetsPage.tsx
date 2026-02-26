@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
-import { useTargetsWithProgress, useDeleteTarget, useUpdateTargetProgress, useCompleteTarget, useUpdateTarget } from "@/hooks/use-targets";
+import { useTargetsWithProgress, useDeleteTarget, useCompleteTarget, useUpdateTarget } from "@/hooks/use-targets";
 import { useCreateDeed } from "@/hooks/use-deeds";
 import { useAuth } from "@/hooks/use-auth";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -167,7 +167,6 @@ export default function TargetsPage() {
   const { data: targets, isLoading } = useTargetsWithProgress();
   const { user } = useAuth();
   const deleteTarget = useDeleteTarget();
-  const updateProgress = useUpdateTargetProgress();
   const completeTarget = useCompleteTarget();
   const createDeed = useCreateDeed();
   const updateTarget = useUpdateTarget();

@@ -49,7 +49,7 @@ Database tables:
 - `users` - User accounts (managed by Replit Auth)
 - `sessions` - Session storage for authentication
 - `deeds` - User deed entries with description, category, points, and customUnit for custom categories (deedType defaults to "good")
-- `targets` - User target/goal entries with customUnit support for custom categories
+- `targets` - User target/goal entries with customUnit support for custom categories. Note: `manualProgress` field exists but is no longer used; one-time target progress is calculated purely from matching deeds.
 - `categories` - Custom user-defined categories
 
 ### Custom Unit System

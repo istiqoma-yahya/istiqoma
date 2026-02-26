@@ -203,7 +203,27 @@ export default function QiblaPage() {
   useEffect(() => {
     if (typeof DeviceOrientationEvent !== "undefined") {
       if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
-        setNeedsManualCompassEnable(true);
+        const previouslyGranted = localStorage.getItem("compass-permission-granted") === "true";
+        if (previouslyGranted) {
+          let receivedEvent = false;
+          const probeHandler = (e: DeviceOrientationEvent) => {
+            if (!receivedEvent) {
+              receivedEvent = true;
+              setCompassEnabled(true);
+              setNeedsManualCompassEnable(false);
+            }
+            handleOrientation(e);
+          };
+          window.addEventListener("deviceorientation", probeHandler as any, true);
+          setTimeout(() => {
+            if (!receivedEvent) {
+              window.removeEventListener("deviceorientation", probeHandler as any, true);
+              setNeedsManualCompassEnable(true);
+            }
+          }, 1500);
+        } else {
+          setNeedsManualCompassEnable(true);
+        }
       } else {
         window.addEventListener("deviceorientationabsolute", handleOrientation as any, true);
         window.addEventListener("deviceorientation", handleOrientation, true);
@@ -222,6 +242,7 @@ export default function QiblaPage() {
       try {
         const permissionState = await (DeviceOrientationEvent as any).requestPermission();
         if (permissionState === "granted") {
+          localStorage.setItem("compass-permission-granted", "true");
           window.addEventListener("deviceorientation", handleOrientation, true);
           setCompassEnabled(true);
           setNeedsManualCompassEnable(false);

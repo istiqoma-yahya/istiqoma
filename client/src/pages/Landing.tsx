@@ -146,7 +146,7 @@ export default function Landing() {
                 >
                   <button
                     onClick={install}
-                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="flex items-center gap-2 text-sm text-white border border-white rounded-md px-4 py-2 hover:bg-white/10 transition-colors"
                     data-testid="button-download-app-hero"
                   >
                     <Download className="w-4 h-4" />
@@ -458,7 +458,7 @@ export default function Landing() {
             >
               <button
                 onClick={install}
-                className="btn-primary w-full sm:w-auto text-base px-8 py-3.5 flex items-center justify-center gap-2 mx-auto"
+                className="w-full sm:w-auto text-base px-8 py-3.5 flex items-center justify-center gap-2 mx-auto text-white border border-white rounded-md hover:bg-white/10 transition-colors"
                 data-testid="button-download-app-bottom"
               >
                 <Download className="w-5 h-5" />

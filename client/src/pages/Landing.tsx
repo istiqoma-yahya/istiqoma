@@ -458,7 +458,7 @@ export default function Landing() {
             >
               <button
                 onClick={install}
-                className="w-full sm:w-auto text-base px-8 py-3.5 flex items-center justify-center gap-2 mx-auto text-white border border-white rounded-md hover:bg-white/10 transition-colors"
+                className="btn-primary w-full sm:w-auto text-base px-8 py-3.5 flex items-center justify-center gap-2 mx-auto"
                 data-testid="button-download-app-bottom"
               >
                 <Download className="w-5 h-5" />

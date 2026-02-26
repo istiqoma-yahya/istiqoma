@@ -250,62 +250,54 @@ export default function TargetsPage() {
         const newProgress = currentProgress + incrementValue;
         const targetTitle = getTargetDisplayTitle(updateModalTarget, t);
         
-        // First update progress, then create deed if successful (to avoid orphan deeds on failure)
-        updateProgress.mutate({ id: targetId, progress: newProgress }, {
-          onSuccess: async () => {
-            // Progress updated successfully, now create the deed
-            const deedData: Parameters<typeof createDeed.mutate>[0] = {
-              description: t("targets.deedCreatedFromTarget", { target: targetTitle }),
-              category: updateModalTarget.category,
-              points: incrementValue,
-              createdAt: new Date(),
-            };
+        const deedData: Parameters<typeof createDeed.mutate>[0] = {
+          description: t("targets.deedCreatedFromTarget", { target: targetTitle }),
+          category: updateModalTarget.category,
+          points: incrementValue,
+          quantity: incrementValue,
+          createdAt: new Date(),
+        };
+        
+        if (updateModalTarget.dzikirType) deedData.dzikirType = updateModalTarget.dzikirType;
+        if (updateModalTarget.sholatType) deedData.sholatType = updateModalTarget.sholatType;
+        if (updateModalTarget.fastingType) deedData.fastingType = updateModalTarget.fastingType;
+        if (updateModalTarget.isJamaah) deedData.isJamaah = updateModalTarget.isJamaah;
+        if (updateModalTarget.quranUnit) deedData.quranUnit = updateModalTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz";
+        if (updateModalTarget.sedekahType) deedData.sedekahType = updateModalTarget.sedekahType as "uang" | "hitungan";
+        
+        createDeed.mutate(deedData, {
+          onSuccess: async (createdDeed) => {
+            await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+            await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
             
-            if (updateModalTarget.dzikirType) deedData.dzikirType = updateModalTarget.dzikirType;
-            if (updateModalTarget.sholatType) deedData.sholatType = updateModalTarget.sholatType;
-            if (updateModalTarget.fastingType) deedData.fastingType = updateModalTarget.fastingType;
-            if (updateModalTarget.isJamaah) deedData.isJamaah = updateModalTarget.isJamaah;
-            if (updateModalTarget.quranUnit) deedData.quranUnit = updateModalTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz";
-            if (updateModalTarget.sedekahType) deedData.sedekahType = updateModalTarget.sedekahType as "uang" | "hitungan";
+            const earnedPoints = createdDeed?.points ?? deedData.points;
             
-            createDeed.mutate(deedData, {
-              onSuccess: async (createdDeed) => {
-                await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
-                await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
-                
-                const earnedPoints = createdDeed?.points ?? deedData.points;
-                
-                if (newProgress >= updateModalTarget.targetValue) {
-                  completeTarget.mutate(targetId, {
-                    onSuccess: async () => {
-                      await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
-                      await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
-                      setUpdateModalTarget(null);
-                      setIsSavingProgress(false);
-                      setRewardPoints(earnedPoints);
-                    },
-                    onError: async () => {
-                      await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
-                      await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
-                      setUpdateModalTarget(null);
-                      setIsSavingProgress(false);
-                      setRewardPoints(earnedPoints);
-                    }
-                  });
-                } else {
+            if (newProgress >= updateModalTarget.targetValue) {
+              completeTarget.mutate(targetId, {
+                onSuccess: async () => {
+                  await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+                  await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
+                  setUpdateModalTarget(null);
+                  setIsSavingProgress(false);
+                  setRewardPoints(earnedPoints);
+                },
+                onError: async () => {
+                  await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+                  await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
                   setUpdateModalTarget(null);
                   setIsSavingProgress(false);
                   setRewardPoints(earnedPoints);
                 }
-              },
-              onError: async () => {
-                await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
-                setUpdateModalTarget(null);
-                setIsSavingProgress(false);
-              }
-            });
+              });
+            } else {
+              setUpdateModalTarget(null);
+              setIsSavingProgress(false);
+              setRewardPoints(earnedPoints);
+            }
           },
-          onError: () => {
+          onError: async () => {
+            await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+            setUpdateModalTarget(null);
             setIsSavingProgress(false);
           }
         });
@@ -316,6 +308,7 @@ export default function TargetsPage() {
           description: t("targets.deedCreatedFromTarget", { target: targetTitle }),
           category: updateModalTarget.category,
           points: incrementValue,
+          quantity: incrementValue,
           createdAt: new Date(),
         };
         

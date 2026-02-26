@@ -214,7 +214,7 @@ export class DatabaseStorage implements IStorage {
         });
         
         const deedProgress = matchingDeeds.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
-        const currentValue = target.manualProgress != null ? (target.manualProgress || 0) : deedProgress;
+        const currentValue = (target.manualProgress || 0) + deedProgress;
         
         const percentComplete = target.targetValue > 0 
           ? Math.min(100, Math.round((currentValue / target.targetValue) * 100))

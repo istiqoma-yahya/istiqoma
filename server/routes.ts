@@ -5,7 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
-import { insertPushSubscriptionSchema, deeds } from "@shared/schema";
+import { deeds } from "@shared/schema";
 import { calculatePoints } from "./calculatePoints";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
 
@@ -270,7 +270,7 @@ export async function registerRoutes(
     res.json(result);
   });
 
-  app.get("/api/targets/:id/detail", isAuthenticated, async (req: any, res) => {
+  app.get(api.targets.detail.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -363,8 +363,7 @@ export async function registerRoutes(
     res.json(target);
   });
 
-  // Push Notification Routes
-  app.get("/api/push/status", isAuthenticated, async (req: any, res) => {
+  app.get(api.push.status.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
     const subscription = await storage.getPushSubscription(userId);
     res.json({
@@ -378,10 +377,10 @@ export async function registerRoutes(
     });
   });
 
-  app.post("/api/push/subscribe", isAuthenticated, async (req: any, res) => {
+  app.post(api.push.subscribe.path, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const input = insertPushSubscriptionSchema.parse(req.body);
+      const input = api.push.subscribe.input.parse(req.body);
       const subscription = await storage.savePushSubscription(userId, input);
       res.status(201).json({ success: true, subscription });
     } catch (err) {
@@ -395,15 +394,10 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/push/settings", isAuthenticated, async (req: any, res) => {
+  app.patch(api.push.updateSettings.path, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { dailyReminder, reminderTime, targetAlerts, timezone } = req.body;
-      const settings: any = {};
-      if (typeof dailyReminder === 'boolean') settings.dailyReminder = dailyReminder;
-      if (typeof reminderTime === 'string') settings.reminderTime = reminderTime;
-      if (typeof timezone === 'string') settings.timezone = timezone;
-      if (typeof targetAlerts === 'boolean') settings.targetAlerts = targetAlerts;
+      const settings = api.push.updateSettings.input.parse(req.body);
       
       const subscription = await storage.updatePushSubscriptionSettings(userId, settings);
       if (!subscription) {
@@ -411,17 +405,23 @@ export async function registerRoutes(
       }
       res.json({ success: true, subscription });
     } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
       throw err;
     }
   });
 
-  app.delete("/api/push/unsubscribe", isAuthenticated, async (req: any, res) => {
+  app.delete(api.push.unsubscribe.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
     await storage.deletePushSubscription(userId);
     res.status(204).send();
   });
 
-  app.post("/api/push/test", isAuthenticated, async (req: any, res) => {
+  app.post(api.push.test.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
     const success = await sendNotificationToUser(userId, {
       title: "Test Notification",
@@ -431,8 +431,7 @@ export async function registerRoutes(
     res.json({ success });
   });
 
-  // Streak Route - Protected
-  app.get("/api/streak", isAuthenticated, async (req: any, res) => {
+  app.get(api.streak.get.path, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const now = new Date();

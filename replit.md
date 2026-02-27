@@ -35,9 +35,16 @@ The frontend follows a component-based architecture with:
 
 The server handles:
 - Authentication via Replit Auth integration
-- CRUD operations for deeds and categories
-- Streak calculation (GET /api/streak) - consecutive days with deeds + weekly active days
+- CRUD operations for deeds, categories, and targets
+- Streak calculation - consecutive days with deeds + weekly active days
+- Push notification subscription and management
 - Static file serving in production
+
+### API Contract & Mobile Readiness
+- **Typed API Contract**: `shared/routes.ts` defines every endpoint with HTTP method, path, Zod input/output schemas
+- **API Documentation**: `API_REFERENCE.md` provides complete endpoint reference with examples for mobile/external clients
+- All route handlers in `server/routes.ts` reference `api.*` from `shared/routes.ts` (single source of truth)
+- The `shared/` directory (`schema.ts`, `routes.ts`, `models/auth.ts`) can be copied to a mobile project for type-safe API calls
 
 ### Data Storage
 - **Database**: PostgreSQL

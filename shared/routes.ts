@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, insertTargetSchema, deeds, categories, targets, targetHistory } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertPushSubscriptionSchema, deeds, categories, targets, targetHistory, pushSubscriptions } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -13,6 +13,9 @@ export const errorSchemas = {
     message: z.string(),
   }),
   unauthorized: z.object({
+    message: z.string(),
+  }),
+  forbidden: z.object({
     message: z.string(),
   }),
 };
@@ -184,6 +187,119 @@ export const api = {
         200: z.custom<typeof targets.$inferSelect>(),
         401: errorSchemas.unauthorized,
         404: errorSchemas.notFound,
+      },
+    },
+    detail: {
+      method: "GET" as const,
+      path: "/api/targets/:id/detail",
+      responses: {
+        200: z.object({
+          target: z.any(),
+          currentStreak: z.number(),
+          longestStreak: z.number(),
+          totalAccumulated: z.number(),
+          totalQuantity: z.number(),
+          totalPoints: z.number(),
+          averagePercentage: z.number(),
+          history: z.array(z.custom<typeof targetHistory.$inferSelect>()),
+        }),
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
+  },
+  streak: {
+    get: {
+      method: "GET" as const,
+      path: "/api/streak",
+      responses: {
+        200: z.object({
+          streakCount: z.number(),
+          weekDays: z.array(z.boolean()),
+          hasActivityToday: z.boolean(),
+        }),
+        401: errorSchemas.unauthorized,
+      },
+    },
+  },
+  push: {
+    status: {
+      method: "GET" as const,
+      path: "/api/push/status",
+      responses: {
+        200: z.object({
+          configured: z.boolean(),
+          subscribed: z.boolean(),
+          settings: z.object({
+            dailyReminder: z.boolean(),
+            reminderTime: z.string(),
+            targetAlerts: z.boolean(),
+          }).nullable(),
+        }),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    subscribe: {
+      method: "POST" as const,
+      path: "/api/push/subscribe",
+      input: insertPushSubscriptionSchema,
+      responses: {
+        201: z.object({
+          success: z.boolean(),
+          subscription: z.custom<typeof pushSubscriptions.$inferSelect>(),
+        }),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+      },
+    },
+    updateSettings: {
+      method: "PATCH" as const,
+      path: "/api/push/settings",
+      input: z.object({
+        dailyReminder: z.boolean().optional(),
+        reminderTime: z.string().optional(),
+        timezone: z.string().optional(),
+        targetAlerts: z.boolean().optional(),
+      }),
+      responses: {
+        200: z.object({
+          success: z.boolean(),
+          subscription: z.custom<typeof pushSubscriptions.$inferSelect>(),
+        }),
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
+    unsubscribe: {
+      method: "DELETE" as const,
+      path: "/api/push/unsubscribe",
+      responses: {
+        204: z.void(),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    test: {
+      method: "POST" as const,
+      path: "/api/push/test",
+      responses: {
+        200: z.object({ success: z.boolean() }),
+        401: errorSchemas.unauthorized,
+      },
+    },
+  },
+  auth: {
+    user: {
+      method: "GET" as const,
+      path: "/api/auth/user",
+      responses: {
+        200: z.object({
+          id: z.string(),
+          email: z.string().nullable(),
+          firstName: z.string().nullable(),
+          lastName: z.string().nullable(),
+          profileImageUrl: z.string().nullable(),
+        }),
+        401: errorSchemas.unauthorized,
       },
     },
   },

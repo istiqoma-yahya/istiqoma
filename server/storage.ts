@@ -208,9 +208,10 @@ export class DatabaseStorage implements IStorage {
           const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
           const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
           const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
+          const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit;
           
           // All deeds are now good deeds - count matching deeds
-          return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && inDateRange;
+          return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit && inDateRange;
         });
         
         const deedProgress = matchingDeeds.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
@@ -269,9 +270,10 @@ export class DatabaseStorage implements IStorage {
         const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
         const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
         const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
+        const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit;
         
         // All deeds are now good deeds - count matching deeds
-        return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && inPeriod;
+        return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit && inPeriod;
       });
 
       const currentValue = deedsInPeriod.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
@@ -446,9 +448,12 @@ export class DatabaseStorage implements IStorage {
         const matchesSholatType = !t.sholatType || deed.sholatType === t.sholatType;
         // For fasting targets with specific type, also match fastingType
         const matchesFastingType = !t.fastingType || deed.fastingType === t.fastingType;
+        const matchesQuranUnit = !t.quranUnit || deed.quranUnit === t.quranUnit;
+        const matchesSedekahType = !t.sedekahType || deed.sedekahType === t.sedekahType;
+        const matchesCustomUnit = !t.customUnit || deed.customUnit === t.customUnit;
         
         // All deeds are now good deeds - count matching deeds
-        return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && inPeriod;
+        return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesCustomUnit && inPeriod;
       });
 
       const achievedValue = deedsInPeriod.reduce((sum, deed) => sum + deed.points, 0);

@@ -263,6 +263,7 @@ export default function TargetsPage() {
         if (updateModalTarget.isJamaah) deedData.isJamaah = updateModalTarget.isJamaah;
         if (updateModalTarget.quranUnit) deedData.quranUnit = updateModalTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz";
         if (updateModalTarget.sedekahType) deedData.sedekahType = updateModalTarget.sedekahType as "uang" | "hitungan";
+        if (updateModalTarget.customUnit) deedData.customUnit = updateModalTarget.customUnit;
         
         createDeed.mutate(deedData, {
           onSuccess: async (createdDeed) => {
@@ -317,6 +318,7 @@ export default function TargetsPage() {
         if (updateModalTarget.isJamaah) deedData.isJamaah = updateModalTarget.isJamaah;
         if (updateModalTarget.quranUnit) deedData.quranUnit = updateModalTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz";
         if (updateModalTarget.sedekahType) deedData.sedekahType = updateModalTarget.sedekahType as "uang" | "hitungan";
+        if (updateModalTarget.customUnit) deedData.customUnit = updateModalTarget.customUnit;
         
         createDeed.mutate(deedData, {
           onSuccess: async (createdDeed) => {

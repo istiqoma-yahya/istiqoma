@@ -63,6 +63,7 @@ export default function DzikirPage() {
         points: count,
         quantity: count,
         dzikirType: selectedDzikirType,
+        customUnit: "times",
         createdAt: new Date(),
       },
       {

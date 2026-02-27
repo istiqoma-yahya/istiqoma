@@ -297,7 +297,7 @@ export async function registerRoutes(
       const matchesFastingType = !target.fastingType || deed.fastingType === target.fastingType;
       const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
       const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
-      const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit;
+      const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit || !deed.customUnit;
       return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesCustomUnit;
     });
     const totalPoints = matchingDeeds.reduce((sum, d) => sum + d.points, 0);

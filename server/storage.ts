@@ -208,7 +208,7 @@ export class DatabaseStorage implements IStorage {
           const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
           const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
           const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
-          const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit;
+          const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit || !deed.customUnit;
           
           // All deeds are now good deeds - count matching deeds
           return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit && inDateRange;
@@ -270,7 +270,7 @@ export class DatabaseStorage implements IStorage {
         const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
         const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
         const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
-        const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit;
+        const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit || !deed.customUnit;
         
         // All deeds are now good deeds - count matching deeds
         return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit && inPeriod;
@@ -450,7 +450,7 @@ export class DatabaseStorage implements IStorage {
         const matchesFastingType = !t.fastingType || deed.fastingType === t.fastingType;
         const matchesQuranUnit = !t.quranUnit || deed.quranUnit === t.quranUnit;
         const matchesSedekahType = !t.sedekahType || deed.sedekahType === t.sedekahType;
-        const matchesCustomUnit = !t.customUnit || deed.customUnit === t.customUnit;
+        const matchesCustomUnit = !t.customUnit || deed.customUnit === t.customUnit || !deed.customUnit;
         
         // All deeds are now good deeds - count matching deeds
         return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesCustomUnit && inPeriod;

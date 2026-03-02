@@ -251,7 +251,22 @@
     "count": "Kiraan",
     "points": "Mata",
     "deedsByCategory": "Amal Mengikut Kategori",
-    "targetsProgress": "Progres Sasaran"
+    "targetsProgress": "Progres Sasaran",
+    "summary": {
+      "title": "Ringkasan Anda",
+      "totalDeeds": "Anda merekod {{count}} amal dalam {{period}} yang lalu.",
+      "topCategory": "Amal yang paling kerap anda lakukan ialah {{category}} sebanyak {{count}} kali.",
+      "mostActiveDay": "Hari paling aktif anda ialah {{day}} dengan {{count}} amal.",
+      "consistency": "Anda beramal pada {{activeDays}} daripada {{totalDays}} hari — konsistensi {{percent}}%.",
+      "noData": "Tiada amal direkod dalam tempoh ini. Mula catat untuk melihat ringkasan di sini.",
+      "motivationHigh": "Mashaa Allah! Anda sangat konsisten. Teruskan tabiat baik ini!",
+      "motivationMedium": "Bagus! Cuba untuk lebih konsisten setiap hari — langkah kecil pun bermakna.",
+      "motivationLow": "Setiap amal itu bernilai, walau sekecil mana. Jadikannya tabiat, satu hari satu langkah.",
+      "periodWeek": "minggu",
+      "periodMonth": "bulan",
+      "periodQuarter": "3 bulan",
+      "periodYear": "tahun"
+    }
   },
   "targets": {
     "title": "Sasaran",

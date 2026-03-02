@@ -251,7 +251,22 @@
     "count": "Jumlah",
     "points": "Poin",
     "deedsByCategory": "Amal per Kategori",
-    "targetsProgress": "Progres Target"
+    "targetsProgress": "Progres Target",
+    "summary": {
+      "title": "Ringkasan Amalmu",
+      "totalDeeds": "Kamu mencatat {{count}} amal dalam {{period}} terakhir.",
+      "topCategory": "Amal yang paling sering kamu lakukan adalah {{category}} sebanyak {{count}} kali.",
+      "mostActiveDay": "Hari paling aktifmu adalah {{day}} dengan {{count}} amal.",
+      "consistency": "Kamu beramal di {{activeDays}} dari {{totalDays}} hari — konsistensi {{percent}}%.",
+      "noData": "Belum ada amal yang dicatat di periode ini. Mulai catat amalmu untuk melihat ringkasan di sini.",
+      "motivationHigh": "Mashaa Allah! Kamu sangat konsisten. Pertahankan kebiasaan baik ini!",
+      "motivationMedium": "Sudah bagus! Coba untuk lebih konsisten setiap hari — langkah kecil pun berarti.",
+      "motivationLow": "Setiap amal itu berharga, sekecil apapun. Yuk jadikan kebiasaan, satu hari satu langkah.",
+      "periodWeek": "minggu",
+      "periodMonth": "bulan",
+      "periodQuarter": "3 bulan",
+      "periodYear": "tahun"
+    }
   },
   "targets": {
     "title": "Target",

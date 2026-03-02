@@ -251,7 +251,22 @@
     "count": "Count",
     "points": "Points",
     "deedsByCategory": "Deeds by Category",
-    "targetsProgress": "Targets Progress"
+    "targetsProgress": "Targets Progress",
+    "summary": {
+      "title": "Your Summary",
+      "totalDeeds": "You recorded {{count}} deeds in the last {{period}}.",
+      "topCategory": "Your most frequent deed is {{category}} with {{count}} entries.",
+      "mostActiveDay": "Your most active day was {{day}} with {{count}} deeds.",
+      "consistency": "You did good deeds on {{activeDays}} out of {{totalDays}} days — {{percent}}% consistency.",
+      "noData": "No deeds recorded in this period. Start logging to see your insights here.",
+      "motivationHigh": "Mashaa Allah! You are very consistent. Keep up this great habit!",
+      "motivationMedium": "Good progress! Try to be consistent every day — small steps add up.",
+      "motivationLow": "Every deed counts, no matter how small. Let's make it a habit, one day at a time.",
+      "periodWeek": "week",
+      "periodMonth": "month",
+      "periodQuarter": "3 months",
+      "periodYear": "year"
+    }
   },
   "targets": {
     "title": "Targets",

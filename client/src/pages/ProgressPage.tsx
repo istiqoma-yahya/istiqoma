@@ -22,6 +22,7 @@ import {
 } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Loader2, Filter } from "lucide-react";
+import { ProgressSummary } from "@/components/ProgressSummary";
 import { format, subDays, subMonths, subYears, eachDayOfInterval } from "date-fns";
 import {
   Select,
@@ -381,6 +382,15 @@ export default function ProgressPage() {
                   </div>
                 </div>
               </Card>
+
+              {/* Progress Summary Insights */}
+              <ProgressSummary
+                totalDeeds={totalDeeds}
+                dateRange={dateRange}
+                categoryData={categoryData}
+                deedsOverTime={deedsOverTime}
+                totalDays={deedsOverTime.length > 0 ? deedsOverTime.length : 1}
+              />
 
               {/* Deeds Over Time */}
               {deedsOverTime.length > 0 && (

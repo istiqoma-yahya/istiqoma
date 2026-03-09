@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar, doublePrecision } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -84,9 +84,12 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   p256dh: text("p256dh").notNull(),
   auth: text("auth").notNull(),
   dailyReminder: boolean("daily_reminder").notNull().default(true),
-  reminderTime: text("reminder_time").notNull().default("08:00"),
+  reminderTime: text("reminder_time").notNull().default("21:00"),
   timezone: text("timezone").notNull().default("Asia/Jakarta"),
   targetAlerts: boolean("target_alerts").notNull().default(true),
+  sholatReminder: boolean("sholat_reminder").notNull().default(true),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -205,14 +208,20 @@ export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions
   reminderTime: true,
   timezone: true,
   targetAlerts: true,
+  sholatReminder: true,
+  latitude: true,
+  longitude: true,
 }).extend({
   endpoint: z.string().min(1),
   p256dh: z.string().min(1),
   auth: z.string().min(1),
   dailyReminder: z.boolean().optional().default(true),
-  reminderTime: z.string().optional().default("08:00"),
+  reminderTime: z.string().optional().default("21:00"),
   timezone: z.string().optional().default("Asia/Jakarta"),
   targetAlerts: z.boolean().optional().default(true),
+  sholatReminder: z.boolean().optional().default(true),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
 });
 
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;

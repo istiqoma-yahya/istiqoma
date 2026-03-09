@@ -18,6 +18,7 @@ import TargetDetailPage from "@/pages/TargetDetailPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import { useDeeds } from "@/hooks/use-deeds";
 import NotFound from "@/pages/not-found";
+import { NotificationPrompt } from "@/components/NotificationPrompt";
 
 function EditDeedRoute({ params }: { params: { id: string } }) {
   const { data: deeds } = useDeeds();
@@ -57,6 +58,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <NotificationPrompt />
         </TooltipProvider>
       </QueryClientProvider>
     </ThemeProvider>

@@ -491,7 +491,17 @@
     "testFailed": "Failed to send test notification",
     "settingsSaved": "Settings saved",
     "subscribed": "Subscribed",
-    "notSubscribed": "Not subscribed"
+    "notSubscribed": "Not subscribed",
+    "sholatReminder": "Sholat Reminders",
+    "sholatReminderDesc": "Get notified 10 minutes before each prayer time",
+    "locationRequired": "Location access is needed for accurate prayer times",
+    "updateLocation": "Update Location",
+    "locationSaved": "Location saved",
+    "promptTitle": "Enable Notifications",
+    "promptDesc": "Get daily reminders and sholat prayer time alerts to help you stay consistent",
+    "promptEnable": "Enable",
+    "promptDismiss": "Not Now",
+    "promptLocationDesc": "Allow location access for accurate prayer time reminders"
   },
   "reward": {
     "congratsMessage": "Congratulations on performing a good deed! Keep it up!",

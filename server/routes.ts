@@ -372,7 +372,9 @@ export async function registerRoutes(
       settings: subscription ? {
         dailyReminder: subscription.dailyReminder,
         reminderTime: subscription.reminderTime,
-        targetAlerts: subscription.targetAlerts
+        targetAlerts: subscription.targetAlerts,
+        sholatReminder: subscription.sholatReminder,
+        hasLocation: subscription.latitude != null && subscription.longitude != null,
       } : null
     });
   });

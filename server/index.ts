@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { sendDailyReminders, sendTargetReminders, isPushConfigured } from "./pushNotifications";
+import { sendSholatReminders } from "./sholatReminders";
 
 const app = express();
 const httpServer = createServer(app);
@@ -103,6 +104,9 @@ app.use((req, res, next) => {
           });
           sendTargetReminders().catch(err => {
             console.error('Error sending target reminders:', err);
+          });
+          sendSholatReminders().catch(err => {
+            console.error('Error sending sholat reminders:', err);
           });
         }, 60000); // Check every minute
         log('Push notification scheduler started');

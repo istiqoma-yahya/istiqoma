@@ -234,6 +234,8 @@ export const api = {
             dailyReminder: z.boolean(),
             reminderTime: z.string(),
             targetAlerts: z.boolean(),
+            sholatReminder: z.boolean(),
+            hasLocation: z.boolean(),
           }).nullable(),
         }),
         401: errorSchemas.unauthorized,
@@ -260,6 +262,9 @@ export const api = {
         reminderTime: z.string().optional(),
         timezone: z.string().optional(),
         targetAlerts: z.boolean().optional(),
+        sholatReminder: z.boolean().optional(),
+        latitude: z.number().min(-90).max(90).optional(),
+        longitude: z.number().min(-180).max(180).optional(),
       }),
       responses: {
         200: z.object({

@@ -58,6 +58,7 @@ Database tables:
 - `deeds` - User deed entries with description, category, points, and customUnit for custom categories (deedType defaults to "good")
 - `targets` - User target/goal entries with customUnit support for custom categories. Note: `manualProgress` field exists but is no longer used; one-time target progress is calculated purely from matching deeds.
 - `categories` - Custom user-defined categories
+- `push_subscriptions` - Push notification subscriptions with settings (dailyReminder, reminderTime, targetAlerts, sholatReminder, latitude, longitude, timezone)
 
 ### Custom Unit System
 When users create deeds or targets with custom (non-built-in) categories, they can select a unit type from 8 options:
@@ -90,6 +91,14 @@ Points are calculated automatically by the backend based on category and quantit
   - Halaman = 10 × quantity
   - Juz = 200 × quantity
   - Surat = 200 × quantity
+
+### Push Notifications & Reminders
+- **Auto-prompt**: After login, users who haven't subscribed see a notification prompt banner (dismissible for 7 days)
+- **Daily Reminder**: Default at 21:00 (night) in user's timezone, configurable
+- **Sholat Reminders**: Sends notification 10 minutes before each prayer time (Subuh, Dzuhur, Ashar, Maghrib, Isya) using the `adhan` library for calculation
+- **Location**: User coordinates (lat/lng) stored in `push_subscriptions` for prayer time calculation, collected during notification opt-in
+- **Scheduler**: 60-second polling interval in `server/index.ts` runs `sendDailyReminders()`, `sendTargetReminders()`, and `sendSholatReminders()`
+- **Key files**: `server/sholatReminders.ts`, `server/pushNotifications.ts`, `client/src/components/NotificationPrompt.tsx`, `client/src/components/NotificationSettings.tsx`
 
 ### Authentication
 - **Provider**: Replit Auth (OpenID Connect)

@@ -513,6 +513,9 @@ export class DatabaseStorage implements IStorage {
           reminderTime: subscription.reminderTime ?? existing.reminderTime,
           timezone: subscription.timezone ?? existing.timezone,
           targetAlerts: subscription.targetAlerts ?? existing.targetAlerts,
+          sholatReminder: subscription.sholatReminder ?? existing.sholatReminder,
+          latitude: subscription.latitude ?? existing.latitude,
+          longitude: subscription.longitude ?? existing.longitude,
         })
         .where(eq(pushSubscriptions.userId, userId))
         .returning();

@@ -492,7 +492,17 @@
     "testFailed": "Gagal mengirim notifikasi uji",
     "settingsSaved": "Pengaturan disimpan",
     "subscribed": "Berlangganan",
-    "notSubscribed": "Tidak berlangganan"
+    "notSubscribed": "Tidak berlangganan",
+    "sholatReminder": "Pengingat Sholat",
+    "sholatReminderDesc": "Dapatkan notifikasi 10 menit sebelum waktu sholat",
+    "locationRequired": "Akses lokasi diperlukan untuk waktu sholat yang akurat",
+    "updateLocation": "Perbarui Lokasi",
+    "locationSaved": "Lokasi tersimpan",
+    "promptTitle": "Aktifkan Notifikasi",
+    "promptDesc": "Dapatkan pengingat harian dan peringatan waktu sholat untuk menjaga konsistensi",
+    "promptEnable": "Aktifkan",
+    "promptDismiss": "Nanti",
+    "promptLocationDesc": "Izinkan akses lokasi untuk pengingat waktu sholat yang akurat"
   },
   "reward": {
     "congratsMessage": "Selamat telah melakukan amal baik! Terus pertahankan!",

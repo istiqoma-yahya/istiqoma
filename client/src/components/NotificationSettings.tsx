@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Bell, BellOff, Send, Clock } from "lucide-react";
+import { Bell, BellOff, Send, Clock, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -27,6 +27,8 @@ interface PushStatus {
     dailyReminder: boolean;
     reminderTime: string;
     targetAlerts: boolean;
+    sholatReminder: boolean;
+    hasLocation: boolean;
   } | null;
 }
 
@@ -67,8 +69,10 @@ export function NotificationSettings() {
     },
   });
 
+  const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);
+
   const updateSettingsMutation = useMutation({
-    mutationFn: async (settings: Partial<{ dailyReminder: boolean; reminderTime: string; targetAlerts: boolean; timezone: string }>) => {
+    mutationFn: async (settings: Partial<{ dailyReminder: boolean; reminderTime: string; targetAlerts: boolean; sholatReminder: boolean; timezone: string; latitude: number; longitude: number }>) => {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Jakarta";
       const res = await apiRequest("PATCH", "/api/push/settings", { ...settings, timezone });
       return res.json();
@@ -221,6 +225,57 @@ export function NotificationSettings() {
                 data-testid="switch-target-alerts"
               />
             </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="sholat-reminder">{t("notifications.sholatReminder")}</Label>
+                <p className="text-sm text-muted-foreground">{t("notifications.sholatReminderDesc")}</p>
+              </div>
+              <Switch
+                id="sholat-reminder"
+                checked={settings?.sholatReminder ?? true}
+                onCheckedChange={(checked) => updateSettingsMutation.mutate({ sholatReminder: checked })}
+                data-testid="switch-sholat-reminder"
+              />
+            </div>
+
+            {settings?.sholatReminder && (
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="w-4 h-4" />
+                  {settings?.hasLocation ? (
+                    <span className="text-muted-foreground">{t("notifications.locationSaved")}</span>
+                  ) : (
+                    <span className="text-muted-foreground">{t("notifications.locationRequired")}</span>
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={isUpdatingLocation}
+                  onClick={async () => {
+                    setIsUpdatingLocation(true);
+                    try {
+                      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: false, timeout: 10000 });
+                      });
+                      updateSettingsMutation.mutate({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                      });
+                    } catch {
+                      toast({ title: t("common.error"), description: t("notifications.locationRequired"), variant: "destructive" });
+                    } finally {
+                      setIsUpdatingLocation(false);
+                    }
+                  }}
+                  data-testid="button-update-location"
+                >
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {t("notifications.updateLocation")}
+                </Button>
+              </div>
+            )}
 
             <div className="flex flex-wrap gap-2 pt-4 border-t">
               <Button

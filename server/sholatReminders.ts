@@ -28,7 +28,7 @@ function cleanupSentSholatAlerts(): void {
   }
 }
 
-async function sendToSubscription(subscription: PushSubscription, payload: { title: string; body: string; url?: string; tag?: string }): Promise<boolean> {
+async function sendToSubscription(subscription: PushSubscription, payload: { title: string; body: string; url?: string; tag?: string; sound?: string }): Promise<boolean> {
   const pushSubscription = {
     endpoint: subscription.endpoint,
     keys: {
@@ -101,6 +101,7 @@ export async function sendSholatReminders(): Promise<void> {
             body: `Sholat ${prayerName} ${MINUTES_BEFORE} menit lagi (${hours}:${minutes}). Siapkan diri untuk sholat.`,
             url: '/',
             tag: `sholat-${prayer.key}`,
+            sound: subscription.notificationSound ?? 'chime',
           });
         }
       }

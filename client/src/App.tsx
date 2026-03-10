@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -20,6 +21,7 @@ import DeedHistoryPage from "@/pages/DeedHistoryPage";
 import { useDeeds } from "@/hooks/use-deeds";
 import NotFound from "@/pages/not-found";
 import { NotificationPrompt } from "@/components/NotificationPrompt";
+import { registerNotificationSoundListener } from "@/lib/sounds";
 
 function EditDeedRoute({ params }: { params: { id: string } }) {
   const { data: deeds } = useDeeds();
@@ -54,6 +56,10 @@ function Router() {
 }
 
 function App() {
+  useEffect(() => {
+    return registerNotificationSoundListener();
+  }, []);
+
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>

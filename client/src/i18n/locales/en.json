@@ -501,7 +501,15 @@
     "promptDesc": "Get daily reminders and sholat prayer time alerts to help you stay consistent",
     "promptEnable": "Enable",
     "promptDismiss": "Not Now",
-    "promptLocationDesc": "Allow location access for accurate prayer time reminders"
+    "promptLocationDesc": "Allow location access for accurate prayer time reminders",
+    "soundLabel": "Notification Sound",
+    "soundDesc": "Sound played when a notification arrives",
+    "sounds": {
+      "chime": "Chime",
+      "double": "Double Chime",
+      "ding": "Soft Ding",
+      "none": "None"
+    }
   },
   "reward": {
     "congratsMessage": "Congratulations on performing a good deed! Keep it up!",

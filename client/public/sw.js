@@ -67,6 +67,7 @@ self.addEventListener('push', function(event) {
     }
   }
 
+  const soundId = data.sound || 'chime';
   const title = data.title || 'Istiqoma';
   const options = {
     body: data.body || 'You have a notification',
@@ -80,7 +81,14 @@ self.addEventListener('push', function(event) {
   };
 
   event.waitUntil(
-    self.registration.showNotification(title, options)
+    Promise.all([
+      self.registration.showNotification(title, options),
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(openClients) {
+        openClients.forEach(function(client) {
+          client.postMessage({ type: 'PLAY_NOTIFICATION_SOUND', sound: soundId });
+        });
+      })
+    ])
   );
 });
 

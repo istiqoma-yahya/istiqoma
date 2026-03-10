@@ -20,6 +20,7 @@ export interface NotificationPayload {
   url?: string;
   tag?: string;
   requireInteraction?: boolean;
+  sound?: string;
 }
 
 async function sendToSubscription(subscription: PushSubscription, payload: NotificationPayload): Promise<boolean> {
@@ -73,7 +74,8 @@ export async function sendDailyReminders(): Promise<void> {
         title: 'Istiqoma Daily Reminder',
         body: 'Time to log your deeds for today!',
         url: '/',
-        tag: 'daily-reminder'
+        tag: 'daily-reminder',
+        sound: subscription.notificationSound ?? 'chime',
       });
     }
   }
@@ -89,7 +91,8 @@ export async function sendTargetAlert(userId: string, targetName: string, messag
     title: `Target: ${targetName}`,
     body: message,
     url: '/targets',
-    tag: 'target-alert'
+    tag: 'target-alert',
+    sound: subscription.notificationSound ?? 'chime',
   });
 }
 
@@ -158,6 +161,7 @@ export async function sendTargetReminders(): Promise<void> {
           body,
           url: `/targets/${target.id}`,
           tag: `target-reminder-${target.id}`,
+          sound: subscription.notificationSound ?? 'chime',
         });
       }
     }

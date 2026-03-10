@@ -502,7 +502,15 @@
     "promptDesc": "Dapatkan peringatan harian dan amaran waktu solat untuk kekal konsisten",
     "promptEnable": "Aktifkan",
     "promptDismiss": "Bukan Sekarang",
-    "promptLocationDesc": "Benarkan akses lokasi untuk peringatan waktu solat yang tepat"
+    "promptLocationDesc": "Benarkan akses lokasi untuk peringatan waktu solat yang tepat",
+    "soundLabel": "Bunyi Pemberitahuan",
+    "soundDesc": "Bunyi yang dimainkan apabila pemberitahuan tiba",
+    "sounds": {
+      "chime": "Loceng",
+      "double": "Loceng Ganda",
+      "ding": "Ding Lembut",
+      "none": "Tiada"
+    }
   },
   "reward": {
     "congratsMessage": "Tahniah kerana melakukan amalan baik! Teruskan usaha anda!",

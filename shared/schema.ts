@@ -90,6 +90,7 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   sholatReminder: boolean("sholat_reminder").notNull().default(true),
   latitude: doublePrecision("latitude"),
   longitude: doublePrecision("longitude"),
+  notificationSound: text("notification_sound").notNull().default("chime"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -211,6 +212,7 @@ export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions
   sholatReminder: true,
   latitude: true,
   longitude: true,
+  notificationSound: true,
 }).extend({
   endpoint: z.string().min(1),
   p256dh: z.string().min(1),
@@ -222,6 +224,7 @@ export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions
   sholatReminder: z.boolean().optional().default(true),
   latitude: z.number().min(-90).max(90).optional(),
   longitude: z.number().min(-180).max(180).optional(),
+  notificationSound: z.enum(["chime", "double", "ding", "none"]).optional().default("chime"),
 });
 
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;

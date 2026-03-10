@@ -265,6 +265,7 @@ export const api = {
         sholatReminder: z.boolean().optional(),
         latitude: z.number().min(-90).max(90).optional(),
         longitude: z.number().min(-180).max(180).optional(),
+        notificationSound: z.enum(["chime", "double", "ding", "none"]).optional(),
       }),
       responses: {
         200: z.object({

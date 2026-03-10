@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Bell, BellOff, Send, Clock, MapPin } from "lucide-react";
+import { Bell, BellOff, Send, Clock, MapPin, Play } from "lucide-react";
+import { NOTIFICATION_SOUNDS, playNotificationSound } from "@/lib/sounds";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -29,6 +30,7 @@ interface PushStatus {
     targetAlerts: boolean;
     sholatReminder: boolean;
     hasLocation: boolean;
+    notificationSound: string;
   } | null;
 }
 
@@ -72,7 +74,7 @@ export function NotificationSettings() {
   const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);
 
   const updateSettingsMutation = useMutation({
-    mutationFn: async (settings: Partial<{ dailyReminder: boolean; reminderTime: string; targetAlerts: boolean; sholatReminder: boolean; timezone: string; latitude: number; longitude: number }>) => {
+    mutationFn: async (settings: Partial<{ dailyReminder: boolean; reminderTime: string; targetAlerts: boolean; sholatReminder: boolean; timezone: string; latitude: number; longitude: number; notificationSound: string }>) => {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Jakarta";
       const res = await apiRequest("PATCH", "/api/push/settings", { ...settings, timezone });
       return res.json();
@@ -276,6 +278,49 @@ export function NotificationSettings() {
                 </Button>
               </div>
             )}
+
+            <div className="space-y-3">
+              <div>
+                <Label className="flex items-center gap-2 mb-1">
+                  <Bell className="w-4 h-4" />
+                  {t("notifications.soundLabel")}
+                </Label>
+                <p className="text-sm text-muted-foreground mb-3">{t("notifications.soundDesc")}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {NOTIFICATION_SOUNDS.map((sound) => {
+                  const isSelected = (settings?.notificationSound ?? "chime") === sound.id;
+                  return (
+                    <div
+                      key={sound.id}
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
+                        isSelected
+                          ? "border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                          : "border-border bg-card hover:bg-accent"
+                      }`}
+                      onClick={() => updateSettingsMutation.mutate({ notificationSound: sound.id })}
+                      data-testid={`button-sound-${sound.id}`}
+                    >
+                      <span className="text-sm font-medium">{t(sound.labelKey)}</span>
+                      {sound.id !== "none" && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            playNotificationSound(sound.id);
+                          }}
+                          className="p-1 rounded hover:bg-background/50 text-muted-foreground hover:text-foreground transition-colors"
+                          data-testid={`button-preview-${sound.id}`}
+                          aria-label={`Preview ${sound.id}`}
+                        >
+                          <Play className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
             <div className="flex flex-wrap gap-2 pt-4 border-t">
               <Button

@@ -375,6 +375,7 @@ export async function registerRoutes(
         targetAlerts: subscription.targetAlerts,
         sholatReminder: subscription.sholatReminder,
         hasLocation: subscription.latitude != null && subscription.longitude != null,
+        notificationSound: subscription.notificationSound ?? "chime",
       } : null
     });
   });
@@ -425,10 +426,12 @@ export async function registerRoutes(
 
   app.post(api.push.test.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
+    const subscription = await storage.getPushSubscription(userId);
     const success = await sendNotificationToUser(userId, {
       title: "Test Notification",
       body: "Push notifications are working!",
-      url: "/"
+      url: "/",
+      sound: subscription?.notificationSound ?? "chime",
     });
     res.json({ success });
   });

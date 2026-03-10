@@ -106,6 +106,16 @@ Points are calculated automatically by the backend based on category and quantit
 - **Session Storage**: PostgreSQL-backed sessions with 1-week TTL
 - **Protection**: `isAuthenticated` middleware for protected routes
 
+## Notification Sound Feature
+Push notifications include a user-configurable sound preference:
+- 4 options: `chime` (default), `double` (double chime), `ding` (soft ding), `none`
+- Sounds synthesized via Web Audio API — no audio files required
+- When app is open: service worker posts `PLAY_NOTIFICATION_SOUND` message to all open windows; App.tsx listener plays the sound
+- When app is closed: OS default system sound plays (browser behavior)
+- Preference stored in `pushSubscriptions.notificationSound` column
+- UI: 4-tile picker in NotificationSettings with live preview buttons
+- All server-side push payloads include `sound` field from user's saved preference
+
 ## External Dependencies
 
 ### Third-Party Services

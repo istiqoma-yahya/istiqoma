@@ -507,6 +507,17 @@
     "congratsMessage": "Congratulations on performing a good deed! Keep it up!",
     "continue": "Continue"
   },
+  "deedHistory": {
+    "title": "Deed History",
+    "subtitle": "Browse and filter all your recorded deeds",
+    "subcategory": "Type",
+    "startDate": "From",
+    "endDate": "To",
+    "resultsCount": "Deeds Found",
+    "noResults": "No deeds found",
+    "tryDifferentFilters": "Try adjusting your filters to find what you're looking for.",
+    "clearFilters": "Clear"
+  },
   "streak": {
     "title": "Streak",
     "daysInARow": "days in a row",

@@ -16,6 +16,7 @@ import CreateTargetPage from "@/pages/CreateTargetPage";
 import EditTargetPage from "@/pages/EditTargetPage";
 import TargetDetailPage from "@/pages/TargetDetailPage";
 import NotificationsPage from "@/pages/NotificationsPage";
+import DeedHistoryPage from "@/pages/DeedHistoryPage";
 import { useDeeds } from "@/hooks/use-deeds";
 import NotFound from "@/pages/not-found";
 import { NotificationPrompt } from "@/components/NotificationPrompt";
@@ -44,6 +45,7 @@ function Router() {
       <Route path="/targets/:id/edit" component={EditTargetPage} />
       <Route path="/categories" component={CategoryManagement} />
       <Route path="/notifications" component={NotificationsPage} />
+      <Route path="/deeds" component={DeedHistoryPage} />
       <Route path="/create-deed" component={CreateDeedPage} />
       <Route path="/edit-deed/:id" component={EditDeedRoute} />
       <Route component={NotFound} />

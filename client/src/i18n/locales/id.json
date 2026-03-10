@@ -508,6 +508,17 @@
     "congratsMessage": "Selamat telah melakukan amal baik! Terus pertahankan!",
     "continue": "Lanjutkan"
   },
+  "deedHistory": {
+    "title": "Riwayat Amal",
+    "subtitle": "Telusuri dan filter semua amal yang telah dicatat",
+    "subcategory": "Jenis",
+    "startDate": "Dari",
+    "endDate": "Sampai",
+    "resultsCount": "Amal Ditemukan",
+    "noResults": "Tidak ada amal ditemukan",
+    "tryDifferentFilters": "Coba sesuaikan filter untuk menemukan yang kamu cari.",
+    "clearFilters": "Hapus"
+  },
   "streak": {
     "title": "Streak",
     "daysInARow": "hari beruntun",

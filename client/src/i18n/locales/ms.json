@@ -508,6 +508,17 @@
     "congratsMessage": "Tahniah kerana melakukan amalan baik! Teruskan usaha anda!",
     "continue": "Teruskan"
   },
+  "deedHistory": {
+    "title": "Sejarah Amal",
+    "subtitle": "Layari dan tapis semua amal yang telah direkod",
+    "subcategory": "Jenis",
+    "startDate": "Dari",
+    "endDate": "Hingga",
+    "resultsCount": "Amal Dijumpai",
+    "noResults": "Tiada amal dijumpai",
+    "tryDifferentFilters": "Cuba sesuaikan penapis untuk mencari apa yang anda cari.",
+    "clearFilters": "Padam"
+  },
   "streak": {
     "title": "Streak",
     "daysInARow": "hari berturut-turut",

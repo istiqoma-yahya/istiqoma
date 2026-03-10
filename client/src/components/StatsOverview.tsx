@@ -3,6 +3,7 @@ import { ThumbsUp, Flame } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { formatNumber } from "@/lib/utils";
 
 interface StatsOverviewProps {
@@ -11,6 +12,7 @@ interface StatsOverviewProps {
 
 export function StatsOverview({ deeds }: StatsOverviewProps) {
   const { t } = useTranslation();
+  const [, navigate] = useLocation();
   const totalDeeds = deeds.length;
   const totalPoints = deeds.reduce((acc, d) => acc + d.points, 0);
 
@@ -26,8 +28,12 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card p-5 border border-emerald-500/20"
+        className="glass-card p-5 border border-emerald-500/20 cursor-pointer hover:bg-emerald-500/5 transition-colors"
         data-testid="card-stats-deeds"
+        onClick={() => navigate("/deeds")}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/deeds"); } }}
+        role="button"
+        tabIndex={0}
       >
         <div className="flex items-center justify-between mb-3">
           <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">

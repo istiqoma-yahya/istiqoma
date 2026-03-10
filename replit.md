@@ -22,7 +22,7 @@ Preferred communication style: Simple, everyday language.
 - **Build Tool**: Vite with React plugin
 
 The frontend follows a component-based architecture with:
-- Pages in `client/src/pages/` for route components
+- Pages in `client/src/pages/` for route components (including DeedHistoryPage at `/deeds` for browsing/filtering all deeds)
 - Reusable components in `client/src/components/`
 - Custom hooks in `client/src/hooks/` for data fetching and business logic
 - Shared types and API definitions imported from `@shared/`

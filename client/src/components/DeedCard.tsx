@@ -76,6 +76,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
     if (target.closest('button') || target.closest('[role="dialog"]')) {
       return;
     }
+    sessionStorage.setItem("dashboard-scroll", String(window.scrollY));
     navigate(`/edit-deed/${deed.id}`);
   };
 

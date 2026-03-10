@@ -226,7 +226,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
     mutate({ id: deed.id, data: { ...data, quantity: data.points, createdAt } }, {
       onSuccess: () => {
         form.reset();
-        navigate("/");
+        window.history.back();
       },
     });
   };
@@ -234,7 +234,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const handleDelete = () => {
     deleteDeed(deed.id, {
       onSuccess: () => {
-        navigate("/");
+        window.history.back();
       },
     });
   };
@@ -245,7 +245,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
         <div className="container max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
           <h1 className="font-display font-bold text-xl">{t("editDeed.title")}</h1>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => window.history.back()}
             className="p-2 hover:bg-muted rounded-lg transition-colors"
             data-testid="button-close-edit-form"
           >

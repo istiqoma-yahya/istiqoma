@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useDeeds } from "@/hooks/use-deeds";
 import { useTargetsWithProgress } from "@/hooks/use-targets";
@@ -29,6 +30,15 @@ export default function Dashboard() {
   const { data: targets } = useTargetsWithProgress();
   const [, navigate] = useLocation();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem("dashboard-scroll");
+    if (saved !== null) {
+      sessionStorage.removeItem("dashboard-scroll");
+      const y = Number(saved);
+      requestAnimationFrame(() => window.scrollTo({ top: y, behavior: "instant" }));
+    }
+  }, []);
 
   if (isLoading) {
     return (

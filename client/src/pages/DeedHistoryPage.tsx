@@ -1,5 +1,5 @@
-import { useState, useMemo, useRef } from "react";
-import { useLocation } from "wouter";
+import { useMemo, useRef, useEffect } from "react";
+import { useLocation, useSearch } from "wouter";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { ArrowLeft, Search, Calendar, Filter, X } from "lucide-react";
@@ -151,15 +151,30 @@ const SUBCATEGORY_MAP: Record<string, { field: keyof Deed; items: { id: string; 
 
 export default function DeedHistoryPage() {
   const [, navigate] = useLocation();
+  const search = useSearch();
   const { t } = useTranslation();
   const { data: deeds, isLoading: deedsLoading } = useDeeds();
   const { data: categories } = useCategories();
   const translateCategoryName = useCategoryName();
 
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("all");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
+  const params = useMemo(() => new URLSearchParams(search), [search]);
+  const selectedCategory = params.get("category") || "all";
+  const selectedSubcategory = params.get("subcategory") || "all";
+  const startDate = params.get("startDate") || "";
+  const endDate = params.get("endDate") || "";
+
+  const updateParams = (updates: Record<string, string>) => {
+    const next = new URLSearchParams(search);
+    for (const [key, value] of Object.entries(updates)) {
+      if (value && value !== "all") {
+        next.set(key, value);
+      } else {
+        next.delete(key);
+      }
+    }
+    const qs = next.toString();
+    navigate(qs ? `/deeds?${qs}` : "/deeds", { replace: true });
+  };
 
   const subcategoryOptions = useMemo(() => {
     if (selectedCategory === "all") return null;
@@ -214,15 +229,11 @@ export default function DeedHistoryPage() {
   const hasActiveFilters = selectedCategory !== "all" || selectedSubcategory !== "all" || startDate || endDate;
 
   const clearFilters = () => {
-    setSelectedCategory("all");
-    setSelectedSubcategory("all");
-    setStartDate("");
-    setEndDate("");
+    navigate("/deeds", { replace: true });
   };
 
   const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value);
-    setSelectedSubcategory("all");
+    updateParams({ category: value, subcategory: "all" });
   };
 
   return (
@@ -301,7 +312,7 @@ export default function DeedHistoryPage() {
               </label>
               <Select
                 value={selectedSubcategory}
-                onValueChange={setSelectedSubcategory}
+                onValueChange={(value) => updateParams({ subcategory: value })}
                 disabled={!subcategoryOptions}
               >
                 <SelectTrigger className="bg-card border-border" data-testid="select-subcategory">
@@ -326,7 +337,7 @@ export default function DeedHistoryPage() {
               </label>
               <DatePickerButton
                 value={startDate}
-                onChange={setStartDate}
+                onChange={(v) => updateParams({ startDate: v })}
                 placeholder={t('deedHistory.selectDate')}
                 testId="input-start-date"
               />
@@ -337,7 +348,7 @@ export default function DeedHistoryPage() {
               </label>
               <DatePickerButton
                 value={endDate}
-                onChange={setEndDate}
+                onChange={(v) => updateParams({ endDate: v })}
                 placeholder={t('deedHistory.selectDate')}
                 testId="input-end-date"
               />

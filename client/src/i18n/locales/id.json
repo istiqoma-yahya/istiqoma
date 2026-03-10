@@ -517,7 +517,8 @@
     "resultsCount": "Amal Ditemukan",
     "noResults": "Tidak ada amal ditemukan",
     "tryDifferentFilters": "Coba sesuaikan filter untuk menemukan yang kamu cari.",
-    "clearFilters": "Hapus"
+    "clearFilters": "Hapus",
+    "selectDate": "Pilih"
   },
   "streak": {
     "title": "Streak",

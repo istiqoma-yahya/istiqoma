@@ -516,7 +516,8 @@
     "resultsCount": "Deeds Found",
     "noResults": "No deeds found",
     "tryDifferentFilters": "Try adjusting your filters to find what you're looking for.",
-    "clearFilters": "Clear"
+    "clearFilters": "Clear",
+    "selectDate": "Select"
   },
   "streak": {
     "title": "Streak",

@@ -1,9 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { ArrowLeft, Search, Calendar, Filter, X } from "lucide-react";
-import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import { format, isWithinInterval, startOfDay, endOfDay, parseISO } from "date-fns";
 import { useDeeds } from "@/hooks/use-deeds";
 import { useCategories, useCategoryName } from "@/hooks/use-categories";
 import { DeedCard } from "@/components/DeedCard";
@@ -16,8 +16,57 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import type { Deed } from "@shared/schema";
+
+function DatePickerButton({
+  value,
+  onChange,
+  placeholder,
+  testId,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  testId: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => inputRef.current?.showPicker?.() ?? inputRef.current?.click()}
+        className="flex items-center gap-2 w-full h-10 px-3 rounded-md border border-border bg-card text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        data-testid={testId}
+      >
+        <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+        <span className={value ? "text-foreground" : "text-muted-foreground"}>
+          {value ? format(parseISO(value), "d MMM yyyy") : placeholder}
+        </span>
+        {value && (
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={(e) => { e.stopPropagation(); onChange(""); }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); onChange(""); } }}
+            className="ml-auto text-muted-foreground hover:text-foreground"
+          >
+            <X className="w-3 h-3" />
+          </span>
+        )}
+      </button>
+      <input
+        ref={inputRef}
+        type="date"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+        tabIndex={-1}
+        aria-hidden="true"
+      />
+    </div>
+  );
+}
 
 function normalizeCategoryForSubcategory(category: string): string {
   const lower = category.toLowerCase();
@@ -275,24 +324,22 @@ export default function DeedHistoryPage() {
               <label className="text-xs font-medium text-muted-foreground mb-1 block">
                 {t('deedHistory.startDate')}
               </label>
-              <Input
-                type="date"
+              <DatePickerButton
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="bg-card border-border"
-                data-testid="input-start-date"
+                onChange={setStartDate}
+                placeholder={t('deedHistory.selectDate')}
+                testId="input-start-date"
               />
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1 block">
                 {t('deedHistory.endDate')}
               </label>
-              <Input
-                type="date"
+              <DatePickerButton
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="bg-card border-border"
-                data-testid="input-end-date"
+                onChange={setEndDate}
+                placeholder={t('deedHistory.selectDate')}
+                testId="input-end-date"
               />
             </div>
           </div>

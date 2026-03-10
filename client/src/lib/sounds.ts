@@ -7,22 +7,36 @@ export const NOTIFICATION_SOUNDS = [
 
 export type SoundId = typeof NOTIFICATION_SOUNDS[number]["id"];
 
-function createBellTone(ctx: AudioContext, freq: number, startTime: number, duration: number): void {
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
+function createBellNote(ctx: AudioContext, freq: number, startTime: number, decay: number, volume = 0.5): void {
+  const harmonics = [
+    { ratio: 1,    gain: 1.0,  decayMult: 1.0  },
+    { ratio: 2,    gain: 0.5,  decayMult: 0.7  },
+    { ratio: 3,    gain: 0.25, decayMult: 0.5  },
+    { ratio: 4.2,  gain: 0.12, decayMult: 0.35 },
+  ];
 
-  osc.connect(gain);
-  gain.connect(ctx.destination);
+  const attackTime = 0.006;
 
-  osc.type = "sine";
-  osc.frequency.setValueAtTime(freq, startTime);
-  osc.frequency.exponentialRampToValueAtTime(freq * 0.5, startTime + duration);
+  for (const h of harmonics) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
 
-  gain.gain.setValueAtTime(0.4, startTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
 
-  osc.start(startTime);
-  osc.stop(startTime + duration);
+    osc.type = "sine";
+    osc.frequency.value = freq * h.ratio;
+
+    const partialDecay = decay * h.decayMult;
+    const peakGain = volume * h.gain;
+
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(peakGain, startTime + attackTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + attackTime + partialDecay);
+
+    osc.start(startTime);
+    osc.stop(startTime + attackTime + partialDecay + 0.05);
+  }
 }
 
 export function playNotificationSound(soundId: string): void {
@@ -30,19 +44,20 @@ export function playNotificationSound(soundId: string): void {
 
   try {
     const ctx = new AudioContext();
+    const t = ctx.currentTime;
 
     if (soundId === "chime") {
-      createBellTone(ctx, 880, ctx.currentTime, 0.8);
+      createBellNote(ctx, 880, t, 1.4, 0.45);
     } else if (soundId === "double") {
-      createBellTone(ctx, 880, ctx.currentTime, 0.5);
-      createBellTone(ctx, 1046, ctx.currentTime + 0.3, 0.6);
+      createBellNote(ctx, 659, t, 1.0, 0.4);
+      createBellNote(ctx, 988, t + 0.28, 1.2, 0.4);
     } else if (soundId === "ding") {
-      createBellTone(ctx, 660, ctx.currentTime, 0.5);
+      createBellNote(ctx, 554, t, 0.7, 0.35);
     }
 
-    setTimeout(() => ctx.close(), 2000);
+    setTimeout(() => ctx.close(), 3000);
   } catch {
-    // AudioContext not available (e.g. server-side or restricted)
+    // AudioContext not available
   }
 }
 

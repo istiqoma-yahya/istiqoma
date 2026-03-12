@@ -641,6 +641,7 @@ function ConsistencyCalendar({
 
   const getCompletionStatus = (achieved: number, targetVal: number): DayStatus => {
     if (isLimitType) {
+      if (achieved === 0) return "no-data";
       if (achieved <= targetVal) return "completed";
       return "missed";
     }

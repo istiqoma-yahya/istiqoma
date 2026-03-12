@@ -641,8 +641,7 @@ function ConsistencyCalendar({
 
   const getCompletionStatus = (achieved: number, targetVal: number): DayStatus => {
     if (isLimitType) {
-      if (achieved === 0) return "completed";
-      if (achieved <= targetVal) return "partial";
+      if (achieved <= targetVal) return "completed";
       return "missed";
     }
     if (achieved >= targetVal) return "completed";
@@ -751,15 +750,15 @@ function ConsistencyCalendar({
       return "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300";
     }
     if (status === "missed") {
-      return "bg-muted/30 text-muted-foreground";
+      return "bg-transparent text-muted-foreground";
     }
     if (status === "future") {
       return "bg-transparent text-muted-foreground/40";
     }
     if (interactive) {
-      return "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:ring-1 hover:ring-primary/30";
+      return "bg-transparent text-muted-foreground hover:bg-muted/50 hover:ring-1 hover:ring-primary/30";
     }
-    return "bg-muted/20 text-muted-foreground/50";
+    return "bg-transparent text-muted-foreground/50";
   };
 
   const handleToggleCheckbox = useCallback(async (date: Date) => {
@@ -949,7 +948,7 @@ function ConsistencyCalendar({
             <span className="text-xs text-muted-foreground">Sebagian</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-muted/30" />
+            <div className="w-3 h-3 rounded-sm border border-muted-foreground/30" />
             <span className="text-xs text-muted-foreground">Belum</span>
           </div>
         </div>

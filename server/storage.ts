@@ -40,6 +40,7 @@ export interface IStorage {
   getTargetHistory(targetId: number, userId: string, limit?: number): Promise<TargetHistory[]>;
   getTargetHistoryWithStreak(targetId: number, userId: string, limit?: number): Promise<TargetHistoryWithStreak>;
   calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack?: number): Promise<TargetHistory[]>;
+  getDeedsForTargetOnDate(targetId: number, userId: string, dateStr: string): Promise<Deed[]>;
   getPushSubscription(userId: string): Promise<PushSubscription | null>;
   savePushSubscription(userId: string, subscription: InsertPushSubscription): Promise<PushSubscription>;
   updatePushSubscriptionSettings(userId: string, settings: Partial<InsertPushSubscription>): Promise<PushSubscription | null>;
@@ -488,6 +489,46 @@ export class DatabaseStorage implements IStorage {
     return savedHistory.sort((a, b) => 
       new Date(b.periodEnd).getTime() - new Date(a.periodEnd).getTime()
     );
+  }
+
+  async getDeedsForTargetOnDate(targetId: number, userId: string, dateStr: string): Promise<Deed[]> {
+    const target = await db
+      .select()
+      .from(targets)
+      .where(and(eq(targets.id, targetId), eq(targets.userId, userId)))
+      .limit(1);
+
+    if (!target.length) {
+      return [];
+    }
+
+    const t = target[0];
+    const dateInUserTz = new Date(dateStr + "T00:00:00");
+    const dayStart = fromZonedTime(startOfDay(dateInUserTz), DEFAULT_TIMEZONE);
+    const dayEnd = fromZonedTime(endOfDay(dateInUserTz), DEFAULT_TIMEZONE);
+
+    const userDeeds = await db
+      .select()
+      .from(deeds)
+      .where(
+        and(
+          eq(deeds.userId, userId),
+          gte(deeds.createdAt, dayStart),
+          lte(deeds.createdAt, dayEnd)
+        )
+      );
+
+    return userDeeds.filter((deed) => {
+      const matchesCategory = matchesFastingCategories(deed.category, t.category) || deed.category === t.category;
+      const matchesDzikirType = !t.dzikirType || deed.dzikirType === t.dzikirType;
+      const matchesSholatType = !t.sholatType || deed.sholatType === t.sholatType;
+      const matchesFastingType = !t.fastingType || deed.fastingType === t.fastingType;
+      const matchesQuranUnit = !t.quranUnit || deed.quranUnit === t.quranUnit;
+      const matchesSedekahType = !t.sedekahType || deed.sedekahType === t.sedekahType;
+      const matchesIsJamaah = t.isJamaah === null || t.isJamaah === undefined || deed.isJamaah === t.isJamaah;
+      const matchesCustomUnit = !t.customUnit || deed.customUnit === t.customUnit || !deed.customUnit;
+      return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit;
+    });
   }
 
   async getPushSubscription(userId: string): Promise<PushSubscription | null> {

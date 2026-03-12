@@ -189,6 +189,15 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
+    deedsForDate: {
+      method: "GET" as const,
+      path: "/api/targets/:id/deeds-for-date",
+      responses: {
+        200: z.array(z.custom<typeof deeds.$inferSelect>()),
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
     detail: {
       method: "GET" as const,
       path: "/api/targets/:id/detail",

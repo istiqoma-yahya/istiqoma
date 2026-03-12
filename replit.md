@@ -129,6 +129,14 @@ Push notifications include a user-configurable sound preference:
 - **Data Fetching**: `@tanstack/react-query`
 - **Auth**: `passport`, `openid-client`, `express-session`
 
+### Interactive Calendar (Target Detail Page)
+The `ConsistencyCalendar` in `TargetDetailPage.tsx` supports two interaction modes:
+- **Checkbox mode** (targetValue=1): Tap past/today dates to toggle completion (creates/deletes deed)
+- **Increment mode** (targetValue>1): Tap opens `CalendarDateProgressDialog` with +/- controls and circular progress rings
+- Future dates are locked (non-interactive)
+- Today's status is fetched in real-time via `GET /api/targets/:id/deeds-for-date?date=YYYY-MM-DD` (history excludes current day)
+- Backend `getDeedsForTargetOnDate` in `server/storage.ts` matches deeds using the same predicates as target progress (including `isJamaah`)
+
 ### Environment Variables Required
 - `DATABASE_URL` - PostgreSQL connection string
 - `SESSION_SECRET` - Secret for session encryption

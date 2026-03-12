@@ -270,6 +270,20 @@ export async function registerRoutes(
     res.json(result);
   });
 
+  app.get(api.targets.deedsForDate.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+    const dateStr = req.query.date as string;
+    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      return res.status(400).json({ message: "Invalid date format. Use YYYY-MM-DD" });
+    }
+    const matchingDeeds = await storage.getDeedsForTargetOnDate(id, userId, dateStr);
+    res.json(matchingDeeds);
+  });
+
   app.get(api.targets.detail.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
     const id = parseInt(req.params.id);

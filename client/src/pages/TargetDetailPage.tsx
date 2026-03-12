@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -18,11 +18,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 import { getFadhilahForCategory } from "@/lib/fadhilah";
 import { getTargetDisplayTitle, getTargetCategoryLine, getTargetUnitLabel } from "@/lib/targets";
 import { formatNumber } from "@/lib/utils";
 import { useDeleteTarget } from "@/hooks/use-targets";
-import type { TargetWithProgress, TargetHistory } from "@shared/schema";
+import type { TargetWithProgress, TargetHistory, Deed } from "@shared/schema";
 import {
   BarChart,
   Bar,
@@ -49,7 +58,9 @@ import {
   Trash2,
   Bell,
   Plus,
+  Minus,
   X,
+  Check,
 } from "lucide-react";
 import {
   format,
@@ -64,6 +75,7 @@ import {
   isToday,
 } from "date-fns";
 import { id as idLocale, enUS } from "date-fns/locale";
+import { api } from "@shared/routes";
 
 interface TargetDetailData {
   target: TargetWithProgress;
@@ -185,17 +197,269 @@ function HighlightCards({
 
 type DayStatus = "completed" | "partial" | "missed" | "future" | "no-data";
 
+function CircularProgress({ percentage, size = 32 }: { percentage: number; size?: number }) {
+  const strokeWidth = 3;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (Math.min(100, percentage) / 100) * circumference;
+
+  return (
+    <svg width={size} height={size} className="absolute inset-0 m-auto">
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        className="text-muted/40"
+      />
+      {percentage > 0 && (
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className="text-primary"
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        />
+      )}
+    </svg>
+  );
+}
+
+function CalendarDateProgressDialog({
+  isOpen,
+  onClose,
+  date,
+  target,
+  onProgressUpdated,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  date: Date | null;
+  target: TargetWithProgress;
+  onProgressUpdated: () => void;
+}) {
+  const { t, i18n } = useTranslation();
+  const { toast } = useToast();
+  const [incrementValue, setIncrementValue] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const dateStr = date ? format(date, "yyyy-MM-dd") : "";
+  const dateLocale = i18n.language === "id" ? idLocale : enUS;
+
+  const { data: existingDeeds, isLoading: isLoadingDeeds } = useQuery<Deed[]>({
+    queryKey: ['/api/targets', target.id, 'deeds-for-date', dateStr],
+    queryFn: async () => {
+      const res = await fetch(`/api/targets/${target.id}/deeds-for-date?date=${dateStr}`, {
+        credentials: "include",
+      });
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: isOpen && !!date,
+  });
+
+  const currentDayProgress = useMemo(() => {
+    if (!existingDeeds) return 0;
+    return existingDeeds.reduce((sum, d) => sum + (d.quantity || 1), 0);
+  }, [existingDeeds]);
+
+  const newProgress = currentDayProgress + incrementValue;
+  const percentComplete = Math.min(100, (newProgress / target.targetValue) * 100);
+
+  const handleSave = async () => {
+    if (!date || incrementValue < 1) return;
+    setIsSaving(true);
+
+    try {
+      const targetTitle = target.name || target.category;
+      const noon = new Date(date);
+      noon.setHours(12, 0, 0, 0);
+
+      const deedData: Record<string, unknown> = {
+        description: t("targets.deedCreatedFromTarget", { target: targetTitle }),
+        category: target.category,
+        points: incrementValue,
+        quantity: incrementValue,
+        createdAt: noon.toISOString(),
+      };
+
+      if (target.dzikirType) deedData.dzikirType = target.dzikirType;
+      if (target.sholatType) deedData.sholatType = target.sholatType;
+      if (target.fastingType) deedData.fastingType = target.fastingType;
+      if (target.isJamaah) deedData.isJamaah = target.isJamaah;
+      if (target.quranUnit) deedData.quranUnit = target.quranUnit;
+      if (target.sedekahType) deedData.sedekahType = target.sedekahType;
+      if (target.customUnit) deedData.customUnit = target.customUnit;
+
+      await apiRequest("POST", "/api/deeds", deedData);
+
+      await queryClient.invalidateQueries({ queryKey: [`/api/targets/${target.id}/detail`] });
+      await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+      await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/targets', target.id, 'deeds-for-date'] });
+
+      onProgressUpdated();
+      setIncrementValue(1);
+      onClose();
+      toast({ title: t("targets.targetUpdated") });
+    } catch {
+      toast({ title: t("common.error"), variant: "destructive" });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleClose = () => {
+    setIncrementValue(1);
+    onClose();
+  };
+
+  if (!date) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle data-testid="text-date-progress-title">
+            {t("targets.updateProgressTitle")}
+          </DialogTitle>
+          <DialogDescription data-testid="text-date-progress-date">
+            {format(date, "EEEE, d MMMM yyyy", { locale: dateLocale })}
+          </DialogDescription>
+        </DialogHeader>
+
+        {isLoadingDeeds ? (
+          <div className="flex justify-center py-6">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="space-y-5 py-3">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{t("targets.currentProgress")}:</span>
+                <span className="font-medium" data-testid="text-date-current-progress">
+                  {formatNumber(currentDayProgress)} / {formatNumber(target.targetValue)}
+                </span>
+              </div>
+              <Progress
+                value={Math.min(100, (currentDayProgress / target.targetValue) * 100)}
+                className="h-2 bg-gray-300 dark:bg-gray-600"
+              />
+            </div>
+
+            <div className="flex items-center justify-center gap-4">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIncrementValue((prev) => Math.max(1, prev - 1))}
+                disabled={incrementValue <= 1}
+                data-testid="button-date-decrement"
+              >
+                <Minus className="w-4 h-4" />
+              </Button>
+              <Input
+                type="number"
+                min={1}
+                value={incrementValue}
+                onChange={(e) => setIncrementValue(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-20 text-center"
+                data-testid="input-date-increment-value"
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIncrementValue((prev) => prev + 1)}
+                data-testid="button-date-increment"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{t("targets.newProgress")}:</span>
+                <span className="font-medium text-emerald-600 dark:text-emerald-400" data-testid="text-date-new-progress">
+                  {formatNumber(newProgress)} / {formatNumber(target.targetValue)}
+                </span>
+              </div>
+              <Progress
+                value={percentComplete}
+                className="h-2 bg-gray-300 dark:bg-gray-600"
+              />
+              {newProgress >= target.targetValue && (
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 text-center">
+                  {t("targets.targetWillBeCompleted")}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={handleClose} disabled={isSaving} data-testid="button-date-cancel">
+            {t("common.cancel")}
+          </Button>
+          <Button onClick={handleSave} disabled={isSaving || incrementValue < 1 || isLoadingDeeds} data-testid="button-date-save">
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {t("common.saving")}
+              </>
+            ) : (
+              t("common.save")
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function ConsistencyCalendar({
   history,
   period,
+  target,
+  onProgressUpdated,
 }: {
   history: TargetHistory[];
   period: string | null;
+  target: TargetWithProgress;
+  onProgressUpdated: () => void;
 }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const { i18n } = useTranslation();
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [isDateDialogOpen, setIsDateDialogOpen] = useState(false);
+  const [isToggling, setIsToggling] = useState<string | null>(null);
+  const { t, i18n } = useTranslation();
+  const { toast } = useToast();
 
   const dateLocale = i18n.language === "id" ? idLocale : enUS;
+  const isCheckboxMode = target.targetValue === 1;
+
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const { data: todayDeeds } = useQuery<Deed[]>({
+    queryKey: ['/api/targets', target.id, 'deeds-for-date', todayStr],
+    queryFn: async () => {
+      const res = await fetch(`/api/targets/${target.id}/deeds-for-date?date=${todayStr}`, {
+        credentials: "include",
+      });
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
+  const todayAchievedValue = useMemo(() => {
+    if (!todayDeeds) return 0;
+    return todayDeeds.reduce((sum, d) => sum + (d.quantity || 1), 0);
+  }, [todayDeeds]);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -205,6 +469,12 @@ function ConsistencyCalendar({
 
   const getDayStatus = (date: Date): DayStatus => {
     if (date > new Date()) return "future";
+
+    if (isToday(date)) {
+      if (todayAchievedValue >= target.targetValue) return "completed";
+      if (todayAchievedValue > 0) return "partial";
+      return "no-data";
+    }
 
     for (const entry of history) {
       const pStart = new Date(entry.periodStart);
@@ -227,94 +497,276 @@ function ConsistencyCalendar({
     return "no-data";
   };
 
+  const getDayProgressPercent = (date: Date): number => {
+    if (isToday(date)) {
+      if (target.targetValue > 0) {
+        return Math.min(100, (todayAchievedValue / target.targetValue) * 100);
+      }
+      return 0;
+    }
+
+    for (const entry of history) {
+      const pStart = new Date(entry.periodStart);
+      const pEnd = new Date(entry.periodEnd);
+
+      if (period === "daily") {
+        if (isSameDay(date, pStart) || (date >= pStart && date <= pEnd && isSameDay(pStart, pEnd))) {
+          if (entry.targetValue > 0) {
+            return Math.min(100, (entry.achievedValue / entry.targetValue) * 100);
+          }
+          return 0;
+        }
+      } else if (period === "weekly" || period === "monthly") {
+        if (date >= pStart && date <= pEnd) {
+          if (entry.targetValue > 0) {
+            return Math.min(100, (entry.achievedValue / entry.targetValue) * 100);
+          }
+          return 0;
+        }
+      }
+    }
+    return 0;
+  };
+
+  const isDateInteractive = (date: Date): boolean => {
+    const now = new Date();
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+    return date <= todayEnd;
+  };
+
+  const handleToggleCheckbox = useCallback(async (date: Date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    setIsToggling(dateStr);
+
+    try {
+      const res = await fetch(`/api/targets/${target.id}/deeds-for-date?date=${dateStr}`, {
+        credentials: "include",
+      });
+      const existingDeeds: Deed[] = res.ok ? await res.json() : [];
+
+      if (existingDeeds.length > 0) {
+        for (const deed of existingDeeds) {
+          await apiRequest("DELETE", `/api/deeds/${deed.id}`);
+        }
+      } else {
+        const targetTitle = target.name || target.category;
+        const noon = new Date(date);
+        noon.setHours(12, 0, 0, 0);
+
+        const deedData: Record<string, unknown> = {
+          description: t("targets.deedCreatedFromTarget", { target: targetTitle }),
+          category: target.category,
+          points: 1,
+          quantity: 1,
+          createdAt: noon.toISOString(),
+        };
+
+        if (target.dzikirType) deedData.dzikirType = target.dzikirType;
+        if (target.sholatType) deedData.sholatType = target.sholatType;
+        if (target.fastingType) deedData.fastingType = target.fastingType;
+        if (target.isJamaah) deedData.isJamaah = target.isJamaah;
+        if (target.quranUnit) deedData.quranUnit = target.quranUnit;
+        if (target.sedekahType) deedData.sedekahType = target.sedekahType;
+        if (target.customUnit) deedData.customUnit = target.customUnit;
+
+        await apiRequest("POST", "/api/deeds", deedData);
+      }
+
+      await queryClient.invalidateQueries({ queryKey: [`/api/targets/${target.id}/detail`] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/targets', target.id, 'deeds-for-date'] });
+      await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+      await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
+      onProgressUpdated();
+    } catch {
+      toast({ title: t("common.error"), variant: "destructive" });
+    } finally {
+      setIsToggling(null);
+    }
+  }, [target, t, toast, onProgressUpdated]);
+
+  const handleDayClick = useCallback((date: Date) => {
+    if (!isDateInteractive(date)) return;
+
+    if (isCheckboxMode) {
+      handleToggleCheckbox(date);
+    } else {
+      setSelectedDate(date);
+      setIsDateDialogOpen(true);
+    }
+  }, [isCheckboxMode, handleToggleCheckbox]);
+
   const dayLabels = ["Sn", "Sl", "Rb", "Km", "Jm", "Sb", "Mg"];
 
   const completedCount = daysInMonth.filter(d => getDayStatus(d) === "completed").length;
 
   return (
-    <Card className="p-4" data-testid="card-calendar">
-      <div className="flex items-center justify-between gap-2 mb-4">
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          data-testid="button-prev-month"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </Button>
-        <h3 className="text-sm font-semibold text-foreground" data-testid="text-calendar-month">
-          {format(currentMonth, "MMMM yyyy", { locale: dateLocale })}
-        </h3>
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          disabled={isSameMonth(currentMonth, new Date())}
-          data-testid="button-next-month"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </Button>
-      </div>
+    <>
+      <Card className="p-4" data-testid="card-calendar">
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            data-testid="button-prev-month"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <h3 className="text-sm font-semibold text-foreground" data-testid="text-calendar-month">
+            {format(currentMonth, "MMMM yyyy", { locale: dateLocale })}
+          </h3>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+            disabled={isSameMonth(currentMonth, new Date())}
+            data-testid="button-next-month"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
 
-      <div className="flex items-center gap-3 mb-4">
-        <Badge variant="secondary" className="text-xs" data-testid="badge-completed-count">
-          {formatNumber(completedCount)} hari tercapai
-        </Badge>
-      </div>
+        <div className="flex items-center gap-3 mb-4">
+          <Badge variant="secondary" className="text-xs" data-testid="badge-completed-count">
+            {formatNumber(completedCount)} hari tercapai
+          </Badge>
+          <span className="text-[10px] text-muted-foreground">
+            {isCheckboxMode ? "Ketuk tanggal untuk centang" : "Ketuk tanggal untuk update"}
+          </span>
+        </div>
 
-      <div className="grid grid-cols-7 gap-1 mb-2">
-        {dayLabels.map((label) => (
-          <div key={label} className="text-center text-xs text-muted-foreground font-medium py-1">
-            {label}
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-7 gap-1">
-        {Array.from({ length: adjustedStartDay }).map((_, i) => (
-          <div key={`empty-${i}`} className="aspect-square" />
-        ))}
-        {daysInMonth.map((date) => {
-          const status = getDayStatus(date);
-          const today = isToday(date);
-
-          let bgClass = "bg-muted/30";
-          if (status === "completed") bgClass = "bg-primary/80";
-          else if (status === "partial") bgClass = "bg-primary/30";
-          else if (status === "missed") bgClass = "bg-destructive/20";
-          else if (status === "future") bgClass = "bg-transparent";
-
-          let textClass = "text-muted-foreground";
-          if (status === "completed") textClass = "text-primary-foreground";
-          else if (today) textClass = "text-foreground font-bold";
-
-          return (
-            <div
-              key={date.toISOString()}
-              className={`aspect-square rounded-md flex items-center justify-center text-xs ${bgClass} ${textClass} ${today ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""}`}
-              data-testid={`calendar-day-${format(date, "yyyy-MM-dd")}`}
-            >
-              {date.getDate()}
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {dayLabels.map((label) => (
+            <div key={label} className="text-center text-xs text-muted-foreground font-medium py-1">
+              {label}
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
 
-      <div className="flex items-center gap-4 mt-4 justify-center">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-primary/80" />
-          <span className="text-xs text-muted-foreground">Tercapai</span>
+        <div className="grid grid-cols-7 gap-1">
+          {Array.from({ length: adjustedStartDay }).map((_, i) => (
+            <div key={`empty-${i}`} className="aspect-square" />
+          ))}
+          {daysInMonth.map((date) => {
+            const status = getDayStatus(date);
+            const today = isToday(date);
+            const interactive = isDateInteractive(date);
+            const dateStr = format(date, "yyyy-MM-dd");
+            const toggling = isToggling === dateStr;
+
+            if (isCheckboxMode) {
+              const isCompleted = status === "completed";
+              return (
+                <button
+                  key={date.toISOString()}
+                  type="button"
+                  disabled={!interactive || toggling}
+                  onClick={() => handleDayClick(date)}
+                  className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs relative transition-all duration-150 ${
+                    interactive ? "cursor-pointer active:scale-90" : "cursor-default"
+                  } ${
+                    isCompleted
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : status === "missed"
+                      ? "bg-destructive/15 text-muted-foreground"
+                      : status === "future"
+                      ? "bg-transparent text-muted-foreground/40"
+                      : interactive
+                      ? "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:ring-1 hover:ring-primary/30"
+                      : "bg-muted/30 text-muted-foreground"
+                  } ${today ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""}`}
+                  data-testid={`calendar-day-${dateStr}`}
+                >
+                  {toggling ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : isCompleted ? (
+                    <Check className="w-3.5 h-3.5 mb-0.5" strokeWidth={3} />
+                  ) : null}
+                  <span className={isCompleted ? "text-[9px] leading-none" : "text-xs"}>
+                    {date.getDate()}
+                  </span>
+                </button>
+              );
+            }
+
+            const progressPercent = getDayProgressPercent(date);
+
+            return (
+              <button
+                key={date.toISOString()}
+                type="button"
+                disabled={!interactive}
+                onClick={() => handleDayClick(date)}
+                className={`aspect-square rounded-lg flex items-center justify-center text-xs relative transition-all duration-150 ${
+                  interactive ? "cursor-pointer active:scale-90" : "cursor-default"
+                } ${
+                  status === "completed"
+                    ? "text-primary font-bold"
+                    : status === "partial"
+                    ? "text-primary/80"
+                    : status === "missed"
+                    ? "text-destructive/60"
+                    : status === "future"
+                    ? "text-muted-foreground/40"
+                    : interactive
+                    ? "text-muted-foreground hover:bg-muted/50 hover:ring-1 hover:ring-primary/30"
+                    : "text-muted-foreground"
+                } ${today ? "ring-2 ring-primary ring-offset-1 ring-offset-background rounded-lg" : ""}`}
+                data-testid={`calendar-day-${dateStr}`}
+              >
+                {status !== "future" && interactive && (
+                  <CircularProgress percentage={progressPercent} size={34} />
+                )}
+                <span className="relative z-10 leading-none">
+                  {date.getDate()}
+                </span>
+              </button>
+            );
+          })}
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-primary/30" />
-          <span className="text-xs text-muted-foreground">Sebagian</span>
+
+        <div className="flex items-center gap-4 mt-4 justify-center">
+          {isCheckboxMode ? (
+            <>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-sm bg-primary flex items-center justify-center">
+                  <Check className="w-2 h-2 text-primary-foreground" strokeWidth={3} />
+                </div>
+                <span className="text-xs text-muted-foreground">Tercapai</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-sm bg-destructive/15" />
+                <span className="text-xs text-muted-foreground">Belum</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary/20" />
+                <span className="text-xs text-muted-foreground">Tercapai</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-full border-2 border-primary/50 bg-transparent" />
+                <span className="text-xs text-muted-foreground">Sebagian</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-sm bg-destructive/20" />
+                <span className="text-xs text-muted-foreground">Belum</span>
+              </div>
+            </>
+          )}
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-destructive/20" />
-          <span className="text-xs text-muted-foreground">Belum</span>
-        </div>
-      </div>
-    </Card>
+      </Card>
+
+      {!isCheckboxMode && (
+        <CalendarDateProgressDialog
+          isOpen={isDateDialogOpen}
+          onClose={() => setIsDateDialogOpen(false)}
+          date={selectedDate}
+          target={target}
+          onProgressUpdated={onProgressUpdated}
+        />
+      )}
+    </>
   );
 }
 
@@ -692,7 +1144,14 @@ export default function TargetDetailPage() {
           unitLabel={unitLabel}
         />
 
-        <ConsistencyCalendar history={history} period={target.period} />
+        <ConsistencyCalendar
+          history={history}
+          period={target.period}
+          target={target}
+          onProgressUpdated={() => {
+            queryClient.invalidateQueries({ queryKey: [`/api/targets/${target.id}/detail`] });
+          }}
+        />
 
         <TrendChart history={history} period={target.period} />
 

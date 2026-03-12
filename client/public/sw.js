@@ -77,7 +77,8 @@ self.addEventListener('push', function(event) {
       url: data.url || '/'
     },
     tag: data.tag || 'istiqoma-notification',
-    requireInteraction: data.requireInteraction || false
+    requireInteraction: data.requireInteraction || false,
+    silent: false
   };
 
   event.waitUntil(

@@ -21,7 +21,7 @@ import DeedHistoryPage from "@/pages/DeedHistoryPage";
 import { useDeeds } from "@/hooks/use-deeds";
 import NotFound from "@/pages/not-found";
 import { NotificationPrompt } from "@/components/NotificationPrompt";
-import { registerNotificationSoundListener } from "@/lib/sounds";
+import { registerNotificationSoundListener, setupAudioUnlock } from "@/lib/sounds";
 
 function EditDeedRoute({ params }: { params: { id: string } }) {
   const { data: deeds } = useDeeds();
@@ -57,6 +57,7 @@ function Router() {
 
 function App() {
   useEffect(() => {
+    setupAudioUnlock();
     return registerNotificationSoundListener();
   }, []);
 

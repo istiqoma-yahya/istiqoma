@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Bell, BellOff, Send, Clock, MapPin, Play } from "lucide-react";
-import { NOTIFICATION_SOUNDS, playNotificationSound } from "@/lib/sounds";
+import { NOTIFICATION_SOUNDS, playNotificationSound, unlockAudio } from "@/lib/sounds";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -307,6 +307,7 @@ export function NotificationSettings() {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
+                            unlockAudio();
                             playNotificationSound(sound.id);
                           }}
                           className="p-1 rounded hover:bg-background/50 text-muted-foreground hover:text-foreground transition-colors"

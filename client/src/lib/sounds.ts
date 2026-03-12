@@ -7,58 +7,76 @@ export const NOTIFICATION_SOUNDS = [
 
 export type SoundId = typeof NOTIFICATION_SOUNDS[number]["id"];
 
-function createBellNote(ctx: AudioContext, freq: number, startTime: number, decay: number, volume = 0.5): void {
-  const harmonics = [
-    { ratio: 1,    gain: 1.0,  decayMult: 1.0  },
-    { ratio: 2,    gain: 0.5,  decayMult: 0.7  },
-    { ratio: 3,    gain: 0.25, decayMult: 0.5  },
-    { ratio: 4.2,  gain: 0.12, decayMult: 0.35 },
-  ];
+let audioUnlocked = false;
+const audioElements = new Map<string, HTMLAudioElement>();
 
-  const attackTime = 0.006;
+const SOUND_URLS: Record<string, string> = {
+  chime: "/sounds/chime.wav",
+  double: "/sounds/double.wav",
+  ding: "/sounds/ding.wav",
+};
 
-  for (const h of harmonics) {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+function getOrCreateAudio(soundId: string): HTMLAudioElement | null {
+  const url = SOUND_URLS[soundId];
+  if (!url) return null;
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.type = "sine";
-    osc.frequency.value = freq * h.ratio;
-
-    const partialDecay = decay * h.decayMult;
-    const peakGain = volume * h.gain;
-
-    gain.gain.setValueAtTime(0, startTime);
-    gain.gain.linearRampToValueAtTime(peakGain, startTime + attackTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + attackTime + partialDecay);
-
-    osc.start(startTime);
-    osc.stop(startTime + attackTime + partialDecay + 0.05);
+  let audio = audioElements.get(soundId);
+  if (!audio) {
+    audio = new Audio(url);
+    audio.preload = "auto";
+    audioElements.set(soundId, audio);
   }
+  return audio;
 }
 
-export function playNotificationSound(soundId: string): void {
+export async function playNotificationSound(soundId: string): Promise<void> {
   if (soundId === "none") return;
 
   try {
-    const ctx = new AudioContext();
-    const t = ctx.currentTime;
+    const audio = getOrCreateAudio(soundId);
+    if (!audio) return;
 
-    if (soundId === "chime") {
-      createBellNote(ctx, 880, t, 1.4, 0.45);
-    } else if (soundId === "double") {
-      createBellNote(ctx, 659, t, 1.0, 0.4);
-      createBellNote(ctx, 988, t + 0.28, 1.2, 0.4);
-    } else if (soundId === "ding") {
-      createBellNote(ctx, 554, t, 0.7, 0.35);
-    }
-
-    setTimeout(() => ctx.close(), 3000);
+    audio.currentTime = 0;
+    audio.volume = 1.0;
+    await audio.play();
   } catch {
-    // AudioContext not available
+    try {
+      const freshAudio = new Audio(SOUND_URLS[soundId]);
+      freshAudio.volume = 1.0;
+      await freshAudio.play();
+    } catch {
+      // Audio playback not available
+    }
   }
+}
+
+export function unlockAudio(): void {
+  if (audioUnlocked) return;
+
+  try {
+    const silentAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
+    silentAudio.volume = 0;
+    silentAudio.play().then(() => {
+      audioUnlocked = true;
+
+      Object.keys(SOUND_URLS).forEach((id) => {
+        getOrCreateAudio(id);
+      });
+    }).catch(() => {});
+  } catch {
+    // Audio not available
+  }
+}
+
+export function setupAudioUnlock(): void {
+  const events = ["touchstart", "touchend", "click", "keydown"];
+
+  const handler = () => {
+    unlockAudio();
+    events.forEach((e) => document.removeEventListener(e, handler, true));
+  };
+
+  events.forEach((e) => document.addEventListener(e, handler, { capture: true, once: false, passive: true }));
 }
 
 export function registerNotificationSoundListener(): () => void {

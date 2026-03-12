@@ -74,11 +74,13 @@ import {
   addMonths,
   isSameMonth,
   isSameDay,
-  isToday,
   isBefore,
   isAfter,
 } from "date-fns";
 import { id as idLocale, enUS } from "date-fns/locale";
+import { toZonedTime } from "date-fns-tz";
+
+const USER_TIMEZONE = "Asia/Jakarta";
 import { api } from "@shared/routes";
 
 interface TargetDetailData {
@@ -467,8 +469,8 @@ function PeriodProgressBars({
     let total = target.targetValue;
     let found = false;
 
-    const now = new Date();
-    const isCurrentMonth = isSameMonth(currentMonth, now);
+    const nowInTz = toZonedTime(new Date(), USER_TIMEZONE);
+    const isCurrentMonth = isSameMonth(currentMonth, nowInTz);
     if (isCurrentMonth) {
       achieved = target.currentValue;
       found = true;
@@ -521,7 +523,7 @@ function PeriodProgressBars({
       cursor.setDate(cursor.getDate() + 1);
     }
 
-    const now = new Date();
+    const nowInTz = toZonedTime(new Date(), USER_TIMEZONE);
 
     return (
       <div className="mb-4 space-y-2" data-testid="period-progress-weekly">
@@ -529,7 +531,7 @@ function PeriodProgressBars({
           let achieved = 0;
           let total = target.targetValue;
 
-          const isCurrentWeek = now >= week.wStart && now <= week.wEnd;
+          const isCurrentWeek = nowInTz >= week.wStart && nowInTz <= week.wEnd;
           if (isCurrentWeek) {
             achieved = target.currentValue;
           }
@@ -579,7 +581,7 @@ function ConsistencyCalendar({
   target: TargetWithProgress;
   onProgressUpdated: () => void;
 }) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(() => toZonedTime(new Date(), USER_TIMEZONE));
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isDateDialogOpen, setIsDateDialogOpen] = useState(false);
   const [isToggling, setIsToggling] = useState<string | null>(null);
@@ -590,7 +592,11 @@ function ConsistencyCalendar({
   const isCheckboxMode = target.targetValue === 1;
   const isOneTime = target.recurrence === "oneTime";
 
-  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const nowInTzRef = toZonedTime(new Date(), USER_TIMEZONE);
+  const todayStr = format(nowInTzRef, "yyyy-MM-dd");
+  const isTodayInTz = useCallback((date: Date): boolean => {
+    return format(date, "yyyy-MM-dd") === todayStr;
+  }, [todayStr]);
   const { data: todayDeeds } = useQuery<Deed[]>({
     queryKey: ['/api/targets', target.id, 'deeds-for-date', todayStr],
     queryFn: async () => {
@@ -622,12 +628,12 @@ function ConsistencyCalendar({
 
   const currentPeriodRange = useMemo(() => {
     if (isOneTime || !period || period === "daily") return null;
-    const now = new Date();
+    const nowInTz = toZonedTime(new Date(), USER_TIMEZONE);
     if (period === "weekly") {
-      return { start: startOfWeek(now, { weekStartsOn: 1 }), end: endOfWeek(now, { weekStartsOn: 1 }) };
+      return { start: startOfWeek(nowInTz, { weekStartsOn: 1 }), end: endOfWeek(nowInTz, { weekStartsOn: 1 }) };
     }
     if (period === "monthly") {
-      return { start: startOfMonth(now), end: endOfMonth(now) };
+      return { start: startOfMonth(nowInTz), end: endOfMonth(nowInTz) };
     }
     return null;
   }, [isOneTime, period]);
@@ -651,8 +657,8 @@ function ConsistencyCalendar({
   };
 
   const getDayStatus = (date: Date): DayStatus => {
-    const now = new Date();
-    const isFuture = date > now;
+    const nowInTz = toZonedTime(new Date(), USER_TIMEZONE);
+    const isFuture = date > nowInTz;
 
     if (isOneTime) {
       if (!isDateInTargetRange(date)) return "no-data";
@@ -667,7 +673,7 @@ function ConsistencyCalendar({
 
     if (isFuture) return "future";
 
-    if (period === "daily" && isToday(date)) {
+    if (period === "daily" && isTodayInTz(date)) {
       return getCompletionStatus(todayAchievedValue, target.targetValue);
     }
 
@@ -698,7 +704,7 @@ function ConsistencyCalendar({
       return target.percentComplete;
     }
 
-    if (period === "daily" && isToday(date)) {
+    if (period === "daily" && isTodayInTz(date)) {
       if (target.targetValue > 0) {
         return Math.min(100, (todayAchievedValue / target.targetValue) * 100);
       }
@@ -736,8 +742,8 @@ function ConsistencyCalendar({
   };
 
   const isDateInteractive = (date: Date): boolean => {
-    const now = new Date();
-    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+    const nowInTz = toZonedTime(new Date(), USER_TIMEZONE);
+    const todayEnd = new Date(nowInTz.getFullYear(), nowInTz.getMonth(), nowInTz.getDate(), 23, 59, 59);
     if (date > todayEnd) return false;
     if (isOneTime && !isDateInTargetRange(date)) return false;
     return true;
@@ -846,7 +852,7 @@ function ConsistencyCalendar({
             size="icon"
             variant="ghost"
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            disabled={isSameMonth(currentMonth, new Date())}
+            disabled={isSameMonth(currentMonth, toZonedTime(new Date(), USER_TIMEZONE))}
             data-testid="button-next-month"
           >
             <ChevronRight className="w-4 h-4" />
@@ -883,7 +889,7 @@ function ConsistencyCalendar({
           ))}
           {daysInMonth.map((date) => {
             const status = getDayStatus(date);
-            const today = isToday(date);
+            const today = isTodayInTz(date);
             const interactive = isDateInteractive(date);
             const dateStr = format(date, "yyyy-MM-dd");
             const toggling = isToggling === dateStr;

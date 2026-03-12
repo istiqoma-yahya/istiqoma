@@ -452,12 +452,12 @@ export class DatabaseStorage implements IStorage {
         const matchesQuranUnit = !t.quranUnit || deed.quranUnit === t.quranUnit;
         const matchesSedekahType = !t.sedekahType || deed.sedekahType === t.sedekahType;
         const matchesCustomUnit = !t.customUnit || deed.customUnit === t.customUnit || !deed.customUnit;
+        const matchesIsJamaah = t.isJamaah === null || t.isJamaah === undefined || deed.isJamaah === t.isJamaah;
         
-        // All deeds are now good deeds - count matching deeds
-        return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesCustomUnit && inPeriod;
+        return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit && inPeriod;
       });
 
-      const achievedValue = deedsInPeriod.reduce((sum, deed) => sum + deed.points, 0);
+      const achievedValue = deedsInPeriod.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
       
       // For limit targets: success means staying at or below the limit
       // For achievement targets: success means reaching or exceeding the target

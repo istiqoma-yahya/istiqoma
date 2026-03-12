@@ -141,7 +141,8 @@ The `ConsistencyCalendar` in `TargetDetailPage.tsx` supports two interaction mod
   - Monthly targets: single monthly progress bar
   - One-time targets: overall progress bar using `currentValue/targetValue`
   - Daily targets: no period bars (use circular rings per cell instead)
-- **Current period aggregation**: Weekly/monthly targets use `target.currentValue` for the current period's progress (since history excludes the current period); past periods use history data
+- **Current period aggregation**: Weekly/monthly targets use `target.currentValue` for the current period's progress (since history excludes the current period); past periods use history data (both `currentValue` and history use `deed.quantity` for consistency)
+- **Timezone consistency**: All client-side time calculations use `Asia/Jakarta` timezone via `toZonedTime` from `date-fns-tz`, matching the server's `DEFAULT_TIMEZONE` — this includes week/month boundaries, today detection, and date interactivity checks
 - **Consistent date coloring** across ALL target types:
   - Completed: `bg-emerald-500` (green) — uniform for checkbox and increment modes
   - Partial: `bg-amber-100` (amber)

@@ -66,6 +66,8 @@ import {
   format,
   startOfMonth,
   endOfMonth,
+  startOfWeek,
+  endOfWeek,
   eachDayOfInterval,
   getDay,
   subMonths,
@@ -73,6 +75,8 @@ import {
   isSameMonth,
   isSameDay,
   isToday,
+  isBefore,
+  isAfter,
 } from "date-fns";
 import { id as idLocale, enUS } from "date-fns/locale";
 import { api } from "@shared/routes";
@@ -423,6 +427,152 @@ function CalendarDateProgressDialog({
   );
 }
 
+function PeriodProgressBars({
+  history,
+  period,
+  target,
+  currentMonth,
+  todayAchievedValue,
+}: {
+  history: TargetHistory[];
+  period: string | null;
+  target: TargetWithProgress;
+  currentMonth: Date;
+  todayAchievedValue: number;
+}) {
+  const { t } = useTranslation();
+  const isOneTime = target.recurrence === "oneTime";
+
+  if (period === "daily" && !isOneTime) return null;
+
+  if (isOneTime) {
+    const pct = target.percentComplete;
+    const achieved = target.currentValue;
+    const total = target.targetValue;
+    return (
+      <div className="mb-4 space-y-1.5" data-testid="period-progress-onetime">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">{t("targets.overallProgress", "Keseluruhan")}</span>
+          <span className="font-medium text-foreground">
+            {formatNumber(achieved)} / {formatNumber(total)} ({pct}%)
+          </span>
+        </div>
+        <Progress value={pct} className="h-2 bg-gray-200 dark:bg-gray-700" />
+      </div>
+    );
+  }
+
+  if (period === "monthly") {
+    const mStart = startOfMonth(currentMonth);
+    const mEnd = endOfMonth(currentMonth);
+    let achieved = 0;
+    let total = target.targetValue;
+    let found = false;
+
+    const now = new Date();
+    const isCurrentMonth = isSameMonth(currentMonth, now);
+    if (isCurrentMonth) {
+      achieved = target.currentValue;
+      found = true;
+    }
+
+    for (const entry of history) {
+      const pStart = new Date(entry.periodStart);
+      const pEnd = new Date(entry.periodEnd);
+      if (pStart <= mEnd && pEnd >= mStart) {
+        if (!isCurrentMonth) {
+          achieved = entry.achievedValue;
+        }
+        total = entry.targetValue;
+        found = true;
+        break;
+      }
+    }
+    if (!found) return null;
+
+    const pct = total > 0 ? Math.min(100, Math.round((achieved / total) * 100)) : 0;
+    return (
+      <div className="mb-4 space-y-1.5" data-testid="period-progress-monthly">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">{t("targets.monthlyProgress", "Bulanan")}</span>
+          <span className="font-medium text-foreground">
+            {formatNumber(achieved)} / {formatNumber(total)} ({pct}%)
+          </span>
+        </div>
+        <Progress value={pct} className="h-2 bg-gray-200 dark:bg-gray-700" />
+      </div>
+    );
+  }
+
+  if (period === "weekly") {
+    const mStart = startOfMonth(currentMonth);
+    const mEnd = endOfMonth(currentMonth);
+    const weeks: { wStart: Date; wEnd: Date; label: string }[] = [];
+    let cursor = startOfWeek(mStart, { weekStartsOn: 1 });
+
+    while (cursor <= mEnd) {
+      const wEnd = endOfWeek(cursor, { weekStartsOn: 1 });
+      const displayStart = cursor < mStart ? mStart : cursor;
+      const displayEnd = wEnd > mEnd ? mEnd : wEnd;
+      weeks.push({
+        wStart: cursor,
+        wEnd,
+        label: `${format(displayStart, "d")}–${format(displayEnd, "d")}`,
+      });
+      cursor = new Date(wEnd);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    const now = new Date();
+
+    return (
+      <div className="mb-4 space-y-2" data-testid="period-progress-weekly">
+        {weeks.map((week, idx) => {
+          let achieved = 0;
+          let total = target.targetValue;
+
+          const isCurrentWeek = now >= week.wStart && now <= week.wEnd;
+          if (isCurrentWeek) {
+            achieved = target.currentValue;
+          }
+
+          for (const entry of history) {
+            const pStart = new Date(entry.periodStart);
+            const pEnd = new Date(entry.periodEnd);
+            if (pStart <= week.wEnd && pEnd >= week.wStart) {
+              if (!isCurrentWeek) {
+                achieved = entry.achievedValue;
+              }
+              total = entry.targetValue;
+              break;
+            }
+          }
+
+          const isFutureWeek = week.wStart > now;
+          if (isFutureWeek) return null;
+
+          const pct = total > 0 ? Math.min(100, Math.round((achieved / total) * 100)) : 0;
+          return (
+            <div key={idx} className="space-y-0.5">
+              <div className="flex items-center justify-between text-[10px]">
+                <span className={`text-muted-foreground ${isCurrentWeek ? "font-semibold text-foreground" : ""}`}>
+                  {week.label}
+                </span>
+                <span className="font-medium text-foreground">
+                  {formatNumber(achieved)}/{formatNumber(total)}
+                </span>
+              </div>
+              <Progress value={pct} className="h-1.5 bg-gray-200 dark:bg-gray-700" />
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  return null;
+}
+
 function ConsistencyCalendar({
   history,
   period,
@@ -443,6 +593,7 @@ function ConsistencyCalendar({
 
   const dateLocale = i18n.language === "id" ? idLocale : enUS;
   const isCheckboxMode = target.targetValue === 1;
+  const isOneTime = target.recurrence === "oneTime";
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
   const { data: todayDeeds } = useQuery<Deed[]>({
@@ -467,12 +618,49 @@ function ConsistencyCalendar({
   const startDayOfWeek = getDay(monthStart);
   const adjustedStartDay = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
 
+  const isDateInTargetRange = useCallback((date: Date): boolean => {
+    if (!isOneTime) return true;
+    if (target.startDate && isBefore(date, new Date(new Date(target.startDate).toDateString()))) return false;
+    if (target.dueDate && isAfter(date, new Date(new Date(target.dueDate).toDateString()))) return false;
+    return true;
+  }, [isOneTime, target.startDate, target.dueDate]);
+
+  const currentPeriodRange = useMemo(() => {
+    if (isOneTime || !period || period === "daily") return null;
+    const now = new Date();
+    if (period === "weekly") {
+      return { start: startOfWeek(now, { weekStartsOn: 1 }), end: endOfWeek(now, { weekStartsOn: 1 }) };
+    }
+    if (period === "monthly") {
+      return { start: startOfMonth(now), end: endOfMonth(now) };
+    }
+    return null;
+  }, [isOneTime, period]);
+
+  const isInCurrentPeriod = useCallback((date: Date): boolean => {
+    if (!currentPeriodRange) return false;
+    return date >= currentPeriodRange.start && date <= currentPeriodRange.end;
+  }, [currentPeriodRange]);
+
   const getDayStatus = (date: Date): DayStatus => {
     if (date > new Date()) return "future";
 
-    if (isToday(date)) {
+    if (isOneTime) {
+      if (!isDateInTargetRange(date)) return "no-data";
+      if (target.currentValue >= target.targetValue) return "completed";
+      if (target.currentValue > 0) return "partial";
+      return "no-data";
+    }
+
+    if (period === "daily" && isToday(date)) {
       if (todayAchievedValue >= target.targetValue) return "completed";
       if (todayAchievedValue > 0) return "partial";
+      return "no-data";
+    }
+
+    if ((period === "weekly" || period === "monthly") && isInCurrentPeriod(date)) {
+      if (target.currentValue >= target.targetValue) return "completed";
+      if (target.currentValue > 0) return "partial";
       return "no-data";
     }
 
@@ -498,9 +686,21 @@ function ConsistencyCalendar({
   };
 
   const getDayProgressPercent = (date: Date): number => {
-    if (isToday(date)) {
+    if (isOneTime) {
+      if (!isDateInTargetRange(date)) return 0;
+      return target.percentComplete;
+    }
+
+    if (period === "daily" && isToday(date)) {
       if (target.targetValue > 0) {
         return Math.min(100, (todayAchievedValue / target.targetValue) * 100);
+      }
+      return 0;
+    }
+
+    if ((period === "weekly" || period === "monthly") && isInCurrentPeriod(date)) {
+      if (target.targetValue > 0) {
+        return Math.min(100, (target.currentValue / target.targetValue) * 100);
       }
       return 0;
     }
@@ -531,7 +731,28 @@ function ConsistencyCalendar({
   const isDateInteractive = (date: Date): boolean => {
     const now = new Date();
     const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-    return date <= todayEnd;
+    if (date > todayEnd) return false;
+    if (isOneTime && !isDateInTargetRange(date)) return false;
+    return true;
+  };
+
+  const getDayBgClass = (status: DayStatus, interactive: boolean): string => {
+    if (status === "completed") {
+      return "bg-emerald-500 dark:bg-emerald-600 text-white shadow-sm font-bold";
+    }
+    if (status === "partial") {
+      return "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300";
+    }
+    if (status === "missed") {
+      return "bg-destructive/10 text-muted-foreground";
+    }
+    if (status === "future") {
+      return "bg-transparent text-muted-foreground/40";
+    }
+    if (interactive) {
+      return "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:ring-1 hover:ring-primary/30";
+    }
+    return "bg-muted/20 text-muted-foreground/50";
   };
 
   const handleToggleCheckbox = useCallback(async (date: Date) => {
@@ -625,6 +846,14 @@ function ConsistencyCalendar({
           </Button>
         </div>
 
+        <PeriodProgressBars
+          history={history}
+          period={period}
+          target={target}
+          currentMonth={currentMonth}
+          todayAchievedValue={todayAchievedValue}
+        />
+
         <div className="flex items-center gap-3 mb-4">
           <Badge variant="secondary" className="text-xs" data-testid="badge-completed-count">
             {formatNumber(completedCount)} hari tercapai
@@ -652,6 +881,7 @@ function ConsistencyCalendar({
             const interactive = isDateInteractive(date);
             const dateStr = format(date, "yyyy-MM-dd");
             const toggling = isToggling === dateStr;
+            const bgClass = getDayBgClass(status, interactive);
 
             if (isCheckboxMode) {
               const isCompleted = status === "completed";
@@ -663,17 +893,7 @@ function ConsistencyCalendar({
                   onClick={() => handleDayClick(date)}
                   className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs relative transition-all duration-150 ${
                     interactive ? "cursor-pointer active:scale-90" : "cursor-default"
-                  } ${
-                    isCompleted
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : status === "missed"
-                      ? "bg-destructive/15 text-muted-foreground"
-                      : status === "future"
-                      ? "bg-transparent text-muted-foreground/40"
-                      : interactive
-                      ? "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:ring-1 hover:ring-primary/30"
-                      : "bg-muted/30 text-muted-foreground"
-                  } ${today ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""}`}
+                  } ${bgClass} ${today ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""}`}
                   data-testid={`calendar-day-${dateStr}`}
                 >
                   {toggling ? (
@@ -689,6 +909,7 @@ function ConsistencyCalendar({
             }
 
             const progressPercent = getDayProgressPercent(date);
+            const showRing = period === "daily" && status !== "future" && interactive;
 
             return (
               <button
@@ -698,22 +919,10 @@ function ConsistencyCalendar({
                 onClick={() => handleDayClick(date)}
                 className={`aspect-square rounded-lg flex items-center justify-center text-xs relative transition-all duration-150 ${
                   interactive ? "cursor-pointer active:scale-90" : "cursor-default"
-                } ${
-                  status === "completed"
-                    ? "text-primary font-bold"
-                    : status === "partial"
-                    ? "text-primary/80"
-                    : status === "missed"
-                    ? "text-destructive/60"
-                    : status === "future"
-                    ? "text-muted-foreground/40"
-                    : interactive
-                    ? "text-muted-foreground hover:bg-muted/50 hover:ring-1 hover:ring-primary/30"
-                    : "text-muted-foreground"
-                } ${today ? "ring-2 ring-primary ring-offset-1 ring-offset-background rounded-lg" : ""}`}
+                } ${bgClass} ${today ? "ring-2 ring-primary ring-offset-1 ring-offset-background rounded-lg" : ""}`}
                 data-testid={`calendar-day-${dateStr}`}
               >
-                {status !== "future" && interactive && (
+                {showRing && (
                   <CircularProgress percentage={progressPercent} size={34} />
                 )}
                 <span className="relative z-10 leading-none">
@@ -724,36 +933,19 @@ function ConsistencyCalendar({
           })}
         </div>
 
-        <div className="flex items-center gap-4 mt-4 justify-center">
-          {isCheckboxMode ? (
-            <>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-sm bg-primary flex items-center justify-center">
-                  <Check className="w-2 h-2 text-primary-foreground" strokeWidth={3} />
-                </div>
-                <span className="text-xs text-muted-foreground">Tercapai</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-sm bg-destructive/15" />
-                <span className="text-xs text-muted-foreground">Belum</span>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary/20" />
-                <span className="text-xs text-muted-foreground">Tercapai</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full border-2 border-primary/50 bg-transparent" />
-                <span className="text-xs text-muted-foreground">Sebagian</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-sm bg-destructive/20" />
-                <span className="text-xs text-muted-foreground">Belum</span>
-              </div>
-            </>
-          )}
+        <div className="flex items-center gap-4 mt-4 justify-center flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-emerald-500 dark:bg-emerald-600" />
+            <span className="text-xs text-muted-foreground">Tercapai</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-amber-100 dark:bg-amber-900/30" />
+            <span className="text-xs text-muted-foreground">Sebagian</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-destructive/10" />
+            <span className="text-xs text-muted-foreground">Belum</span>
+          </div>
         </div>
       </Card>
 

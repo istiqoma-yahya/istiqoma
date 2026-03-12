@@ -136,6 +136,18 @@ The `ConsistencyCalendar` in `TargetDetailPage.tsx` supports two interaction mod
 - Future dates are locked (non-interactive)
 - Today's status is fetched in real-time via `GET /api/targets/:id/deeds-for-date?date=YYYY-MM-DD` (history excludes current day)
 - Backend `getDeedsForTargetOnDate` in `server/storage.ts` matches deeds using the same predicates as target progress (including `isJamaah`)
+- **Period progress bars** (`PeriodProgressBars` component):
+  - Weekly targets: per-week progress bars (4-5 rows per month)
+  - Monthly targets: single monthly progress bar
+  - One-time targets: overall progress bar using `currentValue/targetValue`
+  - Daily targets: no period bars (use circular rings per cell instead)
+- **Current period aggregation**: Weekly/monthly targets use `target.currentValue` for the current period's progress (since history excludes the current period); past periods use history data
+- **Consistent date coloring** across ALL target types:
+  - Completed: `bg-emerald-500` (green) — uniform for checkbox and increment modes
+  - Partial: `bg-amber-100` (amber)
+  - Missed: `bg-destructive/10`
+  - Future: transparent/dimmed
+- One-time targets: dates within `startDate`–`dueDate` range show progress; dates outside are dimmed/non-interactive
 
 ### Environment Variables Required
 - `DATABASE_URL` - PostgreSQL connection string

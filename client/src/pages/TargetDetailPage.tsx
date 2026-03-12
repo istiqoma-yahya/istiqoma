@@ -432,13 +432,11 @@ function PeriodProgressBars({
   period,
   target,
   currentMonth,
-  todayAchievedValue,
 }: {
   history: TargetHistory[];
   period: string | null;
   target: TargetWithProgress;
   currentMonth: Date;
-  todayAchievedValue: number;
 }) {
   const { t } = useTranslation();
   const isOneTime = target.recurrence === "oneTime";
@@ -639,29 +637,38 @@ function ConsistencyCalendar({
     return date >= currentPeriodRange.start && date <= currentPeriodRange.end;
   }, [currentPeriodRange]);
 
+  const isLimitType = target.targetType === "limit";
+
+  const getCompletionStatus = (achieved: number, targetVal: number): DayStatus => {
+    if (isLimitType) {
+      if (achieved === 0) return "completed";
+      if (achieved <= targetVal) return "partial";
+      return "missed";
+    }
+    if (achieved >= targetVal) return "completed";
+    if (achieved > 0) return "partial";
+    return "no-data";
+  };
+
   const getDayStatus = (date: Date): DayStatus => {
     const now = new Date();
     const isFuture = date > now;
 
     if (isOneTime) {
       if (!isDateInTargetRange(date)) return "no-data";
-      if (target.currentValue >= target.targetValue) return "completed";
-      if (target.currentValue > 0) return "partial";
-      return isFuture ? "future" : "no-data";
+      const status = getCompletionStatus(target.currentValue, target.targetValue);
+      return status === "no-data" && isFuture ? "future" : status;
     }
 
     if ((period === "weekly" || period === "monthly") && isInCurrentPeriod(date)) {
-      if (target.currentValue >= target.targetValue) return "completed";
-      if (target.currentValue > 0) return "partial";
-      return isFuture ? "future" : "no-data";
+      const status = getCompletionStatus(target.currentValue, target.targetValue);
+      return status === "no-data" && isFuture ? "future" : status;
     }
 
     if (isFuture) return "future";
 
     if (period === "daily" && isToday(date)) {
-      if (todayAchievedValue >= target.targetValue) return "completed";
-      if (todayAchievedValue > 0) return "partial";
-      return "no-data";
+      return getCompletionStatus(todayAchievedValue, target.targetValue);
     }
 
     for (const entry of history) {
@@ -851,7 +858,6 @@ function ConsistencyCalendar({
           period={period}
           target={target}
           currentMonth={currentMonth}
-          todayAchievedValue={todayAchievedValue}
         />
 
         <div className="flex items-center gap-3 mb-4">

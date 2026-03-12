@@ -556,7 +556,7 @@ function PeriodProgressBars({
                   {week.label}
                 </span>
                 <span className="font-medium text-foreground">
-                  {formatNumber(achieved)}/{formatNumber(total)}
+                  {formatNumber(achieved)}/{formatNumber(total)} ({pct}%)
                 </span>
               </div>
               <Progress value={pct} className="h-1.5 bg-gray-200 dark:bg-gray-700" />
@@ -640,24 +640,27 @@ function ConsistencyCalendar({
   }, [currentPeriodRange]);
 
   const getDayStatus = (date: Date): DayStatus => {
-    if (date > new Date()) return "future";
+    const now = new Date();
+    const isFuture = date > now;
 
     if (isOneTime) {
       if (!isDateInTargetRange(date)) return "no-data";
       if (target.currentValue >= target.targetValue) return "completed";
       if (target.currentValue > 0) return "partial";
-      return "no-data";
-    }
-
-    if (period === "daily" && isToday(date)) {
-      if (todayAchievedValue >= target.targetValue) return "completed";
-      if (todayAchievedValue > 0) return "partial";
-      return "no-data";
+      return isFuture ? "future" : "no-data";
     }
 
     if ((period === "weekly" || period === "monthly") && isInCurrentPeriod(date)) {
       if (target.currentValue >= target.targetValue) return "completed";
       if (target.currentValue > 0) return "partial";
+      return isFuture ? "future" : "no-data";
+    }
+
+    if (isFuture) return "future";
+
+    if (period === "daily" && isToday(date)) {
+      if (todayAchievedValue >= target.targetValue) return "completed";
+      if (todayAchievedValue > 0) return "partial";
       return "no-data";
     }
 

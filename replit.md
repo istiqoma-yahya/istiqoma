@@ -145,7 +145,7 @@ The `ConsistencyCalendar` in `TargetDetailPage.tsx` supports two interaction mod
 - **Consistent date coloring** across ALL target types:
   - Completed: `bg-emerald-500` (green) — uniform for checkbox and increment modes
   - Partial: `bg-amber-100` (amber)
-  - Missed: `bg-destructive/10`
+  - Missed/no progress: `bg-muted/30` (neutral tint, not red)
   - Future: transparent/dimmed
 - One-time targets: dates within `startDate`–`dueDate` range show progress; dates outside are dimmed/non-interactive
 

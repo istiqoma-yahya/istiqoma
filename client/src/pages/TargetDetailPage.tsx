@@ -548,9 +548,6 @@ function PeriodProgressBars({
             }
           }
 
-          const isFutureWeek = week.wStart > now;
-          if (isFutureWeek) return null;
-
           const pct = total > 0 ? Math.min(100, Math.round((achieved / total) * 100)) : 0;
           return (
             <div key={idx} className="space-y-0.5">
@@ -744,7 +741,7 @@ function ConsistencyCalendar({
       return "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300";
     }
     if (status === "missed") {
-      return "bg-destructive/10 text-muted-foreground";
+      return "bg-muted/30 text-muted-foreground";
     }
     if (status === "future") {
       return "bg-transparent text-muted-foreground/40";
@@ -943,7 +940,7 @@ function ConsistencyCalendar({
             <span className="text-xs text-muted-foreground">Sebagian</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-destructive/10" />
+            <div className="w-3 h-3 rounded-sm bg-muted/30" />
             <span className="text-xs text-muted-foreground">Belum</span>
           </div>
         </div>

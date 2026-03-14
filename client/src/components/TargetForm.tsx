@@ -21,6 +21,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Loader2, CalendarIcon, Plus, X, Bell } from "lucide-react";
 import { format, addDays, addWeeks, addMonths } from "date-fns";
 import { cn } from "@/lib/utils";
+import { CreateCategoryDialog } from "@/components/CreateCategoryDialog";
 
 interface TargetFormProps {
   mode: "create" | "edit";
@@ -42,6 +43,7 @@ export function TargetForm({
   const { t } = useTranslation();
   const { data: categories } = useCategories();
   const translateCategoryName = useCategoryName();
+  const [showCreateCategoryDialog, setShowCreateCategoryDialog] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
   const [targetValueInput, setTargetValueInput] = useState<string>("10");
 
@@ -334,6 +336,21 @@ export function TargetForm({
                       {translateCategoryName(cat.name)}
                     </SelectItem>
                   ))}
+                  <div className="border-t border-border mt-1 pt-1">
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-primary hover:bg-accent hover:text-accent-foreground rounded-sm transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowCreateCategoryDialog(true);
+                      }}
+                      data-testid="button-create-category-from-target-dropdown"
+                    >
+                      <Plus className="w-4 h-4" />
+                      {t("categories.addCategory")}
+                    </button>
+                  </div>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -871,6 +888,13 @@ export function TargetForm({
           </Button>
         </div>
       </form>
+      <CreateCategoryDialog
+        open={showCreateCategoryDialog}
+        onOpenChange={setShowCreateCategoryDialog}
+        onCategoryCreated={(categoryName) => {
+          form.setValue("category", categoryName);
+        }}
+      />
     </Form>
   );
 }

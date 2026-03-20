@@ -12,6 +12,32 @@ const resources = {
   ms: { translation: ms },
 };
 
+const LANG_STORAGE_KEY = 'i18nextLng';
+
+function mapCountryToLanguage(countryCode: string): string {
+  if (countryCode === 'ID') return 'id';
+  if (countryCode === 'MY') return 'ms';
+  return 'en';
+}
+
+async function applyGeoLanguage() {
+  const saved = localStorage.getItem(LANG_STORAGE_KEY);
+  if (saved) return;
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) return;
+    const data = await res.json();
+    const lang = mapCountryToLanguage(data.country_code ?? '');
+    i18n.changeLanguage(lang);
+  } catch {
+    // silently fall back to English
+  }
+}
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -22,9 +48,11 @@ i18n
       escapeValue: false,
     },
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: ['localStorage'],
       caches: ['localStorage'],
     },
   });
+
+applyGeoLanguage();
 
 export default i18n;

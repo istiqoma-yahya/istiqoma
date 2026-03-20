@@ -24,17 +24,19 @@ async function applyGeoLanguage() {
   const saved = localStorage.getItem(LANG_STORAGE_KEY);
   if (saved) return;
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3000);
+
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000);
     const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
-    clearTimeout(timeout);
     if (!res.ok) return;
     const data = await res.json();
     const lang = mapCountryToLanguage(data.country_code ?? '');
     i18n.changeLanguage(lang);
   } catch {
     // silently fall back to English
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -51,8 +53,7 @@ i18n
       order: ['localStorage'],
       caches: ['localStorage'],
     },
-  });
-
-applyGeoLanguage();
+  })
+  .then(() => applyGeoLanguage());
 
 export default i18n;

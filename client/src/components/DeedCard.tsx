@@ -55,7 +55,8 @@ export function DeedCard({ deed, index }: DeedCardProps) {
     }
     
     if (deed.quranUnit) {
-      return t(`quran.units.${deed.quranUnit}`);
+      const unit = t(`quran.units.${deed.quranUnit}`);
+      return deed.quantity ? `${formatNumber(deed.quantity)} ${unit}` : unit;
     }
     
     if (deed.sedekahType) {

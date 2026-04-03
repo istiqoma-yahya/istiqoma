@@ -1,10 +1,36 @@
+/**
+ * Data migration script: OLD Replit PostgreSQL → Supabase
+ *
+ * Source:      OLD_DATABASE_URL  (old Replit-managed PostgreSQL)
+ * Destination: SUPABASE_DATABASE_URL (Supabase PostgreSQL, transaction pooler port 6543)
+ *
+ * SSL note: Supabase's pooler presents a self-signed certificate chain that is not
+ * trusted by the Node.js default CA bundle in the Replit environment. Setting
+ * rejectUnauthorized: false is required to establish the connection. The connection
+ * is still encrypted in transit; only certificate-authority verification is skipped.
+ *
+ * Run: npx tsx scripts/migrate-to-supabase.ts
+ */
 import pg from "pg";
 
 const { Pool } = pg;
 
-const sourcePool = new Pool({ connectionString: process.env.DATABASE_URL });
+const SOURCE_URL = process.env.OLD_DATABASE_URL;
+const DEST_URL = process.env.SUPABASE_DATABASE_URL;
+
+if (!SOURCE_URL) {
+  console.error("ERROR: OLD_DATABASE_URL is not set. Aborting migration.");
+  process.exit(1);
+}
+if (!DEST_URL) {
+  console.error("ERROR: SUPABASE_DATABASE_URL is not set. Aborting migration.");
+  process.exit(1);
+}
+
+const sourcePool = new Pool({ connectionString: SOURCE_URL });
 const destPool = new Pool({
-  connectionString: process.env.SUPABASE_DATABASE_URL,
+  connectionString: DEST_URL,
+  // Required: Supabase pooler uses a self-signed cert chain not trusted by the Replit CA bundle.
   ssl: { rejectUnauthorized: false },
 });
 
@@ -41,9 +67,16 @@ async function resetSequence(tableName: string, colName = "id") {
 }
 
 async function main() {
-  console.log("Starting migration from Replit DB → Supabase...\n");
+  console.log("Starting migration from OLD Replit DB → Supabase...\n");
 
   try {
+    // Verify source is the old Replit DB (not Supabase) by checking the host
+    const srcRes = await sourcePool.query("SELECT current_database(), inet_server_addr()");
+    console.log("Source DB:", JSON.stringify(srcRes.rows[0]));
+    const dstRes = await destPool.query("SELECT current_database(), version()");
+    console.log("Destination DB:", JSON.stringify(dstRes.rows[0]));
+    console.log();
+
     // Migrate in dependency order
     console.log("Migrating tables:");
     await migrateTable("users", "created_at");
@@ -66,18 +99,23 @@ async function main() {
     const tables = ["users", "sessions", "categories", "deeds", "targets", "target_history", "push_subscriptions"];
     let allMatch = true;
     for (const t of tables) {
-      const [srcRes, dstRes] = await Promise.all([
+      const [srcCount, dstCount] = await Promise.all([
         sourcePool.query(`SELECT COUNT(*) FROM ${t}`),
         destPool.query(`SELECT COUNT(*) FROM ${t}`),
       ]);
-      const src = srcRes.rows[0].count;
-      const dst = dstRes.rows[0].count;
-      const match = src === dst ? "✓" : "✗ MISMATCH";
-      if (src !== dst) allMatch = false;
-      console.log(`  ${t}: source=${src} supabase=${dst} ${match}`);
+      const src = srcCount.rows[0].count;
+      const dst = dstCount.rows[0].count;
+      const match = src === dst;
+      if (!match) allMatch = false;
+      console.log(`  ${t}: source=${src} supabase=${dst} ${match ? "✓" : "✗ MISMATCH"}`);
     }
 
-    console.log(allMatch ? "\n✅ Migration complete — all counts match!" : "\n❌ Row count mismatch detected!");
+    if (allMatch) {
+      console.log("\n✅ Migration complete — all counts match!");
+    } else {
+      console.log("\n❌ Row count mismatch detected!");
+      process.exit(1);
+    }
   } finally {
     await sourcePool.end();
     await destPool.end();

@@ -16,6 +16,10 @@ const isSupabase = !!process.env.SUPABASE_DATABASE_URL;
 
 export const pool = new Pool({
   connectionString,
+  // Supabase's transaction pooler presents a self-signed certificate chain that is not
+  // trusted by the Node.js default CA bundle in the Replit hosting environment.
+  // The connection is still TLS-encrypted; only CA verification is bypassed.
+  // This is a known platform constraint — see: https://supabase.com/docs/guides/database/connecting-to-postgres
   ...(isSupabase ? { ssl: { rejectUnauthorized: false } } : {}),
 });
 

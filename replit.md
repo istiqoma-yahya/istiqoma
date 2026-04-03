@@ -47,10 +47,13 @@ The server handles:
 - The `shared/` directory (`schema.ts`, `routes.ts`, `models/auth.ts`) can be copied to a mobile project for type-safe API calls
 
 ### Data Storage
-- **Database**: PostgreSQL
+- **Database**: PostgreSQL hosted on **Supabase** (migrated from Replit DB to reduce costs)
+  - Connection: `SUPABASE_DATABASE_URL` secret (Transaction mode pooler, port 6543, SSL enabled)
+  - Fallback: `DATABASE_URL` if `SUPABASE_DATABASE_URL` is not set
 - **ORM**: Drizzle ORM with drizzle-zod for schema validation
 - **Schema Location**: `shared/schema.ts` contains all table definitions
 - **Migrations**: Drizzle Kit for schema migrations (`drizzle.config.ts`)
+  - To push schema changes: `npx drizzle-kit push --force` (reads `SUPABASE_DATABASE_URL` automatically)
 
 Database tables:
 - `users` - User accounts (managed by Replit Auth)

@@ -35,7 +35,7 @@ export interface IStorage {
   getTargets(userId: string): Promise<Target[]>;
   getTargetsWithProgress(userId: string): Promise<TargetWithProgress[]>;
   createTarget(userId: string, target: InsertTarget): Promise<Target>;
-  updateTarget(id: number, userId: string, target: InsertTarget): Promise<Target>;
+  updateTarget(id: number, userId: string, target: Partial<InsertTarget>): Promise<Target>;
   deleteTarget(id: number, userId: string): Promise<void>;
   getTargetFolders(userId: string): Promise<TargetFolder[]>;
   createTargetFolder(userId: string, folder: InsertTargetFolder): Promise<TargetFolder>;
@@ -330,7 +330,7 @@ export class DatabaseStorage implements IStorage {
     return target;
   }
 
-  async updateTarget(id: number, userId: string, updateTarget: InsertTarget): Promise<Target> {
+  async updateTarget(id: number, userId: string, updateTarget: Partial<InsertTarget>): Promise<Target> {
     if ("folderId" in updateTarget) {
       await this.assertFolderOwnership(updateTarget.folderId ?? null, userId);
     }

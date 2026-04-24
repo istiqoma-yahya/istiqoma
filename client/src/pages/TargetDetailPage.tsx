@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -43,8 +43,10 @@ import {
 } from "recharts";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import {
   Loader2,
   ArrowLeft,
@@ -61,6 +63,7 @@ import {
   Minus,
   X,
   Check,
+  RotateCcw,
 } from "lucide-react";
 import {
   format,
@@ -239,6 +242,21 @@ function CircularProgress({ percentage, size = 32 }: { percentage: number; size?
   );
 }
 
+type CalendarProgressMode = "quick" | "counter";
+
+const readCalendarModeFromStorage = (
+  key: string | null,
+): CalendarProgressMode => {
+  if (!key) return "counter";
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw === "quick" || raw === "counter") return raw;
+  } catch {
+    // ignore
+  }
+  return "counter";
+};
+
 function CalendarDateProgressDialog({
   isOpen,
   onClose,
@@ -254,8 +272,37 @@ function CalendarDateProgressDialog({
 }) {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
-  const [incrementValue, setIncrementValue] = useState(1);
+  const { user } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
+
+  const isDzikirTarget = !!target.dzikirType;
+  // Shared with the home Update Progress popup so the user's preference
+  // stays consistent across both popups.
+  const modeStorageKey = user?.id
+    ? `targets:updateProgressMode:${user.id}`
+    : null;
+  const modeStorageKeyRef = useRef<string | null>(modeStorageKey);
+  modeStorageKeyRef.current = modeStorageKey;
+
+  const [mode, setModeState] = useState<CalendarProgressMode>(() =>
+    readCalendarModeFromStorage(modeStorageKey),
+  );
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+
+  const [incrementValue, setIncrementValue] = useState(1);
+
+  useEffect(() => {
+    setModeState(readCalendarModeFromStorage(modeStorageKey));
+  }, [modeStorageKey]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const useCounterDefault =
+        isDzikirTarget && modeRef.current === "counter";
+      setIncrementValue(useCounterDefault ? 0 : 1);
+    }
+  }, [isOpen, target.id, isDzikirTarget]);
 
   const dateStr = date ? format(date, "yyyy-MM-dd") : "";
   const dateLocale = i18n.language === "id" ? idLocale : enUS;
@@ -279,6 +326,33 @@ function CalendarDateProgressDialog({
 
   const newProgress = currentDayProgress + incrementValue;
   const percentComplete = Math.min(100, (newProgress / target.targetValue) * 100);
+
+  const resetIncrementForCurrentMode = () => {
+    const useCounterDefault =
+      isDzikirTarget && modeRef.current === "counter";
+    setIncrementValue(useCounterDefault ? 0 : 1);
+  };
+
+  const handleModeChange = (next: CalendarProgressMode) => {
+    setModeState(next);
+    const key = modeStorageKeyRef.current;
+    if (key) {
+      try {
+        localStorage.setItem(key, next);
+      } catch {
+        // ignore
+      }
+    }
+    // Quick mode enforces min=1; if user lands here with 0 from Counter,
+    // bump state to 1 so the displayed input value and Save-enabled state
+    // stay in sync. Values >= 1 (e.g. 33 taps) are preserved as-is.
+    if (next === "quick" && incrementValue < 1) {
+      setIncrementValue(1);
+    }
+  };
+
+  const handleTap = () => setIncrementValue((prev) => prev + 1);
+  const handleReset = () => setIncrementValue(0);
 
   const handleSave = async () => {
     if (!date || incrementValue < 1) return;
@@ -313,7 +387,7 @@ function CalendarDateProgressDialog({
       await queryClient.invalidateQueries({ queryKey: ['/api/targets', target.id, 'deeds-for-date'] });
 
       onProgressUpdated();
-      setIncrementValue(1);
+      resetIncrementForCurrentMode();
       onClose();
       toast({ title: t("targets.targetUpdated") });
     } catch {
@@ -324,15 +398,79 @@ function CalendarDateProgressDialog({
   };
 
   const handleClose = () => {
-    setIncrementValue(1);
+    resetIncrementForCurrentMode();
     onClose();
   };
 
   if (!date) return null;
 
+  const renderQuickCounter = () => (
+    <div className="flex items-center justify-center gap-4">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => setIncrementValue((prev) => Math.max(1, prev - 1))}
+        disabled={incrementValue <= 1}
+        data-testid="button-date-decrement"
+      >
+        <Minus className="w-4 h-4" />
+      </Button>
+      <Input
+        type="number"
+        min={1}
+        value={Math.max(1, incrementValue)}
+        onChange={(e) => setIncrementValue(Math.max(1, parseInt(e.target.value) || 1))}
+        className="w-20 text-center"
+        data-testid="input-date-increment-value"
+      />
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => setIncrementValue((prev) => prev + 1)}
+        data-testid="button-date-increment"
+      >
+        <Plus className="w-4 h-4" />
+      </Button>
+    </div>
+  );
+
+  const renderTapCounter = () => (
+    <div className="flex flex-col items-center gap-4">
+      <button
+        type="button"
+        onClick={handleTap}
+        className="w-48 h-48 rounded-full flex items-center justify-center transition-all active:scale-95 bg-emerald-500/20 border-4 border-emerald-500 active:bg-emerald-500/30 hover:bg-emerald-500/25"
+        data-testid="button-dzikir-tap-date"
+      >
+        <span
+          className="text-6xl font-bold text-emerald-500"
+          data-testid="text-dzikir-tap-count-date"
+        >
+          {incrementValue}
+        </span>
+      </button>
+
+      <p className="text-sm text-muted-foreground">
+        {t("dzikir.tapToCount")}
+      </p>
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleReset}
+        disabled={incrementValue === 0}
+        className="flex items-center gap-2"
+        data-testid="button-dzikir-reset-date"
+      >
+        <RotateCcw className="w-4 h-4" />
+        {t("dzikir.reset")}
+      </Button>
+    </div>
+  );
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle data-testid="text-date-progress-title">
             {t("targets.updateProgressTitle")}
@@ -348,6 +486,24 @@ function CalendarDateProgressDialog({
           </div>
         ) : (
           <div className="space-y-5 py-3">
+            {isDzikirTarget ? (
+              <Tabs
+                value={mode}
+                onValueChange={(value) =>
+                  handleModeChange(value as CalendarProgressMode)
+                }
+              >
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="quick" data-testid="tab-mode-quick-date">
+                    {t("targets.modeQuick")}
+                  </TabsTrigger>
+                  <TabsTrigger value="counter" data-testid="tab-mode-counter-date">
+                    {t("dzikir.counter")}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            ) : null}
+
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{t("targets.currentProgress")}:</span>
@@ -361,33 +517,11 @@ function CalendarDateProgressDialog({
               />
             </div>
 
-            <div className="flex items-center justify-center gap-4">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setIncrementValue((prev) => Math.max(1, prev - 1))}
-                disabled={incrementValue <= 1}
-                data-testid="button-date-decrement"
-              >
-                <Minus className="w-4 h-4" />
-              </Button>
-              <Input
-                type="number"
-                min={1}
-                value={incrementValue}
-                onChange={(e) => setIncrementValue(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-20 text-center"
-                data-testid="input-date-increment-value"
-              />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setIncrementValue((prev) => prev + 1)}
-                data-testid="button-date-increment"
-              >
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
+            {isDzikirTarget
+              ? mode === "counter"
+                ? renderTapCounter()
+                : renderQuickCounter()
+              : renderQuickCounter()}
 
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">

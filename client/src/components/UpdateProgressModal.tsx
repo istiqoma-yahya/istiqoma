@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type TargetWithProgress } from "@shared/schema";
 import { formatNumber } from "@/lib/utils";
 import { Loader2, Minus, Plus, RotateCcw } from "lucide-react";
@@ -100,9 +100,6 @@ export function UpdateProgressModal({
       } catch {
         // ignore
       }
-    }
-    if (next === "quick" && incrementValue < 1) {
-      setIncrementValue(1);
     }
   };
 

@@ -9,6 +9,23 @@ import { deeds } from "@shared/schema";
 import { calculatePoints } from "./calculatePoints";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
 
+function getErrorStatus(err: unknown): number | undefined {
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "status" in err &&
+    typeof (err as { status: unknown }).status === "number"
+  ) {
+    return (err as { status: number }).status;
+  }
+  return undefined;
+}
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return "Internal Server Error";
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -255,6 +272,31 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
+  app.patch(api.targetFolders.moveTarget.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const input = api.targetFolders.moveTarget.input.parse(req.body);
+      const userId = req.user.claims.sub;
+      const targetId = parseInt(req.params.id);
+      if (isNaN(targetId)) {
+        return res.status(400).json({ message: "Invalid target ID" });
+      }
+      const target = await storage.moveTargetToFolder(targetId, userId, input.folderId);
+      res.json(target);
+    } catch (err: unknown) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      const status = getErrorStatus(err);
+      if (status !== undefined) {
+        return res.status(status).json({ message: getErrorMessage(err) });
+      }
+      throw err;
+    }
+  });
+
   // Targets Routes - Protected
   app.get(api.targets.list.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
@@ -274,15 +316,16 @@ export async function registerRoutes(
       const userId = req.user.claims.sub;
       const target = await storage.createTarget(userId, input);
       res.status(201).json(target);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
           message: err.errors[0].message,
           field: err.errors[0].path.join('.'),
         });
       }
-      if (err && typeof err.status === "number") {
-        return res.status(err.status).json({ message: err.message });
+      const status = getErrorStatus(err);
+      if (status !== undefined) {
+        return res.status(status).json({ message: getErrorMessage(err) });
       }
       throw err;
     }
@@ -298,15 +341,16 @@ export async function registerRoutes(
       }
       const target = await storage.updateTarget(id, userId, input);
       res.json(target);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
           message: err.errors[0].message,
           field: err.errors[0].path.join('.'),
         });
       }
-      if (err && typeof err.status === "number") {
-        return res.status(err.status).json({ message: err.message });
+      const status = getErrorStatus(err);
+      if (status !== undefined) {
+        return res.status(status).json({ message: getErrorMessage(err) });
       }
       throw err;
     }

@@ -149,6 +149,20 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
+    moveTarget: {
+      method: "PATCH" as const,
+      path: "/api/targets/:id/folder",
+      input: z.object({
+        folderId: z.number().int().positive().nullable(),
+      }),
+      responses: {
+        200: z.custom<typeof targets.$inferSelect>(),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+        403: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
   },
   targets: {
     list: {

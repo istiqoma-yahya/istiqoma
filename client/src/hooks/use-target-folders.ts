@@ -102,8 +102,8 @@ export function useMoveTargetToFolder() {
 
   return useMutation({
     mutationFn: async ({ targetId, folderId }: { targetId: number; folderId: number | null }) => {
-      const url = buildUrl(api.targets.update.path, { id: targetId });
-      const res = await apiRequest(api.targets.update.method, url, { folderId });
+      const url = buildUrl(api.targetFolders.moveTarget.path, { id: targetId });
+      const res = await apiRequest(api.targetFolders.moveTarget.method, url, { folderId });
       return await res.json();
     },
     onSuccess: () => {

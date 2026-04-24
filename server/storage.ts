@@ -41,6 +41,7 @@ export interface IStorage {
   createTargetFolder(userId: string, folder: InsertTargetFolder): Promise<TargetFolder>;
   updateTargetFolder(id: number, userId: string, folder: InsertTargetFolder): Promise<TargetFolder>;
   deleteTargetFolder(id: number, userId: string): Promise<void>;
+  moveTargetToFolder(targetId: number, userId: string, folderId: number | null): Promise<Target>;
   getTargetHistory(targetId: number, userId: string, limit?: number): Promise<TargetHistory[]>;
   getTargetHistoryWithStreak(targetId: number, userId: string, limit?: number): Promise<TargetHistoryWithStreak>;
   calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack?: number): Promise<TargetHistory[]>;
@@ -383,6 +384,21 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(targetFolders)
       .where(and(eq(targetFolders.id, id), eq(targetFolders.userId, userId)));
+  }
+
+  async moveTargetToFolder(targetId: number, userId: string, folderId: number | null): Promise<Target> {
+    await this.assertFolderOwnership(folderId, userId);
+    const [target] = await db
+      .update(targets)
+      .set({ folderId })
+      .where(and(eq(targets.id, targetId), eq(targets.userId, userId)))
+      .returning();
+    if (!target) {
+      const err = new Error("Target not found") as Error & { status?: number };
+      err.status = 404;
+      throw err;
+    }
+    return target;
   }
 
   async updateTargetProgress(id: number, userId: string, progress: number): Promise<Target> {

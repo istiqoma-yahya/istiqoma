@@ -342,6 +342,7 @@
     "oneTimeTargetValueDesc": "Value to achieve by deadline",
     "updateProgress": "Update",
     "updateProgressTitle": "Update Progress",
+    "modeQuick": "Quick",
     "currentProgress": "Current Progress",
     "newProgress": "New Progress",
     "targetWillBeCompleted": "Target will be completed!",

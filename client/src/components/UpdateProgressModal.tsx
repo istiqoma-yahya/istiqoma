@@ -101,6 +101,12 @@ export function UpdateProgressModal({
         // ignore
       }
     }
+    // Quick mode enforces min=1; if user lands here with 0 from Counter,
+    // bump state to 1 so the displayed input value and Save-enabled state stay
+    // in sync. Values >= 1 (e.g. 33 taps) are preserved as-is.
+    if (next === "quick" && incrementValue < 1) {
+      setIncrementValue(1);
+    }
   };
 
   const handleIncrement = () => setIncrementValue((prev) => prev + 1);

@@ -217,7 +217,7 @@ export function UpdateProgressModal({
             >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="quick" data-testid="tab-mode-quick">
-                  {t("targets.modeQuick")}
+                  {t("common.add")}
                 </TabsTrigger>
                 <TabsTrigger value="counter" data-testid="tab-mode-counter">
                   {t("dzikir.counter")}

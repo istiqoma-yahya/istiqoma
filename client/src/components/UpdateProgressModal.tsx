@@ -168,11 +168,11 @@ export function UpdateProgressModal({
       <button
         type="button"
         onClick={handleTap}
-        className="w-40 h-40 rounded-full flex items-center justify-center transition-all active:scale-95 bg-emerald-500/20 border-4 border-emerald-500 active:bg-emerald-500/30 hover:bg-emerald-500/25"
+        className="w-48 h-48 rounded-full flex items-center justify-center transition-all active:scale-95 bg-emerald-500/20 border-4 border-emerald-500 active:bg-emerald-500/30 hover:bg-emerald-500/25"
         data-testid="button-dzikir-tap-modal"
       >
         <span
-          className="text-5xl font-bold text-emerald-500"
+          className="text-6xl font-bold text-emerald-500"
           data-testid="text-dzikir-tap-count"
         >
           {incrementValue}
@@ -217,7 +217,7 @@ export function UpdateProgressModal({
             >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="quick" data-testid="tab-mode-quick">
-                  {t("common.add")}
+                  {t("targets.modeQuick")}
                 </TabsTrigger>
                 <TabsTrigger value="counter" data-testid="tab-mode-counter">
                   {t("dzikir.counter")}

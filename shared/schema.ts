@@ -34,9 +34,18 @@ export const deeds = pgTable("deeds", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const targetFolders = pgTable("target_folders", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const targets = pgTable("targets", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
+  folderId: integer("folder_id").references(() => targetFolders.id, { onDelete: "set null" }),
   name: text("name").default("Target"),
   category: text("category").notNull(),
   targetValue: integer("target_value").notNull(),
@@ -127,6 +136,12 @@ export const insertCategorySchema = createInsertSchema(categories).pick({
   isProtected: z.boolean().optional(),
 });
 
+export const insertTargetFolderSchema = createInsertSchema(targetFolders).pick({
+  name: true,
+}).extend({
+  name: z.string().min(1, "Folder name is required").max(80, "Folder name is too long"),
+});
+
 export const insertTargetSchema = createInsertSchema(targets).pick({
   name: true,
   category: true,
@@ -145,7 +160,9 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   sedekahType: true,
   customUnit: true,
   notificationTimes: true,
+  folderId: true,
 }).extend({
+  folderId: z.number().int().positive().nullish(),
   name: z.string().min(1, "Target name is required"),
   category: z.string().min(1, "Category is required"),
   targetValue: z.number().min(0, "Target value must be at least 0"),
@@ -186,6 +203,8 @@ export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Target = typeof targets.$inferSelect;
 export type InsertTarget = z.infer<typeof insertTargetSchema>;
+export type TargetFolder = typeof targetFolders.$inferSelect;
+export type InsertTargetFolder = z.infer<typeof insertTargetFolderSchema>;
 export type TargetHistory = typeof targetHistory.$inferSelect;
 export type InsertTargetHistory = z.infer<typeof insertTargetHistorySchema>;
 

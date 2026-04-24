@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useTargetsWithProgress, useDeleteTarget, useCompleteTarget, useUpdateTarget } from "@/hooks/use-targets";
+import {
+  useTargetFolders,
+  useCreateTargetFolder,
+  useUpdateTargetFolder,
+  useDeleteTargetFolder,
+  useMoveTargetToFolder,
+} from "@/hooks/use-target-folders";
 import { useCreateDeed } from "@/hooks/use-deeds";
-import { useAuth } from "@/hooks/use-auth";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UpdateProgressModal } from "@/components/UpdateProgressModal";
@@ -17,6 +23,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -35,9 +46,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { type TargetWithProgress } from "@shared/schema";
+import { type TargetWithProgress, type TargetFolder } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
 import { formatNumber } from "@/lib/utils";
-import { Loader2, Plus, Target, Pencil } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Folder,
+  FolderOpen,
+  FolderPlus,
+  FolderInput,
+  Loader2,
+  Pencil,
+  Plus,
+  Target,
+  Trash2,
+} from "lucide-react";
 import { format, isPast, type Locale } from "date-fns";
 import { id as idLocale, ms as msLocale, enUS } from "date-fns/locale";
 
@@ -46,6 +70,7 @@ interface TargetCardProps {
   onOpenUpdateModal: () => void;
   onDetail: () => void;
   onRename: (target: TargetWithProgress) => void;
+  onMoveToFolder: (target: TargetWithProgress) => void;
   t: (key: string, options?: Record<string, string>) => string;
   dateLocale: Locale;
 }
@@ -55,6 +80,7 @@ function TargetCard({
   onOpenUpdateModal,
   onDetail,
   onRename,
+  onMoveToFolder,
   t,
   dateLocale,
 }: TargetCardProps) {
@@ -95,7 +121,6 @@ function TargetCard({
     }
   };
 
-  const currentProgress = target.currentValue || 0;
   const percentComplete = target.percentComplete || 0;
   const isCompleted = isOneTime ? oneTimeStatus === "completed" : percentComplete >= 100;
   const canUpdate = isOneTime ? oneTimeStatus === "active" : true;
@@ -104,9 +129,18 @@ function TargetCard({
     <Card className="p-4" data-testid={`card-target-${target.id}`}>
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <h3 className="text-lg font-bold text-foreground" data-testid={`text-target-title-${target.id}`}>
+          <h3 className="text-lg font-bold text-foreground flex-1 min-w-0 break-words" data-testid={`text-target-title-${target.id}`}>
             {getTargetDisplayTitle(target, t)}
           </h3>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => onMoveToFolder(target)}
+            title={t("targets.moveToFolder")}
+            data-testid={`button-move-target-${target.id}`}
+          >
+            <FolderInput className="w-4 h-4" />
+          </Button>
           <Button
             size="icon"
             variant="ghost"
@@ -160,16 +194,28 @@ function TargetCard({
   );
 }
 
+function targetCountLabel(count: number, t: (key: string, opts?: Record<string, string>) => string): string {
+  if (count === 0) return t("targets.targetCountZero");
+  if (count === 1) return t("targets.targetCountOne");
+  return t("targets.targetCount", { count: String(count) });
+}
+
 export default function TargetsPage() {
   const { t, i18n } = useTranslation();
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const { data: targets, isLoading } = useTargetsWithProgress();
-  const { user } = useAuth();
+  const { data: folders } = useTargetFolders();
   const deleteTarget = useDeleteTarget();
   const completeTarget = useCompleteTarget();
   const createDeed = useCreateDeed();
   const updateTarget = useUpdateTarget();
+
+  const createFolder = useCreateTargetFolder();
+  const updateFolder = useUpdateTargetFolder();
+  const deleteFolder = useDeleteTargetFolder();
+  const moveTarget = useMoveTargetToFolder();
 
   const [deletingTarget, setDeletingTarget] = useState<TargetWithProgress | null>(null);
   const [updateModalTarget, setUpdateModalTarget] = useState<TargetWithProgress | null>(null);
@@ -178,6 +224,14 @@ export default function TargetsPage() {
   const [showStreakDialog, setShowStreakDialog] = useState(false);
   const [renamingTarget, setRenamingTarget] = useState<TargetWithProgress | null>(null);
   const [renameValue, setRenameValue] = useState("");
+
+  // Folder UI state
+  const [collapsedFolderIds, setCollapsedFolderIds] = useState<Set<number | string>>(new Set());
+  const [creatingFolder, setCreatingFolder] = useState(false);
+  const [folderNameValue, setFolderNameValue] = useState("");
+  const [renamingFolder, setRenamingFolder] = useState<TargetFolder | null>(null);
+  const [deletingFolder, setDeletingFolder] = useState<TargetFolder | null>(null);
+  const [movingTarget, setMovingTarget] = useState<TargetWithProgress | null>(null);
 
   const { data: streakData } = useQuery<{ streakCount: number; weekDays: boolean[] }>({
     queryKey: ["/api/streak"],
@@ -191,6 +245,24 @@ export default function TargetsPage() {
     }
   };
   const dateLocale = getDateLocale();
+
+  const folderList = folders ?? [];
+  const targetsArray = targets ?? [];
+
+  const groupedTargets = useMemo(() => {
+    const byFolder = new Map<number, TargetWithProgress[]>();
+    const ungrouped: TargetWithProgress[] = [];
+    for (const target of targetsArray) {
+      if (target.folderId == null) {
+        ungrouped.push(target);
+      } else {
+        const list = byFolder.get(target.folderId) ?? [];
+        list.push(target);
+        byFolder.set(target.folderId, list);
+      }
+    }
+    return { byFolder, ungrouped };
+  }, [targetsArray]);
 
   const handleDelete = async () => {
     if (deletingTarget) {
@@ -232,6 +304,73 @@ export default function TargetsPage() {
         onSuccess: () => {
           setRenamingTarget(null);
           setRenameValue("");
+        },
+      }
+    );
+  };
+
+  const toggleFolderCollapsed = (key: number | string) => {
+    setCollapsedFolderIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const handleCreateFolder = () => {
+    const trimmed = folderNameValue.trim();
+    if (!trimmed) return;
+    createFolder.mutate(
+      { name: trimmed },
+      {
+        onSuccess: () => {
+          setCreatingFolder(false);
+          setFolderNameValue("");
+          toast({ title: t("targets.folderCreated") });
+        },
+      }
+    );
+  };
+
+  const handleRenameFolder = () => {
+    if (!renamingFolder) return;
+    const trimmed = folderNameValue.trim();
+    if (!trimmed) return;
+    updateFolder.mutate(
+      { id: renamingFolder.id, data: { name: trimmed } },
+      {
+        onSuccess: () => {
+          setRenamingFolder(null);
+          setFolderNameValue("");
+          toast({ title: t("targets.folderRenamed") });
+        },
+      }
+    );
+  };
+
+  const handleDeleteFolder = () => {
+    if (!deletingFolder) return;
+    deleteFolder.mutate(deletingFolder.id, {
+      onSuccess: () => {
+        setDeletingFolder(null);
+        toast({ title: t("targets.folderDeleted") });
+      },
+    });
+  };
+
+  const handleMoveTarget = (folderId: number | null) => {
+    if (!movingTarget) return;
+    if ((movingTarget.folderId ?? null) === folderId) {
+      setMovingTarget(null);
+      return;
+    }
+    moveTarget.mutate(
+      { targetId: movingTarget.id, folderId },
+      {
+        onSuccess: () => {
+          setMovingTarget(null);
+          toast({ title: t("targets.targetMoved") });
         },
       }
     );
@@ -338,7 +477,6 @@ export default function TargetsPage() {
     }
   };
 
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -347,7 +485,18 @@ export default function TargetsPage() {
     );
   }
 
-  const targetsArray = targets || [];
+  const renderTargetCard = (target: TargetWithProgress) => (
+    <TargetCard
+      key={target.id}
+      target={target}
+      onOpenUpdateModal={() => setUpdateModalTarget(target)}
+      onDetail={() => navigate(`/targets/${target.id}`)}
+      onRename={handleOpenRename}
+      onMoveToFolder={(t2) => setMovingTarget(t2)}
+      t={t}
+      dateLocale={dateLocale}
+    />
+  );
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -359,15 +508,25 @@ export default function TargetsPage() {
           <ThemeToggle />
         </header>
 
-        <div className="flex items-center justify-between gap-2 mb-4">
+        <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">{t("targets.subtitle")}</p>
-          <Button onClick={() => navigate("/targets/new")} data-testid="button-add-target">
-            <Plus className="w-4 h-4 mr-1" />
-            {t("targets.addTarget")}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={() => { setCreatingFolder(true); setFolderNameValue(""); }}
+              data-testid="button-new-folder"
+            >
+              <FolderPlus className="w-4 h-4 mr-1" />
+              {t("targets.newFolder")}
+            </Button>
+            <Button onClick={() => navigate("/targets/new")} data-testid="button-add-target">
+              <Plus className="w-4 h-4 mr-1" />
+              {t("targets.addTarget")}
+            </Button>
+          </div>
         </div>
 
-        {targetsArray.length === 0 ? (
+        {targetsArray.length === 0 && folderList.length === 0 ? (
           <Card className="p-8 text-center">
             <Target className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="font-semibold text-lg mb-2" data-testid="text-no-targets">
@@ -381,17 +540,117 @@ export default function TargetsPage() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {targetsArray.map((target) => (
-              <TargetCard
-                key={target.id}
-                target={target}
-                onOpenUpdateModal={() => setUpdateModalTarget(target)}
-                onDetail={() => navigate(`/targets/${target.id}`)}
-                onRename={handleOpenRename}
-                t={t}
-                dateLocale={dateLocale}
-              />
-            ))}
+            {folderList.map((folder) => {
+              const folderTargets = groupedTargets.byFolder.get(folder.id) ?? [];
+              const isCollapsed = collapsedFolderIds.has(folder.id);
+              return (
+                <Collapsible
+                  key={folder.id}
+                  open={!isCollapsed}
+                  onOpenChange={(open) => {
+                    if (!open) toggleFolderCollapsed(folder.id);
+                    else if (isCollapsed) toggleFolderCollapsed(folder.id);
+                  }}
+                  className="rounded-lg border bg-card"
+                  data-testid={`folder-${folder.id}`}
+                >
+                  <div className="flex items-center gap-1 p-3">
+                    <CollapsibleTrigger
+                      className="flex flex-1 items-center gap-2 text-left rounded hover-elevate active-elevate-2 px-2 py-1 -mx-2 -my-1 min-w-0"
+                      data-testid={`button-toggle-folder-${folder.id}`}
+                    >
+                      {isCollapsed ? (
+                        <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 shrink-0 text-muted-foreground" />
+                      )}
+                      {isCollapsed ? (
+                        <Folder className="w-4 h-4 shrink-0 text-muted-foreground" />
+                      ) : (
+                        <FolderOpen className="w-4 h-4 shrink-0 text-muted-foreground" />
+                      )}
+                      <span className="font-semibold truncate" data-testid={`text-folder-name-${folder.id}`}>
+                        {folder.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground shrink-0" data-testid={`text-folder-count-${folder.id}`}>
+                        {targetCountLabel(folderTargets.length, t)}
+                      </span>
+                    </CollapsibleTrigger>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => { setRenamingFolder(folder); setFolderNameValue(folder.name); }}
+                      title={t("targets.renameFolder")}
+                      data-testid={`button-rename-folder-${folder.id}`}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => setDeletingFolder(folder)}
+                      title={t("targets.deleteFolder")}
+                      data-testid={`button-delete-folder-${folder.id}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <CollapsibleContent>
+                    <div className="px-3 pb-3 space-y-3">
+                      {folderTargets.length === 0 ? (
+                        <p className="text-sm text-muted-foreground italic px-1">
+                          {t("targets.targetCountZero")}
+                        </p>
+                      ) : (
+                        folderTargets.map(renderTargetCard)
+                      )}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              );
+            })}
+
+            {groupedTargets.ungrouped.length > 0 && (
+              folderList.length === 0 ? (
+                <div className="space-y-4" data-testid="section-ungrouped-flat">
+                  {groupedTargets.ungrouped.map(renderTargetCard)}
+                </div>
+              ) : (
+                <Collapsible
+                  key="ungrouped"
+                  open={!collapsedFolderIds.has("ungrouped")}
+                  onOpenChange={(open) => {
+                    if (!open) toggleFolderCollapsed("ungrouped");
+                    else if (collapsedFolderIds.has("ungrouped")) toggleFolderCollapsed("ungrouped");
+                  }}
+                  className="rounded-lg border bg-card"
+                  data-testid="folder-ungrouped"
+                >
+                  <div className="flex items-center gap-1 p-3">
+                    <CollapsibleTrigger
+                      className="flex flex-1 items-center gap-2 text-left rounded hover-elevate active-elevate-2 px-2 py-1 -mx-2 -my-1 min-w-0"
+                      data-testid="button-toggle-folder-ungrouped"
+                    >
+                      {collapsedFolderIds.has("ungrouped") ? (
+                        <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 shrink-0 text-muted-foreground" />
+                      )}
+                      <Folder className="w-4 h-4 shrink-0 text-muted-foreground" />
+                      <span className="font-semibold truncate">{t("targets.ungrouped")}</span>
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {targetCountLabel(groupedTargets.ungrouped.length, t)}
+                      </span>
+                    </CollapsibleTrigger>
+                  </div>
+                  <CollapsibleContent>
+                    <div className="px-3 pb-3 space-y-3">
+                      {groupedTargets.ungrouped.map(renderTargetCard)}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              )
+            )}
           </div>
         )}
       </div>
@@ -477,6 +736,174 @@ export default function TargetsPage() {
               data-testid="button-save-rename"
             >
               {updateTarget.isPending ? t("common.saving") : t("targets.saveChanges")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create folder dialog */}
+      <Dialog
+        open={creatingFolder}
+        onOpenChange={(open) => { if (!open) { setCreatingFolder(false); setFolderNameValue(""); } }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("targets.createFolder")}</DialogTitle>
+            <DialogDescription>{t("targets.createFolderDesc")}</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="create-folder-input">{t("targets.folderName")}</Label>
+            <Input
+              id="create-folder-input"
+              value={folderNameValue}
+              onChange={(e) => setFolderNameValue(e.target.value)}
+              placeholder={t("targets.folderNamePlaceholder")}
+              data-testid="input-create-folder"
+              className="mt-2"
+              autoFocus
+              onKeyDown={(e) => { if (e.key === "Enter") handleCreateFolder(); }}
+            />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => { setCreatingFolder(false); setFolderNameValue(""); }}
+              data-testid="button-cancel-create-folder"
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              onClick={handleCreateFolder}
+              disabled={!folderNameValue.trim() || createFolder.isPending}
+              data-testid="button-confirm-create-folder"
+            >
+              {createFolder.isPending ? t("common.saving") : t("common.save")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rename folder dialog */}
+      <Dialog
+        open={!!renamingFolder}
+        onOpenChange={(open) => { if (!open) { setRenamingFolder(null); setFolderNameValue(""); } }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("targets.renameFolder")}</DialogTitle>
+            <DialogDescription>{t("targets.renameFolderDesc")}</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="rename-folder-input">{t("targets.folderName")}</Label>
+            <Input
+              id="rename-folder-input"
+              value={folderNameValue}
+              onChange={(e) => setFolderNameValue(e.target.value)}
+              data-testid="input-rename-folder"
+              className="mt-2"
+              autoFocus
+              onKeyDown={(e) => { if (e.key === "Enter") handleRenameFolder(); }}
+            />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => { setRenamingFolder(null); setFolderNameValue(""); }}
+              data-testid="button-cancel-rename-folder"
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              onClick={handleRenameFolder}
+              disabled={!folderNameValue.trim() || updateFolder.isPending}
+              data-testid="button-confirm-rename-folder"
+            >
+              {updateFolder.isPending ? t("common.saving") : t("targets.saveChanges")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete folder confirmation */}
+      <AlertDialog
+        open={!!deletingFolder}
+        onOpenChange={(open) => { if (!open) setDeletingFolder(null); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("targets.deleteFolderConfirm")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("targets.deleteFolderWarning")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete-folder">
+              {t("common.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteFolder}
+              className="bg-none bg-rose-500 text-white"
+              data-testid="button-confirm-delete-folder"
+            >
+              {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Move target to folder dialog */}
+      <Dialog open={!!movingTarget} onOpenChange={(open) => { if (!open) setMovingTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("targets.moveToFolder")}</DialogTitle>
+            <DialogDescription>{t("targets.moveToFolderDesc")}</DialogDescription>
+          </DialogHeader>
+          <div className="py-2 space-y-1 max-h-72 overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => handleMoveTarget(null)}
+              disabled={moveTarget.isPending}
+              className={`w-full flex items-center gap-2 text-left px-3 py-2 rounded hover-elevate active-elevate-2 ${
+                movingTarget?.folderId == null ? "bg-accent" : ""
+              }`}
+              data-testid="button-move-to-no-folder"
+            >
+              <Folder className="w-4 h-4 text-muted-foreground" />
+              <span className="flex-1">{t("targets.noFolder")}</span>
+              {movingTarget?.folderId == null && (
+                <span className="text-xs text-muted-foreground">✓</span>
+              )}
+            </button>
+            {folderList.map((folder) => {
+              const isCurrent = movingTarget?.folderId === folder.id;
+              return (
+                <button
+                  key={folder.id}
+                  type="button"
+                  onClick={() => handleMoveTarget(folder.id)}
+                  disabled={moveTarget.isPending}
+                  className={`w-full flex items-center gap-2 text-left px-3 py-2 rounded hover-elevate active-elevate-2 ${
+                    isCurrent ? "bg-accent" : ""
+                  }`}
+                  data-testid={`button-move-to-folder-${folder.id}`}
+                >
+                  <FolderOpen className="w-4 h-4 text-muted-foreground" />
+                  <span className="flex-1 truncate">{folder.name}</span>
+                  {isCurrent && <span className="text-xs text-muted-foreground">✓</span>}
+                </button>
+              );
+            })}
+            {folderList.length === 0 && (
+              <p className="text-sm text-muted-foreground px-3 py-2">
+                {t("targets.createFolderDesc")}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setMovingTarget(null)}
+              data-testid="button-cancel-move-target"
+            >
+              {t("common.cancel")}
             </Button>
           </DialogFooter>
         </DialogContent>

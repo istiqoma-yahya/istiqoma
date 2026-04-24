@@ -197,6 +197,64 @@ export async function registerRoutes(
     }
   });
 
+  // Target Folders Routes - Protected
+  app.get(api.targetFolders.list.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const folders = await storage.getTargetFolders(userId);
+    res.json(folders);
+  });
+
+  app.post(api.targetFolders.create.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const input = api.targetFolders.create.input.parse(req.body);
+      const userId = req.user.claims.sub;
+      const folder = await storage.createTargetFolder(userId, input);
+      res.status(201).json(folder);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      throw err;
+    }
+  });
+
+  app.patch(api.targetFolders.update.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const input = api.targetFolders.update.input.parse(req.body);
+      const userId = req.user.claims.sub;
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      const folder = await storage.updateTargetFolder(id, userId, input);
+      if (!folder) {
+        return res.status(404).json({ message: "Folder not found" });
+      }
+      res.json(folder);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      throw err;
+    }
+  });
+
+  app.delete(api.targetFolders.delete.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+    await storage.deleteTargetFolder(id, userId);
+    res.status(204).send();
+  });
+
   // Targets Routes - Protected
   app.get(api.targets.list.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
@@ -216,12 +274,15 @@ export async function registerRoutes(
       const userId = req.user.claims.sub;
       const target = await storage.createTarget(userId, input);
       res.status(201).json(target);
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
           message: err.errors[0].message,
           field: err.errors[0].path.join('.'),
         });
+      }
+      if (err && typeof err.status === "number") {
+        return res.status(err.status).json({ message: err.message });
       }
       throw err;
     }
@@ -237,12 +298,15 @@ export async function registerRoutes(
       }
       const target = await storage.updateTarget(id, userId, input);
       res.json(target);
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
           message: err.errors[0].message,
           field: err.errors[0].path.join('.'),
         });
+      }
+      if (err && typeof err.status === "number") {
+        return res.status(err.status).json({ message: err.message });
       }
       throw err;
     }

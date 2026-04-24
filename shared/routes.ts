@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertPushSubscriptionSchema, deeds, categories, targets, targetHistory, pushSubscriptions } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -107,6 +107,46 @@ export const api = {
       responses: {
         200: z.array(z.custom<typeof categories.$inferSelect>()),
         401: errorSchemas.unauthorized,
+      },
+    },
+  },
+  targetFolders: {
+    list: {
+      method: "GET" as const,
+      path: "/api/target-folders",
+      responses: {
+        200: z.array(z.custom<typeof targetFolders.$inferSelect>()),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    create: {
+      method: "POST" as const,
+      path: "/api/target-folders",
+      input: insertTargetFolderSchema,
+      responses: {
+        201: z.custom<typeof targetFolders.$inferSelect>(),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+      },
+    },
+    update: {
+      method: "PATCH" as const,
+      path: "/api/target-folders/:id",
+      input: insertTargetFolderSchema,
+      responses: {
+        200: z.custom<typeof targetFolders.$inferSelect>(),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
+    delete: {
+      method: "DELETE" as const,
+      path: "/api/target-folders/:id",
+      responses: {
+        204: z.void(),
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
       },
     },
   },

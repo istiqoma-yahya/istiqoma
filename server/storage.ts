@@ -1,7 +1,7 @@
 import { db } from "./db";
 export { db };
-import { deeds, categories, targets, targetHistory, pushSubscriptions, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription } from "@shared/schema";
-import { eq, desc, and, asc, sql, gte, lte } from "drizzle-orm";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription } from "@shared/schema";
+import { eq, desc, and, asc, sql, gte, lte, isNull } from "drizzle-orm";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 
@@ -37,6 +37,10 @@ export interface IStorage {
   createTarget(userId: string, target: InsertTarget): Promise<Target>;
   updateTarget(id: number, userId: string, target: InsertTarget): Promise<Target>;
   deleteTarget(id: number, userId: string): Promise<void>;
+  getTargetFolders(userId: string): Promise<TargetFolder[]>;
+  createTargetFolder(userId: string, folder: InsertTargetFolder): Promise<TargetFolder>;
+  updateTargetFolder(id: number, userId: string, folder: InsertTargetFolder): Promise<TargetFolder>;
+  deleteTargetFolder(id: number, userId: string): Promise<void>;
   getTargetHistory(targetId: number, userId: string, limit?: number): Promise<TargetHistory[]>;
   getTargetHistoryWithStreak(targetId: number, userId: string, limit?: number): Promise<TargetHistoryWithStreak>;
   calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack?: number): Promise<TargetHistory[]>;
@@ -302,7 +306,22 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
+  private async assertFolderOwnership(folderId: number | null | undefined, userId: string): Promise<void> {
+    if (folderId == null) return;
+    const [folder] = await db
+      .select({ id: targetFolders.id })
+      .from(targetFolders)
+      .where(and(eq(targetFolders.id, folderId), eq(targetFolders.userId, userId)))
+      .limit(1);
+    if (!folder) {
+      const err = new Error("Folder not found or not owned by user") as Error & { status?: number };
+      err.status = 403;
+      throw err;
+    }
+  }
+
   async createTarget(userId: string, insertTarget: InsertTarget): Promise<Target> {
+    await this.assertFolderOwnership(insertTarget.folderId ?? null, userId);
     const [target] = await db
       .insert(targets)
       .values({ ...insertTarget, userId })
@@ -311,6 +330,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTarget(id: number, userId: string, updateTarget: InsertTarget): Promise<Target> {
+    if ("folderId" in updateTarget) {
+      await this.assertFolderOwnership(updateTarget.folderId ?? null, userId);
+    }
     const [target] = await db
       .update(targets)
       .set(updateTarget)
@@ -323,6 +345,44 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(targets)
       .where(and(eq(targets.id, id), eq(targets.userId, userId)));
+  }
+
+  async getTargetFolders(userId: string): Promise<TargetFolder[]> {
+    return await db
+      .select()
+      .from(targetFolders)
+      .where(eq(targetFolders.userId, userId))
+      .orderBy(asc(targetFolders.sortOrder), asc(targetFolders.id));
+  }
+
+  async createTargetFolder(userId: string, insertFolder: InsertTargetFolder): Promise<TargetFolder> {
+    const existing = await this.getTargetFolders(userId);
+    const maxSortOrder = existing.length > 0 ? Math.max(...existing.map(f => f.sortOrder)) : -1;
+    const [folder] = await db
+      .insert(targetFolders)
+      .values({
+        ...insertFolder,
+        userId,
+        sortOrder: maxSortOrder + 1,
+      })
+      .returning();
+    return folder;
+  }
+
+  async updateTargetFolder(id: number, userId: string, updateFolder: InsertTargetFolder): Promise<TargetFolder> {
+    const [folder] = await db
+      .update(targetFolders)
+      .set({ name: updateFolder.name })
+      .where(and(eq(targetFolders.id, id), eq(targetFolders.userId, userId)))
+      .returning();
+    return folder;
+  }
+
+  async deleteTargetFolder(id: number, userId: string): Promise<void> {
+    // ON DELETE SET NULL on targets.folder_id keeps the targets but ungroups them.
+    await db
+      .delete(targetFolders)
+      .where(and(eq(targetFolders.id, id), eq(targetFolders.userId, userId)));
   }
 
   async updateTargetProgress(id: number, userId: string, progress: number): Promise<Target> {

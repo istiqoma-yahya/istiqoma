@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
 import { useTargetsWithProgress, useDeleteTarget, useCompleteTarget, useUpdateTarget } from "@/hooks/use-targets";
 import {
   useTargetFolders,
@@ -226,7 +227,35 @@ export default function TargetsPage() {
   const [renameValue, setRenameValue] = useState("");
 
   // Folder UI state
-  const [collapsedFolderIds, setCollapsedFolderIds] = useState<Set<number | string>>(new Set());
+  const { user } = useAuth();
+  const collapsedStorageKey = user?.id ? `targets:collapsedFolders:${user.id}` : null;
+  const collapsedStorageKeyRef = useRef<string | null>(collapsedStorageKey);
+  collapsedStorageKeyRef.current = collapsedStorageKey;
+
+  const readCollapsedFromStorage = (key: string | null): Set<number | string> => {
+    if (!key) return new Set();
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return new Set();
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return new Set();
+      return new Set(
+        parsed.map((v: unknown) => (typeof v === "number" ? v : String(v)))
+      );
+    } catch {
+      return new Set();
+    }
+  };
+
+  const [collapsedFolderIds, setCollapsedFolderIds] = useState<Set<number | string>>(
+    () => readCollapsedFromStorage(collapsedStorageKey)
+  );
+
+  // Re-hydrate when the storage key becomes available or changes (e.g. user loads).
+  useEffect(() => {
+    setCollapsedFolderIds(readCollapsedFromStorage(collapsedStorageKey));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collapsedStorageKey]);
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [folderNameValue, setFolderNameValue] = useState("");
   const [renamingFolder, setRenamingFolder] = useState<TargetFolder | null>(null);
@@ -314,6 +343,14 @@ export default function TargetsPage() {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
       else next.add(key);
+      const storageKey = collapsedStorageKeyRef.current;
+      if (storageKey) {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(Array.from(next)));
+        } catch {
+          // Ignore storage errors (quota, private mode, etc.)
+        }
+      }
       return next;
     });
   };

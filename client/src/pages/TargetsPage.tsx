@@ -397,10 +397,6 @@ export default function TargetsPage() {
     });
   };
 
-  useEffect(() => {
-    setPendingFolderId(movingTarget ? (movingTarget.folderId ?? null) : null);
-  }, [movingTarget]);
-
   const handleMoveTarget = () => {
     if (!movingTarget) return;
     moveTarget.mutate(
@@ -530,7 +526,7 @@ export default function TargetsPage() {
       onOpenUpdateModal={() => setUpdateModalTarget(target)}
       onDetail={() => navigate(`/targets/${target.id}`)}
       onRename={handleOpenRename}
-      onMoveToFolder={(t2) => setMovingTarget(t2)}
+      onMoveToFolder={(t2) => { setMovingTarget(t2); setPendingFolderId(t2.folderId ?? null); }}
       t={t}
       dateLocale={dateLocale}
     />

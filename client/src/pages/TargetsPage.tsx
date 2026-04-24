@@ -261,6 +261,7 @@ export default function TargetsPage() {
   const [renamingFolder, setRenamingFolder] = useState<TargetFolder | null>(null);
   const [deletingFolder, setDeletingFolder] = useState<TargetFolder | null>(null);
   const [movingTarget, setMovingTarget] = useState<TargetWithProgress | null>(null);
+  const [pendingFolderId, setPendingFolderId] = useState<number | null>(null);
 
   const { data: streakData } = useQuery<{ streakCount: number; weekDays: boolean[] }>({
     queryKey: ["/api/streak"],
@@ -396,14 +397,14 @@ export default function TargetsPage() {
     });
   };
 
-  const handleMoveTarget = (folderId: number | null) => {
+  useEffect(() => {
+    setPendingFolderId(movingTarget ? (movingTarget.folderId ?? null) : null);
+  }, [movingTarget]);
+
+  const handleMoveTarget = () => {
     if (!movingTarget) return;
-    if ((movingTarget.folderId ?? null) === folderId) {
-      setMovingTarget(null);
-      return;
-    }
     moveTarget.mutate(
-      { targetId: movingTarget.id, folderId },
+      { targetId: movingTarget.id, folderId: pendingFolderId },
       {
         onSuccess: () => {
           setMovingTarget(null);
@@ -896,35 +897,35 @@ export default function TargetsPage() {
           <div className="py-2 space-y-1 max-h-72 overflow-y-auto">
             <button
               type="button"
-              onClick={() => handleMoveTarget(null)}
+              onClick={() => setPendingFolderId(null)}
               disabled={moveTarget.isPending}
               className={`w-full flex items-center gap-2 text-left px-3 py-2 rounded hover-elevate active-elevate-2 ${
-                movingTarget?.folderId == null ? "bg-accent" : ""
+                pendingFolderId == null ? "bg-accent" : ""
               }`}
               data-testid="button-move-to-no-folder"
             >
               <Folder className="w-4 h-4 text-muted-foreground" />
               <span className="flex-1">{t("targets.noFolder")}</span>
-              {movingTarget?.folderId == null && (
+              {pendingFolderId == null && (
                 <span className="text-xs text-muted-foreground">✓</span>
               )}
             </button>
             {folderList.map((folder) => {
-              const isCurrent = movingTarget?.folderId === folder.id;
+              const isSelected = pendingFolderId === folder.id;
               return (
                 <button
                   key={folder.id}
                   type="button"
-                  onClick={() => handleMoveTarget(folder.id)}
+                  onClick={() => setPendingFolderId(folder.id)}
                   disabled={moveTarget.isPending}
                   className={`w-full flex items-center gap-2 text-left px-3 py-2 rounded hover-elevate active-elevate-2 ${
-                    isCurrent ? "bg-accent" : ""
+                    isSelected ? "bg-accent" : ""
                   }`}
                   data-testid={`button-move-to-folder-${folder.id}`}
                 >
                   <FolderOpen className="w-4 h-4 text-muted-foreground" />
                   <span className="flex-1 truncate">{folder.name}</span>
-                  {isCurrent && <span className="text-xs text-muted-foreground">✓</span>}
+                  {isSelected && <span className="text-xs text-muted-foreground">✓</span>}
                 </button>
               );
             })}
@@ -934,13 +935,20 @@ export default function TargetsPage() {
               </p>
             )}
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button
               variant="outline"
               onClick={() => setMovingTarget(null)}
               data-testid="button-cancel-move-target"
             >
               {t("common.cancel")}
+            </Button>
+            <Button
+              onClick={handleMoveTarget}
+              disabled={pendingFolderId === (movingTarget?.folderId ?? null) || moveTarget.isPending}
+              data-testid="button-confirm-move-target"
+            >
+              {moveTarget.isPending ? t("common.saving") : t("common.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

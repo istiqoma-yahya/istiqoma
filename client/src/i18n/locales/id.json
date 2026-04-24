@@ -416,7 +416,8 @@
     "language": "Bahasa",
     "filter": "Filter",
     "allCategories": "Semua Kategori",
-    "allSubCategories": "Semua Jenis"
+    "allSubCategories": "Semua Jenis",
+    "confirm": "Konfirmasi"
   },
   "sholat": {
     "selectType": "Pilih Jenis Sholat",

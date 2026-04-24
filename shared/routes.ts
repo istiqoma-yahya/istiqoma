@@ -159,7 +159,7 @@ export const api = {
         200: z.custom<typeof targets.$inferSelect>(),
         400: errorSchemas.validation,
         401: errorSchemas.unauthorized,
-        403: errorSchemas.unauthorized,
+        403: errorSchemas.forbidden,
         404: errorSchemas.notFound,
       },
     },

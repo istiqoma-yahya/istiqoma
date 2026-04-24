@@ -268,7 +268,10 @@ export async function registerRoutes(
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid ID" });
     }
-    await storage.deleteTargetFolder(id, userId);
+    const deleted = await storage.deleteTargetFolder(id, userId);
+    if (!deleted) {
+      return res.status(404).json({ message: "Folder not found" });
+    }
     res.status(204).send();
   });
 

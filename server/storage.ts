@@ -39,8 +39,8 @@ export interface IStorage {
   deleteTarget(id: number, userId: string): Promise<void>;
   getTargetFolders(userId: string): Promise<TargetFolder[]>;
   createTargetFolder(userId: string, folder: InsertTargetFolder): Promise<TargetFolder>;
-  updateTargetFolder(id: number, userId: string, folder: InsertTargetFolder): Promise<TargetFolder>;
-  deleteTargetFolder(id: number, userId: string): Promise<void>;
+  updateTargetFolder(id: number, userId: string, folder: InsertTargetFolder): Promise<TargetFolder | undefined>;
+  deleteTargetFolder(id: number, userId: string): Promise<boolean>;
   moveTargetToFolder(targetId: number, userId: string, folderId: number | null): Promise<Target>;
   getTargetHistory(targetId: number, userId: string, limit?: number): Promise<TargetHistory[]>;
   getTargetHistoryWithStreak(targetId: number, userId: string, limit?: number): Promise<TargetHistoryWithStreak>;
@@ -370,7 +370,7 @@ export class DatabaseStorage implements IStorage {
     return folder;
   }
 
-  async updateTargetFolder(id: number, userId: string, updateFolder: InsertTargetFolder): Promise<TargetFolder> {
+  async updateTargetFolder(id: number, userId: string, updateFolder: InsertTargetFolder): Promise<TargetFolder | undefined> {
     const [folder] = await db
       .update(targetFolders)
       .set({ name: updateFolder.name })
@@ -379,11 +379,13 @@ export class DatabaseStorage implements IStorage {
     return folder;
   }
 
-  async deleteTargetFolder(id: number, userId: string): Promise<void> {
+  async deleteTargetFolder(id: number, userId: string): Promise<boolean> {
     // ON DELETE SET NULL on targets.folder_id keeps the targets but ungroups them.
-    await db
+    const deleted = await db
       .delete(targetFolders)
-      .where(and(eq(targetFolders.id, id), eq(targetFolders.userId, userId)));
+      .where(and(eq(targetFolders.id, id), eq(targetFolders.userId, userId)))
+      .returning({ id: targetFolders.id });
+    return deleted.length > 0;
   }
 
   async moveTargetToFolder(targetId: number, userId: string, folderId: number | null): Promise<Target> {

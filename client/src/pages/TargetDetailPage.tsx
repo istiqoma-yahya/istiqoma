@@ -470,7 +470,7 @@ function CalendarDateProgressDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className={isDzikirTarget ? "sm:max-w-md" : "sm:max-w-sm"}>
         <DialogHeader>
           <DialogTitle data-testid="text-date-progress-title">
             {t("targets.updateProgressTitle")}

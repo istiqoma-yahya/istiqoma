@@ -48,12 +48,18 @@ The server handles:
 
 ### Data Storage
 - **Database**: PostgreSQL hosted on **Supabase** (migrated from Replit DB to reduce costs)
-  - Connection: `SUPABASE_DATABASE_URL` secret (Transaction mode pooler, port 6543, SSL enabled)
-  - Fallback: `DATABASE_URL` if `SUPABASE_DATABASE_URL` is not set
+- **Two separate Supabase projects** — DO NOT collapse these back into one:
+  - **Production** uses `SUPABASE_DATABASE_URL` (currently `aws-1-ap-southeast-1` region). Read by the deployed app and by `drizzle-kit` when `NODE_ENV=production`.
+  - **Development** uses `SUPABASE_DEV_DATABASE_URL` (separate Supabase project, currently `aws-1-ap-southeast-2`). Read by `npm run dev` and by `drizzle-kit` when `NODE_ENV` is anything other than `production`.
+  - Both are Transaction mode pooler connections (port 6543, SSL enabled).
+  - `server/db.ts` and `drizzle.config.ts` branch on `NODE_ENV` and **fail fast** in dev if `SUPABASE_DEV_DATABASE_URL` is missing — there is intentionally NO fallback to the prod URL, so dev work cannot accidentally pollute production. If the dev secret ever goes missing, set it before starting the workflow.
+  - To provision a fresh dev DB: create a new Supabase project, copy its Transaction mode pooled URI (port 6543), and store it in the `SUPABASE_DEV_DATABASE_URL` secret. Then run `SUPABASE_DATABASE_URL=$SUPABASE_DEV_DATABASE_URL NODE_ENV=production npx drizzle-kit push --force` to create the schema (or just `npx drizzle-kit push --force` since dev defaults to the dev URL).
+- **Sessions**: `server/replit_integrations/auth/replitAuth.ts` uses `DATABASE_URL` (Replit-managed Postgres) for the session store. This is intentionally per-environment — Replit scopes `DATABASE_URL` separately for dev and prod, so sessions stay isolated automatically.
 - **ORM**: Drizzle ORM with drizzle-zod for schema validation
 - **Schema Location**: `shared/schema.ts` contains all table definitions
-- **Migrations**: Drizzle Kit for schema migrations (`drizzle.config.ts`)
-  - To push schema changes: `npx drizzle-kit push --force` (reads `SUPABASE_DATABASE_URL` automatically)
+- **Migrations**: Drizzle Kit (`drizzle.config.ts`)
+  - To push schema changes in dev: `npx drizzle-kit push --force` (defaults to dev DB)
+  - To push schema changes against prod: `NODE_ENV=production npx drizzle-kit push --force`
 
 Database tables:
 - `users` - User accounts (managed by Replit Auth)
@@ -154,7 +160,9 @@ The `ConsistencyCalendar` in `TargetDetailPage.tsx` supports two interaction mod
 - One-time targets: dates within `startDate`–`dueDate` range show progress; dates outside are dimmed/non-interactive
 
 ### Environment Variables Required
-- `DATABASE_URL` - PostgreSQL connection string
+- `SUPABASE_DATABASE_URL` - Production Supabase connection string (used when `NODE_ENV=production`)
+- `SUPABASE_DEV_DATABASE_URL` - Development Supabase connection string (used otherwise; keep this on a separate Supabase project)
+- `DATABASE_URL` - Replit-managed Postgres connection string, used only by `replitAuth.ts` for the session store (per-environment, scoped automatically by Replit)
 - `SESSION_SECRET` - Secret for session encryption
 - `ISSUER_URL` - Replit OIDC issuer (defaults to https://replit.com/oidc)
 - `REPL_ID` - Replit environment identifier

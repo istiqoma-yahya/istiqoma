@@ -15,6 +15,17 @@ import pg from "pg";
 
 const { Pool } = pg;
 
+// Safety guard: this script writes to the PRODUCTION Supabase database via
+// SUPABASE_DATABASE_URL and was already executed once. Refuse to run unless the
+// operator explicitly opts in, so a casual `tsx scripts/...` from a dev shell
+// (which still has access to the prod secret) cannot accidentally re-import data.
+if (process.env.ALLOW_PROD_DB_MIGRATION !== "1") {
+  console.error(
+    "REFUSING TO RUN: this is a one-shot prod migration script. Re-run with ALLOW_PROD_DB_MIGRATION=1 only if you really mean to write to the production Supabase database.",
+  );
+  process.exit(1);
+}
+
 const SOURCE_URL = process.env.OLD_DATABASE_URL;
 const DEST_URL = process.env.SUPABASE_DATABASE_URL;
 

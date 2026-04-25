@@ -157,7 +157,12 @@ export default function Dashboard() {
           {targets && targets.length > 0 ? (
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {targets.slice(0, 3).map((target) => (
-                <Card key={target.id} className="p-3" data-testid={`card-dashboard-target-${target.id}`}>
+                <Card
+                  key={target.id}
+                  className="p-3 cursor-pointer hover:border-emerald-500/50 hover:bg-muted/50 transition-colors active:scale-[0.98]"
+                  onClick={() => navigate(`/targets/${target.id}`)}
+                  data-testid={`card-dashboard-target-${target.id}`}
+                >
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-sm truncate">
                       {getTargetDisplayTitle(target, t)}

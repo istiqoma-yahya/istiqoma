@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
 import { useCreateDeed } from "@/hooks/use-deeds";
 import { useCategories } from "@/hooks/use-categories";
 import { useCustomDzikirTypes, useCreateCustomDzikirType, useDeleteCustomDzikirType } from "@/hooks/use-dzikir-types";
@@ -40,7 +39,6 @@ const BUILT_IN_DZIKIR_TYPES = [
 const BUILT_IN_IDS = new Set(BUILT_IN_DZIKIR_TYPES.map((t) => t.id));
 
 export default function DzikirPage() {
-  const [, navigate] = useLocation();
   const [count, setCount] = useState(0);
   const [selectedDzikirType, setSelectedDzikirType] = useState<string>(() => {
     return localStorage.getItem("lastDzikirType") || "subhanallah";
@@ -49,6 +47,15 @@ export default function DzikirPage() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [manageDialogOpen, setManageDialogOpen] = useState(false);
   const [newLabel, setNewLabel] = useState("");
+
+  const handleSelectChange = (val: string) => {
+    if (val === "__add_custom__") {
+      setNewLabel("");
+      setAddDialogOpen(true);
+      return;
+    }
+    setSelectedDzikirType(val);
+  };
 
   const { data: categories = [] } = useCategories();
   const { data: customTypes = [] } = useCustomDzikirTypes();
@@ -184,7 +191,7 @@ export default function DzikirPage() {
         <div className="flex items-center gap-2 mb-6 w-full max-w-sm">
           <Select
             value={selectedDzikirType}
-            onValueChange={setSelectedDzikirType}
+            onValueChange={handleSelectChange}
           >
             <SelectTrigger
               className="flex-1"
@@ -223,6 +230,16 @@ export default function DzikirPage() {
                   </SelectGroup>
                 </>
               )}
+
+              <SelectSeparator />
+              <SelectItem
+                value="__add_custom__"
+                className="text-emerald-500 font-medium"
+                data-testid="select-item-add-custom-dzikir"
+              >
+                <Plus className="w-4 h-4 mr-1 inline-block" />
+                {t("dzikir.addCustomType")}
+              </SelectItem>
             </SelectContent>
           </Select>
 

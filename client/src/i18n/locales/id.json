@@ -199,6 +199,7 @@
     "customTypeDeleted": "Jenis kustom dihapus",
     "customTypeRenamed": "Jenis kustom diubah",
     "renameCustomType": "Ubah Nama Jenis Kustom",
+    "renameHistoryNote": "Catatan: Mengubah nama jenis ini tidak akan memperbarui catatan amal masa lalu. Amal historis tetap menampilkan nama lama.",
     "noCustomTypes": "Belum ada jenis kustom",
     "units": {
       "times": "Hitungan"

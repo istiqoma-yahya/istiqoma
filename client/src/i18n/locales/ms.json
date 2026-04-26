@@ -199,6 +199,7 @@
     "customTypeDeleted": "Jenis tersuai dibuang",
     "customTypeRenamed": "Jenis tersuai diubah nama",
     "renameCustomType": "Ubah Nama Jenis Tersuai",
+    "renameHistoryNote": "Nota: Mengubah nama jenis ini tidak akan mengemas kini rekod amalan yang lalu. Amalan sejarah masih akan menunjukkan nama lama.",
     "noCustomTypes": "Tiada jenis tersuai lagi",
     "units": {
       "times": "Kiraan"

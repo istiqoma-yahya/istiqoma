@@ -199,6 +199,7 @@
     "customTypeDeleted": "Custom type removed",
     "customTypeRenamed": "Custom type renamed",
     "renameCustomType": "Rename Custom Type",
+    "renameHistoryNote": "Note: Renaming this type will not update past deed records. Historical deeds will still show the old name.",
     "noCustomTypes": "No custom types yet",
     "units": {
       "times": "Counts"

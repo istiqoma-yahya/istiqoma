@@ -392,6 +392,9 @@ export default function DzikirPage() {
             data-testid="input-rename-dzikir-label"
             autoFocus
           />
+          <p className="text-xs text-muted-foreground" data-testid="text-rename-history-note">
+            {t("dzikir.renameHistoryNote")}
+          </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRenameDialogOpen(false)}>
               {t("common.cancel")}

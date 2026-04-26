@@ -137,6 +137,14 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
     { id: "istighfar", labelKey: "dzikir.types.istighfar" },
   ];
 
+  const builtInDzikirIds = new Set(DZIKIR_TYPES.map((type) => type.id));
+  const orphanedDzikirType =
+    deed.dzikirType &&
+    !builtInDzikirIds.has(deed.dzikirType) &&
+    !customDzikirTypes.some((ct) => ct.label === deed.dzikirType)
+      ? deed.dzikirType
+      : null;
+
   const SHOLAT_FARDHU_TYPES = [
     { id: "subuh", labelKey: "sholat.types.subuh" },
     { id: "dzuhur", labelKey: "sholat.types.dzuhur" },
@@ -329,6 +337,11 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                             {resolveDzikirTypeLabel(type.label, t, customDzikirTypes)}
                           </SelectItem>
                         ))}
+                        {orphanedDzikirType && (
+                          <SelectItem key="orphaned" value={orphanedDzikirType}>
+                            {orphanedDzikirType}
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />

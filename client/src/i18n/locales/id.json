@@ -255,7 +255,9 @@
     "doneLabel": "Sudah",
     "noLocationTitle": "Aktifkan Lokasi",
     "noLocationDesc": "Untuk menampilkan jadwal sholat, kami membutuhkan lokasimu.",
-    "loading": "Memuat jadwal sholat..."
+    "loading": "Memuat jadwal sholat...",
+    "imsak": "Imsak",
+    "sunrise": "Terbit"
   },
   "progress": {
     "title": "Progres",

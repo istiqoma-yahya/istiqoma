@@ -181,6 +181,16 @@ export default function SholatPage() {
     ];
   }, [prayerTimes]);
 
+  const imsakTime = useMemo(() => {
+    if (!prayerTimes) return null;
+    return new Date(prayerTimes.fajr.getTime() - 10 * 60 * 1000);
+  }, [prayerTimes]);
+
+  const sunriseTime = useMemo(() => {
+    if (!prayerTimes) return null;
+    return prayerTimes.sunrise;
+  }, [prayerTimes]);
+
   const getPrayerKey = (prayer: typeof Prayer[keyof typeof Prayer]): PrayerKey | null => {
     switch (prayer) {
       case Prayer.Fajr: return "fajr";
@@ -407,6 +417,26 @@ export default function SholatPage() {
                 </Card>
               </button>
             </div>
+
+            {/* Imsak / Sunrise sub-times */}
+            {imsakTime && sunriseTime && (
+              <div
+                className="flex items-center justify-center gap-3 text-xs text-muted-foreground px-2"
+                data-testid="row-sub-times"
+              >
+                <span className="flex items-center gap-1.5" data-testid="text-imsak">
+                  <Moon className="w-3 h-3" />
+                  <span>{t("sholatPage.imsak")}</span>
+                  <span className="font-mono">{format(imsakTime, "HH:mm")}</span>
+                </span>
+                <span aria-hidden="true">·</span>
+                <span className="flex items-center gap-1.5" data-testid="text-sunrise">
+                  <Sunrise className="w-3 h-3" />
+                  <span>{t("sholatPage.sunrise")}</span>
+                  <span className="font-mono">{format(sunriseTime, "HH:mm")}</span>
+                </span>
+              </div>
+            )}
 
             {/* Prayer list */}
             <Card className="p-2 sm:p-3">

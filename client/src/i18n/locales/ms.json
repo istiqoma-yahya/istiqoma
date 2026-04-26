@@ -255,7 +255,9 @@
     "doneLabel": "Selesai",
     "noLocationTitle": "Aktifkan Lokasi",
     "noLocationDesc": "Untuk memaparkan waktu solat, kami memerlukan lokasi anda.",
-    "loading": "Memuatkan waktu solat..."
+    "loading": "Memuatkan waktu solat...",
+    "imsak": "Imsak",
+    "sunrise": "Syuruk"
   },
   "progress": {
     "title": "Kemajuan",

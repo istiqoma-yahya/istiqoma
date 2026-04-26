@@ -255,7 +255,9 @@
     "doneLabel": "Done",
     "noLocationTitle": "Enable Location",
     "noLocationDesc": "To display prayer times, we need your location.",
-    "loading": "Loading prayer times..."
+    "loading": "Loading prayer times...",
+    "imsak": "Imsak",
+    "sunrise": "Sunrise"
   },
   "progress": {
     "title": "Progress",

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { Coordinates, PrayerTimes, CalculationMethod, Prayer } from "adhan";
 import { Card } from "@/components/ui/card";
@@ -105,6 +105,7 @@ export default function SholatPage() {
   const { flags: done, togglePrayer: togglePrayerMutation, markAll } = usePrayerCompletion(dateKey);
 
   const [wigglingPrayer, setWigglingPrayer] = useState<PrayerKey | null>(null);
+  const wiggleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isFutureDay = useMemo(
     () => selectedDate.getTime() > todayMidnight.getTime(),
@@ -316,8 +317,18 @@ export default function SholatPage() {
   };
 
   const triggerWiggle = useCallback((key: PrayerKey) => {
+    if (wiggleTimerRef.current) clearTimeout(wiggleTimerRef.current);
     setWigglingPrayer(key);
-    setTimeout(() => setWigglingPrayer(null), 450);
+    wiggleTimerRef.current = setTimeout(() => {
+      setWigglingPrayer(null);
+      wiggleTimerRef.current = null;
+    }, 450);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (wiggleTimerRef.current) clearTimeout(wiggleTimerRef.current);
+    };
   }, []);
 
   const togglePrayer = useCallback((key: PrayerKey, prayerTime: Date) => {

@@ -5,6 +5,8 @@ import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { useUpdateDeed, useDeleteDeed } from "@/hooks/use-deeds";
 import { useCategories, useCategoryName } from "@/hooks/use-categories";
+import { useCustomDzikirTypes } from "@/hooks/use-dzikir-types";
+import { resolveDzikirTypeLabel } from "@/lib/targets";
 import { insertDeedSchema, type Deed } from "@shared/schema";
 import {
   Form,
@@ -71,6 +73,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const { mutate: deleteDeed, isPending: isDeleting } = useDeleteDeed();
   const { data: categories = [] } = useCategories();
   const translateCategoryName = useCategoryName();
+  const { data: customDzikirTypes = [] } = useCustomDzikirTypes();
   const [dateTime, setDateTime] = useState(formatDateTimeForInput(deed.createdAt));
   const [showCreateCategoryDialog, setShowCreateCategoryDialog] = useState(false);
 
@@ -319,6 +322,11 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
                         {DZIKIR_TYPES.map((type) => (
                           <SelectItem key={type.id} value={type.id}>
                             {t(type.labelKey)}
+                          </SelectItem>
+                        ))}
+                        {customDzikirTypes.map((type) => (
+                          <SelectItem key={`custom-${type.id}`} value={type.label}>
+                            {resolveDzikirTypeLabel(type.label, t, customDzikirTypes)}
                           </SelectItem>
                         ))}
                       </SelectContent>

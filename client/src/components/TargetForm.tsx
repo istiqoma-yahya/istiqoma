@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCategories, useCategoryName } from "@/hooks/use-categories";
 import { useCustomDzikirTypes } from "@/hooks/use-dzikir-types";
+import { resolveDzikirTypeLabel } from "@/lib/targets";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -385,7 +386,7 @@ export function TargetForm({
                     ))}
                     {customDzikirTypes.map((type) => (
                       <SelectItem key={`custom-${type.id}`} value={type.label}>
-                        {type.label}
+                        {resolveDzikirTypeLabel(type.label, t, customDzikirTypes)}
                       </SelectItem>
                     ))}
                   </SelectContent>

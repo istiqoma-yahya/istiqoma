@@ -375,8 +375,18 @@ export function usePrayerCompletion(date: string) {
   const createPrayerDeed = useCallback(
     async (prayer: PrayerKey) => {
       const tempId = nextTempId();
-      const now = new Date();
-      const createdAtIso = now.toISOString();
+      // For the selected date: if it's today use the real current time so
+      // Recent Activity ordering stays natural; for past/future days use noon
+      // of that day so the deed is stored on the correct calendar date
+      // regardless of timezone offset.
+      const todayKey = localDateKey(new Date());
+      const isSelectedToday = date === todayKey;
+      const createdAtIso = isSelectedToday
+        ? new Date().toISOString()
+        : (() => {
+            const [y, m, d2] = date.split("-").map(Number);
+            return new Date(y, m - 1, d2, 12, 0, 0).toISOString();
+          })();
       const optimistic = buildOptimisticDeed(date, prayer, tempId, createdAtIso);
 
       await queryClient.cancelQueries({ queryKey: DEEDS_QUERY_KEY });
@@ -396,8 +406,7 @@ export function usePrayerCompletion(date: string) {
           quantity: 1,
           sholatType: PRAYER_TO_SHOLAT_TYPE[prayer],
           customUnit: "times",
-          // createdAt intentionally omitted so the server stamps `now()` —
-          // keeps Recent Activity ordering natural.
+          createdAt: createdAtIso,
         });
         const created = (await res.json()) as Deed;
         removePending((op) => op.kind === "create" && op.tempId === tempId);

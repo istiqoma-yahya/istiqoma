@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar, doublePrecision, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -92,6 +92,48 @@ export const customDzikirTypes = pgTable("custom_dzikir_types", {
   label: text("label").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const prayerCompletions = pgTable(
+  "prayer_completions",
+  {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id").notNull().references(() => users.id),
+    date: text("date").notNull(),
+    fajr: boolean("fajr").notNull().default(false),
+    dhuhr: boolean("dhuhr").notNull().default(false),
+    asr: boolean("asr").notNull().default(false),
+    maghrib: boolean("maghrib").notNull().default(false),
+    isha: boolean("isha").notNull().default(false),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("prayer_completions_user_date_idx").on(table.userId, table.date),
+  ],
+);
+
+export const PRAYER_KEYS = ["fajr", "dhuhr", "asr", "maghrib", "isha"] as const;
+export const prayerKeySchema = z.enum(PRAYER_KEYS);
+export type PrayerKey = z.infer<typeof prayerKeySchema>;
+
+export const dateStringSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format");
+
+export const prayerCompletionFlagsSchema = z.object({
+  fajr: z.boolean(),
+  dhuhr: z.boolean(),
+  asr: z.boolean(),
+  maghrib: z.boolean(),
+  isha: z.boolean(),
+});
+
+export const updatePrayerCompletionSchema = z.object({
+  prayer: prayerKeySchema,
+  done: z.boolean(),
+});
+
+export type PrayerCompletion = typeof prayerCompletions.$inferSelect;
+export type PrayerCompletionFlags = z.infer<typeof prayerCompletionFlagsSchema>;
+export type UpdatePrayerCompletionRequest = z.infer<typeof updatePrayerCompletionSchema>;
 
 export const insertCustomDzikirTypeSchema = createInsertSchema(customDzikirTypes).pick({
   label: true,

@@ -68,6 +68,7 @@ Database tables:
 - `targets` - User target/goal entries with customUnit support for custom categories. Note: `manualProgress` field exists but is no longer used; one-time target progress is calculated purely from matching deeds.
 - `categories` - Custom user-defined categories
 - `push_subscriptions` - Push notification subscriptions with settings (dailyReminder, reminderTime, targetAlerts, sholatReminder, latitude, longitude, timezone)
+- `prayer_completions` - Daily 5-prayer completion log keyed by `(user_id, date)` where `date` is `YYYY-MM-DD` (user's local day). Five booleans (fajr/dhuhr/asr/maghrib/isha) are upserted via REST endpoints under `/api/prayer-completions/:date`. The Sholat page reads/writes via react-query with optimistic updates and mirrors values to localStorage as an offline cache; legacy `sholat_done_<date>` localStorage values are migrated into the database on first load.
 
 ### Custom Unit System
 When users create deeds or targets with custom (non-built-in) categories, they can select a unit type from 8 options:

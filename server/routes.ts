@@ -5,7 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
-import { deeds, insertCustomDzikirTypeSchema } from "@shared/schema";
+import { deeds, insertCustomDzikirTypeSchema, dateStringSchema, updatePrayerCompletionSchema, prayerCompletionFlagsSchema } from "@shared/schema";
 import { calculatePoints } from "./calculatePoints";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
 
@@ -674,6 +674,51 @@ export async function registerRoutes(
     } catch (err) {
       const status = getErrorStatus(err) ?? 400;
       res.status(status).json({ message: getErrorMessage(err) });
+    }
+  });
+
+  // Prayer Completions Routes
+  app.get("/api/prayer-completions/:date", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const date = dateStringSchema.parse(req.params.date);
+      const completion = await storage.getPrayerCompletion(userId, date);
+      res.json(completion);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      throw err;
+    }
+  });
+
+  app.patch("/api/prayer-completions/:date", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const date = dateStringSchema.parse(req.params.date);
+      const { prayer, done } = updatePrayerCompletionSchema.parse(req.body);
+      const updated = await storage.updatePrayerCompletion(userId, date, prayer, done);
+      res.json(updated);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      throw err;
+    }
+  });
+
+  app.put("/api/prayer-completions/:date", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const date = dateStringSchema.parse(req.params.date);
+      const flags = prayerCompletionFlagsSchema.parse(req.body);
+      const updated = await storage.setPrayerCompletion(userId, date, flags);
+      res.json(updated);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      throw err;
     }
   });
 

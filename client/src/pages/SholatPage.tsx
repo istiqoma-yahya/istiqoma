@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
+import { usePrayerCompletion } from "@/hooks/use-prayer-completions";
 
 interface LocationState {
   latitude: number | null;
@@ -52,42 +53,11 @@ function saveLocation(latitude: number, longitude: number) {
   } catch {}
 }
 
-function todayKey(): string {
-  const d = new Date();
+function formatDateKey(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
-  return `sholat_done_${y}-${m}-${day}`;
-}
-
-function loadDoneState(): Record<PrayerKey, boolean> {
-  const empty: Record<PrayerKey, boolean> = {
-    fajr: false,
-    dhuhr: false,
-    asr: false,
-    maghrib: false,
-    isha: false,
-  };
-  try {
-    const raw = localStorage.getItem(todayKey());
-    if (!raw) return empty;
-    const parsed = JSON.parse(raw);
-    return {
-      fajr: !!parsed.fajr,
-      dhuhr: !!parsed.dhuhr,
-      asr: !!parsed.asr,
-      maghrib: !!parsed.maghrib,
-      isha: !!parsed.isha,
-    };
-  } catch {
-    return empty;
-  }
-}
-
-function saveDoneState(state: Record<PrayerKey, boolean>) {
-  try {
-    localStorage.setItem(todayKey(), JSON.stringify(state));
-  } catch {}
+  return `${y}-${m}-${day}`;
 }
 
 const PRAYER_ICONS: Record<PrayerKey, typeof Sun> = {
@@ -111,29 +81,21 @@ export default function SholatPage() {
     requested: saved !== null,
   });
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [done, setDone] = useState<Record<PrayerKey, boolean>>(() => loadDoneState());
+  const dateKey = useMemo(
+    () => formatDateKey(currentTime),
+    // Re-derive when the calendar day changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      currentTime.getFullYear(),
+      currentTime.getMonth(),
+      currentTime.getDate(),
+    ],
+  );
+  const { flags: done, togglePrayer: togglePrayerMutation, markAll } = usePrayerCompletion(dateKey);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
-  }, []);
-
-  // Reset done state when the date rolls over
-  useEffect(() => {
-    const checkDay = () => {
-      const stored = localStorage.getItem(todayKey());
-      if (!stored) {
-        setDone({
-          fajr: false,
-          dhuhr: false,
-          asr: false,
-          maghrib: false,
-          isha: false,
-        });
-      }
-    };
-    const interval = setInterval(checkDay, 60000);
-    return () => clearInterval(interval);
   }, []);
 
   // Auto-fetch geolocation if available
@@ -299,23 +261,11 @@ export default function SholatPage() {
   };
 
   const togglePrayer = (key: PrayerKey) => {
-    setDone((prev) => {
-      const next = { ...prev, [key]: !prev[key] };
-      saveDoneState(next);
-      return next;
-    });
+    togglePrayerMutation(key);
   };
 
   const markAllDone = () => {
-    const allDone: Record<PrayerKey, boolean> = {
-      fajr: true,
-      dhuhr: true,
-      asr: true,
-      maghrib: true,
-      isha: true,
-    };
-    setDone(allDone);
-    saveDoneState(allDone);
+    markAll();
   };
 
   const allMarked = PRAYER_ORDER.every((k) => done[k]);

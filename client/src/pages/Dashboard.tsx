@@ -157,40 +157,42 @@ export default function Dashboard() {
           {targets && targets.length > 0 ? (
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {targets.slice(0, 3).map((target) => (
-                <Card
+                <button
                   key={target.id}
-                  className="p-3 cursor-pointer hover:border-emerald-500/50 hover:bg-muted/50 transition-colors active:scale-[0.98]"
+                  className="w-full text-left"
                   onClick={() => navigate(`/targets/${target.id}`)}
                   data-testid={`card-dashboard-target-${target.id}`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-sm truncate">
-                      {getTargetDisplayTitle(target, t)}
-                    </span>
-                    {target.targetType === "limit" ? (
-                      target.currentValue > target.targetValue && (
-                        <ThumbsDown className="w-4 h-4 text-rose-500" />
-                      )
-                    ) : (
-                      target.percentComplete >= 100 && (
-                        <Trophy className="w-4 h-4 text-emerald-500" />
-                      )
-                    )}
-                  </div>
-                  <Progress 
-                    value={target.targetType === "limit" ? Math.min(100, target.percentComplete) : target.percentComplete} 
-                    className={`h-2 mb-1 bg-gray-300 dark:bg-gray-600 ${target.targetType === "limit" ? "[&>div]:bg-rose-500" : ""}`} 
-                  />
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{target.currentValue} / {target.targetValue}</span>
-                    <span className={target.targetType === "limit" 
-                      ? (target.currentValue <= target.targetValue ? "text-emerald-500 font-medium" : "text-rose-500 font-medium")
-                      : (target.percentComplete >= 100 ? "text-emerald-500 font-medium" : "")
-                    }>
-                      {target.percentComplete}%
-                    </span>
-                  </div>
-                </Card>
+                  <Card className="p-3 hover:border-emerald-500/50 hover:bg-muted/50 transition-colors active:scale-[0.98]">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-sm truncate">
+                        {getTargetDisplayTitle(target, t)}
+                      </span>
+                      {target.targetType === "limit" ? (
+                        target.currentValue > target.targetValue && (
+                          <ThumbsDown className="w-4 h-4 text-rose-500" />
+                        )
+                      ) : (
+                        target.percentComplete >= 100 && (
+                          <Trophy className="w-4 h-4 text-emerald-500" />
+                        )
+                      )}
+                    </div>
+                    <Progress 
+                      value={target.targetType === "limit" ? Math.min(100, target.percentComplete) : target.percentComplete} 
+                      className={`h-2 mb-1 bg-gray-300 dark:bg-gray-600 ${target.targetType === "limit" ? "[&>div]:bg-rose-500" : ""}`} 
+                    />
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>{target.currentValue} / {target.targetValue}</span>
+                      <span className={target.targetType === "limit" 
+                        ? (target.currentValue <= target.targetValue ? "text-emerald-500 font-medium" : "text-rose-500 font-medium")
+                        : (target.percentComplete >= 100 ? "text-emerald-500 font-medium" : "")
+                      }>
+                        {target.percentComplete}%
+                      </span>
+                    </div>
+                  </Card>
+                </button>
               ))}
             </div>
           ) : (

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, prayerCompletions, prayerCompletionFlagsSchema, updatePrayerCompletionSchema } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -354,37 +354,6 @@ export const api = {
       path: "/api/push/test",
       responses: {
         200: z.object({ success: z.boolean() }),
-        401: errorSchemas.unauthorized,
-      },
-    },
-  },
-  prayerCompletions: {
-    get: {
-      method: "GET" as const,
-      path: "/api/prayer-completions/:date",
-      responses: {
-        200: z.custom<typeof prayerCompletions.$inferSelect>(),
-        400: errorSchemas.validation,
-        401: errorSchemas.unauthorized,
-      },
-    },
-    update: {
-      method: "PATCH" as const,
-      path: "/api/prayer-completions/:date",
-      input: updatePrayerCompletionSchema,
-      responses: {
-        200: z.custom<typeof prayerCompletions.$inferSelect>(),
-        400: errorSchemas.validation,
-        401: errorSchemas.unauthorized,
-      },
-    },
-    setAll: {
-      method: "PUT" as const,
-      path: "/api/prayer-completions/:date",
-      input: prayerCompletionFlagsSchema,
-      responses: {
-        200: z.custom<typeof prayerCompletions.$inferSelect>(),
-        400: errorSchemas.validation,
         401: errorSchemas.unauthorized,
       },
     },

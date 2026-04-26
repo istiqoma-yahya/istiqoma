@@ -4,6 +4,8 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import { sendDailyReminders, sendTargetReminders, isPushConfigured } from "./pushNotifications";
 import { sendSholatReminders } from "./sholatReminders";
+import { pool } from "./db";
+import { migratePrayerCompletionsToDeeds } from "../scripts/migrate-prayer-completions-to-deeds";
 
 const app = express();
 const httpServer = createServer(app);
@@ -62,6 +64,15 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Safety-net: migrate any leftover prayer_completions rows into Sholat
+  // Fardhu deeds. The migration is idempotent and no-ops once the table is
+  // gone, so it's safe to run on every boot.
+  try {
+    await migratePrayerCompletionsToDeeds(pool);
+  } catch (err) {
+    console.error("[startup] prayer-completions migration failed:", err);
+  }
+
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

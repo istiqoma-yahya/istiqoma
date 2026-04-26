@@ -1,6 +1,6 @@
 import { db } from "./db";
 export { db };
-import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, prayerCompletions, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type PrayerCompletion, type PrayerKey, type PrayerCompletionFlags } from "@shared/schema";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte, isNull } from "drizzle-orm";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -55,9 +55,6 @@ export interface IStorage {
   createCustomDzikirType(userId: string, label: string): Promise<CustomDzikirType>;
   updateCustomDzikirType(id: number, userId: string, label: string): Promise<CustomDzikirType>;
   deleteCustomDzikirType(id: number, userId: string): Promise<void>;
-  getPrayerCompletion(userId: string, date: string): Promise<PrayerCompletion>;
-  updatePrayerCompletion(userId: string, date: string, prayer: PrayerKey, done: boolean): Promise<PrayerCompletion>;
-  setPrayerCompletion(userId: string, date: string, flags: PrayerCompletionFlags): Promise<PrayerCompletion>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -734,59 +731,6 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(customDzikirTypes.id, id), eq(customDzikirTypes.userId, userId)));
   }
 
-  async getPrayerCompletion(userId: string, date: string): Promise<PrayerCompletion> {
-    const [existing] = await db
-      .select()
-      .from(prayerCompletions)
-      .where(and(eq(prayerCompletions.userId, userId), eq(prayerCompletions.date, date)))
-      .limit(1);
-    if (existing) return existing;
-    return {
-      id: 0,
-      userId,
-      date,
-      fajr: false,
-      dhuhr: false,
-      asr: false,
-      maghrib: false,
-      isha: false,
-      createdAt: null,
-      updatedAt: null,
-    };
-  }
-
-  async updatePrayerCompletion(
-    userId: string,
-    date: string,
-    prayer: PrayerKey,
-    done: boolean,
-  ): Promise<PrayerCompletion> {
-    const [row] = await db
-      .insert(prayerCompletions)
-      .values({ userId, date, [prayer]: done })
-      .onConflictDoUpdate({
-        target: [prayerCompletions.userId, prayerCompletions.date],
-        set: { [prayer]: done, updatedAt: new Date() },
-      })
-      .returning();
-    return row;
-  }
-
-  async setPrayerCompletion(
-    userId: string,
-    date: string,
-    flags: PrayerCompletionFlags,
-  ): Promise<PrayerCompletion> {
-    const [row] = await db
-      .insert(prayerCompletions)
-      .values({ userId, date, ...flags })
-      .onConflictDoUpdate({
-        target: [prayerCompletions.userId, prayerCompletions.date],
-        set: { ...flags, updatedAt: new Date() },
-      })
-      .returning();
-    return row;
-  }
 }
 
 export const storage = new DatabaseStorage();

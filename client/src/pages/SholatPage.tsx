@@ -33,7 +33,6 @@ interface LocationState {
 const LOCATION_STORAGE_KEY = "qibla_last_location";
 
 type PrayerKey = "fajr" | "dhuhr" | "asr" | "maghrib" | "isha";
-const PRAYER_ORDER: PrayerKey[] = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
 
 function getSavedLocation(): { latitude: number; longitude: number } | null {
   try {
@@ -105,6 +104,18 @@ export default function SholatPage() {
 
   const { flags: done, togglePrayer: togglePrayerMutation, markAll } = usePrayerCompletion(dateKey);
 
+  const [wigglingPrayer, setWigglingPrayer] = useState<PrayerKey | null>(null);
+
+  const isFutureDay = useMemo(
+    () => selectedDate.getTime() > todayMidnight.getTime(),
+    [selectedDate, todayMidnight],
+  );
+
+  const isPastDay = useMemo(
+    () => selectedDate.getTime() < todayMidnight.getTime(),
+    [selectedDate, todayMidnight],
+  );
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -148,6 +159,16 @@ export default function SholatPage() {
     const params = CalculationMethod.MuslimWorldLeague();
     return new PrayerTimes(coords, selectedDate, params);
   }, [location.latitude, location.longitude, selectedDate]);
+
+  const isPrayerLocked = useCallback(
+    (prayerTime: Date): boolean => {
+      if (isFutureDay) return true;
+      if (isPastDay) return false;
+      if (!prayerTimes) return false;
+      return prayerTime > currentTime;
+    },
+    [isFutureDay, isPastDay, prayerTimes, currentTime],
+  );
 
   const prayerList = useMemo(() => {
     if (!prayerTimes) return [];
@@ -294,15 +315,37 @@ export default function SholatPage() {
     );
   };
 
-  const togglePrayer = (key: PrayerKey) => {
+  const triggerWiggle = useCallback((key: PrayerKey) => {
+    setWigglingPrayer(key);
+    setTimeout(() => setWigglingPrayer(null), 450);
+  }, []);
+
+  const togglePrayer = useCallback((key: PrayerKey, prayerTime: Date) => {
+    if (isPrayerLocked(prayerTime)) {
+      triggerWiggle(key);
+      return;
+    }
     togglePrayerMutation(key);
-  };
+  }, [isPrayerLocked, triggerWiggle, togglePrayerMutation]);
+
+  const markablePrayers = useMemo(() => {
+    return prayerList.filter((p) => !isPrayerLocked(p.time));
+  }, [prayerList, isPrayerLocked]);
+
+  const allMarkableDone = useMemo(() => {
+    if (markablePrayers.length === 0) return true;
+    return markablePrayers.every((p) => done[p.name]);
+  }, [markablePrayers, done]);
 
   const markAllDone = () => {
-    markAll();
+    if (isPastDay) {
+      markAll();
+    } else {
+      markablePrayers.forEach((p) => {
+        if (!done[p.name]) togglePrayerMutation(p.name);
+      });
+    }
   };
-
-  const allMarked = PRAYER_ORDER.every((k) => done[k]);
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
@@ -469,25 +512,29 @@ export default function SholatPage() {
                   const isCurrent = isToday && currentPrayerKey === prayer.name;
                   const isNext = isToday && !isCurrent && nextPrayerKey === prayer.name;
                   const isDone = done[prayer.name];
+                  const locked = isPrayerLocked(prayer.time);
+                  const isWiggling = wigglingPrayer === prayer.name;
                   const Icon = PRAYER_ICONS[prayer.name];
                   return (
                     <div
                       key={prayer.name}
-                      className={`flex items-center gap-3 p-3 sm:p-4 rounded-lg ${
+                      className={`flex items-center gap-3 p-3 sm:p-4 rounded-lg transition-opacity ${
                         isCurrent ? "bg-emerald-500/10" : ""
-                      }`}
+                      } ${locked && !isDone ? "opacity-50" : ""}`}
                       data-testid={`prayer-row-${prayer.name}`}
                     >
                       <button
                         type="button"
-                        onClick={() => togglePrayer(prayer.name)}
+                        onClick={() => togglePrayer(prayer.name, prayer.time)}
                         aria-label={`${t(`qibla.prayers.${prayer.name}`)} - ${t("sholatPage.doneLabel")}`}
                         aria-pressed={isDone}
                         className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center border-2 transition-colors ${
                           isDone
                             ? "bg-emerald-500 border-emerald-500 text-white"
+                            : locked
+                            ? "border-muted-foreground/20 text-transparent"
                             : "border-muted-foreground/40 text-transparent hover:border-emerald-500/60"
-                        }`}
+                        } ${isWiggling ? "animate-wiggle" : ""}`}
                         data-testid={`button-toggle-${prayer.name}`}
                       >
                         <Check className="w-5 h-5" />
@@ -537,16 +584,18 @@ export default function SholatPage() {
               </div>
             </Card>
 
-            <Button
-              onClick={markAllDone}
-              disabled={allMarked}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-              size="lg"
-              data-testid="button-mark-all-done"
-            >
-              <CheckCheck className="w-4 h-4 mr-2" />
-              {allMarked ? t("sholatPage.allDone") : t("sholatPage.markAllDone")}
-            </Button>
+            {!isFutureDay && (
+              <Button
+                onClick={markAllDone}
+                disabled={allMarkableDone}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                size="lg"
+                data-testid="button-mark-all-done"
+              >
+                <CheckCheck className="w-4 h-4 mr-2" />
+                {allMarkableDone ? t("sholatPage.allDone") : t("sholatPage.markAllDone")}
+              </Button>
+            )}
           </div>
         )}
       </main>

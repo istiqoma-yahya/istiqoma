@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useCategories, useCategoryName } from "@/hooks/use-categories";
+import { useCustomDzikirTypes } from "@/hooks/use-dzikir-types";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +44,7 @@ export function TargetForm({
   const { t } = useTranslation();
   const { data: categories } = useCategories();
   const translateCategoryName = useCategoryName();
+  const { data: customDzikirTypes = [] } = useCustomDzikirTypes();
   const [showCreateCategoryDialog, setShowCreateCategoryDialog] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
   const [targetValueInput, setTargetValueInput] = useState<string>("10");
@@ -379,6 +381,11 @@ export function TargetForm({
                     {DZIKIR_TYPES.map((type) => (
                       <SelectItem key={type.id} value={type.id}>
                         {t(type.labelKey)}
+                      </SelectItem>
+                    ))}
+                    {customDzikirTypes.map((type) => (
+                      <SelectItem key={`custom-${type.id}`} value={type.label}>
+                        {type.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

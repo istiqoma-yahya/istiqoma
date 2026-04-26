@@ -6,6 +6,7 @@ import { ArrowLeft, Search, Calendar, Filter, X } from "lucide-react";
 import { format, isWithinInterval, startOfDay, endOfDay, parseISO } from "date-fns";
 import { useDeeds } from "@/hooks/use-deeds";
 import { useCategories, useCategoryName } from "@/hooks/use-categories";
+import { useCustomDzikirTypes } from "@/hooks/use-dzikir-types";
 import { DeedCard } from "@/components/DeedCard";
 import { formatNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -156,6 +157,7 @@ export default function DeedHistoryPage() {
   const { data: deeds, isLoading: deedsLoading } = useDeeds();
   const { data: categories } = useCategories();
   const translateCategoryName = useCategoryName();
+  const { data: customDzikirTypes = [] } = useCustomDzikirTypes();
 
   const params = useMemo(() => new URLSearchParams(search), [search]);
   const selectedCategory = params.get("category") || "all";
@@ -179,8 +181,19 @@ export default function DeedHistoryPage() {
   const subcategoryOptions = useMemo(() => {
     if (selectedCategory === "all") return null;
     const normalized = normalizeCategoryForSubcategory(selectedCategory);
-    return SUBCATEGORY_MAP[normalized] || null;
-  }, [selectedCategory]);
+    const base = SUBCATEGORY_MAP[normalized];
+    if (!base) return null;
+    if (normalized === "Dzikir" && customDzikirTypes.length > 0) {
+      return {
+        ...base,
+        items: [
+          ...base.items,
+          ...customDzikirTypes.map((ct) => ({ id: ct.label, labelKey: ct.label, isCustom: true })),
+        ],
+      };
+    }
+    return base;
+  }, [selectedCategory, customDzikirTypes]);
 
   const filteredDeeds = useMemo(() => {
     if (!deeds) return [];
@@ -322,7 +335,7 @@ export default function DeedHistoryPage() {
                   <SelectItem value="all" data-testid="option-subcategory-all">{t('common.allSubCategories')}</SelectItem>
                   {subcategoryOptions?.items.map((item) => (
                     <SelectItem key={item.id} value={item.id} data-testid={`option-subcategory-${item.id}`}>
-                      {t(item.labelKey)}
+                      {'isCustom' in item && item.isCustom ? item.labelKey : t(item.labelKey)}
                     </SelectItem>
                   ))}
                 </SelectContent>

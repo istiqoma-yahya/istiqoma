@@ -21,7 +21,9 @@ export function getTargetCategoryLine(target: TargetWithProgress, t: TFunc): str
   parts.push(translateCategory(target.category, t));
 
   if (target.dzikirType) {
-    parts.push(t(`dzikir.types.${target.dzikirType}`));
+    const dzikirKey = `dzikir.types.${target.dzikirType}`;
+    const dzikirTranslated = t(dzikirKey);
+    parts.push(dzikirTranslated === dzikirKey ? target.dzikirType : dzikirTranslated);
   } else if (target.sholatType) {
     parts.push(t(`sholat.types.${target.sholatType}`));
   } else if (target.fastingType) {

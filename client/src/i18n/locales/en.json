@@ -243,6 +243,20 @@
       "timeout": "Location request timed out."
     }
   },
+  "sholatPage": {
+    "title": "Prayer",
+    "currentPrayer": "Current prayer",
+    "nextPrayer": "Next",
+    "in": "in",
+    "qiblaFinder": "Qibla Direction",
+    "qiblaFinderDesc": "Open compass",
+    "markAllDone": "Mark all as completed",
+    "allDone": "All prayers completed today",
+    "doneLabel": "Done",
+    "noLocationTitle": "Enable Location",
+    "noLocationDesc": "To display prayer times, we need your location.",
+    "loading": "Loading prayer times..."
+  },
   "progress": {
     "title": "Progress",
     "spiritualProgress": "Spiritual Progress",

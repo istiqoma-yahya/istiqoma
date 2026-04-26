@@ -43,9 +43,9 @@ export function BottomNavigation() {
 
           <Button
             variant="ghost"
-            onClick={() => navigate("/qibla")}
+            onClick={() => navigate("/sholat")}
             className={`flex flex-col items-center gap-1 py-2 text-xs font-medium transition-colors ${
-              isActive("/qibla")
+              isActive("/sholat") || isActive("/qibla")
                 ? "text-emerald-500"
                 : "text-muted-foreground hover:text-foreground"
             }`}

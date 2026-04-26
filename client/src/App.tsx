@@ -12,6 +12,7 @@ import EditDeedPage from "@/pages/EditDeedPage";
 import ProgressPage from "@/pages/ProgressPage";
 import DzikirPage from "@/pages/DzikirPage";
 import QiblaPage from "@/pages/QiblaPage";
+import SholatPage from "@/pages/SholatPage";
 import TargetsPage from "@/pages/TargetsPage";
 import CreateTargetPage from "@/pages/CreateTargetPage";
 import EditTargetPage from "@/pages/EditTargetPage";
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/" component={AuthWrapper} />
       <Route path="/progress" component={ProgressPage} />
       <Route path="/dzikir" component={DzikirPage} />
+      <Route path="/sholat" component={SholatPage} />
       <Route path="/qibla" component={QiblaPage} />
       <Route path="/targets" component={TargetsPage} />
       <Route path="/targets/new" component={CreateTargetPage} />

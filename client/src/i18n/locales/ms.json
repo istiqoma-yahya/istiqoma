@@ -243,6 +243,20 @@
       "timeout": "Permintaan lokasi tamat masa."
     }
   },
+  "sholatPage": {
+    "title": "Solat",
+    "currentPrayer": "Solat sekarang",
+    "nextPrayer": "Seterusnya",
+    "in": "dalam",
+    "qiblaFinder": "Arah Kiblat",
+    "qiblaFinderDesc": "Buka kompas",
+    "markAllDone": "Tanda semua sebagai selesai",
+    "allDone": "Semua solat hari ini selesai",
+    "doneLabel": "Selesai",
+    "noLocationTitle": "Aktifkan Lokasi",
+    "noLocationDesc": "Untuk memaparkan waktu solat, kami memerlukan lokasi anda.",
+    "loading": "Memuatkan waktu solat..."
+  },
   "progress": {
     "title": "Kemajuan",
     "spiritualProgress": "Progres Spiritual",

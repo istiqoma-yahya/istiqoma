@@ -197,6 +197,8 @@
     "manageCustomTypes": "Urus Jenis Tersuai",
     "customTypeAdded": "Jenis tersuai ditambah",
     "customTypeDeleted": "Jenis tersuai dibuang",
+    "customTypeRenamed": "Jenis tersuai diubah nama",
+    "renameCustomType": "Ubah Nama Jenis Tersuai",
     "noCustomTypes": "Tiada jenis tersuai lagi",
     "units": {
       "times": "Kiraan"

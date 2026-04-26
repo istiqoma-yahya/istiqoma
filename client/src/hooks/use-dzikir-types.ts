@@ -38,6 +38,29 @@ export function useCreateCustomDzikirType() {
   });
 }
 
+export function useRenameCustomDzikirType() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, label }: { id: number; label: string }) => {
+      const res = await fetch(`${QUERY_KEY}/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ label }),
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to rename custom dzikir type");
+      }
+      return res.json() as Promise<CustomDzikirType>;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+    },
+  });
+}
+
 export function useDeleteCustomDzikirType() {
   const queryClient = useQueryClient();
 

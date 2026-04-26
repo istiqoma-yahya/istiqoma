@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useCreateDeed } from "@/hooks/use-deeds";
 import { useCategories } from "@/hooks/use-categories";
-import { useCustomDzikirTypes, useCreateCustomDzikirType, useDeleteCustomDzikirType } from "@/hooks/use-dzikir-types";
+import { useCustomDzikirTypes, useCreateCustomDzikirType, useRenameCustomDzikirType, useDeleteCustomDzikirType } from "@/hooks/use-dzikir-types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { RotateCcw, Save, Loader2, Plus, Settings, Trash2 } from "lucide-react";
+import { RotateCcw, Save, Loader2, Plus, Settings, Trash2, Pencil } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -47,6 +47,9 @@ export default function DzikirPage() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [manageDialogOpen, setManageDialogOpen] = useState(false);
   const [newLabel, setNewLabel] = useState("");
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [renamingId, setRenamingId] = useState<number | null>(null);
+  const [renameLabel, setRenameLabel] = useState("");
 
   const handleSelectChange = (val: string) => {
     if (val === "__add_custom__") {
@@ -61,6 +64,7 @@ export default function DzikirPage() {
   const { data: customTypes = [] } = useCustomDzikirTypes();
   const { mutate: createDeed, isPending: isSaving } = useCreateDeed();
   const { mutate: createCustomType, isPending: isCreating } = useCreateCustomDzikirType();
+  const { mutate: renameCustomType, isPending: isRenaming } = useRenameCustomDzikirType();
   const { mutate: deleteCustomType } = useDeleteCustomDzikirType();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -158,6 +162,35 @@ export default function DzikirPage() {
         });
       },
     });
+  };
+
+  const handleOpenRename = (id: number, currentLabel: string) => {
+    setRenamingId(id);
+    setRenameLabel(currentLabel);
+    setRenameDialogOpen(true);
+  };
+
+  const handleRenameCustomType = () => {
+    const trimmed = renameLabel.trim();
+    if (!trimmed || renamingId === null) return;
+    renameCustomType(
+      { id: renamingId, label: trimmed },
+      {
+        onSuccess: () => {
+          toast({ title: t("dzikir.customTypeRenamed"), description: trimmed });
+          setRenameDialogOpen(false);
+          setRenamingId(null);
+          setRenameLabel("");
+        },
+        onError: (err) => {
+          toast({
+            title: t("dzikir.failedToSave"),
+            description: err.message,
+            variant: "destructive",
+          });
+        },
+      }
+    );
   };
 
   const handleDeleteCustomType = (id: number) => {
@@ -345,6 +378,36 @@ export default function DzikirPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Rename custom type dialog */}
+      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t("dzikir.renameCustomType")}</DialogTitle>
+          </DialogHeader>
+          <Input
+            placeholder={t("dzikir.customTypePlaceholder")}
+            value={renameLabel}
+            onChange={(e) => setRenameLabel(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleRenameCustomType()}
+            data-testid="input-rename-dzikir-label"
+            autoFocus
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRenameDialogOpen(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button
+              onClick={handleRenameCustomType}
+              disabled={!renameLabel.trim() || isRenaming}
+              className="bg-emerald-500 hover:bg-emerald-600"
+              data-testid="button-confirm-rename-custom-dzikir"
+            >
+              {isRenaming ? <Loader2 className="w-4 h-4 animate-spin" /> : t("common.save")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Manage custom types dialog */}
       <Dialog open={manageDialogOpen} onOpenChange={setManageDialogOpen}>
         <DialogContent className="max-w-sm">
@@ -363,15 +426,27 @@ export default function DzikirPage() {
                   className="flex items-center justify-between gap-2 px-3 py-2 rounded-md border border-border bg-muted/30"
                 >
                   <span className="text-sm font-medium truncate">{ct.label}</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 shrink-0"
-                    onClick={() => handleDeleteCustomType(ct.id)}
-                    data-testid={`button-delete-custom-dzikir-${ct.id}`}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent"
+                      onClick={() => handleOpenRename(ct.id, ct.label)}
+                      data-testid={`button-rename-custom-dzikir-${ct.id}`}
+                      title={t("dzikir.renameCustomType")}
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
+                      onClick={() => handleDeleteCustomType(ct.id)}
+                      data-testid={`button-delete-custom-dzikir-${ct.id}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               ))
             )}

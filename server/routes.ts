@@ -650,6 +650,20 @@ export async function registerRoutes(
     }
   });
 
+  app.patch("/api/dzikir-types/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid id" });
+      const { label } = insertCustomDzikirTypeSchema.parse(req.body);
+      const updated = await storage.updateCustomDzikirType(id, userId, label);
+      res.json(updated);
+    } catch (err) {
+      const status = getErrorStatus(err) ?? 400;
+      res.status(status).json({ message: getErrorMessage(err) });
+    }
+  });
+
   app.delete("/api/dzikir-types/:id", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

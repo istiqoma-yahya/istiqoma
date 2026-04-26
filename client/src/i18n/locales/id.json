@@ -197,6 +197,8 @@
     "manageCustomTypes": "Kelola Jenis Kustom",
     "customTypeAdded": "Jenis kustom ditambahkan",
     "customTypeDeleted": "Jenis kustom dihapus",
+    "customTypeRenamed": "Jenis kustom diubah",
+    "renameCustomType": "Ubah Nama Jenis Kustom",
     "noCustomTypes": "Belum ada jenis kustom",
     "units": {
       "times": "Hitungan"

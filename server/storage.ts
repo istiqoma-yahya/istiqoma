@@ -53,6 +53,7 @@ export interface IStorage {
   getAllPushSubscriptions(): Promise<PushSubscription[]>;
   getCustomDzikirTypes(userId: string): Promise<CustomDzikirType[]>;
   createCustomDzikirType(userId: string, label: string): Promise<CustomDzikirType>;
+  updateCustomDzikirType(id: number, userId: string, label: string): Promise<CustomDzikirType>;
   deleteCustomDzikirType(id: number, userId: string): Promise<void>;
 }
 
@@ -687,6 +688,41 @@ export class DatabaseStorage implements IStorage {
       .values({ userId, label })
       .returning();
     return created;
+  }
+
+  async updateCustomDzikirType(id: number, userId: string, label: string): Promise<CustomDzikirType> {
+    const [existing] = await db
+      .select()
+      .from(customDzikirTypes)
+      .where(and(eq(customDzikirTypes.id, id), eq(customDzikirTypes.userId, userId)))
+      .limit(1);
+    if (!existing) {
+      const err = new Error("Custom dzikir type not found") as Error & { status?: number };
+      err.status = 404;
+      throw err;
+    }
+
+    const oldLabel = existing.label;
+
+    const [updated] = await db
+      .update(customDzikirTypes)
+      .set({ label })
+      .where(and(eq(customDzikirTypes.id, id), eq(customDzikirTypes.userId, userId)))
+      .returning();
+
+    if (oldLabel !== label) {
+      await db
+        .update(deeds)
+        .set({ dzikirType: label })
+        .where(and(eq(deeds.userId, userId), eq(deeds.dzikirType, oldLabel)));
+
+      await db
+        .update(targets)
+        .set({ dzikirType: label })
+        .where(and(eq(targets.userId, userId), eq(targets.dzikirType, oldLabel)));
+    }
+
+    return updated;
   }
 
   async deleteCustomDzikirType(id: number, userId: string): Promise<void> {

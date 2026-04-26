@@ -197,6 +197,8 @@
     "manageCustomTypes": "Manage Custom Types",
     "customTypeAdded": "Custom type added",
     "customTypeDeleted": "Custom type removed",
+    "customTypeRenamed": "Custom type renamed",
+    "renameCustomType": "Rename Custom Type",
     "noCustomTypes": "No custom types yet",
     "units": {
       "times": "Counts"

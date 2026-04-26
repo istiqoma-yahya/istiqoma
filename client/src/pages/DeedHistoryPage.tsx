@@ -6,7 +6,7 @@ import { ArrowLeft, Search, Calendar, Filter, X } from "lucide-react";
 import { format, isWithinInterval, startOfDay, endOfDay, parseISO } from "date-fns";
 import { useDeeds } from "@/hooks/use-deeds";
 import { useCategories, useCategoryName } from "@/hooks/use-categories";
-import { useCustomDzikirTypes } from "@/hooks/use-dzikir-types";
+import { useCustomDzikirTypes, useDzikirTypeName } from "@/hooks/use-dzikir-types";
 import { DeedCard } from "@/components/DeedCard";
 import { formatNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -158,6 +158,7 @@ export default function DeedHistoryPage() {
   const { data: categories } = useCategories();
   const translateCategoryName = useCategoryName();
   const { data: customDzikirTypes = [] } = useCustomDzikirTypes();
+  const translateDzikirType = useDzikirTypeName();
 
   const params = useMemo(() => new URLSearchParams(search), [search]);
   const selectedCategory = params.get("category") || "all";
@@ -333,11 +334,17 @@ export default function DeedHistoryPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all" data-testid="option-subcategory-all">{t('common.allSubCategories')}</SelectItem>
-                  {subcategoryOptions?.items.map((item) => (
-                    <SelectItem key={item.id} value={item.id} data-testid={`option-subcategory-${item.id}`}>
-                      {'isCustom' in item && item.isCustom ? item.labelKey : t(item.labelKey)}
-                    </SelectItem>
-                  ))}
+                  {subcategoryOptions?.items.map((item) => {
+                    const isDzikirCategory = normalizeCategoryForSubcategory(selectedCategory) === "Dzikir";
+                    const label = isDzikirCategory
+                      ? translateDzikirType(item.id)
+                      : t(item.labelKey);
+                    return (
+                      <SelectItem key={item.id} value={item.id} data-testid={`option-subcategory-${item.id}`}>
+                        {label}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>

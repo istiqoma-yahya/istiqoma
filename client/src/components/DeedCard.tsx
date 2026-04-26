@@ -4,6 +4,7 @@ import { type Deed } from "@shared/schema";
 import { formatNumber } from "@/lib/utils";
 import { useDeleteDeed } from "@/hooks/use-deeds";
 import { useCategoryName } from "@/hooks/use-categories";
+import { useDzikirTypeName } from "@/hooks/use-dzikir-types";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import {
@@ -29,6 +30,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
   const { mutate: deleteDeed, isPending } = useDeleteDeed();
   const { t } = useTranslation();
   const translateCategoryName = useCategoryName();
+  const translateDzikirType = useDzikirTypeName();
 
   const date = deed.createdAt ? new Date(deed.createdAt) : new Date();
   
@@ -36,9 +38,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
     const isDzikirCategory = deed.category?.toLowerCase() === "dzikir" || deed.category?.toLowerCase() === "dzikr";
     if (isDzikirCategory) {
       if (deed.dzikirType) {
-        const key = `dzikir.types.${deed.dzikirType}`;
-        const dzikirTypeLabel = t(key);
-        return dzikirTypeLabel === key ? deed.dzikirType : dzikirTypeLabel;
+        return translateDzikirType(deed.dzikirType);
       }
       return t('dzikir.dzikirDeedDesc', { count: formatNumber(deed.points || 0) } as Record<string, string>);
     }

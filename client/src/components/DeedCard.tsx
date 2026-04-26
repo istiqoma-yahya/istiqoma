@@ -36,8 +36,9 @@ export function DeedCard({ deed, index }: DeedCardProps) {
     const isDzikirCategory = deed.category?.toLowerCase() === "dzikir" || deed.category?.toLowerCase() === "dzikr";
     if (isDzikirCategory) {
       if (deed.dzikirType) {
-        const dzikirTypeLabel = t(`dzikir.types.${deed.dzikirType}`);
-        return dzikirTypeLabel;
+        const key = `dzikir.types.${deed.dzikirType}`;
+        const dzikirTypeLabel = t(key);
+        return dzikirTypeLabel === key ? deed.dzikirType : dzikirTypeLabel;
       }
       return t('dzikir.dzikirDeedDesc', { count: formatNumber(deed.points || 0) } as Record<string, string>);
     }

@@ -86,6 +86,22 @@ export const targetHistory = pgTable("target_history", {
   capturedAt: timestamp("captured_at").defaultNow(),
 });
 
+export const customDzikirTypes = pgTable("custom_dzikir_types", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  label: text("label").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertCustomDzikirTypeSchema = createInsertSchema(customDzikirTypes).pick({
+  label: true,
+}).extend({
+  label: z.string().min(1, "Label is required").max(80, "Label is too long"),
+});
+
+export type CustomDzikirType = typeof customDzikirTypes.$inferSelect;
+export type InsertCustomDzikirType = z.infer<typeof insertCustomDzikirTypeSchema>;
+
 export const pushSubscriptions = pgTable("push_subscriptions", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),

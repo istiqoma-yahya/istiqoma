@@ -190,6 +190,14 @@
     "selectUnit": "Pilih Satuan",
     "anyType": "Semua (semua jenis dihitung)",
     "typeRequired": "Silakan pilih jenis dzikir",
+    "builtInTypes": "Bawaan",
+    "customTypes": "Jenis Kustom Saya",
+    "addCustomType": "Tambah Jenis Kustom",
+    "customTypePlaceholder": "mis. Shalawat, Hauqalah...",
+    "manageCustomTypes": "Kelola Jenis Kustom",
+    "customTypeAdded": "Jenis kustom ditambahkan",
+    "customTypeDeleted": "Jenis kustom dihapus",
+    "noCustomTypes": "Belum ada jenis kustom",
     "units": {
       "times": "Hitungan"
     }

@@ -190,6 +190,14 @@
     "selectUnit": "Pilih Unit",
     "anyType": "Semua (semua jenis dikira)",
     "typeRequired": "Sila pilih jenis zikir",
+    "builtInTypes": "Terbina dalam",
+    "customTypes": "Jenis Tersuai Saya",
+    "addCustomType": "Tambah Jenis Tersuai",
+    "customTypePlaceholder": "cth. Selawat, Hauqalah...",
+    "manageCustomTypes": "Urus Jenis Tersuai",
+    "customTypeAdded": "Jenis tersuai ditambah",
+    "customTypeDeleted": "Jenis tersuai dibuang",
+    "noCustomTypes": "Tiada jenis tersuai lagi",
     "units": {
       "times": "Kiraan"
     }

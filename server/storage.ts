@@ -1,6 +1,6 @@
 import { db } from "./db";
 export { db };
-import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription } from "@shared/schema";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte, isNull } from "drizzle-orm";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -51,6 +51,9 @@ export interface IStorage {
   updatePushSubscriptionSettings(userId: string, settings: Partial<InsertPushSubscription>): Promise<PushSubscription | null>;
   deletePushSubscription(userId: string): Promise<void>;
   getAllPushSubscriptions(): Promise<PushSubscription[]>;
+  getCustomDzikirTypes(userId: string): Promise<CustomDzikirType[]>;
+  createCustomDzikirType(userId: string, label: string): Promise<CustomDzikirType>;
+  deleteCustomDzikirType(id: number, userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -668,6 +671,28 @@ export class DatabaseStorage implements IStorage {
 
   async getAllPushSubscriptions(): Promise<PushSubscription[]> {
     return await db.select().from(pushSubscriptions);
+  }
+
+  async getCustomDzikirTypes(userId: string): Promise<CustomDzikirType[]> {
+    return await db
+      .select()
+      .from(customDzikirTypes)
+      .where(eq(customDzikirTypes.userId, userId))
+      .orderBy(asc(customDzikirTypes.createdAt));
+  }
+
+  async createCustomDzikirType(userId: string, label: string): Promise<CustomDzikirType> {
+    const [created] = await db
+      .insert(customDzikirTypes)
+      .values({ userId, label })
+      .returning();
+    return created;
+  }
+
+  async deleteCustomDzikirType(id: number, userId: string): Promise<void> {
+    await db
+      .delete(customDzikirTypes)
+      .where(and(eq(customDzikirTypes.id, id), eq(customDzikirTypes.userId, userId)));
   }
 }
 

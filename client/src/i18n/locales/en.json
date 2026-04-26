@@ -190,6 +190,14 @@
     "selectUnit": "Select Unit",
     "anyType": "Any (all types counted)",
     "typeRequired": "Please select a dzikir type",
+    "builtInTypes": "Built-in",
+    "customTypes": "My Custom Types",
+    "addCustomType": "Add Custom Type",
+    "customTypePlaceholder": "e.g. Shalawat, Hauqalah...",
+    "manageCustomTypes": "Manage Custom Types",
+    "customTypeAdded": "Custom type added",
+    "customTypeDeleted": "Custom type removed",
+    "noCustomTypes": "No custom types yet",
     "units": {
       "times": "Counts"
     }

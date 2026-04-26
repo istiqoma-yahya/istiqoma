@@ -5,7 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
-import { deeds } from "@shared/schema";
+import { deeds, insertCustomDzikirTypeSchema } from "@shared/schema";
 import { calculatePoints } from "./calculatePoints";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
 
@@ -628,6 +628,38 @@ export async function registerRoutes(
       res.json({ streakCount, weekDays, hasActivityToday });
     } catch (err) {
       throw err;
+    }
+  });
+
+  // Custom Dzikir Types Routes
+  app.get("/api/dzikir-types", isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const types = await storage.getCustomDzikirTypes(userId);
+    res.json(types);
+  });
+
+  app.post("/api/dzikir-types", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { label } = insertCustomDzikirTypeSchema.parse(req.body);
+      const created = await storage.createCustomDzikirType(userId, label);
+      res.status(201).json(created);
+    } catch (err) {
+      const status = getErrorStatus(err) ?? 400;
+      res.status(status).json({ message: getErrorMessage(err) });
+    }
+  });
+
+  app.delete("/api/dzikir-types/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid id" });
+      await storage.deleteCustomDzikirType(id, userId);
+      res.status(204).send();
+    } catch (err) {
+      const status = getErrorStatus(err) ?? 400;
+      res.status(status).json({ message: getErrorMessage(err) });
     }
   });
 

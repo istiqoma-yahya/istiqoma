@@ -16,6 +16,7 @@ import {
   Check,
   CheckCheck,
   ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
@@ -60,6 +61,10 @@ function formatDateKey(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+function toMidnight(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
 const PRAYER_ICONS: Record<PrayerKey, typeof Sun> = {
   fajr: Sunrise,
   dhuhr: Sun,
@@ -81,16 +86,23 @@ export default function SholatPage() {
     requested: saved !== null,
   });
   const [currentTime, setCurrentTime] = useState(new Date());
-  const dateKey = useMemo(
-    () => formatDateKey(currentTime),
-    // Re-derive when the calendar day changes
+
+  // selectedDate is always midnight of the chosen day
+  const [selectedDate, setSelectedDate] = useState<Date>(() => toMidnight(new Date()));
+
+  const dateKey = useMemo(() => formatDateKey(selectedDate), [selectedDate]);
+
+  const todayMidnight = useMemo(
+    () => toMidnight(currentTime),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      currentTime.getFullYear(),
-      currentTime.getMonth(),
-      currentTime.getDate(),
-    ],
+    [currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate()],
   );
+
+  const isToday = useMemo(
+    () => selectedDate.getTime() === todayMidnight.getTime(),
+    [selectedDate, todayMidnight],
+  );
+
   const { flags: done, togglePrayer: togglePrayerMutation, markAll } = usePrayerCompletion(dateKey);
 
   useEffect(() => {
@@ -119,18 +131,23 @@ export default function SholatPage() {
     );
   }, []);
 
-  const dateString = currentTime.toDateString();
-  const dateOnly = useMemo(() => {
-    return new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateString]);
+  // Keep selectedDate in sync when the calendar day rolls over while on today
+  useEffect(() => {
+    setSelectedDate((prev) => {
+      // Only auto-advance if the user is on today; don't disturb manual navigation
+      if (prev.getTime() === toMidnight(new Date(currentTime.getTime() - 1000)).getTime()) {
+        return todayMidnight;
+      }
+      return prev;
+    });
+  }, [todayMidnight, currentTime]);
 
   const prayerTimes = useMemo(() => {
     if (location.latitude === null || location.longitude === null) return null;
     const coords = new Coordinates(location.latitude, location.longitude);
     const params = CalculationMethod.MuslimWorldLeague();
-    return new PrayerTimes(coords, dateOnly, params);
-  }, [location.latitude, location.longitude, dateOnly]);
+    return new PrayerTimes(coords, selectedDate, params);
+  }, [location.latitude, location.longitude, selectedDate]);
 
   const prayerList = useMemo(() => {
     if (!prayerTimes) return [];
@@ -164,15 +181,16 @@ export default function SholatPage() {
     }
   };
 
+  // currentPrayer and nextPrayer are only meaningful when viewing today
   const currentPrayerKey = useMemo(() => {
-    if (!prayerTimes) return null;
+    if (!prayerTimes || !isToday) return null;
     return getPrayerKey(prayerTimes.currentPrayer());
-  }, [prayerTimes, currentTime]);
+  }, [prayerTimes, currentTime, isToday]);
 
   const nextPrayerKey = useMemo(() => {
-    if (!prayerTimes) return null;
+    if (!prayerTimes || !isToday) return null;
     return getPrayerKey(prayerTimes.nextPrayer());
-  }, [prayerTimes, currentTime]);
+  }, [prayerTimes, currentTime, isToday]);
 
   const nextPrayerTime = useMemo(() => {
     if (!prayerTimes || !nextPrayerKey) return null;
@@ -211,6 +229,22 @@ export default function SholatPage() {
       Prayer.Isha
     );
   }, [prayerTimes, headerPrayerKey]);
+
+  const goToPrevDay = () => {
+    setSelectedDate((prev) => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() - 1);
+      return d;
+    });
+  };
+
+  const goToNextDay = () => {
+    setSelectedDate((prev) => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() + 1);
+      return d;
+    });
+  };
 
   const requestLocation = () => {
     if (!navigator.geolocation) {
@@ -317,6 +351,40 @@ export default function SholatPage() {
           </Card>
         ) : (
           <div className="space-y-4">
+            {/* Day navigation bar */}
+            <div className="flex items-center justify-between gap-2" data-testid="row-day-navigation">
+              <button
+                type="button"
+                onClick={goToPrevDay}
+                aria-label="Previous day"
+                className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted transition-colors shrink-0"
+                data-testid="button-prev-day"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              <div className="flex-1 text-center" data-testid="text-selected-date">
+                <div className="font-semibold text-base leading-tight">
+                  {isToday
+                    ? t("sholatPage.today", { defaultValue: "Today" })
+                    : format(selectedDate, "EEEE")}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {format(selectedDate, "d MMMM yyyy")}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={goToNextDay}
+                aria-label="Next day"
+                className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted transition-colors shrink-0"
+                data-testid="button-next-day"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+
             {/* Header: two-card row */}
             <div className="grid grid-cols-3 gap-3">
               <Card
@@ -324,23 +392,29 @@ export default function SholatPage() {
                 data-testid="card-current-prayer"
               >
                 <div className="text-xs uppercase tracking-wide text-emerald-100/80">
-                  {currentPrayerKey ? t("sholatPage.currentPrayer") : t("sholatPage.nextPrayer")}
+                  {isToday
+                    ? (currentPrayerKey ? t("sholatPage.currentPrayer") : t("sholatPage.nextPrayer"))
+                    : t("sholatPage.prayerTimes", { defaultValue: "Prayer Times" })}
                 </div>
                 <div className="mt-1 flex items-baseline gap-3 flex-wrap">
                   <div
                     className="text-2xl md:text-3xl font-bold"
                     data-testid="text-current-prayer-name"
                   >
-                    {headerPrayerKey ? t(`qibla.prayers.${headerPrayerKey}`) : "--"}
+                    {isToday
+                      ? (headerPrayerKey ? t(`qibla.prayers.${headerPrayerKey}`) : "--")
+                      : format(selectedDate, "d MMM")}
                   </div>
-                  <div
-                    className="text-xl md:text-2xl font-mono text-emerald-100"
-                    data-testid="text-current-prayer-time"
-                  >
-                    {headerPrayerTime ? format(headerPrayerTime, "HH:mm") : "--:--"}
-                  </div>
+                  {isToday && (
+                    <div
+                      className="text-xl md:text-2xl font-mono text-emerald-100"
+                      data-testid="text-current-prayer-time"
+                    >
+                      {headerPrayerTime ? format(headerPrayerTime, "HH:mm") : "--:--"}
+                    </div>
+                  )}
                 </div>
-                {nextPrayerKey && timeUntilNextPrayer && (
+                {isToday && nextPrayerKey && timeUntilNextPrayer && (
                   <div
                     className="mt-3 text-sm text-emerald-50/90"
                     data-testid="text-next-prayer"
@@ -392,8 +466,8 @@ export default function SholatPage() {
             <Card className="p-2 sm:p-3">
               <div className="divide-y divide-border">
                 {prayerList.map((prayer) => {
-                  const isCurrent = currentPrayerKey === prayer.name;
-                  const isNext = !isCurrent && nextPrayerKey === prayer.name;
+                  const isCurrent = isToday && currentPrayerKey === prayer.name;
+                  const isNext = isToday && !isCurrent && nextPrayerKey === prayer.name;
                   const isDone = done[prayer.name];
                   const Icon = PRAYER_ICONS[prayer.name];
                   return (

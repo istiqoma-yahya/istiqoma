@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import type { CustomDzikirType } from "@shared/schema";
+import { resolveDzikirTypeLabel } from "@/lib/targets";
 
 const QUERY_KEY = "/api/dzikir-types";
 
@@ -13,6 +15,16 @@ export function useCustomDzikirTypes() {
       return res.json();
     },
   });
+}
+
+export function useDzikirTypeName() {
+  const { t } = useTranslation();
+  const { data: customDzikirTypes = [] } = useCustomDzikirTypes();
+
+  return (dzikirType: string | null | undefined): string => {
+    if (!dzikirType) return "";
+    return resolveDzikirTypeLabel(dzikirType, t, customDzikirTypes);
+  };
 }
 
 export function useCreateCustomDzikirType() {

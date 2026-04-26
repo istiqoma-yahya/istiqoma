@@ -31,6 +31,7 @@ import { getFadhilahForCategory } from "@/lib/fadhilah";
 import { getTargetDisplayTitle, getTargetCategoryLine, getTargetUnitLabel } from "@/lib/targets";
 import { formatNumber } from "@/lib/utils";
 import { useDeleteTarget } from "@/hooks/use-targets";
+import { useCustomDzikirTypes } from "@/hooks/use-dzikir-types";
 import type { TargetWithProgress, TargetHistory, Deed } from "@shared/schema";
 import {
   BarChart,
@@ -1410,6 +1411,7 @@ export default function TargetDetailPage() {
   const targetId = params.id ? parseInt(params.id, 10) : null;
 
   const { data, isLoading, error } = useTargetDetail(targetId);
+  const { data: customDzikirTypes = [] } = useCustomDzikirTypes();
 
   if (isLoading) {
     return (
@@ -1446,8 +1448,8 @@ export default function TargetDetailPage() {
 
   const { target, currentStreak, totalQuantity, totalPoints, averagePercentage, history } = data;
   const unitLabel = getTargetUnitLabel(target, t);
-  const displayTitle = getTargetDisplayTitle(target, t);
-  const categoryLine = getTargetCategoryLine(target, t);
+  const displayTitle = getTargetDisplayTitle(target, t, customDzikirTypes);
+  const categoryLine = getTargetCategoryLine(target, t, customDzikirTypes);
 
   return (
     <div className="min-h-screen bg-background pb-20">

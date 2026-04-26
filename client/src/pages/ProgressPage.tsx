@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useDeeds } from "@/hooks/use-deeds";
 import { useCategoryName } from "@/hooks/use-categories";
+import { useDzikirTypeName } from "@/hooks/use-dzikir-types";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
@@ -37,6 +38,7 @@ export default function ProgressPage() {
   const { data: deeds, isLoading } = useDeeds();
   const { theme } = useTheme();
   const translateCategoryName = useCategoryName();
+  const translateDzikirType = useDzikirTypeName();
   
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>("all");
@@ -148,7 +150,7 @@ export default function ProgressPage() {
       let breakdownKey = deed.category;
       
       if (selectedCategory !== "all") {
-        if (deed.dzikirType) breakdownKey = t(`dzikir.types.${deed.dzikirType}`);
+        if (deed.dzikirType) breakdownKey = translateDzikirType(deed.dzikirType);
         else if (deed.sholatType) breakdownKey = t(`sholat.types.${deed.sholatType}`);
         else if (deed.fastingType) breakdownKey = t(`fasting.types.${deed.fastingType}`);
         else if (deed.quranUnit) breakdownKey = t(`quran.units.${deed.quranUnit}`);
@@ -163,7 +165,7 @@ export default function ProgressPage() {
     });
 
     return Array.from(categoryMap.entries()).map(([name, value]) => ({ name, value }));
-  }, [dateFilteredDeeds, selectedCategory, t, translateCategoryName]);
+  }, [dateFilteredDeeds, selectedCategory, t, translateCategoryName, translateDzikirType]);
 
   // Deeds count over time (daily) - tracks number of deeds, not points
   const deedsOverTime = useMemo(() => {
@@ -180,7 +182,7 @@ export default function ProgressPage() {
     } else {
       const set = new Set<string>();
       dateFilteredDeeds.forEach(d => {
-        if (d.dzikirType) set.add(t(`dzikir.types.${d.dzikirType}`));
+        if (d.dzikirType) set.add(translateDzikirType(d.dzikirType));
         else if (d.sholatType) set.add(t(`sholat.types.${d.sholatType}`));
         else if (d.fastingType) set.add(t(`fasting.types.${d.fastingType}`));
         else if (d.quranUnit) set.add(t(`quran.units.${d.quranUnit}`));
@@ -218,7 +220,7 @@ export default function ProgressPage() {
         trackingSubCategories.forEach(sub => {
           res[sub] = dayDeeds.filter(d => {
             let label = "";
-            if (d.dzikirType) label = t(`dzikir.types.${d.dzikirType}`);
+            if (d.dzikirType) label = translateDzikirType(d.dzikirType);
             else if (d.sholatType) label = t(`sholat.types.${d.sholatType}`);
             else if (d.fastingType) label = t(`fasting.types.${d.fastingType}`);
             else if (d.quranUnit) label = t(`quran.units.${d.quranUnit}`);
@@ -236,20 +238,20 @@ export default function ProgressPage() {
       (_, index, arr) =>
         arr.slice(index).some((d) => d.count !== 0)
     );
-  }, [dateFilteredDeeds, dateRangeBounds, selectedCategory, t, translateCategoryName]);
+  }, [dateFilteredDeeds, dateRangeBounds, selectedCategory, t, translateCategoryName, translateDzikirType]);
 
   const subCategoryList = useMemo(() => {
     if (selectedCategory === "all") return [];
     const set = new Set<string>();
     dateFilteredDeeds.forEach(d => {
-      if (d.dzikirType) set.add(t(`dzikir.types.${d.dzikirType}`));
+      if (d.dzikirType) set.add(translateDzikirType(d.dzikirType));
       else if (d.sholatType) set.add(t(`sholat.types.${d.sholatType}`));
       else if (d.fastingType) set.add(t(`fasting.types.${d.fastingType}`));
       else if (d.quranUnit) set.add(t(`quran.units.${d.quranUnit}`));
       else if (d.sedekahType) set.add(t(`sedekah.types.${d.sedekahType}`));
     });
     return Array.from(set).sort();
-  }, [dateFilteredDeeds, selectedCategory, t]);
+  }, [dateFilteredDeeds, selectedCategory, t, translateDzikirType]);
 
   const COLORS = [
     "#10b981",
@@ -350,7 +352,7 @@ export default function ProgressPage() {
                           {subCategories.map(sub => {
                             const [type, value] = sub.split(":");
                             let label = value;
-                            if (type === "dzikir") label = t(`dzikir.types.${value}`);
+                            if (type === "dzikir") label = translateDzikirType(value);
                             if (type === "sholat") label = t(`sholat.types.${value}`);
                             if (type === "fasting") label = t(`fasting.types.${value}`);
                             if (type === "quran") label = t(`quran.units.${value}`);

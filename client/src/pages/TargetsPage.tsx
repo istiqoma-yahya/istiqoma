@@ -11,6 +11,7 @@ import {
   useMoveTargetToFolder,
 } from "@/hooks/use-target-folders";
 import { useCreateDeed } from "@/hooks/use-deeds";
+import { useCustomDzikirTypes } from "@/hooks/use-dzikir-types";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UpdateProgressModal } from "@/components/UpdateProgressModal";
@@ -47,7 +48,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { type TargetWithProgress, type TargetFolder } from "@shared/schema";
+import { type TargetWithProgress, type TargetFolder, type CustomDzikirType } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { formatNumber } from "@/lib/utils";
 import {
@@ -74,6 +75,7 @@ interface TargetCardProps {
   onMoveToFolder: (target: TargetWithProgress) => void;
   t: (key: string, options?: Record<string, string>) => string;
   dateLocale: Locale;
+  customDzikirTypes?: CustomDzikirType[];
 }
 
 function TargetCard({
@@ -84,6 +86,7 @@ function TargetCard({
   onMoveToFolder,
   t,
   dateLocale,
+  customDzikirTypes,
 }: TargetCardProps) {
   const isOneTime = target.recurrence === "oneTime";
 
@@ -131,7 +134,7 @@ function TargetCard({
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-bold text-foreground flex-1 min-w-0 break-words" data-testid={`text-target-title-${target.id}`}>
-            {getTargetDisplayTitle(target, t)}
+            {getTargetDisplayTitle(target, t, customDzikirTypes)}
           </h3>
           <Button
             size="icon"
@@ -157,7 +160,7 @@ function TargetCard({
         </p>
 
         <p className="text-sm text-muted-foreground" data-testid={`text-target-category-${target.id}`}>
-          {t("targets.categoryLabel")} {getTargetCategoryLine(target, t)}
+          {t("targets.categoryLabel")} {getTargetCategoryLine(target, t, customDzikirTypes)}
         </p>
 
         <div className="flex items-center gap-2">
@@ -217,6 +220,7 @@ export default function TargetsPage() {
   const updateFolder = useUpdateTargetFolder();
   const deleteFolder = useDeleteTargetFolder();
   const moveTarget = useMoveTargetToFolder();
+  const { data: customDzikirTypes = [] } = useCustomDzikirTypes();
 
   const [deletingTarget, setDeletingTarget] = useState<TargetWithProgress | null>(null);
   const [updateModalTarget, setUpdateModalTarget] = useState<TargetWithProgress | null>(null);
@@ -529,6 +533,7 @@ export default function TargetsPage() {
       onMoveToFolder={(t2) => { setMovingTarget(t2); setPendingFolderId(t2.folderId ?? null); }}
       t={t}
       dateLocale={dateLocale}
+      customDzikirTypes={customDzikirTypes}
     />
   );
 

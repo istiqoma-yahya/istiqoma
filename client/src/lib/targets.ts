@@ -1,6 +1,21 @@
-import type { TargetWithProgress } from "@shared/schema";
+import type { TargetWithProgress, CustomDzikirType } from "@shared/schema";
 
 type TFunc = (key: string, options?: Record<string, string>) => string;
+
+export function resolveDzikirTypeLabel(
+  dzikirType: string,
+  t: TFunc,
+  customDzikirTypes?: CustomDzikirType[],
+): string {
+  const key = `dzikir.types.${dzikirType}`;
+  const translated = t(key);
+  if (translated !== key) return translated;
+  if (customDzikirTypes) {
+    const match = customDzikirTypes.find((ct) => ct.label === dzikirType);
+    if (match) return match.label;
+  }
+  return dzikirType;
+}
 
 function translateCategory(category: string, t: TFunc): string {
   const key = `categoryNames.${category}`;
@@ -8,22 +23,20 @@ function translateCategory(category: string, t: TFunc): string {
   return translated === key ? category : translated;
 }
 
-export function getTargetDisplayTitle(target: TargetWithProgress, t: TFunc): string {
+export function getTargetDisplayTitle(target: TargetWithProgress, t: TFunc, customDzikirTypes?: CustomDzikirType[]): string {
   if (target.name) {
     return target.name;
   }
-  return getTargetCategoryLine(target, t);
+  return getTargetCategoryLine(target, t, customDzikirTypes);
 }
 
-export function getTargetCategoryLine(target: TargetWithProgress, t: TFunc): string {
+export function getTargetCategoryLine(target: TargetWithProgress, t: TFunc, customDzikirTypes?: CustomDzikirType[]): string {
   const parts: string[] = [];
 
   parts.push(translateCategory(target.category, t));
 
   if (target.dzikirType) {
-    const dzikirKey = `dzikir.types.${target.dzikirType}`;
-    const dzikirTranslated = t(dzikirKey);
-    parts.push(dzikirTranslated === dzikirKey ? target.dzikirType : dzikirTranslated);
+    parts.push(resolveDzikirTypeLabel(target.dzikirType, t, customDzikirTypes));
   } else if (target.sholatType) {
     parts.push(t(`sholat.types.${target.sholatType}`));
   } else if (target.fastingType) {

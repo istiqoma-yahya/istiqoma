@@ -218,6 +218,7 @@
     "distanceToKaaba": "Distance to Kaaba",
     "yourLocation": "Your Location",
     "enableCompass": "Enable Live Compass",
+    "tapToActivate": "Tap to activate compass",
     "compassActive": "Compass Active",
     "howToUse": "How to Use",
     "rotateDevice": "Rotate your device to enable compass (mobile only)",

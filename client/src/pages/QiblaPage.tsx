@@ -51,7 +51,7 @@ export default function QiblaPage() {
   const [compassHeading, setCompassHeading] = useState<number | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [compassEnabled, setCompassEnabled] = useState(false);
-  const [needsManualCompassEnable, setNeedsManualCompassEnable] = useState(false);
+  const [needsTap, setNeedsTap] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const KAABA_COORDS = { lat: 21.422487, lng: 39.826206 };
@@ -201,34 +201,33 @@ export default function QiblaPage() {
   };
 
   useEffect(() => {
-    if (typeof DeviceOrientationEvent !== "undefined") {
-      if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
-        const previouslyGranted = localStorage.getItem("compass-permission-granted") === "true";
-        if (previouslyGranted) {
-          let receivedEvent = false;
-          const probeHandler = (e: DeviceOrientationEvent) => {
-            if (!receivedEvent) {
-              receivedEvent = true;
-              setCompassEnabled(true);
-              setNeedsManualCompassEnable(false);
-            }
-            handleOrientation(e);
-          };
-          window.addEventListener("deviceorientation", probeHandler as any, true);
-          setTimeout(() => {
-            if (!receivedEvent) {
-              window.removeEventListener("deviceorientation", probeHandler as any, true);
-              setNeedsManualCompassEnable(true);
-            }
-          }, 1500);
-        } else {
-          setNeedsManualCompassEnable(true);
-        }
-      } else {
-        window.addEventListener("deviceorientationabsolute", handleOrientation as any, true);
-        window.addEventListener("deviceorientation", handleOrientation, true);
-        setCompassEnabled(true);
-      }
+    if (typeof DeviceOrientationEvent === "undefined") return;
+
+    if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
+      // iOS: try calling requestPermission() without a user gesture.
+      // If permission was already granted in this session, iOS returns "granted"
+      // immediately with no dialog. If a fresh session requires a gesture it throws.
+      (DeviceOrientationEvent as any)
+        .requestPermission()
+        .then((state: string) => {
+          if (state === "granted") {
+            localStorage.setItem("compass-permission-granted", "true");
+            window.addEventListener("deviceorientation", handleOrientation, true);
+            setCompassEnabled(true);
+            setNeedsTap(false);
+          } else {
+            setNeedsTap(true);
+          }
+        })
+        .catch(() => {
+          // Gesture required — show tap-to-activate overlay on the compass circle.
+          setNeedsTap(true);
+        });
+    } else {
+      // Android / desktop — no permission needed, auto-enable.
+      window.addEventListener("deviceorientationabsolute", handleOrientation as any, true);
+      window.addEventListener("deviceorientation", handleOrientation, true);
+      setCompassEnabled(true);
     }
 
     return () => {
@@ -245,7 +244,7 @@ export default function QiblaPage() {
           localStorage.setItem("compass-permission-granted", "true");
           window.addEventListener("deviceorientation", handleOrientation, true);
           setCompassEnabled(true);
-          setNeedsManualCompassEnable(false);
+          setNeedsTap(false);
         }
       } catch (error) {
         console.error("Compass permission error:", error);
@@ -384,24 +383,28 @@ export default function QiblaPage() {
                       </span>
                     </div>
                   </div>
+
+                  {needsTap && (
+                    <button
+                      type="button"
+                      className="absolute inset-0 rounded-full flex flex-col items-center justify-center bg-black/40 touch-manipulation cursor-pointer z-10"
+                      onClick={enableCompass}
+                      data-testid="button-enable-compass"
+                    >
+                      <div className="animate-ping absolute w-16 h-16 rounded-full bg-emerald-500/30" />
+                      <Compass className="w-8 h-8 text-emerald-400 relative z-10 mb-1" />
+                      <span className="text-xs font-medium text-white relative z-10 text-center px-4">
+                        {t("qibla.tapToActivate")}
+                      </span>
+                    </button>
+                  )}
                 </div>
 
                 <div className="mt-6 text-center">
                   <p className="text-lg font-medium">
                     {t("qibla.qiblaDirection")}: <span className="text-emerald-500">{qiblaDirection !== null ? `${Math.round(qiblaDirection)}°` : "--"}</span>
                   </p>
-                  {needsManualCompassEnable && !compassEnabled && (
-                    <Button 
-                      onClick={enableCompass} 
-                      variant="outline" 
-                      className="mt-4"
-                      data-testid="button-enable-compass"
-                    >
-                      <Compass className="w-4 h-4 mr-2" />
-                      {t("qibla.enableCompass")}
-                    </Button>
-                  )}
-                  {compassHeading === null && !needsManualCompassEnable && (
+                  {compassHeading === null && !needsTap && compassEnabled && (
                     <p className="text-sm text-muted-foreground mt-2">
                       {t("qibla.rotateDevice")}
                     </p>

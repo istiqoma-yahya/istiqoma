@@ -64,9 +64,55 @@ export async function registerRoutes(
         points: calculatedPoints,
         quantity: originalQuantity,
       };
-      
-      const deed = await storage.createDeed(userId, deedWithCalculatedPoints);
-      res.status(201).json(deed);
+
+      // Sholat Fardhu deeds are idempotent per (user, prayer, local calendar
+      // date). If the client retries a tap, has a stale cache, or fires
+      // multiple taps before the first round-trip resolves, we must not
+      // create a second deed for the same prayer on the same day. Return
+      // the existing deed so the client converges on a single canonical row.
+      if (
+        input.category === "Sholat Fardhu" &&
+        input.sholatType &&
+        input.localDate
+      ) {
+        const existing = await storage.findSholatDeedByLocalDate(
+          userId,
+          input.sholatType,
+          input.localDate,
+        );
+        if (existing) {
+          return res.status(200).json(existing);
+        }
+      }
+
+      try {
+        const deed = await storage.createDeed(userId, deedWithCalculatedPoints);
+        return res.status(201).json(deed);
+      } catch (insertErr: any) {
+        // Postgres unique_violation: another concurrent request beat us to
+        // creating the same Sholat Fardhu deed for this (user, prayer, day).
+        // Recover by returning the row that already exists.
+        const isUniqueViolation =
+          insertErr?.code === "23505" ||
+          insertErr?.cause?.code === "23505" ||
+          insertErr?.constraint === "uniq_sholat_deed_per_day";
+        if (
+          isUniqueViolation &&
+          input.category === "Sholat Fardhu" &&
+          input.sholatType &&
+          input.localDate
+        ) {
+          const existing = await storage.findSholatDeedByLocalDate(
+            userId,
+            input.sholatType,
+            input.localDate,
+          );
+          if (existing) {
+            return res.status(200).json(existing);
+          }
+        }
+        throw insertErr;
+      }
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({

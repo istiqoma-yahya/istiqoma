@@ -24,6 +24,7 @@ export type TargetHistoryWithStreak = {
 export interface IStorage {
   getDeeds(userId: string): Promise<Deed[]>;
   createDeed(userId: string, deed: InsertDeed): Promise<Deed>;
+  findSholatDeedByLocalDate(userId: string, sholatType: string, localDate: string): Promise<Deed | null>;
   deleteDeed(id: number, userId: string): Promise<void>;
   updateDeed(id: number, userId: string, deed: InsertDeed): Promise<Deed>;
   getCategories(userId: string): Promise<Category[]>;
@@ -73,6 +74,31 @@ export class DatabaseStorage implements IStorage {
       .values(values)
       .returning();
     return deed;
+  }
+
+  // Idempotency lookup for Sholat Fardhu deeds. Each (user, prayer, local
+  // calendar date) tuple should map to at most one deed. This lets the POST
+  // route short-circuit duplicate creates from rapid taps, retries, or stale
+  // client caches without ever inserting a second row.
+  async findSholatDeedByLocalDate(
+    userId: string,
+    sholatType: string,
+    localDate: string,
+  ): Promise<Deed | null> {
+    const rows = await db
+      .select()
+      .from(deeds)
+      .where(
+        and(
+          eq(deeds.userId, userId),
+          eq(deeds.category, "Sholat Fardhu"),
+          eq(deeds.sholatType, sholatType),
+          eq(deeds.localDate, localDate),
+        ),
+      )
+      .orderBy(asc(deeds.id))
+      .limit(1);
+    return rows[0] ?? null;
   }
 
   async deleteDeed(id: number, userId: string): Promise<void> {

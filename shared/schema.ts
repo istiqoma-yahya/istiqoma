@@ -1,7 +1,7 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar, doublePrecision, date, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // Export auth models
 export * from "./models/auth";
@@ -32,7 +32,20 @@ export const deeds = pgTable("deeds", {
   sedekahType: text("sedekah_type"),
   customUnit: text("custom_unit"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+  // Local calendar date (YYYY-MM-DD) the user assigned this deed to.
+  // For Sholat Fardhu deeds this is the unique key with sholat_type and
+  // user_id, preventing duplicate prayer marks for the same day even if
+  // the client retries or has a stale cache.
+  localDate: date("local_date"),
+}, (table) => ({
+  // Hard guarantee: at most one Sholat Fardhu deed per (user, prayer, day).
+  // The application also performs a find-then-insert idempotency check, but
+  // that is TOCTOU under concurrent requests. This partial unique index
+  // closes the race by letting Postgres reject the second insert.
+  uniqSholatPerDay: uniqueIndex("uniq_sholat_deed_per_day")
+    .on(table.userId, table.sholatType, table.localDate)
+    .where(sql`category = 'Sholat Fardhu' AND local_date IS NOT NULL AND sholat_type IS NOT NULL`),
+}));
 
 export const targetFolders = pgTable("target_folders", {
   id: serial("id").primaryKey(),
@@ -133,6 +146,7 @@ export const insertDeedSchema = createInsertSchema(deeds).pick({
   sedekahType: true,
   customUnit: true,
   createdAt: true,
+  localDate: true,
 }).extend({
   deedType: z.enum(["good", "bad"]).optional(),
   createdAt: z.coerce.date().optional(),
@@ -143,6 +157,7 @@ export const insertDeedSchema = createInsertSchema(deeds).pick({
   quranUnit: z.enum(["ayat", "halaman", "surat", "juz"]).optional(),
   sedekahType: z.enum(["uang", "hitungan"]).optional(),
   customUnit: z.enum(["hitungan", "ayat", "halaman", "surat", "juz", "rakaat", "hari", "uang", "times", "days"]).optional(),
+  localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "localDate must be YYYY-MM-DD").optional(),
 });
 
 export const insertCategorySchema = createInsertSchema(categories).pick({

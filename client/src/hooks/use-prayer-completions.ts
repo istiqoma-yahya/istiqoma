@@ -84,6 +84,20 @@ function localDateKey(d: Date | string | null | undefined): string | null {
   return `${y}-${m}-${day}`;
 }
 
+// Resolve the local calendar date a deed belongs to. Prefer the explicit
+// `localDate` column the server now stores; fall back to deriving it from
+// the timestamp for legacy rows that pre-date the column. Postgres `date`
+// columns come back as "YYYY-MM-DD" strings via node-postgres, but we
+// defensively handle the Date case too.
+function deedDayKey(deed: Deed): string | null {
+  const ld = (deed as { localDate?: string | Date | null }).localDate;
+  if (ld) {
+    if (typeof ld === "string") return ld.slice(0, 10);
+    return localDateKey(ld);
+  }
+  return localDateKey(deed.createdAt);
+}
+
 function findPrayerKey(deed: Deed): PrayerKey | null {
   if (deed.category !== SHOLAT_FARDHU_CATEGORY) return null;
   if (!deed.sholatType) return null;
@@ -97,26 +111,29 @@ function flagsFromDeeds(deeds: Deed[] | null | undefined, date: string): PrayerC
   if (!deeds) return { ...EMPTY_FLAGS };
   const flags: PrayerCompletionFlags = { ...EMPTY_FLAGS };
   for (const d of deeds) {
-    if (localDateKey(d.createdAt) !== date) continue;
+    if (deedDayKey(d) !== date) continue;
     const key = findPrayerKey(d);
     if (key) flags[key] = true;
   }
   return flags;
 }
 
-function findMatchingDeed(
+function findMatchingDeeds(
   deeds: Deed[] | null | undefined,
   date: string,
   prayer: PrayerKey,
-): Deed | null {
-  if (!deeds) return null;
-  let match: Deed | null = null;
+): Deed[] {
+  if (!deeds) return [];
+  const matches: Deed[] = [];
   for (const d of deeds) {
-    if (localDateKey(d.createdAt) !== date) continue;
+    if (deedDayKey(d) !== date) continue;
     if (findPrayerKey(d) !== prayer) continue;
-    if (!match || (d.id ?? 0) > (match.id ?? 0)) match = d;
+    matches.push(d);
   }
-  return match;
+  // Newest first so callers that only want one (e.g. the optimistic-temp
+  // detection in `togglePrayer`) can take the head.
+  matches.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+  return matches;
 }
 
 // Generate a temp id that is:
@@ -163,7 +180,8 @@ function buildOptimisticDeed(
     sedekahType: null,
     customUnit: "times",
     createdAt: new Date(createdAtIso),
-  };
+    localDate: date,
+  } as Deed;
 }
 
 // -- Pending ops queue --------------------------------------------------------
@@ -317,6 +335,9 @@ export function usePrayerCompletion(date: string) {
             sholatType: PRAYER_TO_SHOLAT_TYPE[op.prayer],
             customUnit: "times",
             createdAt: op.createdAtIso,
+            // op.date is the user's local YYYY-MM-DD when the tap happened,
+            // so it doubles as the idempotency key for the server.
+            localDate: op.date,
           });
           removePending((p) => p.kind === "create" && p.tempId === op.tempId);
           mutated = true;
@@ -407,6 +428,10 @@ export function usePrayerCompletion(date: string) {
           sholatType: PRAYER_TO_SHOLAT_TYPE[prayer],
           customUnit: "times",
           createdAt: createdAtIso,
+          // The server enforces idempotency on (user, sholat_type, localDate),
+          // so even if multiple rapid taps race, the second POST will return
+          // the existing deed instead of creating a duplicate.
+          localDate: date,
         });
         const created = (await res.json()) as Deed;
         removePending((op) => op.kind === "create" && op.tempId === tempId);
@@ -466,22 +491,32 @@ export function usePrayerCompletion(date: string) {
       pendingRef.current.add(prayer);
 
       const list = queryClient.getQueryData<Deed[]>(DEEDS_QUERY_KEY) ?? deedsQuery.data ?? [];
-      const existing = findMatchingDeed(list, date, prayer);
+      const matches = findMatchingDeeds(list, date, prayer);
 
-      const work =
-        existing && existing.id > 0
-          ? deletePrayerDeed(prayer, existing.id)
-          : existing && existing.id < 0
-            ? // Tapping off an as-yet-unsynced create: just drop the temp deed
-              // and the queued op. No network call needed.
-              (() => {
-                removePending((op) => op.kind === "create" && op.tempId === existing.id);
+      // Untoggling: when the user taps a checked prayer, sweep away every
+      // matching deed for that (date, prayer). In normal operation there
+      // is at most one (server idempotency guarantees that), but if any
+      // legacy duplicates lingered in the DB we don't want the user to
+      // have to tap N times to clear them.
+      const work: Promise<unknown> = matches.length > 0
+        ? (async () => {
+            for (const m of matches) {
+              if (m.id < 0) {
+                removePending((op) => op.kind === "create" && op.tempId === m.id);
                 queryClient.setQueryData<Deed[]>(DEEDS_QUERY_KEY, (current) =>
-                  (current ?? []).filter((d) => d.id !== existing.id),
+                  (current ?? []).filter((d) => d.id !== m.id),
                 );
-                return Promise.resolve();
-              })()
-            : createPrayerDeed(prayer);
+              } else {
+                try {
+                  await deletePrayerDeed(prayer, m.id);
+                } catch {
+                  // deletePrayerDeed already handles revert/rethrow; we
+                  // swallow here so the loop continues clearing the rest.
+                }
+              }
+            }
+          })()
+        : createPrayerDeed(prayer);
 
       work
         .catch(() => {

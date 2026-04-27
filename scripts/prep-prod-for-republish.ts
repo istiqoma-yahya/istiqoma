@@ -186,6 +186,11 @@ async function main() {
       WHERE category='Sholat Fardhu' AND sholat_type IS NOT NULL AND sholat_type<>'' AND local_date IS NULL
     `);
     console.log(`rows with NULL local_date (should be 0): ${nullLocalDate.rows[0].n}`);
+    if (nullLocalDate.rows[0].n !== 0) {
+      throw new Error(
+        `Verification failed: ${nullLocalDate.rows[0].n} Sholat Fardhu rows still have NULL local_date. The deployed code requires every Sholat Fardhu row to have a local_date.`,
+      );
+    }
 
     const finalIdx = await client.query<{ indexdef: string }>(`
       SELECT indexdef FROM pg_indexes

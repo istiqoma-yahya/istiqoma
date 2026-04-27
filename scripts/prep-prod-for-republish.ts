@@ -187,11 +187,34 @@ async function main() {
     `);
     console.log(`rows with NULL local_date (should be 0): ${nullLocalDate.rows[0].n}`);
 
-    const finalIdx = await client.query(`
+    const finalIdx = await client.query<{ indexdef: string }>(`
       SELECT indexdef FROM pg_indexes
       WHERE schemaname='public' AND tablename='deeds' AND indexname='uniq_sholat_deed_per_day'
     `);
-    console.log(`final index def: ${finalIdx.rows[0]?.indexdef ?? "MISSING"}`);
+    const indexdef = finalIdx.rows[0]?.indexdef ?? "MISSING";
+    console.log(`final index def: ${indexdef}`);
+    // Defensive predicate check: CREATE UNIQUE INDEX IF NOT EXISTS only
+    // guarantees that *some* index with that name exists. If a previous
+    // run (or a manual operator) had created an index with the same name
+    // but a different shape, we would silently accept it. Assert the
+    // columns and the partial-predicate filter explicitly.
+    const requiredFragments = [
+      "UNIQUE INDEX uniq_sholat_deed_per_day",
+      "ON public.deeds",
+      "user_id",
+      "sholat_type",
+      "local_date",
+      "category = 'Sholat Fardhu'",
+      "local_date IS NOT NULL",
+      "sholat_type IS NOT NULL",
+    ];
+    const missing = requiredFragments.filter((f) => !indexdef.includes(f));
+    if (missing.length > 0) {
+      throw new Error(
+        `Index 'uniq_sholat_deed_per_day' exists but is shaped wrong. Missing fragments: ${JSON.stringify(missing)}. Indexdef: ${indexdef}`,
+      );
+    }
+    console.log("index shape check: ✓");
 
     const sampleUser = "55008017";
     const userAfter = await client.query<{ user_id: string; sholat_type: string; local_date: string; n: number }>(

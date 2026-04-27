@@ -159,7 +159,8 @@ export default function Dashboard() {
               {targets.slice(0, 3).map((target) => (
                 <button
                   key={target.id}
-                  className="w-full text-left"
+                  type="button"
+                  className="w-full text-left touch-manipulation"
                   onClick={() => navigate(`/targets/${target.id}`)}
                   data-testid={`card-dashboard-target-${target.id}`}
                 >

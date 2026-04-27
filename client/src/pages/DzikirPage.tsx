@@ -362,7 +362,7 @@ export default function DzikirPage() {
             data-testid="input-custom-dzikir-label"
             autoFocus
           />
-          <DialogFooter>
+          <DialogFooter className="gap-3">
             <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
               {t("common.cancel")}
             </Button>
@@ -395,7 +395,7 @@ export default function DzikirPage() {
           <p className="text-xs text-muted-foreground" data-testid="text-rename-history-note">
             {t("dzikir.renameHistoryNote")}
           </p>
-          <DialogFooter>
+          <DialogFooter className="gap-3">
             <Button variant="outline" onClick={() => setRenameDialogOpen(false)}>
               {t("common.cancel")}
             </Button>

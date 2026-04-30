@@ -427,6 +427,16 @@ export async function registerRoutes(
     res.json(result);
   });
 
+  function parseTimezone(raw: unknown): string | undefined {
+    if (!raw || typeof raw !== "string") return undefined;
+    try {
+      Intl.DateTimeFormat(undefined, { timeZone: raw });
+      return raw;
+    } catch {
+      return undefined;
+    }
+  }
+
   app.get(api.targets.deedsForDate.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
     const id = parseInt(req.params.id);
@@ -437,7 +447,8 @@ export async function registerRoutes(
     if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       return res.status(400).json({ message: "Invalid date format. Use YYYY-MM-DD" });
     }
-    const matchingDeeds = await storage.getDeedsForTargetOnDate(id, userId, dateStr);
+    const timezone = parseTimezone(req.query.timezone);
+    const matchingDeeds = await storage.getDeedsForTargetOnDate(id, userId, dateStr, timezone);
     res.json(matchingDeeds);
   });
 
@@ -457,7 +468,8 @@ export async function registerRoutes(
     if (startDate > endDate) {
       return res.status(400).json({ message: "startDate must be before or equal to endDate" });
     }
-    const breakdown = await storage.getDailyBreakdown(id, userId, startDate, endDate);
+    const timezone = parseTimezone(req.query.timezone);
+    const breakdown = await storage.getDailyBreakdown(id, userId, startDate, endDate, timezone);
     res.json(breakdown);
   });
 

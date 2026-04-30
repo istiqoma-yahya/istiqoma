@@ -8,6 +8,17 @@ import { toZonedTime, fromZonedTime } from "date-fns-tz";
 // Default timezone for users (Indonesia)
 const DEFAULT_TIMEZONE = "Asia/Jakarta";
 
+// Validate an IANA timezone string. Returns the string if valid, otherwise undefined.
+function validateTimezone(tz: unknown): string | undefined {
+  if (!tz || typeof tz !== "string") return undefined;
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: tz });
+    return tz;
+  } catch {
+    return undefined;
+  }
+}
+
 const FASTING_CATEGORY_VARIANTS = ["puasa", "fasting", "puasa fardhu", "puasa sunnah", "fasting fardhu", "fasting sunnah"];
 function isFastingCategory(cat: string): boolean {
   return FASTING_CATEGORY_VARIANTS.includes(cat.toLowerCase());
@@ -45,9 +56,9 @@ export interface IStorage {
   moveTargetToFolder(targetId: number, userId: string, folderId: number | null): Promise<Target>;
   getTargetHistory(targetId: number, userId: string, limit?: number): Promise<TargetHistory[]>;
   getTargetHistoryWithStreak(targetId: number, userId: string, limit?: number): Promise<TargetHistoryWithStreak>;
-  calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack?: number): Promise<TargetHistory[]>;
-  getDeedsForTargetOnDate(targetId: number, userId: string, dateStr: string): Promise<Deed[]>;
-  getDailyBreakdown(targetId: number, userId: string, startDate: string, endDate: string): Promise<{ date: string; quantity: number }[]>;
+  calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack?: number, timezone?: string): Promise<TargetHistory[]>;
+  getDeedsForTargetOnDate(targetId: number, userId: string, dateStr: string, timezone?: string): Promise<Deed[]>;
+  getDailyBreakdown(targetId: number, userId: string, startDate: string, endDate: string, timezone?: string): Promise<{ date: string; quantity: number }[]>;
   getPushSubscription(userId: string): Promise<PushSubscription | null>;
   savePushSubscription(userId: string, subscription: InsertPushSubscription): Promise<PushSubscription>;
   updatePushSubscriptionSettings(userId: string, settings: Partial<InsertPushSubscription>): Promise<PushSubscription | null>;
@@ -476,7 +487,14 @@ export class DatabaseStorage implements IStorage {
     return { history, currentStreak };
   }
 
-  async calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack: number = 7): Promise<TargetHistory[]> {
+  private async resolveUserTimezone(userId: string, explicitTz?: string): Promise<string> {
+    const validated = validateTimezone(explicitTz);
+    if (validated) return validated;
+    const sub = await this.getPushSubscription(userId);
+    return validateTimezone(sub?.timezone) ?? DEFAULT_TIMEZONE;
+  }
+
+  async calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack: number = 7, timezone?: string): Promise<TargetHistory[]> {
     const target = await db
       .select()
       .from(targets)
@@ -490,9 +508,11 @@ export class DatabaseStorage implements IStorage {
     const t = target[0];
     const userDeeds = await this.getDeeds(userId);
     const now = new Date();
+
+    const tz = await this.resolveUserTimezone(userId, timezone);
     
     // Convert to user's timezone for accurate period calculations
-    const nowInUserTz = toZonedTime(now, DEFAULT_TIMEZONE);
+    const nowInUserTz = toZonedTime(now, tz);
     
     const periodBoundaries: Array<{ periodStart: Date; periodEnd: Date }> = [];
     for (let i = 1; i <= periodsBack; i++) {
@@ -502,18 +522,18 @@ export class DatabaseStorage implements IStorage {
       switch (t.period) {
         case "daily":
           const dayInUserTz = subDays(nowInUserTz, i);
-          periodStart = fromZonedTime(startOfDay(dayInUserTz), DEFAULT_TIMEZONE);
-          periodEnd = fromZonedTime(endOfDay(dayInUserTz), DEFAULT_TIMEZONE);
+          periodStart = fromZonedTime(startOfDay(dayInUserTz), tz);
+          periodEnd = fromZonedTime(endOfDay(dayInUserTz), tz);
           break;
         case "weekly":
           const weekInUserTz = subWeeks(nowInUserTz, i);
-          periodStart = fromZonedTime(startOfWeek(weekInUserTz, { weekStartsOn: 1 }), DEFAULT_TIMEZONE);
-          periodEnd = fromZonedTime(endOfWeek(weekInUserTz, { weekStartsOn: 1 }), DEFAULT_TIMEZONE);
+          periodStart = fromZonedTime(startOfWeek(weekInUserTz, { weekStartsOn: 1 }), tz);
+          periodEnd = fromZonedTime(endOfWeek(weekInUserTz, { weekStartsOn: 1 }), tz);
           break;
         case "monthly":
           const monthInUserTz = subMonths(nowInUserTz, i);
-          periodStart = fromZonedTime(startOfMonth(monthInUserTz), DEFAULT_TIMEZONE);
-          periodEnd = fromZonedTime(endOfMonth(monthInUserTz), DEFAULT_TIMEZONE);
+          periodStart = fromZonedTime(startOfMonth(monthInUserTz), tz);
+          periodEnd = fromZonedTime(endOfMonth(monthInUserTz), tz);
           break;
         default:
           continue;
@@ -600,7 +620,7 @@ export class DatabaseStorage implements IStorage {
     );
   }
 
-  async getDeedsForTargetOnDate(targetId: number, userId: string, dateStr: string): Promise<Deed[]> {
+  async getDeedsForTargetOnDate(targetId: number, userId: string, dateStr: string, timezone?: string): Promise<Deed[]> {
     const target = await db
       .select()
       .from(targets)
@@ -612,9 +632,10 @@ export class DatabaseStorage implements IStorage {
     }
 
     const t = target[0];
+    const tz = await this.resolveUserTimezone(userId, timezone);
     const dateInUserTz = new Date(dateStr + "T00:00:00");
-    const dayStart = fromZonedTime(startOfDay(dateInUserTz), DEFAULT_TIMEZONE);
-    const dayEnd = fromZonedTime(endOfDay(dateInUserTz), DEFAULT_TIMEZONE);
+    const dayStart = fromZonedTime(startOfDay(dateInUserTz), tz);
+    const dayEnd = fromZonedTime(endOfDay(dateInUserTz), tz);
 
     const userDeeds = await db
       .select()
@@ -645,6 +666,7 @@ export class DatabaseStorage implements IStorage {
     userId: string,
     startDate: string,
     endDate: string,
+    timezone?: string,
   ): Promise<{ date: string; quantity: number }[]> {
     const targetRows = await db
       .select()
@@ -655,9 +677,10 @@ export class DatabaseStorage implements IStorage {
     if (!targetRows.length) return [];
 
     const t = targetRows[0];
+    const tz = await this.resolveUserTimezone(userId, timezone);
 
-    const rangeStart = fromZonedTime(startOfDay(new Date(startDate + "T00:00:00")), DEFAULT_TIMEZONE);
-    const rangeEnd = fromZonedTime(endOfDay(new Date(endDate + "T00:00:00")), DEFAULT_TIMEZONE);
+    const rangeStart = fromZonedTime(startOfDay(new Date(startDate + "T00:00:00")), tz);
+    const rangeEnd = fromZonedTime(endOfDay(new Date(endDate + "T00:00:00")), tz);
 
     const userDeeds = await db
       .select()
@@ -684,7 +707,7 @@ export class DatabaseStorage implements IStorage {
 
     const byDay = new Map<string, number>();
     for (const deed of matchingDeeds) {
-      const deedInUserTz = toZonedTime(new Date(deed.createdAt!), DEFAULT_TIMEZONE);
+      const deedInUserTz = toZonedTime(new Date(deed.createdAt!), tz);
       const dateStr = format(deedInUserTz, "yyyy-MM-dd");
       byDay.set(dateStr, (byDay.get(dateStr) || 0) + (deed.quantity || 1));
     }
@@ -703,6 +726,8 @@ export class DatabaseStorage implements IStorage {
 
   async savePushSubscription(userId: string, subscription: InsertPushSubscription): Promise<PushSubscription> {
     const existing = await this.getPushSubscription(userId);
+    // Only persist a timezone value if it is a valid IANA identifier
+    const sanitizedTimezone = validateTimezone(subscription.timezone) ?? existing?.timezone ?? null;
     
     if (existing) {
       const [updated] = await db
@@ -713,7 +738,7 @@ export class DatabaseStorage implements IStorage {
           auth: subscription.auth,
           dailyReminder: subscription.dailyReminder ?? existing.dailyReminder,
           reminderTime: subscription.reminderTime ?? existing.reminderTime,
-          timezone: subscription.timezone ?? existing.timezone,
+          timezone: sanitizedTimezone,
           targetAlerts: subscription.targetAlerts ?? existing.targetAlerts,
           sholatReminder: subscription.sholatReminder ?? existing.sholatReminder,
           latitude: subscription.latitude ?? existing.latitude,
@@ -726,7 +751,7 @@ export class DatabaseStorage implements IStorage {
     
     const [created] = await db
       .insert(pushSubscriptions)
-      .values({ ...subscription, userId })
+      .values({ ...subscription, userId, timezone: sanitizedTimezone })
       .returning();
     return created;
   }

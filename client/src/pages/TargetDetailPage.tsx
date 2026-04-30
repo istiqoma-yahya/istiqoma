@@ -84,7 +84,7 @@ import {
 import { id as idLocale, enUS } from "date-fns/locale";
 import { toZonedTime } from "date-fns-tz";
 
-const USER_TIMEZONE = "Asia/Jakarta";
+const USER_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 import { api } from "@shared/routes";
 
 interface TargetDetailData {
@@ -311,7 +311,7 @@ function CalendarDateProgressDialog({
   const { data: existingDeeds, isLoading: isLoadingDeeds } = useQuery<Deed[]>({
     queryKey: ['/api/targets', target.id, 'deeds-for-date', dateStr],
     queryFn: async () => {
-      const res = await fetch(`/api/targets/${target.id}/deeds-for-date?date=${dateStr}`, {
+      const res = await fetch(`/api/targets/${target.id}/deeds-for-date?date=${dateStr}&timezone=${encodeURIComponent(USER_TIMEZONE)}`, {
         credentials: "include",
       });
       if (!res.ok) return [];
@@ -758,7 +758,7 @@ function ConsistencyCalendar({
     queryKey: ["/api/targets", target.id, "daily-breakdown", breakdownRangeStart, breakdownRangeEnd],
     queryFn: async () => {
       const res = await fetch(
-        `/api/targets/${target.id}/daily-breakdown?startDate=${breakdownRangeStart}&endDate=${breakdownRangeEnd}`,
+        `/api/targets/${target.id}/daily-breakdown?startDate=${breakdownRangeStart}&endDate=${breakdownRangeEnd}&timezone=${encodeURIComponent(USER_TIMEZONE)}`,
         { credentials: "include" }
       );
       if (!res.ok) return [];
@@ -784,7 +784,7 @@ function ConsistencyCalendar({
   const { data: todayDeeds } = useQuery<Deed[]>({
     queryKey: ['/api/targets', target.id, 'deeds-for-date', todayStr],
     queryFn: async () => {
-      const res = await fetch(`/api/targets/${target.id}/deeds-for-date?date=${todayStr}`, {
+      const res = await fetch(`/api/targets/${target.id}/deeds-for-date?date=${todayStr}&timezone=${encodeURIComponent(USER_TIMEZONE)}`, {
         credentials: "include",
       });
       if (!res.ok) return [];
@@ -957,7 +957,7 @@ function ConsistencyCalendar({
     setIsToggling(dateStr);
 
     try {
-      const res = await fetch(`/api/targets/${target.id}/deeds-for-date?date=${dateStr}`, {
+      const res = await fetch(`/api/targets/${target.id}/deeds-for-date?date=${dateStr}&timezone=${encodeURIComponent(USER_TIMEZONE)}`, {
         credentials: "include",
       });
       const existingDeeds: Deed[] = res.ok ? await res.json() : [];

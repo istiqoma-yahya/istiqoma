@@ -207,7 +207,7 @@ function HighlightCards({
 
 type DayStatus = "completed" | "partial" | "missed" | "future" | "no-data";
 
-function CircularProgress({ percentage, size = 32 }: { percentage: number; size?: number }) {
+function CircularProgress({ percentage, size = 32, onGreen = false }: { percentage: number; size?: number; onGreen?: boolean }) {
   const strokeWidth = 3;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -222,7 +222,7 @@ function CircularProgress({ percentage, size = 32 }: { percentage: number; size?
         fill="none"
         stroke="currentColor"
         strokeWidth={strokeWidth}
-        className="text-muted/40"
+        className={onGreen ? "text-emerald-200/50 dark:text-emerald-300/30" : "text-muted/40"}
       />
       {percentage > 0 && (
         <circle
@@ -235,7 +235,7 @@ function CircularProgress({ percentage, size = 32 }: { percentage: number; size?
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          className="text-primary"
+          className={onGreen ? "text-emerald-200 dark:text-emerald-300" : "text-primary"}
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
       )}
@@ -1070,7 +1070,7 @@ function ConsistencyCalendar({
                 data-testid={`calendar-day-${dateStr}`}
               >
                 {showRing && (
-                  <CircularProgress percentage={progressPercent} size={34} />
+                  <CircularProgress percentage={progressPercent} size={34} onGreen={status === "completed"} />
                 )}
                 <span className="relative z-10 leading-none">
                   {date.getDate()}

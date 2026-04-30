@@ -13,7 +13,7 @@ const buttonVariants = cva(
         default:
           "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20",
         destructive:
-          "bg-destructive text-destructive-foreground",
+          "bg-destructive text-destructive-foreground shadow-lg shadow-rose-500/20",
         outline:
           // Shows the background color of whatever card / sidebar / accent background it is inside of.
           // Inherits the current text color.

@@ -708,7 +708,7 @@ export default function TargetsPage() {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-none bg-rose-500 text-white"
+              variant="destructive"
               data-testid="button-confirm-delete-target"
             >
               {t("common.delete")}
@@ -879,7 +879,7 @@ export default function TargetsPage() {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteFolder}
-              className="bg-none bg-rose-500 text-white"
+              variant="destructive"
               data-testid="button-confirm-delete-folder"
             >
               {t("common.delete")}

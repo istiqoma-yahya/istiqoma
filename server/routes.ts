@@ -441,6 +441,26 @@ export async function registerRoutes(
     res.json(matchingDeeds);
   });
 
+  app.get("/api/targets/:id/daily-breakdown", isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+    const { startDate, endDate } = req.query as { startDate?: string; endDate?: string };
+    if (!startDate || !/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
+      return res.status(400).json({ message: "Invalid startDate. Use YYYY-MM-DD" });
+    }
+    if (!endDate || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+      return res.status(400).json({ message: "Invalid endDate. Use YYYY-MM-DD" });
+    }
+    if (startDate > endDate) {
+      return res.status(400).json({ message: "startDate must be before or equal to endDate" });
+    }
+    const breakdown = await storage.getDailyBreakdown(id, userId, startDate, endDate);
+    res.json(breakdown);
+  });
+
   app.get(api.targets.detail.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
     const id = parseInt(req.params.id);

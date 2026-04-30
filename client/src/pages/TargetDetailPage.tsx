@@ -386,6 +386,7 @@ function CalendarDateProgressDialog({
       await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
       await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
       await queryClient.invalidateQueries({ queryKey: ['/api/targets', target.id, 'deeds-for-date'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/targets', target.id, 'daily-breakdown'] });
 
       onProgressUpdated();
       resetIncrementForCurrentMode();
@@ -569,11 +570,13 @@ function PeriodProgressBars({
   period,
   target,
   currentMonth,
+  dailyBreakdown,
 }: {
   history: TargetHistory[];
   period: string | null;
   target: TargetWithProgress;
   currentMonth: Date;
+  dailyBreakdown?: Map<string, number>;
 }) {
   const { t } = useTranslation();
   const isOneTime = target.recurrence === "oneTime";
@@ -684,6 +687,9 @@ function PeriodProgressBars({
           }
 
           const pct = total > 0 ? Math.min(100, Math.round((achieved / total) * 100)) : 0;
+
+          const weekDays = eachDayOfInterval({ start: week.wStart, end: week.wEnd });
+
           return (
             <div key={idx} className="space-y-0.5">
               <div className="flex items-center justify-between text-[10px]">
@@ -695,6 +701,27 @@ function PeriodProgressBars({
                 </span>
               </div>
               <Progress value={pct} className="h-1.5 bg-gray-200 dark:bg-gray-700" />
+              {dailyBreakdown && (
+                <div className="flex gap-px pt-0.5">
+                  {weekDays.map((day) => {
+                    const ds = format(day, "yyyy-MM-dd");
+                    const qty = dailyBreakdown.get(ds) || 0;
+                    return (
+                      <div
+                        key={ds}
+                        className="flex-1 flex items-center justify-center"
+                        title={qty > 0 ? `${ds}: ${qty}` : undefined}
+                      >
+                        {qty > 0 ? (
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary/70" />
+                        ) : (
+                          <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/20" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}
@@ -722,6 +749,28 @@ function ConsistencyCalendar({
   const [isToggling, setIsToggling] = useState<string | null>(null);
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
+
+  const isWeekly = period === "weekly";
+  const breakdownRangeStart = format(startOfWeek(startOfMonth(currentMonth), { weekStartsOn: 1 }), "yyyy-MM-dd");
+  const breakdownRangeEnd = format(endOfWeek(endOfMonth(currentMonth), { weekStartsOn: 1 }), "yyyy-MM-dd");
+
+  const { data: breakdownData } = useQuery<{ date: string; quantity: number }[]>({
+    queryKey: ["/api/targets", target.id, "daily-breakdown", breakdownRangeStart, breakdownRangeEnd],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/targets/${target.id}/daily-breakdown?startDate=${breakdownRangeStart}&endDate=${breakdownRangeEnd}`,
+        { credentials: "include" }
+      );
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: isWeekly,
+  });
+
+  const dailyBreakdown = useMemo<Map<string, number>>(() => {
+    if (!breakdownData) return new Map();
+    return new Map(breakdownData.map((e) => [e.date, e.quantity]));
+  }, [breakdownData]);
 
   const dateLocale = i18n.language === "id" ? idLocale : enUS;
   const isCheckboxMode = target.targetValue === 1;
@@ -943,6 +992,7 @@ function ConsistencyCalendar({
 
       await queryClient.invalidateQueries({ queryKey: [`/api/targets/${target.id}/detail`] });
       await queryClient.invalidateQueries({ queryKey: ['/api/targets', target.id, 'deeds-for-date'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/targets', target.id, 'daily-breakdown'] });
       await queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
       await queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
       onProgressUpdated();
@@ -999,6 +1049,7 @@ function ConsistencyCalendar({
           period={period}
           target={target}
           currentMonth={currentMonth}
+          dailyBreakdown={isWeekly ? dailyBreakdown : undefined}
         />
 
         <div className="flex items-center gap-3 mb-4">
@@ -1031,7 +1082,10 @@ function ConsistencyCalendar({
             const bgClass = getDayBgClass(status, interactive);
 
             if (isCheckboxMode) {
-              const isCompleted = status === "completed";
+              const checkDayQty = isWeekly ? (dailyBreakdown.get(dateStr) || 0) : 0;
+              const isCompleted = isWeekly
+                ? checkDayQty > 0 && status !== "future"
+                : status === "completed";
               return (
                 <button
                   key={date.toISOString()}
@@ -1051,12 +1105,24 @@ function ConsistencyCalendar({
                   <span className={isCompleted ? "text-[9px] leading-none" : "text-xs"}>
                     {date.getDate()}
                   </span>
+                  {isWeekly && checkDayQty > 1 && !toggling && (
+                    <span
+                      className={`text-[7px] font-bold leading-none mt-0.5 ${
+                        status === "completed" ? "text-white/80" : "text-primary"
+                      }`}
+                      data-testid={`day-indicator-${dateStr}`}
+                    >
+                      {checkDayQty}
+                    </span>
+                  )}
                 </button>
               );
             }
 
             const progressPercent = getDayProgressPercent(date);
             const showRing = period === "daily" && status !== "future" && interactive;
+            const dayQty = isWeekly ? (dailyBreakdown.get(dateStr) || 0) : 0;
+            const showDayIndicator = isWeekly && dayQty > 0 && status !== "future";
 
             return (
               <button
@@ -1064,7 +1130,7 @@ function ConsistencyCalendar({
                 type="button"
                 disabled={!interactive}
                 onClick={() => handleDayClick(date)}
-                className={`aspect-square rounded-lg flex items-center justify-center text-xs relative transition-all duration-150 ${
+                className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs relative transition-all duration-150 ${
                   interactive ? "cursor-pointer active:scale-90" : "cursor-default"
                 } ${bgClass} ${today ? "ring-2 ring-primary ring-offset-1 ring-offset-background rounded-lg" : ""}`}
                 data-testid={`calendar-day-${dateStr}`}
@@ -1075,6 +1141,34 @@ function ConsistencyCalendar({
                 <span className="relative z-10 leading-none">
                   {date.getDate()}
                 </span>
+                {showDayIndicator && (
+                  <span
+                    className={`relative z-10 leading-none mt-0.5 ${
+                      dayQty > 1
+                        ? `text-[8px] font-bold px-0.5 rounded ${
+                            status === "completed"
+                              ? "text-white/90"
+                              : status === "partial"
+                              ? "text-amber-700 dark:text-amber-300"
+                              : "text-primary"
+                          }`
+                        : ""
+                    }`}
+                    data-testid={`day-indicator-${dateStr}`}
+                  >
+                    {dayQty > 1 ? dayQty : (
+                      <span
+                        className={`block w-1 h-1 rounded-full ${
+                          status === "completed"
+                            ? "bg-white/80"
+                            : status === "partial"
+                            ? "bg-amber-500 dark:bg-amber-400"
+                            : "bg-primary/70"
+                        }`}
+                      />
+                    )}
+                  </span>
+                )}
               </button>
             );
           })}

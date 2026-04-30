@@ -2,7 +2,7 @@ import { db } from "./db";
 export { db };
 import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte, isNull } from "drizzle-orm";
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from "date-fns";
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 
 // Default timezone for users (Indonesia)
@@ -47,6 +47,7 @@ export interface IStorage {
   getTargetHistoryWithStreak(targetId: number, userId: string, limit?: number): Promise<TargetHistoryWithStreak>;
   calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack?: number): Promise<TargetHistory[]>;
   getDeedsForTargetOnDate(targetId: number, userId: string, dateStr: string): Promise<Deed[]>;
+  getDailyBreakdown(targetId: number, userId: string, startDate: string, endDate: string): Promise<{ date: string; quantity: number }[]>;
   getPushSubscription(userId: string): Promise<PushSubscription | null>;
   savePushSubscription(userId: string, subscription: InsertPushSubscription): Promise<PushSubscription>;
   updatePushSubscriptionSettings(userId: string, settings: Partial<InsertPushSubscription>): Promise<PushSubscription | null>;
@@ -637,6 +638,58 @@ export class DatabaseStorage implements IStorage {
       const matchesCustomUnit = !t.customUnit || deed.customUnit === t.customUnit || !deed.customUnit;
       return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit;
     });
+  }
+
+  async getDailyBreakdown(
+    targetId: number,
+    userId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<{ date: string; quantity: number }[]> {
+    const targetRows = await db
+      .select()
+      .from(targets)
+      .where(and(eq(targets.id, targetId), eq(targets.userId, userId)))
+      .limit(1);
+
+    if (!targetRows.length) return [];
+
+    const t = targetRows[0];
+
+    const rangeStart = fromZonedTime(startOfDay(new Date(startDate + "T00:00:00")), DEFAULT_TIMEZONE);
+    const rangeEnd = fromZonedTime(endOfDay(new Date(endDate + "T00:00:00")), DEFAULT_TIMEZONE);
+
+    const userDeeds = await db
+      .select()
+      .from(deeds)
+      .where(
+        and(
+          eq(deeds.userId, userId),
+          gte(deeds.createdAt, rangeStart),
+          lte(deeds.createdAt, rangeEnd)
+        )
+      );
+
+    const matchingDeeds = userDeeds.filter((deed) => {
+      const matchesCategory = matchesFastingCategories(deed.category, t.category) || deed.category === t.category;
+      const matchesDzikirType = !t.dzikirType || deed.dzikirType === t.dzikirType;
+      const matchesSholatType = !t.sholatType || deed.sholatType === t.sholatType;
+      const matchesFastingType = !t.fastingType || deed.fastingType === t.fastingType;
+      const matchesQuranUnit = !t.quranUnit || deed.quranUnit === t.quranUnit;
+      const matchesSedekahType = !t.sedekahType || deed.sedekahType === t.sedekahType;
+      const matchesIsJamaah = t.isJamaah === null || t.isJamaah === undefined || deed.isJamaah === t.isJamaah;
+      const matchesCustomUnit = !t.customUnit || deed.customUnit === t.customUnit || !deed.customUnit;
+      return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit;
+    });
+
+    const byDay = new Map<string, number>();
+    for (const deed of matchingDeeds) {
+      const deedInUserTz = toZonedTime(new Date(deed.createdAt!), DEFAULT_TIMEZONE);
+      const dateStr = format(deedInUserTz, "yyyy-MM-dd");
+      byDay.set(dateStr, (byDay.get(dateStr) || 0) + (deed.quantity || 1));
+    }
+
+    return Array.from(byDay.entries()).map(([date, quantity]) => ({ date, quantity }));
   }
 
   async getPushSubscription(userId: string): Promise<PushSubscription | null> {

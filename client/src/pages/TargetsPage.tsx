@@ -590,7 +590,7 @@ export default function TargetsPage() {
                     if (!open) toggleFolderCollapsed(folder.id);
                     else if (isCollapsed) toggleFolderCollapsed(folder.id);
                   }}
-                  className="rounded-lg border bg-card"
+                  className="rounded-lg border border-border bg-card"
                   data-testid={`folder-${folder.id}`}
                 >
                   <div className="flex items-center gap-1 p-3">
@@ -662,7 +662,7 @@ export default function TargetsPage() {
                     if (!open) toggleFolderCollapsed("ungrouped");
                     else if (collapsedFolderIds.has("ungrouped")) toggleFolderCollapsed("ungrouped");
                   }}
-                  className="rounded-lg border bg-card"
+                  className="rounded-lg border border-border bg-card"
                   data-testid="folder-ungrouped"
                 >
                   <div className="flex items-center gap-1 p-3">

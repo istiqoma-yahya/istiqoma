@@ -101,6 +101,12 @@ interface TargetDetailData {
 function useTargetDetail(targetId: number | null) {
   return useQuery<TargetDetailData>({
     queryKey: [`/api/targets/${targetId}/detail`],
+    queryFn: async () => {
+      const url = `/api/targets/${targetId}/detail?timezone=${encodeURIComponent(USER_TIMEZONE)}`;
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch target detail");
+      return res.json();
+    },
     enabled: !!targetId,
   });
 }

@@ -159,7 +159,9 @@ export function useTargetHistory(targetId: number | null) {
     queryKey: [api.targets.history.path, targetId],
     queryFn: async () => {
       if (!targetId) return { history: [], currentStreak: 0 };
-      const url = buildUrl(api.targets.history.path, { id: targetId });
+      const base = buildUrl(api.targets.history.path, { id: targetId });
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const url = `${base}?timezone=${encodeURIComponent(timezone)}`;
       const res = await fetch(url, { credentials: "include" });
       if (res.status === 401) return { history: [], currentStreak: 0 };
       if (!res.ok) throw new Error("Failed to fetch target history");

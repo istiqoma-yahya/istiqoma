@@ -421,8 +421,8 @@ export async function registerRoutes(
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid ID" });
     }
-    
-    await storage.calculateAndSaveTargetHistory(id, userId, 7);
+    const timezone = parseTimezone(req.query.timezone);
+    await storage.calculateAndSaveTargetHistory(id, userId, 7, timezone);
     const result = await storage.getTargetHistoryWithStreak(id, userId, 7);
     res.json(result);
   });
@@ -487,7 +487,8 @@ export async function registerRoutes(
     }
 
     const periodsBack = 90;
-    await storage.calculateAndSaveTargetHistory(id, userId, periodsBack);
+    const timezone = parseTimezone(req.query.timezone);
+    await storage.calculateAndSaveTargetHistory(id, userId, periodsBack, timezone);
     const { history, currentStreak } = await storage.getTargetHistoryWithStreak(id, userId, periodsBack);
 
     const totalAccumulated = history.reduce((sum, h) => sum + h.achievedValue, 0);

@@ -17,17 +17,30 @@ export function RecommendationsEntryCard({ surface }: RecommendationsEntryCardPr
   const { t } = useTranslation();
   const { user } = useAuth();
   const dismissedKey = user?.id ? `${STORAGE_PREFIX}${surface}:${user.id}` : null;
-  const initialDismissed =
-    typeof window !== "undefined" && dismissedKey
-      ? window.localStorage.getItem(dismissedKey) === "1"
-      : false;
-  const [dismissed, setDismissed] = useState(initialDismissed);
+  // Reading from localStorage can throw in private browsing modes or when
+  // storage is disabled by site settings. Fall back to "not dismissed"
+  // rather than crashing the whole page when that happens.
+  const readDismissed = (): boolean => {
+    if (typeof window === "undefined" || !dismissedKey) return false;
+    try {
+      return window.localStorage.getItem(dismissedKey) === "1";
+    } catch {
+      return false;
+    }
+  };
+  const [dismissed, setDismissed] = useState(readDismissed);
   const [open, setOpen] = useState(false);
 
   const handleDismiss = (e: React.MouseEvent) => {
     e.stopPropagation();
     setDismissed(true);
-    if (dismissedKey) window.localStorage.setItem(dismissedKey, "1");
+    if (!dismissedKey) return;
+    try {
+      window.localStorage.setItem(dismissedKey, "1");
+    } catch {
+      // Storage write failed (quota / disabled). The in-memory dismiss
+      // still applies for the rest of this session.
+    }
   };
 
   if (dismissed) {

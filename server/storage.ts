@@ -522,8 +522,26 @@ export class DatabaseStorage implements IStorage {
     const userDeeds = await this.getDeeds(userId);
     const now = new Date();
 
-    const tz = await this.resolveUserTimezone(userId, timezone);
-    
+    // Lock the timezone for this target's history to whatever was used the
+    // first time we computed history for it. Otherwise, a user travelling or
+    // toggling their device timezone would shift every future recalculation
+    // onto a different calendar grid, retroactively breaking past streaks.
+    //
+    // The request timezone is only used as the seed when:
+    //   - the target has no history rows yet (brand-new target), or
+    //   - the most recent history row is a legacy pre-column row whose
+    //     timezone is NULL (we don't fabricate a timezone for it — we trust
+    //     the caller's current timezone instead of locking everyone to a
+    //     hardcoded default that would mis-shift non-Jakarta users).
+    const requestTz = await this.resolveUserTimezone(userId, timezone);
+    const [existingForTz] = await db
+      .select({ timezone: targetHistory.timezone })
+      .from(targetHistory)
+      .where(and(eq(targetHistory.targetId, targetId), eq(targetHistory.userId, userId)))
+      .orderBy(desc(targetHistory.periodEnd))
+      .limit(1);
+    const tz = validateTimezone(existingForTz?.timezone) ?? requestTz;
+
     // Convert to user's timezone for accurate period calculations
     const nowInUserTz = toZonedTime(now, tz);
     
@@ -622,6 +640,7 @@ export class DatabaseStorage implements IStorage {
           targetValue: t.targetValue,
           targetType: t.targetType,
           completed,
+          timezone: tz,
         })
         .returning();
 

@@ -98,6 +98,15 @@ export const targetHistory = pgTable("target_history", {
   targetValue: integer("target_value").notNull(),
   targetType: text("target_type", { enum: ["achievement", "limit"] }).notNull().default("achievement"),
   completed: boolean("completed").notNull(),
+  // IANA timezone the periodStart/periodEnd boundaries were computed under.
+  // Stored per-record so a later device timezone change cannot retroactively
+  // shift historical period boundaries (which would silently break streaks).
+  // Subsequent recalculations reuse the timezone already on file for this
+  // target, keeping past period boundaries — and therefore streaks — stable.
+  // NULLABLE on purpose: legacy rows written before this column existed are
+  // left as NULL so the recalc path falls back to the user's
+  // resolved request timezone instead of being locked to a wrong default.
+  timezone: text("timezone"),
   capturedAt: timestamp("captured_at").defaultNow(),
 });
 
@@ -321,6 +330,7 @@ export const insertTargetHistorySchema = createInsertSchema(targetHistory).pick(
   targetValue: true,
   targetType: true,
   completed: true,
+  timezone: true,
 });
 
 export type InsertDeed = z.infer<typeof insertDeedSchema>;

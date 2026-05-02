@@ -9,6 +9,12 @@ import {
   type TargetRecommendation,
   type UserOnboarding,
 } from "@shared/schema";
+import {
+  arabicMatchesEntry,
+  isReferenceInRange,
+  lookupCorpusEntry,
+  renderCorpusForPrompt,
+} from "./recommendationsCorpus";
 
 const anthropic = new Anthropic({
   apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
@@ -230,18 +236,14 @@ function buildSystemPrompt(language: RecommendationLanguage): string {
     "You are an assistant that recommends Islamic worship targets for a personal habit-tracking app.",
     "",
     "ABSOLUTE RULES — read carefully:",
-    "1. Every recommendation MUST be backed by ONE citation. The citation MUST come from exactly one of these three sources only:",
-    "   - The Quran (kind: \"quran\")",
-    "   - Sahih al-Bukhari (kind: \"bukhari\")",
-    "   - Sahih Muslim (kind: \"muslim\")",
-    "2. NEVER cite Tirmidhi, Abu Dawud, Nasa'i, Ibn Majah, Musnad Ahmad, Muwatta, or any other collection. NEVER cite a scholar's quote.",
-    "3. If you are not 100% certain a hadith is in Sahih al-Bukhari or Sahih Muslim with a verifiable hadith number, OMIT that recommendation entirely. Quality over quantity. It is far better to return 4 trustworthy items than 8 with a fabricated citation.",
-    "4. Provide the Arabic text exactly as it appears in the source. Do NOT invent or paraphrase Arabic. If unsure, omit.",
-    `5. The "whyItFits" string and the "translation" string MUST be in ${langName} (language code: ${language}). The Arabic field is always literal Arabic.`,
-    "6. The reference must be a clear, human-readable citation, e.g.:",
-    "   - quran: \"QS Al-Baqarah 2:152\" or \"Quran 2:152\"",
-    "   - bukhari: \"HR. Bukhari no. 6407\" or \"Sahih al-Bukhari 6407\"",
-    "   - muslim: \"HR. Muslim no. 2675\" or \"Sahih Muslim 2675\"",
+    "1. You MUST only cite entries from the ALLOWED CITATIONS list below. Any citation outside that list (including correctly-formatted but unlisted hadith numbers) will be rejected and the recommendation discarded.",
+    "2. Provide the Arabic field by copying the canonical Arabic of the cited verse/hadith verbatim (with or without diacritics). The server verifies the Arabic against ground truth — fabricated or paraphrased Arabic is rejected.",
+    `3. The "whyItFits" string and the "translation" string MUST be in ${langName} (language code: ${language}). The Arabic field is always literal Arabic.`,
+    "4. NEVER cite Tirmidhi, Abu Dawud, Nasa'i, Ibn Majah, Musnad Ahmad, Muwatta, or any other collection. NEVER cite a scholar's quote.",
+    "5. Use the reference string exactly as written in the ALLOWED CITATIONS list (or an obvious equivalent like \"Quran 2:152\" instead of \"QS Al-Baqarah 2:152\").",
+    "",
+    "ALLOWED CITATIONS — you MUST pick from this list only. Any citation outside this list will be dropped by the server, even if the verse/hadith number is real. The server also verifies that the Arabic you submit matches the canonical Arabic of the cited entry; copy the canonical Arabic verbatim.",
+    renderCorpusForPrompt(),
     "",
     "TARGET FIELDS — map each recommendation to the app's data model:",
     `- "category" must be exactly one of: ${RECOMMENDATION_CATEGORIES.map((c) => `"${c}"`).join(", ")}.`,
@@ -353,25 +355,59 @@ export async function generateRecommendations(
   const items = Array.isArray(raw?.recommendations) ? raw.recommendations : [];
 
   const valid: TargetRecommendation[] = [];
+  const dropped: Array<{ reason: string; reference?: string; kind?: string }> = [];
   for (const item of items) {
     const parsed = targetRecommendationSchema.safeParse(item);
-    if (!parsed.success) continue;
-    // Defense in depth: drop anything whose source.kind isn't one of the
-    // three permitted kinds (the schema already enforces this, but we
-    // double-check explicitly per the task spec).
-    if (!RECOMMENDATION_SOURCE_KINDS.includes(parsed.data.source.kind)) continue;
-    // Reject references whose human-readable string doesn't match the
-    // expected citation shape for its kind. This catches model output that
-    // labels something as "bukhari" while citing e.g. Tirmidhi or a
-    // free-form quote.
-    if (!isReferenceFormatValid(parsed.data.source.kind, parsed.data.source.reference)) continue;
-    // Require non-empty Arabic text containing at least a few Arabic letters
-    // (basic Unicode block U+0600..U+06FF). This blocks empty / Latin-only
-    // citations that the schema can't catch.
-    if (!hasArabicText(parsed.data.source.arabic)) continue;
+    if (!parsed.success) {
+      dropped.push({ reason: "schema-invalid" });
+      continue;
+    }
+    const { kind, reference, arabic } = parsed.data.source;
+    if (!RECOMMENDATION_SOURCE_KINDS.includes(kind)) {
+      dropped.push({ reason: "disallowed-kind", kind, reference });
+      continue;
+    }
+    if (!isReferenceFormatValid(kind, reference)) {
+      dropped.push({ reason: "format-invalid", kind, reference });
+      continue;
+    }
+    if (!hasArabicText(arabic)) {
+      dropped.push({ reason: "missing-arabic", kind, reference });
+      continue;
+    }
+    // Defense-in-depth existence check before corpus lookup.
+    if (!isReferenceInRange(kind, reference)) {
+      dropped.push({ reason: "out-of-range", kind, reference });
+      continue;
+    }
+    // Fail-closed Arabic verification: a citation is accepted only if it
+    // exists in our curated corpus AND its Arabic, normalized, is a
+    // contiguous substring of the canonical text. References outside the
+    // corpus cannot be Arabic-verified and are therefore dropped — better
+    // to return fewer, fully-verified items than to surface a fabricated
+    // citation to the user.
+    const entry = lookupCorpusEntry(kind, reference);
+    if (!entry) {
+      dropped.push({ reason: "not-in-corpus", kind, reference });
+      continue;
+    }
+    if (!arabicMatchesEntry(entry, arabic)) {
+      dropped.push({ reason: "arabic-mismatch", kind, reference });
+      continue;
+    }
+    // Canonicalize the outgoing reference to the corpus' display string so
+    // any malformed surah name in the model output (e.g. wrong transliteration
+    // paired with a correct number) is replaced with our vetted form.
+    parsed.data.source.reference = entry.display;
     valid.push(parsed.data);
   }
 
+  if (dropped.length > 0) {
+    console.warn(
+      `[recommendations] dropped ${dropped.length}/${items.length} item(s) due to citation issues:`,
+      JSON.stringify(dropped),
+    );
+  }
   return valid;
 }
 
@@ -389,8 +425,9 @@ const QURAN_PATTERNS: RegExp[] = [
   /\bQS\b[^()\d]*\(?\s*\d{1,3}\s*[:.\s]\s*\d{1,3}\s*\)?/i,
   // "Quran 2:152" / "Qur'an 2:152" / "Al-Qur'an 2:152"
   /\b(?:al[-\s]?)?qur'?an\b[^()\d]*\(?\s*\d{1,3}\s*[:.\s]\s*\d{1,3}\s*\)?/i,
-  // "Surah Al-Baqarah, ayat 152" / "Surah Al-Baqarah ayat 152"
-  /\bsurah?\b[^()\d]*ayat\s*\d{1,3}/i,
+  // Note: name-only forms like "Surah Al-Baqarah ayat 152" are intentionally
+  // NOT accepted — corpus validation requires a numeric surah:ayah pair so
+  // we can verify against the canonical mushaf.
 ];
 
 const BUKHARI_PATTERNS: RegExp[] = [

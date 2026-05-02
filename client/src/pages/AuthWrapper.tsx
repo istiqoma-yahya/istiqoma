@@ -2,10 +2,11 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import Dashboard from "./Dashboard";
 import Landing from "./Landing";
+import OnboardingFlow from "./OnboardingFlow";
 import { BottomNavigation } from "@/components/BottomNavigation";
 
 export default function AuthWrapper() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -16,6 +17,9 @@ export default function AuthWrapper() {
   }
 
   if (isAuthenticated) {
+    if (user && !user.onboardingComplete) {
+      return <OnboardingFlow />;
+    }
     return (
       <>
         <Dashboard />

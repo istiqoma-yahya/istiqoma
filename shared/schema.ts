@@ -279,3 +279,48 @@ export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions
 
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
 export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema>;
+
+// ─── Onboarding ───────────────────────────────────────────────
+export const userOnboarding = pgTable("user_onboarding", {
+  userId: varchar("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  completed: boolean("completed").notNull().default(false),
+  completedAt: timestamp("completed_at"),
+  q1: text("q1"),
+  q2: text("q2"),
+  q3: text("q3").array().default([]),
+  q4: text("q4"),
+  q5: text("q5"),
+  identityKey: text("identity_key"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const Q1_VALUES = ["pemula", "naik-turun", "cukup-baik", "tingkatkan"] as const;
+export const Q2_VALUES = ["lupa", "males", "tidak-tahu", "sibuk"] as const;
+export const Q3_VALUES = [
+  "baca-quran",
+  "dzikir",
+  "sholat-fardhu",
+  "sholat-sunnah",
+  "puasa",
+  "hafalan-quran",
+  "birrul-walidayn",
+  "shodaqoh",
+  "tolabul-ilmi",
+] as const;
+export const Q4_VALUES = ["subuh", "ashar", "isya", "tidur"] as const;
+export const Q5_VALUES = ["dekat-allah", "bermanfaat", "berilmu", "istiqomah", "keluarga"] as const;
+
+export const insertUserOnboardingSchema = createInsertSchema(userOnboarding)
+  .omit({ userId: true, createdAt: true, updatedAt: true, completed: true, completedAt: true })
+  .extend({
+    q1: z.enum(Q1_VALUES),
+    q2: z.enum(Q2_VALUES),
+    q3: z.array(z.enum(Q3_VALUES)).min(1, "Pick at least one"),
+    q4: z.enum(Q4_VALUES),
+    q5: z.enum(Q5_VALUES),
+    identityKey: z.enum(Q5_VALUES),
+  });
+
+export type UserOnboarding = typeof userOnboarding.$inferSelect;
+export type InsertUserOnboarding = z.infer<typeof insertUserOnboardingSchema>;

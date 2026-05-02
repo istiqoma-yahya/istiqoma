@@ -587,5 +587,146 @@
     "continue": "Continue",
     "noStreak": "Start your streak today!",
     "day": "Day"
+  },
+  "onboarding": {
+    "intro": "Introduction",
+    "done": "Done",
+    "back": "Back",
+    "next": "Next",
+    "start": "Begin",
+    "startQuiz": "Start Quiz",
+    "showIdentity": "Reveal My Identity",
+    "startJourney": "Start My Journey",
+    "saveError": "Failed to save. Please try again.",
+    "quizCount": "Quiz {{current}} / {{total}}",
+    "splashTagline": "Istiqoma · Consistent in Goodness",
+    "bismillahMeaning": "In the name of Allah, the Most Gracious, the Most Merciful",
+    "s1": {
+      "eyebrow": "What is Istiqoma?",
+      "headline": "Your companion on<br>becoming <em>better</em>",
+      "subtext": "Istiqoma is an app that helps you record your daily good deeds — not as an obligation, but as a mirror of the soul.",
+      "features": {
+        "a": { "icon": "📿", "title": "Record Spontaneous Good Deeds", "desc": "No targets needed. Simply record any small kindness you do today." },
+        "b": { "icon": "🌙", "title": "End-of-Day Reflection", "desc": "Gently reminded in the evening to reflect on the day that has passed." },
+        "c": { "icon": "📖", "title": "See Your Journey", "desc": "Your record of deeds becomes the story of you growing as a Muslim." }
+      }
+    },
+    "s2": {
+      "eyebrow": "Why Istiqoma?",
+      "headline": "Benefits you<br>will <em>feel</em>",
+      "benefits": {
+        "a": { "icon": "🤲", "title": "A Calmer Heart", "desc": "Awareness of your deeds makes your heart more grateful" },
+        "b": { "icon": "🌱", "title": "A New Identity", "desc": "Slowly build yourself as a Muslim who is istiqomah" },
+        "c": { "icon": "✨", "title": "Meaningful Worship", "desc": "Every small deed feels meaningful and beautifully recorded" },
+        "d": { "icon": "📅", "title": "Consistency", "desc": "Helped to stay consistent without feeling burdened" }
+      },
+      "hadithText": "\"Verily, the most beloved deeds to Allah are the most consistent ones.\"",
+      "hadithSource": "— Bukhari & Muslim"
+    },
+    "q1": {
+      "question": "How is your worship right now?",
+      "hint": "Pick what most honestly describes you",
+      "options": {
+        "pemula": "Just starting to learn and want to do better",
+        "naik-turun": "Up and down, struggling to stay consistent",
+        "cukup-baik": "Already fairly regular, want more istiqomah",
+        "tingkatkan": "Want to raise the overall quality of my worship"
+      }
+    },
+    "q2": {
+      "question": "What most often holds you back from doing more good?",
+      "hint": "Be honest — there are no wrong answers",
+      "options": {
+        "lupa": "I often forget or miss the opportunity",
+        "males": "I know what to do, but feel lazy doing it",
+        "tidak-tahu": "I don't know what daily good deeds I could do",
+        "sibuk": "Busyness leaves me no time to reflect"
+      }
+    },
+    "q3": {
+      "question": "Which deeds do you want to focus on?",
+      "hint": "Pick as many as you like — at least 1",
+      "empty": "None selected yet",
+      "count": "{{count}} selected",
+      "options": {
+        "baca-quran": "Read Qur'an",
+        "dzikir": "Dzikir",
+        "sholat-fardhu": "Fardhu Prayer",
+        "sholat-sunnah": "Sunnah Prayer",
+        "puasa": "Fasting",
+        "hafalan-quran": "Memorise Qur'an",
+        "birrul-walidayn": "Birrul Walidayn",
+        "shodaqoh": "Charity",
+        "tolabul-ilmi": "Seeking Knowledge"
+      }
+    },
+    "q4": {
+      "question": "When is the best time to reflect on your day?",
+      "hint": "We'll send a reminder at this time",
+      "options": {
+        "subuh": "After Subuh — set the day with good intent",
+        "ashar": "After Ashar — a midday reflection",
+        "isya": "After Isya — close the day with gratitude",
+        "tidur": "Before sleep — muhasabah at night"
+      }
+    },
+    "q5": {
+      "question": "I want to be known as a Muslim who is…",
+      "hint": "This is the identity you'll build together with Istiqoma",
+      "options": {
+        "dekat-allah": { "label": "Close to Allah", "sublabel": "Worship feels light, the heart always connected" },
+        "bermanfaat": { "label": "Beneficial to others", "sublabel": "My presence brings real impact to those around me" },
+        "berilmu": { "label": "Knowledgeable and wise", "sublabel": "Always learning and practising the deen with excellence" },
+        "istiqomah": { "label": "Istiqomah and steadfast", "sublabel": "Consistent in good even when no one is watching" },
+        "keluarga": { "label": "An example in the family", "sublabel": "Being an imam, mother, or child who carries goodness" }
+      }
+    },
+    "result": {
+      "eyebrow": "Your identity has formed",
+      "note": "This identity isn't a label — it is <em>who you are becoming,</em> one good deed at a time."
+    },
+    "identities": {
+      "dekat-allah": {
+        "name": "A Muslim Close to Allah",
+        "desc": "You long for a sincere connection with Allah. Every deed you record in Istiqoma is a real step closer to Him — one kindness at a time.",
+        "tags": ["A Longing Servant", "A Connected Heart"]
+      },
+      "bermanfaat": {
+        "name": "A Beneficial Muslim",
+        "desc": "You believe the best of people are those most beneficial to others. Istiqoma will help you see how much goodness you've already spread.",
+        "tags": ["Bringer of Benefit", "A Caring Heart"]
+      },
+      "berilmu": {
+        "name": "A Knowledgeable Muslim",
+        "desc": "You understand that knowledge is light. Istiqoma will accompany you in recording every step of learning and practice — for knowledge without action is a tree without fruit.",
+        "tags": ["Seeker of Knowledge", "Action & Wisdom"]
+      },
+      "istiqomah": {
+        "name": "A Steadfast Muslim",
+        "desc": "Istiqomah isn't about perfection — it's about not stopping. With Istiqoma, you'll see how consistent you really are, even on the heaviest days.",
+        "tags": ["Steadfast", "Consistent Without End"]
+      },
+      "keluarga": {
+        "name": "A Family Role Model",
+        "desc": "The greatest goodness begins at home. Every deed you plant today is an inheritance for those you love most.",
+        "tags": ["Family Leader", "Legacy of Good"]
+      }
+    },
+    "identityFallback": {
+      "name": "A Growing Muslim",
+      "desc": "Your journey begins today. Every small step you take is proof that you are growing into the best version of yourself.",
+      "tags": ["Always Growing"]
+    },
+    "contextTags": {
+      "pemula": "First Steps",
+      "naik-turun": "Consistency Warrior",
+      "cukup-baik": "Always Improving",
+      "tingkatkan": "Seeker of Excellence"
+    },
+    "hint": {
+      "title": "Continue from onboarding",
+      "subtitle": "You picked these deeds during onboarding. Set targets to begin.",
+      "dismiss": "Dismiss"
+    }
   }
 }

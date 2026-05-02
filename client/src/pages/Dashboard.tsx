@@ -4,6 +4,7 @@ import { useDeeds } from "@/hooks/use-deeds";
 import { useTargetsWithProgress } from "@/hooks/use-targets";
 import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
+import { OnboardingHintCard } from "@/components/OnboardingHintCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { getTargetDisplayTitle } from "@/lib/targets";
@@ -132,6 +133,8 @@ export default function Dashboard() {
             <span>{t('dashboard.recordDeed')}</span>
           </button>
         </div>
+
+        <OnboardingHintCard />
 
         <StatsOverview deeds={sortedDeeds} />
 

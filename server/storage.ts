@@ -1,6 +1,6 @@
 import { db } from "./db";
 export { db };
-import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType } from "@shared/schema";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte, isNull } from "drizzle-orm";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -68,6 +68,8 @@ export interface IStorage {
   createCustomDzikirType(userId: string, label: string): Promise<CustomDzikirType>;
   updateCustomDzikirType(id: number, userId: string, label: string): Promise<CustomDzikirType>;
   deleteCustomDzikirType(id: number, userId: string): Promise<void>;
+  getUserOnboarding(userId: string): Promise<UserOnboarding | null>;
+  upsertUserOnboarding(userId: string, data: InsertUserOnboarding): Promise<UserOnboarding>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -835,6 +837,49 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(customDzikirTypes.id, id), eq(customDzikirTypes.userId, userId)));
   }
 
+  async getUserOnboarding(userId: string): Promise<UserOnboarding | null> {
+    const [row] = await db
+      .select()
+      .from(userOnboarding)
+      .where(eq(userOnboarding.userId, userId))
+      .limit(1);
+    return row || null;
+  }
+
+  async upsertUserOnboarding(userId: string, data: InsertUserOnboarding): Promise<UserOnboarding> {
+    const now = new Date();
+    const values = {
+      userId,
+      q1: data.q1,
+      q2: data.q2,
+      q3: data.q3,
+      q4: data.q4,
+      q5: data.q5,
+      identityKey: data.identityKey,
+      completed: true,
+      completedAt: now,
+      updatedAt: now,
+    };
+    const [row] = await db
+      .insert(userOnboarding)
+      .values(values)
+      .onConflictDoUpdate({
+        target: userOnboarding.userId,
+        set: {
+          q1: values.q1,
+          q2: values.q2,
+          q3: values.q3,
+          q4: values.q4,
+          q5: values.q5,
+          identityKey: values.identityKey,
+          completed: true,
+          completedAt: now,
+          updatedAt: now,
+        },
+      })
+      .returning();
+    return row;
+  }
 }
 
 export const storage = new DatabaseStorage();

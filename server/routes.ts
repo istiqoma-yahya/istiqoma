@@ -5,7 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
-import { deeds, insertCustomDzikirTypeSchema } from "@shared/schema";
+import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema } from "@shared/schema";
 import { calculatePoints } from "./calculatePoints";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
 
@@ -750,6 +750,51 @@ export async function registerRoutes(
       if (isNaN(id)) return res.status(400).json({ message: "Invalid id" });
       await storage.deleteCustomDzikirType(id, userId);
       res.status(204).send();
+    } catch (err) {
+      const status = getErrorStatus(err) ?? 400;
+      res.status(status).json({ message: getErrorMessage(err) });
+    }
+  });
+
+  // Onboarding routes
+  app.get(api.onboarding.get.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const row = await storage.getUserOnboarding(userId);
+      res.json(row);
+    } catch (err) {
+      res.status(500).json({ message: getErrorMessage(err) });
+    }
+  });
+
+  app.post(api.onboarding.complete.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      // Identity key is derived server-side from validated answers; any
+      // client-supplied identityKey is ignored to keep the stored profile
+      // consistent with the answers.
+      const parsed = insertUserOnboardingSchema
+        .omit({ identityKey: true })
+        .parse(req.body);
+      const data = { ...parsed, identityKey: parsed.q5 };
+      const row = await storage.upsertUserOnboarding(userId, data);
+
+      // Map Q4 → reminder time and update push subscription if present
+      const Q4_TO_TIME: Record<string, string> = {
+        subuh: "05:30",
+        ashar: "16:00",
+        isya: "20:00",
+        tidur: "22:00",
+      };
+      const reminderTime = Q4_TO_TIME[data.q4];
+      if (reminderTime) {
+        const existing = await storage.getPushSubscription(userId);
+        if (existing) {
+          await storage.updatePushSubscriptionSettings(userId, { reminderTime });
+        }
+      }
+
+      res.json(row);
     } catch (err) {
       const status = getErrorStatus(err) ?? 400;
       res.status(status).json({ message: getErrorMessage(err) });

@@ -588,5 +588,146 @@
     "continue": "Lanjutkan",
     "noStreak": "Mulai streakmu hari ini!",
     "day": "Hari"
+  },
+  "onboarding": {
+    "intro": "Pengenalan",
+    "done": "Selesai",
+    "back": "Kembali",
+    "next": "Lanjut",
+    "start": "Mulai",
+    "startQuiz": "Mulai Quiz",
+    "showIdentity": "Lihat Identitasku",
+    "startJourney": "Mulai Perjalananku",
+    "saveError": "Gagal menyimpan. Coba lagi.",
+    "quizCount": "Quiz {{current}} / {{total}}",
+    "splashTagline": "Istiqoma · Konsisten dalam Kebaikan",
+    "bismillahMeaning": "Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang",
+    "s1": {
+      "eyebrow": "Apa itu Istiqoma?",
+      "headline": "Temanmu dalam<br>perjalanan menjadi <em>lebih baik</em>",
+      "subtext": "Istiqoma adalah aplikasi yang membantu kamu mencatat amal kebaikan harian — bukan sebagai kewajiban, tapi sebagai cermin jiwa.",
+      "features": {
+        "a": { "icon": "📿", "title": "Catat Amal Baik Spontan", "desc": "Tidak perlu target. Cukup catat kebaikan sekecil apapun yang kamu lakukan hari ini." },
+        "b": { "icon": "🌙", "title": "Refleksi Penghujung Hari", "desc": "Diingatkan dengan lembut di malam hari untuk merefleksikan hari yang telah berlalu." },
+        "c": { "icon": "📖", "title": "Lihat Perjalananmu", "desc": "Catatan amalmu menjadi kisah hidupmu sebagai seorang muslim yang bertumbuh." }
+      }
+    },
+    "s2": {
+      "eyebrow": "Mengapa Istiqoma?",
+      "headline": "Manfaat yang<br>kamu akan <em>rasakan</em>",
+      "benefits": {
+        "a": { "icon": "🤲", "title": "Hati Lebih Tenang", "desc": "Kesadaran atas amal membuat hati lebih bersyukur" },
+        "b": { "icon": "🌱", "title": "Identitas Baru", "desc": "Perlahan membangun diri sebagai muslim yang istiqomah" },
+        "c": { "icon": "✨", "title": "Ibadah Bermakna", "desc": "Setiap amal kecil terasa berarti dan dicatat dengan indah" },
+        "d": { "icon": "📅", "title": "Konsistensi", "desc": "Dibantu untuk tetap konsisten tanpa merasa terbebani" }
+      },
+      "hadithText": "\"Sesungguhnya amalan yang paling dicintai Allah adalah yang paling konsisten dilakukan.\"",
+      "hadithSource": "— HR. Bukhari & Muslim"
+    },
+    "q1": {
+      "question": "Bagaimana kondisi ibadahmu saat ini?",
+      "hint": "Pilih yang paling jujur menggambarkan dirimu",
+      "options": {
+        "pemula": "Baru mulai belajar dan ingin lebih baik",
+        "naik-turun": "Naik turun, susah konsisten",
+        "cukup-baik": "Sudah cukup rutin, ingin lebih istiqomah",
+        "tingkatkan": "Ingin meningkatkan kualitas ibadah secara keseluruhan"
+      }
+    },
+    "q2": {
+      "question": "Apa yang paling sering menghalangimu untuk berbuat baik lebih banyak?",
+      "hint": "Jujur ya, tidak ada jawaban yang salah",
+      "options": {
+        "lupa": "Sering lupa atau tidak sadar ada kesempatan",
+        "males": "Tahu mau ngapain, tapi malas melakukannya",
+        "tidak-tahu": "Tidak tahu amal apa yang bisa dilakukan sehari-hari",
+        "sibuk": "Kesibukan membuat tidak sempat merefleksikan diri"
+      }
+    },
+    "q3": {
+      "question": "Amal apa yang ingin kamu fokuskan?",
+      "hint": "Pilih sebanyak yang kamu mau — minimal 1",
+      "empty": "Belum ada yang dipilih",
+      "count": "{{count}} amal dipilih",
+      "options": {
+        "baca-quran": "Baca Qur'an",
+        "dzikir": "Dzikir",
+        "sholat-fardhu": "Sholat Fardhu",
+        "sholat-sunnah": "Sholat Sunnah",
+        "puasa": "Puasa",
+        "hafalan-quran": "Hafalan Qur'an",
+        "birrul-walidayn": "Birrul Walidayn",
+        "shodaqoh": "Shodaqoh",
+        "tolabul-ilmi": "Tolabul Ilmi"
+      }
+    },
+    "q4": {
+      "question": "Kapan waktu terbaik untuk merefleksikan harimu?",
+      "hint": "Kami akan mengirim pengingat di waktu ini",
+      "options": {
+        "subuh": "Setelah Subuh — niatkan hari dengan baik",
+        "ashar": "Setelah Ashar — refleksi tengah hari",
+        "isya": "Setelah Isya — tutup hari dengan syukur",
+        "tidur": "Sebelum tidur — muhasabah malam hari"
+      }
+    },
+    "q5": {
+      "question": "Aku ingin dikenal sebagai muslim yang…",
+      "hint": "Inilah identitas yang akan kamu bangun bersama Istiqoma",
+      "options": {
+        "dekat-allah": { "label": "Dekat dengan Allah", "sublabel": "Ibadah terasa ringan, hati selalu terhubung" },
+        "bermanfaat": { "label": "Bermanfaat bagi sesama", "sublabel": "Kehadiranku memberi dampak nyata bagi orang di sekitar" },
+        "berilmu": { "label": "Berilmu dan bijaksana", "sublabel": "Terus belajar dan mengamalkan ilmu agama dengan baik" },
+        "istiqomah": { "label": "Istiqomah dan teguh pendirian", "sublabel": "Konsisten dalam kebaikan meski tidak ada yang melihat" },
+        "keluarga": { "label": "Teladan dalam keluarga", "sublabel": "Menjadi imam, ibu, atau anak yang membawa kebaikan" }
+      }
+    },
+    "result": {
+      "eyebrow": "Identitasmu telah terbentuk",
+      "note": "Identitas ini bukan label — ini adalah <em>siapa dirimu yang sedang kamu bangun,</em> satu amal baik dalam satu hari."
+    },
+    "identities": {
+      "dekat-allah": {
+        "name": "Muslim yang Dekat dengan Allah",
+        "desc": "Kamu merindukan hubungan yang tulus dengan Allah. Setiap amal yang kamu catat di Istiqoma adalah langkah nyata untuk mendekatkan diri kepada-Nya — satu kebaikan dalam satu waktu.",
+        "tags": ["Hamba yang Rindu", "Hati yang Terhubung"]
+      },
+      "bermanfaat": {
+        "name": "Muslim yang Bermanfaat",
+        "desc": "Kamu percaya bahwa sebaik-baik manusia adalah yang paling bermanfaat. Istiqoma akan membantumu melihat betapa banyak kebaikan yang sudah kamu tebarkan kepada orang di sekitarmu.",
+        "tags": ["Pemberi Manfaat", "Hati yang Peduli"]
+      },
+      "berilmu": {
+        "name": "Muslim yang Berilmu",
+        "desc": "Kamu memahami bahwa ilmu adalah cahaya. Istiqoma akan menemanimu mencatat setiap langkah perjalanan belajar dan amalmu, karena ilmu tanpa amal bagaikan pohon tanpa buah.",
+        "tags": ["Pencari Ilmu", "Amal & Hikmah"]
+      },
+      "istiqomah": {
+        "name": "Muslim yang Istiqomah",
+        "desc": "Istiqomah bukan tentang sempurna — tapi tentang tidak berhenti. Dengan Istiqoma, kamu akan melihat sendiri betapa konsistennya dirimu, bahkan di hari-hari yang terasa berat.",
+        "tags": ["Teguh Pendirian", "Konsisten Tanpa Henti"]
+      },
+      "keluarga": {
+        "name": "Teladan dalam Keluarga",
+        "desc": "Kebaikan terbesar dimulai dari rumah. Setiap amal yang kamu tanam hari ini adalah warisan yang akan dirasakan oleh orang-orang yang paling kamu cintai.",
+        "tags": ["Pemimpin Keluarga", "Warisan Kebaikan"]
+      }
+    },
+    "identityFallback": {
+      "name": "Muslim yang Bertumbuh",
+      "desc": "Perjalananmu dimulai hari ini. Setiap langkah kecil yang kamu ambil adalah bukti bahwa kamu sedang bertumbuh menjadi versi terbaik dirimu.",
+      "tags": ["Terus Bertumbuh"]
+    },
+    "contextTags": {
+      "pemula": "Langkah Pertama",
+      "naik-turun": "Pejuang Konsistensi",
+      "cukup-baik": "Terus Meningkat",
+      "tingkatkan": "Pencari Keutamaan"
+    },
+    "hint": {
+      "title": "Lanjutkan dari onboarding",
+      "subtitle": "Kamu memilih amal-amal ini saat onboarding. Buat target untuk memulai.",
+      "dismiss": "Tutup"
+    }
   }
 }

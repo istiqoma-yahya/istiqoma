@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -369,7 +369,28 @@ export const api = {
           firstName: z.string().nullable(),
           lastName: z.string().nullable(),
           profileImageUrl: z.string().nullable(),
+          onboardingComplete: z.boolean(),
         }),
+        401: errorSchemas.unauthorized,
+      },
+    },
+  },
+  onboarding: {
+    get: {
+      method: "GET" as const,
+      path: "/api/onboarding",
+      responses: {
+        200: z.custom<typeof userOnboarding.$inferSelect | null>(),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    complete: {
+      method: "POST" as const,
+      path: "/api/onboarding/complete",
+      input: insertUserOnboardingSchema,
+      responses: {
+        200: z.custom<typeof userOnboarding.$inferSelect>(),
+        400: errorSchemas.validation,
         401: errorSchemas.unauthorized,
       },
     },

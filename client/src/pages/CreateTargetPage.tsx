@@ -1,4 +1,5 @@
-import { useLocation } from "wouter";
+import { useMemo } from "react";
+import { useLocation, useSearch } from "wouter";
 import { useCreateTarget } from "@/hooks/use-targets";
 import { useTranslation } from "react-i18next";
 import { TargetForm } from "@/components/TargetForm";
@@ -10,8 +11,26 @@ import type { InsertTarget } from "@shared/schema";
 export default function CreateTargetPage() {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
+  const search = useSearch();
   const { toast } = useToast();
   const createTarget = useCreateTarget();
+
+  const prefilledCategory = useMemo(() => {
+    const params = new URLSearchParams(search);
+    return params.get("category") || undefined;
+  }, [search]);
+
+  const defaultValues = prefilledCategory
+    ? ({
+        name: "",
+        category: prefilledCategory,
+        targetValue: 10,
+        period: "daily" as const,
+        targetType: "achievement" as const,
+        recurrence: "recurring" as const,
+        notificationTimes: [],
+      } as Partial<InsertTarget>)
+    : undefined;
 
   const handleSubmit = async (data: InsertTarget) => {
     try {
@@ -60,6 +79,7 @@ export default function CreateTargetPage() {
 
         <TargetForm
           mode="create"
+          defaultValues={defaultValues}
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           isSubmitting={createTarget.isPending}

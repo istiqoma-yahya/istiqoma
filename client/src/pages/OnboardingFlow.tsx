@@ -463,7 +463,7 @@ export default function OnboardingFlow() {
                     style={{
                       marginTop: "0.8rem",
                       fontSize: "0.75rem",
-                      color: "#ff8a80",
+                      color: "hsl(var(--destructive))",
                     }}
                     data-testid="text-onboarding-error"
                   >

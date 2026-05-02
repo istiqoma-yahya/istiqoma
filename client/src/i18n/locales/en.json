@@ -661,6 +661,7 @@
     "errorTitle": "Couldn't load suggestions",
     "errorDesc": "Please try again in a moment.",
     "retry": "Try again",
+    "refresh": "Refresh",
     "empty": "No suggestions are available right now.",
     "useThisTarget": "Use this target",
     "backToList": "Back to suggestions",

@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { createHash } from "crypto";
 import {
   Q3_TO_CATEGORY,
   RECOMMENDATION_CATEGORIES,
@@ -40,6 +41,93 @@ function sweepRateLimitMap(now: number): void {
 export interface RateLimitResult {
   allowed: boolean;
   retryAfterSeconds?: number;
+}
+
+// In-memory recommendation cache. Keyed by (userId, language, onboarding
+// fingerprint) so repeat opens within the TTL skip the Claude call entirely.
+// The fingerprint is derived from the onboarding answers, so any edit to
+// onboarding produces a new key and therefore a fresh fetch — no manual
+// invalidation step is required when a user updates their answers.
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+const CACHE_SWEEP_MS = 30 * 60 * 1000;
+
+interface CacheEntry {
+  recommendations: TargetRecommendation[];
+  expiresAt: number;
+}
+
+const recommendationCache = new Map<string, CacheEntry>();
+let lastCacheSweep = Date.now();
+
+function sweepCache(now: number): void {
+  if (now - lastCacheSweep < CACHE_SWEEP_MS) return;
+  lastCacheSweep = now;
+  for (const [key, entry] of recommendationCache) {
+    if (entry.expiresAt <= now) recommendationCache.delete(key);
+  }
+}
+
+export function fingerprintOnboarding(onboarding: UserOnboarding | null): string {
+  // Only the fields actually fed into the prompt contribute to the hash.
+  // We sort q3 so an answer-order change doesn't bust the cache.
+  const payload = onboarding
+    ? {
+        q1: onboarding.q1 ?? null,
+        q2: onboarding.q2 ?? null,
+        q3: [...(onboarding.q3 ?? [])].sort(),
+        q4: onboarding.q4 ?? null,
+        q5: onboarding.q5 ?? null,
+      }
+    : { empty: true };
+  return createHash("sha256")
+    .update(JSON.stringify(payload))
+    .digest("hex")
+    .slice(0, 16);
+}
+
+function cacheKey(
+  userId: string,
+  language: RecommendationLanguage,
+  fingerprint: string,
+): string {
+  return `${userId}|${language}|${fingerprint}`;
+}
+
+export function getCachedRecommendations(
+  userId: string,
+  language: RecommendationLanguage,
+  onboarding: UserOnboarding | null,
+): TargetRecommendation[] | null {
+  const now = Date.now();
+  sweepCache(now);
+  const key = cacheKey(userId, language, fingerprintOnboarding(onboarding));
+  const entry = recommendationCache.get(key);
+  if (!entry) return null;
+  if (entry.expiresAt <= now) {
+    recommendationCache.delete(key);
+    return null;
+  }
+  return entry.recommendations;
+}
+
+export function setCachedRecommendations(
+  userId: string,
+  language: RecommendationLanguage,
+  onboarding: UserOnboarding | null,
+  recommendations: TargetRecommendation[],
+): void {
+  const key = cacheKey(userId, language, fingerprintOnboarding(onboarding));
+  recommendationCache.set(key, {
+    recommendations,
+    expiresAt: Date.now() + CACHE_TTL_MS,
+  });
+}
+
+export function invalidateUserRecommendationCache(userId: string): void {
+  const prefix = `${userId}|`;
+  for (const key of recommendationCache.keys()) {
+    if (key.startsWith(prefix)) recommendationCache.delete(key);
+  }
 }
 
 export function checkRateLimit(userId: string): RateLimitResult {

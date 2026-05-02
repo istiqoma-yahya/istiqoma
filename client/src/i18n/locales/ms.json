@@ -662,6 +662,7 @@
     "errorTitle": "Gagal memuatkan cadangan",
     "errorDesc": "Sila cuba lagi sebentar.",
     "retry": "Cuba lagi",
+    "refresh": "Muat semula",
     "empty": "Tiada cadangan tersedia buat masa ini.",
     "useThisTarget": "Gunakan sasaran ini",
     "backToList": "Kembali ke senarai",

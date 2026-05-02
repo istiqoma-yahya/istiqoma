@@ -509,10 +509,12 @@ export type TargetRecommendation = z.infer<typeof targetRecommendationSchema>;
 
 export const targetRecommendationsRequestSchema = z.object({
   language: z.enum(RECOMMENDATION_LANGUAGES).default("id"),
+  forceRefresh: z.boolean().optional().default(false),
 });
 
 export const targetRecommendationsResponseSchema = z.object({
   recommendations: z.array(targetRecommendationSchema),
+  cached: z.boolean().optional(),
 });
 
 export type TargetRecommendationsRequest = z.infer<typeof targetRecommendationsRequestSchema>;

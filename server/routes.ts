@@ -6,7 +6,13 @@ import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
 import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS } from "@shared/schema";
-import { checkRateLimit, generateRecommendations } from "./recommendations";
+import {
+  checkRateLimit,
+  generateRecommendations,
+  getCachedRecommendations,
+  setCachedRecommendations,
+  invalidateUserRecommendationCache,
+} from "./recommendations";
 import { calculatePoints } from "./calculatePoints";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
 import { format } from "date-fns";
@@ -485,7 +491,25 @@ export async function registerRoutes(
       const rawLanguage =
         (typeof req.query?.language === "string" ? req.query.language : undefined) ??
         req.body?.language;
-      const { language } = api.targets.recommendations.input.parse({ language: rawLanguage });
+      const rawForceRefresh =
+        (typeof req.query?.forceRefresh === "string"
+          ? req.query.forceRefresh === "true"
+          : undefined) ?? req.body?.forceRefresh;
+      const { language, forceRefresh } = api.targets.recommendations.input.parse({
+        language: rawLanguage,
+        forceRefresh: rawForceRefresh,
+      });
+
+      const onboarding = await storage.getUserOnboarding(userId);
+
+      // Cache hits skip rate-limiting entirely — they don't burn credits or
+      // call Claude, so there's no abuse vector to throttle.
+      if (!forceRefresh) {
+        const cached = getCachedRecommendations(userId, language, onboarding);
+        if (cached && cached.length > 0) {
+          return res.json({ recommendations: cached, cached: true });
+        }
+      }
 
       const limit = checkRateLimit(userId);
       if (!limit.allowed) {
@@ -494,8 +518,6 @@ export async function registerRoutes(
           message: "Too many recommendation requests. Please try again later.",
         });
       }
-
-      const onboarding = await storage.getUserOnboarding(userId);
 
       let recommendations;
       try {
@@ -513,7 +535,9 @@ export async function registerRoutes(
         });
       }
 
-      res.json({ recommendations });
+      setCachedRecommendations(userId, language, onboarding, recommendations);
+
+      res.json({ recommendations, cached: false });
     } catch (err) {
       const status = getErrorStatus(err) ?? 400;
       res.status(status).json({ message: getErrorMessage(err) });
@@ -999,6 +1023,12 @@ export async function registerRoutes(
         .parse(req.body);
       const data = { ...parsed, identityKey: parsed.q5 };
       const row = await storage.upsertUserOnboarding(userId, data);
+
+      // Onboarding answers are part of the recommendation cache key, so an
+      // edit could leave a stale entry around for the same fingerprint if
+      // the user happened to flip back and forth. Drop everything for this
+      // user so the next open recomputes against the new answers.
+      invalidateUserRecommendationCache(userId);
 
       // Map Q4 → reminder time and update push subscription if present.
       // Mapping is shared with the client so the Settings edit page can

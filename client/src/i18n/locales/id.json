@@ -662,6 +662,7 @@
     "errorTitle": "Gagal memuat saran",
     "errorDesc": "Coba lagi sebentar.",
     "retry": "Coba lagi",
+    "refresh": "Segarkan",
     "empty": "Belum ada saran tersedia.",
     "useThisTarget": "Gunakan target ini",
     "backToList": "Kembali ke daftar",

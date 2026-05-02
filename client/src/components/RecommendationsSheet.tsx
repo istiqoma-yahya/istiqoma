@@ -32,20 +32,20 @@ export function RecommendationsSheet({ open, onOpenChange }: RecommendationsShee
 
   const language = (["id", "en", "ms"].includes(i18n.language) ? i18n.language : "id") as "id" | "en" | "ms";
 
-  const mutation = useMutation<TargetRecommendationsResponse, Error, void>({
-    mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/targets/recommendations", { language });
+  const mutation = useMutation<TargetRecommendationsResponse, Error, boolean | void>({
+    mutationFn: async (forceRefresh) => {
+      const res = await apiRequest("POST", "/api/targets/recommendations", {
+        language,
+        forceRefresh: forceRefresh === true,
+      });
       return (await res.json()) as TargetRecommendationsResponse;
     },
   });
 
-  // Fire a fresh recommendation request EVERY time the sheet opens. The task
-  // explicitly forbids result caching: each open should hit Claude again so
-  // the user sees genuinely new suggestions. We reset the previous mutation
-  // state on close so the next open shows the loading skeleton instead of
-  // briefly flashing stale data, and we trigger the request unconditionally
-  // when `open` flips to true (avoiding the Radix-onOpenChange-doesn't-fire-
-  // on-programmatic-open footgun).
+  // Fire a recommendation request every time the sheet opens. The server
+  // now caches results per (user, language, onboarding fingerprint) for a
+  // few hours, so repeat opens return instantly without burning credits.
+  // The user can force a fresh fetch via the "Refresh" button below.
   useEffect(() => {
     if (open) {
       if (!mutation.isPending) mutation.mutate();
@@ -187,10 +187,23 @@ export function RecommendationsSheet({ open, onOpenChange }: RecommendationsShee
         ) : (
           <>
             <SheetHeader className="text-left flex-shrink-0">
-              <SheetTitle className="flex items-center gap-2" data-testid="text-recommendations-title">
-                <Sparkles className="w-5 h-5 text-emerald-500" />
-                {t("recommendations.sheetTitle")}
-              </SheetTitle>
+              <div className="flex items-start justify-between gap-2">
+                <SheetTitle className="flex items-center gap-2" data-testid="text-recommendations-title">
+                  <Sparkles className="w-5 h-5 text-emerald-500" />
+                  {t("recommendations.sheetTitle")}
+                </SheetTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="-mt-1 -mr-2 text-xs"
+                  onClick={() => mutation.mutate(true)}
+                  disabled={mutation.isPending}
+                  data-testid="button-recommendations-refresh"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 mr-1 ${mutation.isPending ? "animate-spin" : ""}`} />
+                  {t("recommendations.refresh")}
+                </Button>
+              </div>
               <SheetDescription className="text-xs">
                 {t("recommendations.disclaimer")}
               </SheetDescription>

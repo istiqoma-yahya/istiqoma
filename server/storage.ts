@@ -74,6 +74,8 @@ export interface IStorage {
   getPointsBalance(userId: string): Promise<{ earned: number; spent: number; available: number }>;
   getFrozenDates(userId: string): Promise<Set<string>>;
   consumeFreezerForDate(userId: string, dateStr: string): Promise<boolean>;
+  getStreakFloor(userId: string): Promise<string | null>;
+  setStreakFloor(userId: string, dateStr: string): Promise<void>;
   purchaseStreakFreezers(userId: string, packSize: StreakFreezerPackSize): Promise<{
     freezer: { owned: number; used: number; available: number };
     points: { earned: number; spent: number; available: number };

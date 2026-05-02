@@ -130,6 +130,11 @@ function TargetCard({
   const isCompleted = isOneTime ? oneTimeStatus === "completed" : percentComplete >= 100;
   const canUpdate = isOneTime ? oneTimeStatus === "active" : true;
 
+  const intentionParts = [target.intentionWhen, target.intentionWhere]
+    .map((v) => (v ?? "").trim())
+    .filter((v) => v.length > 0);
+  const intentionLine = intentionParts.join(" · ");
+
   return (
     <Card className="p-4" data-testid={`card-target-${target.id}`}>
       <div className="space-y-3">
@@ -163,6 +168,16 @@ function TargetCard({
         <p className="text-sm text-muted-foreground" data-testid={`text-target-category-${target.id}`}>
           {t("targets.categoryLabel")} {getTargetCategoryLine(target, t, customDzikirTypes)}
         </p>
+
+        {intentionLine && (
+          <p
+            className="text-xs text-muted-foreground truncate"
+            title={intentionLine}
+            data-testid={`text-target-intention-${target.id}`}
+          >
+            {intentionLine}
+          </p>
+        )}
 
         <div className="flex items-center gap-2">
           <Progress

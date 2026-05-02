@@ -39,16 +39,19 @@ export function RecommendationsSheet({ open, onOpenChange }: RecommendationsShee
     },
   });
 
-  // Fire the recommendation request whenever the sheet opens with no data yet.
-  // Using useEffect (instead of relying on Radix's onOpenChange callback)
-  // ensures the mutation fires even when the parent opens the sheet
-  // programmatically via setOpen(true).
+  // Fire a fresh recommendation request EVERY time the sheet opens. The task
+  // explicitly forbids result caching: each open should hit Claude again so
+  // the user sees genuinely new suggestions. We reset the previous mutation
+  // state on close so the next open shows the loading skeleton instead of
+  // briefly flashing stale data, and we trigger the request unconditionally
+  // when `open` flips to true (avoiding the Radix-onOpenChange-doesn't-fire-
+  // on-programmatic-open footgun).
   useEffect(() => {
-    if (open && !mutation.data && !mutation.isPending && !mutation.isError) {
-      mutation.mutate();
-    }
-    if (!open) {
+    if (open) {
+      if (!mutation.isPending) mutation.mutate();
+    } else {
       setSelected(null);
+      mutation.reset();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);

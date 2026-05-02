@@ -48,7 +48,9 @@ export function TargetForm({
   const { data: customDzikirTypes = [] } = useCustomDzikirTypes();
   const [showCreateCategoryDialog, setShowCreateCategoryDialog] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
-  const [targetValueInput, setTargetValueInput] = useState<string>("10");
+  const [targetValueInput, setTargetValueInput] = useState<string>(
+    String(editingTarget?.targetValue ?? defaultValues?.targetValue ?? 10),
+  );
 
   const form = useForm<InsertTarget>({
     resolver: zodResolver(insertTargetSchema),

@@ -66,6 +66,7 @@ import {
   X,
   Check,
   RotateCcw,
+  Sparkles,
 } from "lucide-react";
 import {
   format,
@@ -1348,6 +1349,8 @@ function TrendChart({
   );
 }
 
+const INTENTION_NUDGE_STORAGE_PREFIX = "targets:intentionNudgeDismissed:";
+
 function IntentionCard({
   targetId,
   initialWhen,
@@ -1359,9 +1362,39 @@ function IntentionCard({
 }) {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [whenValue, setWhenValue] = useState(initialWhen);
   const [whereValue, setWhereValue] = useState(initialWhere);
   const [isSaving, setIsSaving] = useState(false);
+
+  const cardRef = useRef<HTMLDivElement>(null);
+  const whenInputRef = useRef<HTMLInputElement>(null);
+
+  // Capture once on mount: did this target start out with both fields empty?
+  // Using a ref ensures the nudge does not flicker back after the user fills
+  // a field (the `initial*` props refresh from the query after save).
+  const startedEmptyRef = useRef(!initialWhen && !initialWhere);
+
+  const nudgeStorageKey = user?.id
+    ? `${INTENTION_NUDGE_STORAGE_PREFIX}${user.id}`
+    : null;
+
+  const [nudgeDismissed, setNudgeDismissed] = useState<boolean>(() => {
+    if (typeof window === "undefined" || !nudgeStorageKey) return true;
+    return window.localStorage.getItem(nudgeStorageKey) === "1";
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !nudgeStorageKey) return;
+    setNudgeDismissed(window.localStorage.getItem(nudgeStorageKey) === "1");
+  }, [nudgeStorageKey]);
+
+  const dismissNudge = useCallback(() => {
+    setNudgeDismissed(true);
+    if (typeof window !== "undefined" && nudgeStorageKey) {
+      window.localStorage.setItem(nudgeStorageKey, "1");
+    }
+  }, [nudgeStorageKey]);
 
   useEffect(() => {
     setWhenValue(initialWhen);
@@ -1370,6 +1403,15 @@ function IntentionCard({
 
   const hasChanges = whenValue !== initialWhen || whereValue !== initialWhere;
   const isEmpty = !whenValue.trim() && !whereValue.trim();
+
+  const showNudge = startedEmptyRef.current && !nudgeDismissed;
+
+  const focusWhenInput = useCallback(() => {
+    cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => {
+      whenInputRef.current?.focus();
+    }, 250);
+  }, []);
 
   const saveChanges = async () => {
     setIsSaving(true);
@@ -1380,6 +1422,9 @@ function IntentionCard({
       });
       await queryClient.invalidateQueries({ queryKey: [`/api/targets/${targetId}/detail`] });
       toast({ title: t("targets.targetUpdated"), description: t("targets.targetUpdatedDesc") });
+      if (whenValue.trim() || whereValue.trim()) {
+        dismissNudge();
+      }
     } catch {
       toast({ title: t("common.error"), variant: "destructive" });
     } finally {
@@ -1388,7 +1433,51 @@ function IntentionCard({
   };
 
   return (
-    <Card className="p-4" data-testid="card-intention">
+    <Card ref={cardRef} className="p-4" data-testid="card-intention">
+      {showNudge && (
+        <div
+          className="mb-3 p-3 rounded-md border border-emerald-500/30 bg-emerald-500/5 flex items-start gap-3"
+          data-testid="banner-intention-nudge"
+        >
+          <div className="w-8 h-8 rounded-md bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="w-4 h-4 text-emerald-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground mb-1" data-testid="text-intention-nudge-title">
+              {t("targets.intentionNudgeTitle")}
+            </p>
+            <p className="text-xs text-muted-foreground mb-2" data-testid="text-intention-nudge-body">
+              {t("targets.intentionNudgeBody")}
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                onClick={focusWhenInput}
+                data-testid="button-intention-nudge-cta"
+              >
+                {t("targets.intentionNudgeCta")}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={dismissNudge}
+                data-testid="button-intention-nudge-gotit"
+              >
+                {t("targets.intentionNudgeGotIt")}
+              </Button>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={dismissNudge}
+            className="p-1 -m-1 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            data-testid="button-intention-nudge-close"
+            aria-label={t("targets.intentionNudgeDismiss")}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
       <div className="flex items-center gap-2 mb-2">
         <MapPin className="w-4 h-4 text-muted-foreground" />
         <h3 className="text-sm font-semibold text-foreground">{t("targets.intentionCardTitle")}</h3>
@@ -1403,6 +1492,7 @@ function IntentionCard({
           </Label>
           <Input
             id={`intention-when-${targetId}`}
+            ref={whenInputRef}
             value={whenValue}
             onChange={(e) => setWhenValue(e.target.value)}
             placeholder={t("targets.intentionWhenPlaceholder")}

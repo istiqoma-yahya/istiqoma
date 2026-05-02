@@ -5,7 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
-import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema } from "@shared/schema";
+import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, STREAK_FREEZER_PACKS } from "@shared/schema";
 import { calculatePoints } from "./calculatePoints";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
 
@@ -654,40 +654,84 @@ export async function registerRoutes(
         .orderBy(sql`DATE(${deeds.createdAt}) DESC`);
 
       const deedDates = new Set(
-        distinctDatesResult.map((r) => r.date)
+        distinctDatesResult.map((r) => r.date),
       );
 
+      // Mutable copy of frozen dates so we can record any new freezes we
+      // make during this single walk and reflect them in weekDays/frozenDays
+      // without re-querying.
+      const frozenDates = await storage.getFrozenDates(userId);
+
       const todayStr = todayUTC.toISOString().split("T")[0];
+      const SAFETY_MAX_DAYS = 365 * 10;
+
+      // ─── No-retroactive-repair migration ─────────────────────
+      // The first time we ever read this user's streak, persist a "floor"
+      // at the most recent natural break in their deed history (without
+      // touching freezers). After this, buying freezers can ONLY save
+      // future days — it can never resurrect a streak that was already
+      // broken before the freezer existed. Users with a perfect record
+      // get no floor (null) and can freeze freely.
+      let floor = await storage.getStreakFloor(userId);
+      if (floor === null) {
+        let mDate = new Date(todayUTC);
+        let mIsToday = true;
+        let mWalked = 0;
+        while (mWalked < SAFETY_MAX_DAYS) {
+          const mStr = mDate.toISOString().split("T")[0];
+          if (deedDates.has(mStr)) {
+            // consecutive deed day — keep walking
+          } else if (mIsToday) {
+            // today empty is fine, not a break
+          } else {
+            // first historical gap — this is our floor
+            await storage.setStreakFloor(userId, mStr);
+            floor = mStr;
+            break;
+          }
+          mIsToday = false;
+          mDate = new Date(mDate);
+          mDate.setUTCDate(mDate.getUTCDate() - 1);
+          mWalked++;
+        }
+      }
+
+      // Walk back from today. Today never gets auto-frozen (the user still has
+      // the rest of the calendar day). Past gaps consume one freezer if any
+      // are available; otherwise we set the floor to that gap and stop.
+      // The floor is also a hard stop: we never walk past it, so freezers
+      // bought later cannot revive an already-broken streak.
       let streakCount = 0;
-
-      const yesterdayUTC = new Date(todayUTC);
-      yesterdayUTC.setUTCDate(yesterdayUTC.getUTCDate() - 1);
-      const yesterdayStr = yesterdayUTC.toISOString().split("T")[0];
-
-      if (deedDates.has(todayStr)) {
-        streakCount = 1;
-        let checkDate = new Date(todayUTC);
-        while (true) {
-          checkDate.setUTCDate(checkDate.getUTCDate() - 1);
-          const checkStr = checkDate.toISOString().split("T")[0];
-          if (deedDates.has(checkStr)) {
+      let isToday = true;
+      let checkDate = new Date(todayUTC);
+      let walked = 0;
+      while (walked < SAFETY_MAX_DAYS) {
+        const checkStr = checkDate.toISOString().split("T")[0];
+        // Hard stop at the no-revive floor.
+        if (floor !== null && checkStr <= floor) break;
+        const hasDeed = deedDates.has(checkStr);
+        const isFrozen = frozenDates.has(checkStr);
+        if (hasDeed || isFrozen) {
+          streakCount++;
+        } else if (isToday) {
+          // Today empty: don't break, don't freeze, just walk to yesterday.
+        } else {
+          const frozen = await storage.consumeFreezerForDate(userId, checkStr);
+          if (frozen) {
+            frozenDates.add(checkStr);
             streakCount++;
           } else {
+            // Out of freezers on a real past gap → streak breaks here.
+            // Persist the floor so a later freezer purchase can't revive it.
+            await storage.setStreakFloor(userId, checkStr);
+            floor = checkStr;
             break;
           }
         }
-      } else if (deedDates.has(yesterdayStr)) {
-        streakCount = 1;
-        let checkDate = new Date(yesterdayUTC);
-        while (true) {
-          checkDate.setUTCDate(checkDate.getUTCDate() - 1);
-          const checkStr = checkDate.toISOString().split("T")[0];
-          if (deedDates.has(checkStr)) {
-            streakCount++;
-          } else {
-            break;
-          }
-        }
+        isToday = false;
+        checkDate = new Date(checkDate);
+        checkDate.setUTCDate(checkDate.getUTCDate() - 1);
+        walked++;
       }
 
       const dayOfWeek = todayUTC.getUTCDay();
@@ -696,16 +740,68 @@ export async function registerRoutes(
       monday.setUTCDate(monday.getUTCDate() + mondayOffset);
 
       const weekDays: boolean[] = [];
+      const frozenDays: boolean[] = [];
       for (let i = 0; i < 7; i++) {
         const d = new Date(monday);
         d.setUTCDate(d.getUTCDate() + i);
         const dStr = d.toISOString().split("T")[0];
-        weekDays.push(deedDates.has(dStr));
+        const hasDeed = deedDates.has(dStr);
+        const isFrozen = frozenDates.has(dStr);
+        weekDays.push(hasDeed || isFrozen);
+        frozenDays.push(!hasDeed && isFrozen);
       }
 
       const hasActivityToday = deedDates.has(todayStr);
-      res.json({ streakCount, weekDays, hasActivityToday });
+      res.json({ streakCount, weekDays, hasActivityToday, frozenDays });
     } catch (err) {
+      throw err;
+    }
+  });
+
+  // ─── Streak Freezer ──────────────────────────────────────────
+  app.get(api.streakFreezer.get.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const [freezer, points, frozen] = await Promise.all([
+      storage.getStreakFreezerBalance(userId),
+      storage.getPointsBalance(userId),
+      storage.getFrozenDates(userId),
+    ]);
+    res.json({
+      freezer,
+      points,
+      frozenDates: Array.from(frozen).sort(),
+      packs: STREAK_FREEZER_PACKS.map((p) => ({
+        size: p.size,
+        cost: p.cost,
+        discountPercent: p.discountPercent,
+      })),
+    });
+  });
+
+  app.post(api.streakFreezer.purchase.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const parsed = api.streakFreezer.purchase.input.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: parsed.error.issues[0]?.message ?? "Invalid pack size",
+        field: parsed.error.issues[0]?.path?.join(".") ?? "packSize",
+      });
+    }
+    try {
+      const result = await storage.purchaseStreakFreezers(
+        userId,
+        parsed.data.packSize as 1 | 10 | 25 | 50 | 100,
+      );
+      res.json(result);
+    } catch (err: any) {
+      if (err?.code === "INSUFFICIENT_POINTS") {
+        return res.status(402).json({
+          message: "Not enough points to purchase this pack.",
+          code: "INSUFFICIENT_POINTS",
+          available: err.available ?? 0,
+          required: err.required ?? 0,
+        });
+      }
       throw err;
     }
   });

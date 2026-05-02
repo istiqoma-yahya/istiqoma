@@ -267,7 +267,7 @@ export default function TargetsPage() {
   const [movingTarget, setMovingTarget] = useState<TargetWithProgress | null>(null);
   const [pendingFolderId, setPendingFolderId] = useState<number | null>(null);
 
-  const { data: streakData } = useQuery<{ streakCount: number; weekDays: boolean[] }>({
+  const { data: streakData } = useQuery<{ streakCount: number; weekDays: boolean[]; hasActivityToday: boolean; frozenDays: boolean[] }>({
     queryKey: ["/api/streak"],
   });
 
@@ -738,6 +738,8 @@ export default function TargetsPage() {
         open={showStreakDialog}
         streakCount={streakData?.streakCount ?? 0}
         weekDays={streakData?.weekDays ?? [false, false, false, false, false, false, false]}
+        frozenDays={streakData?.frozenDays ?? [false, false, false, false, false, false, false]}
+        hasActivityToday={streakData?.hasActivityToday ?? false}
         onClose={() => {
           setShowStreakDialog(false);
           setRewardPoints(null);

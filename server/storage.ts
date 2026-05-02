@@ -1,6 +1,6 @@
 import { db } from "./db";
 export { db };
-import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding } from "@shared/schema";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte, isNull } from "drizzle-orm";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -70,6 +70,15 @@ export interface IStorage {
   deleteCustomDzikirType(id: number, userId: string): Promise<void>;
   getUserOnboarding(userId: string): Promise<UserOnboarding | null>;
   upsertUserOnboarding(userId: string, data: InsertUserOnboarding): Promise<UserOnboarding>;
+  getStreakFreezerBalance(userId: string): Promise<{ owned: number; used: number; available: number }>;
+  getPointsBalance(userId: string): Promise<{ earned: number; spent: number; available: number }>;
+  getFrozenDates(userId: string): Promise<Set<string>>;
+  consumeFreezerForDate(userId: string, dateStr: string): Promise<boolean>;
+  purchaseStreakFreezers(userId: string, packSize: StreakFreezerPackSize): Promise<{
+    freezer: { owned: number; used: number; available: number };
+    points: { earned: number; spent: number; available: number };
+    purchased: { packSize: number; pointsCost: number; freezersGranted: number };
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -879,6 +888,181 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return row;
+  }
+
+  // ─── Streak Freezer ────────────────────────────────────────────
+  // All balances are computed from append-only ledgers (point_purchases,
+  // streak_freezes) so no separate counter can drift. The unique index on
+  // (user_id, frozen_date) is what makes consumeFreezerForDate safe under
+  // concurrency — a duplicate insert raises 23505 and we treat that as a
+  // no-op success (the date is already frozen).
+
+  async getStreakFreezerBalance(userId: string): Promise<{ owned: number; used: number; available: number }> {
+    const [grantedRow] = await db
+      .select({ total: sql<number>`COALESCE(SUM(${pointPurchases.freezersGranted}), 0)::int` })
+      .from(pointPurchases)
+      .where(eq(pointPurchases.userId, userId));
+    const [usedRow] = await db
+      .select({ total: sql<number>`COUNT(*)::int` })
+      .from(streakFreezes)
+      .where(eq(streakFreezes.userId, userId));
+    const owned = Number(grantedRow?.total ?? 0);
+    const used = Number(usedRow?.total ?? 0);
+    return { owned, used, available: Math.max(0, owned - used) };
+  }
+
+  async getPointsBalance(userId: string): Promise<{ earned: number; spent: number; available: number }> {
+    const [earnedRow] = await db
+      .select({ total: sql<number>`COALESCE(SUM(${deeds.points}), 0)::int` })
+      .from(deeds)
+      .where(eq(deeds.userId, userId));
+    const [spentRow] = await db
+      .select({ total: sql<number>`COALESCE(SUM(${pointPurchases.pointsCost}), 0)::int` })
+      .from(pointPurchases)
+      .where(eq(pointPurchases.userId, userId));
+    const earned = Number(earnedRow?.total ?? 0);
+    const spent = Number(spentRow?.total ?? 0);
+    return { earned, spent, available: Math.max(0, earned - spent) };
+  }
+
+  // Normalize a drizzle `date` column (which can come back as string or Date
+   // depending on the driver path) to a strict YYYY-MM-DD string.
+  private normalizeDateColumn(value: string | Date | null): string | null {
+    if (value === null) return null;
+    if (typeof value === "string") return value.slice(0, 10);
+    return value.toISOString().slice(0, 10);
+  }
+
+  // Acquire a per-user transaction-scoped advisory lock. Released
+  // automatically at end of transaction. Serializes all freezer point
+  // operations for this user, preventing read-then-insert races
+  // (double-spend on rapid clicks, or two concurrent walks both
+  // consuming the same one freezer).
+  private async acquireUserFreezerLock(tx: Parameters<Parameters<typeof db.transaction>[0]>[0], userId: string) {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`streak-freezer:${userId}`}, 0))`);
+  }
+
+  async getFrozenDates(userId: string): Promise<Set<string>> {
+    const rows = await db
+      .select({ d: streakFreezes.frozenDate })
+      .from(streakFreezes)
+      .where(eq(streakFreezes.userId, userId));
+    return new Set(
+      rows
+        .map((r) => this.normalizeDateColumn(r.d))
+        .filter((s): s is string => s !== null),
+    );
+  }
+
+  async getStreakFloor(userId: string): Promise<string | null> {
+    const [row] = await db
+      .select({ d: userStreakState.floorDate })
+      .from(userStreakState)
+      .where(eq(userStreakState.userId, userId));
+    return this.normalizeDateColumn(row?.d ?? null);
+  }
+
+  // Idempotent upsert. Always advances forward in time — i.e. if a more
+   // recent floor already exists we keep that one rather than rolling it
+   // back to an older date. This makes setStreakFloor safe to call from
+   // anywhere in the walk without ordering concerns.
+  async setStreakFloor(userId: string, dateStr: string): Promise<void> {
+    await db
+      .insert(userStreakState)
+      .values({ userId, floorDate: dateStr, updatedAt: new Date() })
+      .onConflictDoUpdate({
+        target: userStreakState.userId,
+        set: {
+          floorDate: sql`GREATEST(${userStreakState.floorDate}, ${dateStr}::date)`,
+          updatedAt: new Date(),
+        },
+      });
+  }
+
+  async consumeFreezerForDate(userId: string, dateStr: string): Promise<boolean> {
+    return await db.transaction(async (tx) => {
+      await this.acquireUserFreezerLock(tx, userId);
+      const [grantedRow] = await tx
+        .select({ total: sql<number>`COALESCE(SUM(${pointPurchases.freezersGranted}), 0)::int` })
+        .from(pointPurchases)
+        .where(eq(pointPurchases.userId, userId));
+      const [usedRow] = await tx
+        .select({ total: sql<number>`COUNT(*)::int` })
+        .from(streakFreezes)
+        .where(eq(streakFreezes.userId, userId));
+      const available = Number(grantedRow?.total ?? 0) - Number(usedRow?.total ?? 0);
+      if (available <= 0) return false;
+      try {
+        await tx.insert(streakFreezes).values({ userId, frozenDate: dateStr });
+        return true;
+      } catch (err: unknown) {
+        // 23505 = unique_violation: another concurrent walk already froze
+        // this same date. Treat as success — the date is frozen, no double charge.
+        if (typeof err === "object" && err !== null && "code" in err && (err as { code?: string }).code === "23505") {
+          return true;
+        }
+        throw err;
+      }
+    });
+  }
+
+  async purchaseStreakFreezers(userId: string, packSize: StreakFreezerPackSize) {
+    const pack = getPackByCount(packSize);
+    if (!pack) {
+      const err = new Error(`Invalid pack size: ${packSize}`) as Error & { status?: number };
+      err.status = 400;
+      throw err;
+    }
+    return await db.transaction(async (tx) => {
+      await this.acquireUserFreezerLock(tx, userId);
+      const [earnedRow] = await tx
+        .select({ total: sql<number>`COALESCE(SUM(${deeds.points}), 0)::int` })
+        .from(deeds)
+        .where(eq(deeds.userId, userId));
+      const [spentRow] = await tx
+        .select({ total: sql<number>`COALESCE(SUM(${pointPurchases.pointsCost}), 0)::int` })
+        .from(pointPurchases)
+        .where(eq(pointPurchases.userId, userId));
+      const earned = Number(earnedRow?.total ?? 0);
+      const spent = Number(spentRow?.total ?? 0);
+      const available = Math.max(0, earned - spent);
+      if (available < pack.cost) {
+        const err = new Error("INSUFFICIENT_POINTS") as Error & {
+          status?: number;
+          code?: string;
+          available?: number;
+          required?: number;
+        };
+        err.status = 402;
+        err.code = "INSUFFICIENT_POINTS";
+        err.available = available;
+        err.required = pack.cost;
+        throw err;
+      }
+      await tx.insert(pointPurchases).values({
+        userId,
+        kind: "streak_freezer",
+        packSize: pack.size,
+        pointsCost: pack.cost,
+        freezersGranted: pack.size,
+      });
+      const newSpent = spent + pack.cost;
+      const newGranted = await tx
+        .select({ total: sql<number>`COALESCE(SUM(${pointPurchases.freezersGranted}), 0)::int` })
+        .from(pointPurchases)
+        .where(eq(pointPurchases.userId, userId));
+      const [usedRow] = await tx
+        .select({ total: sql<number>`COUNT(*)::int` })
+        .from(streakFreezes)
+        .where(eq(streakFreezes.userId, userId));
+      const owned = Number(newGranted[0]?.total ?? 0);
+      const used = Number(usedRow?.total ?? 0);
+      return {
+        freezer: { owned, used, available: Math.max(0, owned - used) },
+        points: { earned, spent: newSpent, available: Math.max(0, earned - newSpent) },
+        purchased: { packSize: pack.size, pointsCost: pack.cost, freezersGranted: pack.size },
+      };
+    });
   }
 }
 

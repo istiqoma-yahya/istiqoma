@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -282,8 +282,68 @@ export const api = {
           streakCount: z.number(),
           weekDays: z.array(z.boolean()),
           hasActivityToday: z.boolean(),
+          frozenDays: z.array(z.boolean()),
         }),
         401: errorSchemas.unauthorized,
+      },
+    },
+  },
+  streakFreezer: {
+    get: {
+      method: "GET" as const,
+      path: "/api/streak-freezer",
+      responses: {
+        200: z.object({
+          freezer: z.object({
+            owned: z.number(),
+            used: z.number(),
+            available: z.number(),
+          }),
+          points: z.object({
+            earned: z.number(),
+            spent: z.number(),
+            available: z.number(),
+          }),
+          frozenDates: z.array(z.string()),
+          packs: z.array(z.object({
+            size: z.number(),
+            cost: z.number(),
+            discountPercent: z.number(),
+          })),
+        }),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    purchase: {
+      method: "POST" as const,
+      path: "/api/streak-freezer/purchase",
+      input: purchaseStreakFreezerSchema,
+      responses: {
+        200: z.object({
+          freezer: z.object({
+            owned: z.number(),
+            used: z.number(),
+            available: z.number(),
+          }),
+          points: z.object({
+            earned: z.number(),
+            spent: z.number(),
+            available: z.number(),
+          }),
+          purchased: z.object({
+            packSize: z.number(),
+            pointsCost: z.number(),
+            freezersGranted: z.number(),
+          }),
+        }),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+        402: z.object({
+          message: z.string(),
+          code: z.literal("INSUFFICIENT_POINTS"),
+          available: z.number(),
+          required: z.number(),
+        }),
       },
     },
   },

@@ -160,6 +160,16 @@ The `ConsistencyCalendar` in `TargetDetailPage.tsx` supports two interaction mod
   - Future: transparent/dimmed
 - One-time targets: dates within `startDate`–`dueDate` range show progress; dates outside are dimmed/non-interactive
 
+### Streak Freezer (Task #65)
+- Tables: `streak_freezes` (uniqueIndex on user_id + frozen_date), `point_purchases` (append-only ledger), `user_streak_state` (per-user `floor_date` boundary that prevents retroactive streak revival).
+- Balances are computed from ledgers (no counter columns) — points available = SUM(deeds.points) − SUM(point_purchases.points_cost); freezers available = SUM(point_purchases.freezers_granted) − COUNT(streak_freezes).
+- Packs (`STREAK_FREEZER_PACKS` in `shared/schema.ts`): 1=500, 10=4500 (10% off), 25=10000 (20% off), 50=18750 (25% off), 100=35000 (30% off).
+- **Concurrency**: both `purchaseStreakFreezers` and `consumeFreezerForDate` open a transaction and call `pg_advisory_xact_lock(hashtextextended('streak-freezer:'||userId, 0))` BEFORE the read-then-insert. This serializes all freezer point ops per user so rapid double-clicks cannot double-spend and concurrent walks cannot consume more freezers than owned. Inserts on `streak_freezes` are still 23505-tolerant for defense-in-depth.
+- **No-retroactive-repair (`user_streak_state.floor_date`)**: `GET /api/streak` first reads the user's floor; if null, runs a one-time *migration walk* (no consume) that finds the most recent natural break in deed history and persists it as the floor. The real walk then refuses to look at any date `<= floor`. When the real walk runs out of freezers on a past gap it sets `floor = gap_date` and breaks. Net effect: once a streak is broken, buying more freezers later cannot bring it back from the dead.
+- `GET /api/streak` walks back from today; today is never auto-frozen, but past gaps strictly above the floor consume one freezer each. Returns `{streakCount, weekDays, hasActivityToday, frozenDays}`.
+- `GET /api/streak-freezer` returns balances + frozenDates + pack catalog. `POST /api/streak-freezer/purchase` body `{packSize}` returns 402 with `code: "INSUFFICIENT_POINTS"` on insufficient funds.
+- Frontend: `/streak-freezer` page (`StreakFreezerPage.tsx`) with `text-freezer-balance` / `text-points-balance` testids and per-pack `text-pack-shortfall-N` "Need N more points" affordability copy; freezer chip on dashboard streak card (links to page); frozen-day rendering (sky-blue Snowflake) in `StreakDialog`. i18n keys under `streakFreezer.*` for en/id/ms include i18next `_one`/`_other` plurals for `needMorePoints`.
+
 ### Environment Variables Required
 - `SUPABASE_DATABASE_URL` - Production Supabase connection string (used when `NODE_ENV=production`)
 - `SUPABASE_DEV_DATABASE_URL` - Development Supabase connection string (used otherwise; keep this on a separate Supabase project)

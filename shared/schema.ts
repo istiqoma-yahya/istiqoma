@@ -115,6 +115,95 @@ export const insertCustomDzikirTypeSchema = createInsertSchema(customDzikirTypes
 export type CustomDzikirType = typeof customDzikirTypes.$inferSelect;
 export type InsertCustomDzikirType = z.infer<typeof insertCustomDzikirTypeSchema>;
 
+// ─── Streak Freezer ───────────────────────────────────────────
+// Per-user streak invariants. `floorDate` is the "no-revive boundary":
+// once a user's streak is broken on date D (no deed AND no freezer
+// available at the time of the walk), we set floorDate = D. Subsequent
+// streak reads stop the walk at floorDate, so later buying freezers
+// CANNOT retroactively resurrect that broken streak. Pre-existing
+// users (who have no row yet) get a floor lazily computed from their
+// natural deed history on first read.
+export const userStreakState = pgTable("user_streak_state", {
+  userId: varchar("user_id").primaryKey().references(() => users.id),
+  floorDate: date("floor_date"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// One row per (user, frozen calendar date). Source of truth for which past
+// days were saved by an auto-consumed freezer. Unique constraint on
+// (user_id, frozen_date) prevents the same date from being charged twice.
+export const streakFreezes = pgTable("streak_freezes", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  frozenDate: date("frozen_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqUserDate: uniqueIndex("uniq_streak_freeze_user_date").on(table.userId, table.frozenDate),
+}));
+
+// Append-only ledger of point spends. Currently only "streak_freezer" but
+// the kind column lets us add more spend reasons later. We never store a
+// running balance — all balances are derived by aggregation so they cannot
+// drift.
+export const pointPurchases = pgTable("point_purchases", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  kind: text("kind", { enum: ["streak_freezer"] }).notNull().default("streak_freezer"),
+  packSize: integer("pack_size").notNull(),
+  pointsCost: integer("points_cost").notNull(),
+  freezersGranted: integer("freezers_granted").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Single source of truth for freezer pack pricing. Server validates against
+// this same table the client renders, so prices cannot diverge.
+export const STREAK_FREEZER_PACKS = [
+  { size: 1, cost: 500, discountPercent: 0 },
+  { size: 10, cost: 4500, discountPercent: 10 },
+  { size: 25, cost: 10000, discountPercent: 20 },
+  { size: 50, cost: 18750, discountPercent: 25 },
+  { size: 100, cost: 35000, discountPercent: 30 },
+] as const;
+
+export type StreakFreezerPack = typeof STREAK_FREEZER_PACKS[number];
+export type StreakFreezerPackSize = StreakFreezerPack["size"];
+
+export const STREAK_FREEZER_PACK_SIZES = STREAK_FREEZER_PACKS.map((p) => p.size) as readonly StreakFreezerPackSize[];
+
+export function getPackByCount(size: number): StreakFreezerPack | undefined {
+  return STREAK_FREEZER_PACKS.find((p) => p.size === size);
+}
+
+export const insertStreakFreezeSchema = createInsertSchema(streakFreezes).pick({
+  frozenDate: true,
+}).extend({
+  frozenDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "frozenDate must be YYYY-MM-DD"),
+});
+
+export const insertPointPurchaseSchema = createInsertSchema(pointPurchases).pick({
+  kind: true,
+  packSize: true,
+  pointsCost: true,
+  freezersGranted: true,
+});
+
+export type StreakFreeze = typeof streakFreezes.$inferSelect;
+export type InsertStreakFreeze = z.infer<typeof insertStreakFreezeSchema>;
+export type PointPurchase = typeof pointPurchases.$inferSelect;
+export type InsertPointPurchase = z.infer<typeof insertPointPurchaseSchema>;
+
+export const purchaseStreakFreezerSchema = z.object({
+  packSize: z.union(
+    STREAK_FREEZER_PACK_SIZES.map((s) => z.literal(s)) as unknown as [
+      z.ZodLiteral<number>,
+      z.ZodLiteral<number>,
+      ...z.ZodLiteral<number>[]
+    ],
+  ),
+});
+
+export type PurchaseStreakFreezerRequest = z.infer<typeof purchaseStreakFreezerSchema>;
+
 export const pushSubscriptions = pgTable("push_subscriptions", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),

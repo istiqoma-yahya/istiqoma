@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Flame, Check } from "lucide-react";
+import { Flame, Check, Snowflake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import {
@@ -13,6 +13,7 @@ interface StreakDialogProps {
   open: boolean;
   streakCount: number;
   weekDays: boolean[];
+  frozenDays?: boolean[];
   hasActivityToday?: boolean;
   onClose: () => void;
 }
@@ -44,7 +45,7 @@ function AnimatedStreakCounter({ target, duration = 1200 }: { target: number; du
   return <span>{current}</span>;
 }
 
-export function StreakDialog({ open, streakCount, weekDays, hasActivityToday = true, onClose }: StreakDialogProps) {
+export function StreakDialog({ open, streakCount, weekDays, frozenDays = [], hasActivityToday = true, onClose }: StreakDialogProps) {
   const { t } = useTranslation();
   const weekDayLabels = t("streak.weekDays", { returnObjects: true }) as string[];
 
@@ -117,6 +118,7 @@ export function StreakDialog({ open, streakCount, weekDays, hasActivityToday = t
           >
             {weekDayLabels.map((label: string, index: number) => {
               const dayActive = weekDays[index];
+              const dayFrozen = frozenDays[index] ?? false;
               const isToday = index === todayIndex;
 
               return (
@@ -129,13 +131,19 @@ export function StreakDialog({ open, streakCount, weekDays, hasActivityToday = t
                     animate={{ scale: 1 }}
                     transition={dayActive ? { type: "spring", damping: 10, stiffness: 300, delay: 0.6 + index * 0.08 } : {}}
                     className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      dayActive
-                        ? "bg-orange-500 text-white"
-                        : "bg-muted text-muted-foreground"
+                      dayFrozen
+                        ? "bg-sky-500 text-white"
+                        : dayActive
+                          ? "bg-orange-500 text-white"
+                          : "bg-muted text-muted-foreground"
                     } ${isToday && !dayActive ? "ring-2 ring-orange-500/40" : ""}`}
                     data-testid={`streak-day-${index}`}
                   >
-                    {dayActive && <Check className="w-4 h-4" strokeWidth={3} />}
+                    {dayFrozen ? (
+                      <Snowflake className="w-4 h-4" strokeWidth={2.5} />
+                    ) : dayActive ? (
+                      <Check className="w-4 h-4" strokeWidth={3} />
+                    ) : null}
                   </motion.div>
                 </div>
               );

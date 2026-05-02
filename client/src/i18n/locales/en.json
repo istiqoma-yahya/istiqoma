@@ -810,5 +810,25 @@
       "subtitle": "You picked these deeds during onboarding. Set targets to begin.",
       "dismiss": "Dismiss"
     }
+  },
+  "profile": {
+    "title": "Profile",
+    "unnamed": "Unnamed user",
+    "identityNote": "Your name, email, and avatar are managed by your Replit Auth account.",
+    "personalHeading": "Personal info",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "e.g. yusuf123",
+    "usernameHelp": "Up to 40 characters. Leave blank to clear.",
+    "phoneLabel": "Phone number",
+    "phonePlaceholder": "+62 812 3456 7890",
+    "phoneHelp": "Digits, spaces, +, -, ( and ) only. Up to 30 characters.",
+    "saveButton": "Save changes",
+    "saving": "Saving…",
+    "saveSuccess": "Profile updated",
+    "saveError": "Couldn't save your profile",
+    "connectGmailTitle": "Connect Gmail",
+    "connectGmailDesc": "Link a Google account to your sign-in. You'll be sent to the Replit login screen, where you can choose Google.",
+    "connectGmailCta": "Connect Gmail",
+    "gmailConnected": "Connected as {{email}}"
   }
 }

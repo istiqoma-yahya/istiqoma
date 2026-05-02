@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, targetRecommendationsRequestSchema, targetRecommendationsResponseSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, targetRecommendationsRequestSchema, targetRecommendationsResponseSchema, updateProfileSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -459,9 +459,32 @@ export const api = {
           firstName: z.string().nullable(),
           lastName: z.string().nullable(),
           profileImageUrl: z.string().nullable(),
+          username: z.string().nullable(),
+          phoneNumber: z.string().nullable(),
           onboardingComplete: z.boolean(),
         }),
         401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
+    updateProfile: {
+      method: "PATCH" as const,
+      path: "/api/auth/user",
+      input: updateProfileSchema,
+      responses: {
+        200: z.object({
+          id: z.string(),
+          email: z.string().nullable(),
+          firstName: z.string().nullable(),
+          lastName: z.string().nullable(),
+          profileImageUrl: z.string().nullable(),
+          username: z.string().nullable(),
+          phoneNumber: z.string().nullable(),
+          onboardingComplete: z.boolean(),
+        }),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
       },
     },
   },

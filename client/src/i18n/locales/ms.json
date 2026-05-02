@@ -811,5 +811,25 @@
       "subtitle": "Anda memilih amal-amal ini semasa onboarding. Tetapkan sasaran untuk bermula.",
       "dismiss": "Tutup"
     }
+  },
+  "profile": {
+    "title": "Profil",
+    "unnamed": "Pengguna tanpa nama",
+    "identityNote": "Nama, e-mel, dan avatar anda diuruskan oleh akaun Replit Auth anda.",
+    "personalHeading": "Maklumat peribadi",
+    "usernameLabel": "Nama pengguna",
+    "usernamePlaceholder": "cth. yusuf123",
+    "usernameHelp": "Sehingga 40 aksara. Biarkan kosong untuk kosongkan.",
+    "phoneLabel": "Nombor telefon",
+    "phonePlaceholder": "+60 12-345 6789",
+    "phoneHelp": "Hanya digit, ruang, +, -, ( dan ). Sehingga 30 aksara.",
+    "saveButton": "Simpan perubahan",
+    "saving": "Menyimpan…",
+    "saveSuccess": "Profil dikemas kini",
+    "saveError": "Gagal menyimpan profil",
+    "connectGmailTitle": "Sambungkan Gmail",
+    "connectGmailDesc": "Pautkan akaun Google ke log masuk anda. Anda akan dibawa ke skrin log masuk Replit, di mana anda boleh memilih Google.",
+    "connectGmailCta": "Sambungkan Gmail",
+    "gmailConnected": "Disambungkan sebagai {{email}}"
   }
 }

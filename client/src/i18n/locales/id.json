@@ -811,5 +811,25 @@
       "subtitle": "Kamu memilih amal-amal ini saat onboarding. Buat target untuk memulai.",
       "dismiss": "Tutup"
     }
+  },
+  "profile": {
+    "title": "Profil",
+    "unnamed": "Pengguna tanpa nama",
+    "identityNote": "Nama, email, dan foto profilmu dikelola oleh akun Replit Auth-mu.",
+    "personalHeading": "Info pribadi",
+    "usernameLabel": "Nama pengguna",
+    "usernamePlaceholder": "mis. yusuf123",
+    "usernameHelp": "Maksimal 40 karakter. Kosongkan untuk menghapus.",
+    "phoneLabel": "Nomor telepon",
+    "phonePlaceholder": "+62 812 3456 7890",
+    "phoneHelp": "Hanya angka, spasi, +, -, ( dan ). Maksimal 30 karakter.",
+    "saveButton": "Simpan perubahan",
+    "saving": "Menyimpan…",
+    "saveSuccess": "Profil diperbarui",
+    "saveError": "Gagal menyimpan profil",
+    "connectGmailTitle": "Hubungkan Gmail",
+    "connectGmailDesc": "Tautkan akun Google ke login-mu. Kamu akan diarahkan ke halaman login Replit, lalu pilih Google.",
+    "connectGmailCta": "Hubungkan Gmail",
+    "gmailConnected": "Terhubung sebagai {{email}}"
   }
 }

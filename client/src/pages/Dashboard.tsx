@@ -88,6 +88,14 @@ export default function Dashboard() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-border" />
+              <DropdownMenuItem
+                onClick={() => navigate("/profile")}
+                className="cursor-pointer"
+                data-testid="link-profile"
+              >
+                <User className="mr-2 h-4 w-4" />
+                <span>{t('user.profile')}</span>
+              </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => navigate("/categories")}
                 className="cursor-pointer"

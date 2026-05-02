@@ -18,6 +18,7 @@ import CreateTargetPage from "@/pages/CreateTargetPage";
 import EditTargetPage from "@/pages/EditTargetPage";
 import TargetDetailPage from "@/pages/TargetDetailPage";
 import NotificationsPage from "@/pages/NotificationsPage";
+import ProfilePage from "@/pages/ProfilePage";
 import DeedHistoryPage from "@/pages/DeedHistoryPage";
 import StreakFreezerPage from "@/pages/StreakFreezerPage";
 import StreakDetailPage from "@/pages/StreakDetailPage";
@@ -51,6 +52,7 @@ function Router() {
       <Route path="/targets/:id/edit" component={EditTargetPage} />
       <Route path="/categories" component={CategoryManagement} />
       <Route path="/notifications" component={NotificationsPage} />
+      <Route path="/profile" component={ProfilePage} />
       <Route path="/deeds" component={DeedHistoryPage} />
       <Route path="/streak" component={StreakDetailPage} />
       <Route path="/streak-freezer" component={StreakFreezerPage} />

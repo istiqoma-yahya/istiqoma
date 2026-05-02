@@ -442,6 +442,21 @@ export const RECOMMENDATION_CATEGORIES = [
 ] as const;
 export type RecommendationCategory = (typeof RECOMMENDATION_CATEGORIES)[number];
 
+// Maps onboarding Q3 focus picks to the recommendation category that should
+// surface for that pick. Both client and server import this so prompts and
+// hints stay in lockstep with the onboarding choices.
+export const Q3_TO_CATEGORY: Record<(typeof Q3_VALUES)[number], RecommendationCategory> = {
+  "baca-quran": "Baca Quran",
+  dzikir: "Dzikir",
+  "sholat-fardhu": "Sholat Fardhu",
+  "sholat-sunnah": "Sholat Sunnah",
+  puasa: "Puasa",
+  "hafalan-quran": "Baca Quran",
+  "birrul-walidayn": "Birrul Walidayn",
+  shodaqoh: "Shodaqoh",
+  "tolabul-ilmi": "Tolabul Ilmi",
+};
+
 export const recommendationSourceSchema = z.object({
   kind: z.enum(RECOMMENDATION_SOURCE_KINDS),
   reference: z.string().min(1).max(200),

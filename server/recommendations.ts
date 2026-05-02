@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import {
+  Q3_TO_CATEGORY,
   RECOMMENDATION_CATEGORIES,
   RECOMMENDATION_SOURCE_KINDS,
   targetRecommendationSchema,
@@ -115,6 +116,21 @@ function summarizeOnboarding(onboarding: UserOnboarding | null): string {
   if (onboarding.q2) parts.push(`Main struggle: ${Q2_LABELS[onboarding.q2] || onboarding.q2}.`);
   const focus = (onboarding.q3 || []).map((p) => Q3_LABELS[p] || p).filter(Boolean);
   if (focus.length) parts.push(`Wants to focus on: ${focus.join(", ")}.`);
+  // Use the canonical onboarding -> category mapping so the model is told,
+  // explicitly, which target categories should appear in its picks. This
+  // keeps prompt suggestions in lockstep with what onboarding promises.
+  const categories = Array.from(
+    new Set(
+      (onboarding.q3 || [])
+        .map((p) => Q3_TO_CATEGORY[p as keyof typeof Q3_TO_CATEGORY])
+        .filter(Boolean),
+    ),
+  );
+  if (categories.length) {
+    parts.push(
+      `Prefer recommendations in these target categories: ${categories.map((c) => `"${c}"`).join(", ")}.`,
+    );
+  }
   if (onboarding.q4) parts.push(`Most-active time of day: ${Q4_LABELS[onboarding.q4] || onboarding.q4}.`);
   if (onboarding.q5) parts.push(`Identity goal: wants to ${Q5_LABELS[onboarding.q5] || onboarding.q5}.`);
   return parts.join(" ");

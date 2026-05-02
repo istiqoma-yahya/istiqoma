@@ -20,20 +20,22 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Target recommendations", () => {
-  test("recommendations -> preview -> use target -> form prefilled", async ({ page }) => {
+  test("empty Targets state -> recommendations -> preview -> use target -> form prefilled", async ({ page }) => {
     // Auth — driven by the testReplitAuth helper / OIDC mock when running
     // through the Replit testing skill. In a vanilla Playwright run, replace
-    // with whatever login flow the project provides.
+    // with whatever login flow the project provides. The Replit testReplitAuth
+    // mock sets up a fresh user (no targets), so the Targets page lands on
+    // its empty state.
     await page.goto("/");
     await page.getByTestId("button-login").click();
     await page.waitForURL((url) => !url.pathname.startsWith("/login"));
 
-    // 1. Entry card on Create Target page
-    await page.goto("/targets/new");
-    await expect(page.getByTestId("card-recommendations-entry-create-target")).toBeVisible();
+    // 1. Empty Targets page surfaces the entry card and the open button.
+    await page.goto("/targets");
+    await expect(page.getByTestId("card-recommendations-entry-targets-empty")).toBeVisible();
 
-    // 2. Open the sheet — fetches fresh recommendations from Claude
-    await page.getByTestId("button-open-recommendations-create-target").click();
+    // 2. Open the sheet from the empty state — fetches fresh recommendations.
+    await page.getByTestId("button-open-recommendations-targets-empty").click();
     await expect(page.getByTestId("sheet-recommendations")).toBeVisible();
     await expect(page.getByTestId("state-recommendations-loading")).toBeVisible();
     await expect(page.getByTestId("list-recommendations")).toBeVisible({ timeout: 90_000 });

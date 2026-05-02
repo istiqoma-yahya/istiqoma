@@ -479,7 +479,13 @@ export async function registerRoutes(
   app.post(api.targets.recommendations.path, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { language } = api.targets.recommendations.input.parse(req.body);
+      // Accept `language` from the query string (per spec) or the request
+      // body (existing client sends it in the body). Whichever is present
+      // wins; the schema enforces it must be one of id/en/ms.
+      const rawLanguage =
+        (typeof req.query?.language === "string" ? req.query.language : undefined) ??
+        req.body?.language;
+      const { language } = api.targets.recommendations.input.parse({ language: rawLanguage });
 
       const limit = checkRateLimit(userId);
       if (!limit.allowed) {

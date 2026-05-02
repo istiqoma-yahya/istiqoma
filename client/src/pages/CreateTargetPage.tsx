@@ -29,6 +29,8 @@ export default function CreateTargetPage() {
         targetType: "achievement" as const,
         recurrence: "recurring" as const,
         notificationTimes: [],
+        intentionWhen: "",
+        intentionWhere: "",
       } as Partial<InsertTarget>)
     : undefined;
 

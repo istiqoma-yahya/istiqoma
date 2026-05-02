@@ -78,6 +78,8 @@ export const targets = pgTable("targets", {
   sedekahType: text("sedekah_type"),
   customUnit: text("custom_unit"),
   notificationTimes: text("notification_times").array().default([]),
+  intentionWhen: text("intention_when"),
+  intentionWhere: text("intention_where"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -280,6 +282,8 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   sedekahType: true,
   customUnit: true,
   notificationTimes: true,
+  intentionWhen: true,
+  intentionWhere: true,
   folderId: true,
 }).extend({
   folderId: z.number().int().positive().nullish(),
@@ -300,6 +304,8 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   sedekahType: z.enum(["uang", "hitungan"]).optional(),
   customUnit: z.enum(["hitungan", "ayat", "halaman", "surat", "juz", "rakaat", "hari", "uang", "times", "days"]).optional(),
   notificationTimes: z.array(z.string().regex(/^\d{2}:\d{2}$/)).max(5).optional().default([]),
+  intentionWhen: z.string().max(120).optional().nullable(),
+  intentionWhere: z.string().max(120).optional().nullable(),
 });
 
 export const insertTargetHistorySchema = createInsertSchema(targetHistory).pick({

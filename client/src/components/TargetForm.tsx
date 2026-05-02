@@ -70,6 +70,8 @@ export function TargetForm({
       sedekahType: undefined,
       customUnit: undefined,
       notificationTimes: [],
+      intentionWhen: "",
+      intentionWhere: "",
     },
   });
 
@@ -93,6 +95,8 @@ export function TargetForm({
         sedekahType: (editingTarget.sedekahType as "uang" | "hitungan" | undefined) || undefined,
         customUnit: (editingTarget.customUnit as "hitungan" | "ayat" | "halaman" | "surat" | "juz" | "rakaat" | "hari" | "uang" | "times" | "days" | undefined) || undefined,
         notificationTimes: editingTarget.notificationTimes || [],
+        intentionWhen: editingTarget.intentionWhen || "",
+        intentionWhere: editingTarget.intentionWhere || "",
       });
       setTargetValueInput(String(editingTarget.targetValue));
     }
@@ -799,6 +803,49 @@ export function TargetForm({
             )}
           />
         )}
+
+        <FormField
+          control={form.control}
+          name="intentionWhen"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("targets.intentionWhenLabel")}</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder={t("targets.intentionWhenPlaceholder")}
+                  className="glass-input"
+                  maxLength={120}
+                  {...field}
+                  value={field.value ?? ""}
+                  data-testid="input-target-when"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="intentionWhere"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("targets.intentionWhereLabel")}</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder={t("targets.intentionWherePlaceholder")}
+                  className="glass-input"
+                  maxLength={120}
+                  {...field}
+                  value={field.value ?? ""}
+                  data-testid="input-target-where"
+                />
+              </FormControl>
+              <p className="text-xs text-muted-foreground">{t("targets.intentionHelper")}</p>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}

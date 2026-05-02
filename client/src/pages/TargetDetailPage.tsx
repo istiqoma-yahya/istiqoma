@@ -60,6 +60,7 @@ import {
   BookOpen,
   Trash2,
   Bell,
+  MapPin,
   Plus,
   Minus,
   X,
@@ -1347,6 +1348,114 @@ function TrendChart({
   );
 }
 
+function IntentionCard({
+  targetId,
+  initialWhen,
+  initialWhere,
+}: {
+  targetId: number;
+  initialWhen: string;
+  initialWhere: string;
+}) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [whenValue, setWhenValue] = useState(initialWhen);
+  const [whereValue, setWhereValue] = useState(initialWhere);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    setWhenValue(initialWhen);
+    setWhereValue(initialWhere);
+  }, [initialWhen, initialWhere]);
+
+  const hasChanges = whenValue !== initialWhen || whereValue !== initialWhere;
+  const isEmpty = !whenValue.trim() && !whereValue.trim();
+
+  const saveChanges = async () => {
+    setIsSaving(true);
+    try {
+      await apiRequest("PATCH", `/api/targets/${targetId}`, {
+        intentionWhen: whenValue.trim() || null,
+        intentionWhere: whereValue.trim() || null,
+      });
+      await queryClient.invalidateQueries({ queryKey: [`/api/targets/${targetId}/detail`] });
+      toast({ title: t("targets.targetUpdated"), description: t("targets.targetUpdatedDesc") });
+    } catch {
+      toast({ title: t("common.error"), variant: "destructive" });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <Card className="p-4" data-testid="card-intention">
+      <div className="flex items-center gap-2 mb-2">
+        <MapPin className="w-4 h-4 text-muted-foreground" />
+        <h3 className="text-sm font-semibold text-foreground">{t("targets.intentionCardTitle")}</h3>
+      </div>
+      <p className="text-xs text-muted-foreground mb-3">
+        {isEmpty ? t("targets.intentionCardEmpty") : t("targets.intentionHelper")}
+      </p>
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground" htmlFor={`intention-when-${targetId}`}>
+            {t("targets.intentionWhenLabel")}
+          </Label>
+          <Input
+            id={`intention-when-${targetId}`}
+            value={whenValue}
+            onChange={(e) => setWhenValue(e.target.value)}
+            placeholder={t("targets.intentionWhenPlaceholder")}
+            maxLength={120}
+            data-testid="input-intention-when"
+          />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground" htmlFor={`intention-where-${targetId}`}>
+            {t("targets.intentionWhereLabel")}
+          </Label>
+          <Input
+            id={`intention-where-${targetId}`}
+            value={whereValue}
+            onChange={(e) => setWhereValue(e.target.value)}
+            placeholder={t("targets.intentionWherePlaceholder")}
+            maxLength={120}
+            data-testid="input-intention-where"
+          />
+        </div>
+        {!isEmpty && (
+          <div className="space-y-1 pt-1 text-sm">
+            {initialWhen && (
+              <p className="text-foreground" data-testid="text-intention-when">
+                <span className="text-muted-foreground">{t("targets.intentionWhenLabel")}: </span>
+                {initialWhen}
+              </p>
+            )}
+            {initialWhere && (
+              <p className="text-foreground" data-testid="text-intention-where">
+                <span className="text-muted-foreground">{t("targets.intentionWhereLabel")}: </span>
+                {initialWhere}
+              </p>
+            )}
+          </div>
+        )}
+        {hasChanges && (
+          <Button
+            onClick={saveChanges}
+            disabled={isSaving}
+            size="sm"
+            className="w-full"
+            data-testid="button-save-intention"
+          >
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+            {t("common.save")}
+          </Button>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 function NotificationTimesCard({ targetId, initialTimes }: { targetId: number; initialTimes: string[] }) {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -1596,6 +1705,12 @@ export default function TargetDetailPage() {
         <TrendChart history={history} period={target.period} />
 
         <NotificationTimesCard targetId={target.id} initialTimes={target.notificationTimes || []} />
+
+        <IntentionCard
+          targetId={target.id}
+          initialWhen={target.intentionWhen || ""}
+          initialWhere={target.intentionWhere || ""}
+        />
 
         <DeleteTargetSection targetId={target.id} targetName={displayTitle} />
       </div>

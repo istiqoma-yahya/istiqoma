@@ -260,7 +260,9 @@
     "noLocationDesc": "Untuk menampilkan jadwal sholat, kami membutuhkan lokasimu.",
     "loading": "Memuat jadwal sholat...",
     "imsak": "Imsak",
-    "sunrise": "Terbit"
+    "sunrise": "Terbit",
+    "dhuha": "Dhuha",
+    "tahajjud": "Tahajjud"
   },
   "progress": {
     "title": "Progres",

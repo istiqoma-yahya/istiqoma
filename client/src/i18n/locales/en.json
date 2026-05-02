@@ -260,7 +260,9 @@
     "noLocationDesc": "To display prayer times, we need your location.",
     "loading": "Loading prayer times...",
     "imsak": "Imsak",
-    "sunrise": "Sunrise"
+    "sunrise": "Sunrise",
+    "dhuha": "Dhuha",
+    "tahajjud": "Tahajjud"
   },
   "progress": {
     "title": "Progress",

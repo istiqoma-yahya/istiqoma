@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
-import { Coordinates, PrayerTimes, CalculationMethod, Prayer } from "adhan";
+import { Coordinates, PrayerTimes, CalculationMethod, Prayer, SunnahTimes } from "adhan";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -191,6 +191,28 @@ export default function SholatPage() {
     if (!prayerTimes) return null;
     return prayerTimes.sunrise;
   }, [prayerTimes]);
+
+  const nextDayPrayerTimes = useMemo(() => {
+    if (location.latitude === null || location.longitude === null) return null;
+    const coords = new Coordinates(location.latitude, location.longitude);
+    const params = CalculationMethod.MuslimWorldLeague();
+    const nextDay = new Date(selectedDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    return new PrayerTimes(coords, nextDay, params);
+  }, [location.latitude, location.longitude, selectedDate]);
+
+  const dhuhaWindow = useMemo(() => {
+    if (!prayerTimes) return null;
+    const start = new Date(prayerTimes.sunrise.getTime() + 15 * 60 * 1000);
+    const end = new Date(prayerTimes.dhuhr.getTime() - 2 * 60 * 1000);
+    return { start, end };
+  }, [prayerTimes]);
+
+  const tahajjudWindow = useMemo(() => {
+    if (!prayerTimes || !nextDayPrayerTimes) return null;
+    const sunnah = new SunnahTimes(prayerTimes);
+    return { start: sunnah.lastThirdOfTheNight, end: nextDayPrayerTimes.fajr };
+  }, [prayerTimes, nextDayPrayerTimes]);
 
   const getPrayerKey = (prayer: typeof Prayer[keyof typeof Prayer]): PrayerKey | null => {
     switch (prayer) {
@@ -513,6 +535,36 @@ export default function SholatPage() {
                   <span>{t("sholatPage.sunrise")}</span>
                   <span className="font-mono">{format(sunriseTime, "HH:mm")}</span>
                 </span>
+              </div>
+            )}
+
+            {/* Sunnah windows: Dhuha / Tahajjud */}
+            {(dhuhaWindow || tahajjudWindow) && (
+              <div
+                className="flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-4 text-xs text-muted-foreground px-2"
+                data-testid="row-sunnah-windows"
+              >
+                {dhuhaWindow && (
+                  <span className="flex items-center gap-1.5" data-testid="text-dhuha-window">
+                    <Sun className="w-3 h-3" />
+                    <span>{t("sholatPage.dhuha")}</span>
+                    <span className="font-mono">
+                      {format(dhuhaWindow.start, "HH:mm")}–{format(dhuhaWindow.end, "HH:mm")}
+                    </span>
+                  </span>
+                )}
+                {dhuhaWindow && tahajjudWindow && (
+                  <span aria-hidden="true" className="hidden sm:inline">·</span>
+                )}
+                {tahajjudWindow && (
+                  <span className="flex items-center gap-1.5" data-testid="text-tahajjud-window">
+                    <Moon className="w-3 h-3" />
+                    <span>{t("sholatPage.tahajjud")}</span>
+                    <span className="font-mono">
+                      {format(tahajjudWindow.start, "HH:mm")}–{format(tahajjudWindow.end, "HH:mm")}
+                    </span>
+                  </span>
+                )}
               </div>
             )}
 

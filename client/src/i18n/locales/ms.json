@@ -260,7 +260,9 @@
     "noLocationDesc": "Untuk memaparkan waktu solat, kami memerlukan lokasi anda.",
     "loading": "Memuatkan waktu solat...",
     "imsak": "Imsak",
-    "sunrise": "Syuruk"
+    "sunrise": "Syuruk",
+    "dhuha": "Dhuha",
+    "tahajjud": "Tahajud"
   },
   "progress": {
     "title": "Kemajuan",

@@ -416,6 +416,19 @@ export const Q3_VALUES = [
 export const Q4_VALUES = ["subuh", "ashar", "isya", "tidur"] as const;
 export const Q5_VALUES = ["dekat-allah", "bermanfaat", "berilmu", "istiqomah", "keluarga"] as const;
 
+// Single source of truth for the onboarding Q4 → daily reminder time
+// mapping. Used by the onboarding upsert path (server) and any UI that
+// needs to display when the reminder will fire if the user picks a given
+// Q4 answer. Keeping this mapping in one place ensures the Settings edit
+// flow updates push_subscriptions.reminder_time the same way the original
+// onboarding did.
+export const Q4_TO_REMINDER_TIME: Record<(typeof Q4_VALUES)[number], string> = {
+  subuh: "05:30",
+  ashar: "16:00",
+  isya: "20:00",
+  tidur: "22:00",
+};
+
 export const insertUserOnboardingSchema = createInsertSchema(userOnboarding)
   .omit({ userId: true, createdAt: true, updatedAt: true, completed: true, completedAt: true })
   .extend({

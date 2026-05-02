@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Loader2, Mail, User as UserIcon } from "lucide-react";
+import { ArrowLeft, ChevronRight, Loader2, Mail, Sparkles, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,12 +23,27 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 import { updateProfileSchema, type UpdateProfileInput } from "@shared/models/auth";
+import type { UserOnboarding } from "@shared/schema";
+
+const Q5_ICONS: Record<string, string> = {
+  "dekat-allah": "🤲",
+  bermanfaat: "🌟",
+  berilmu: "📚",
+  istiqomah: "🏔️",
+  keluarga: "🏡",
+};
 
 export default function ProfilePage() {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
   const { user, isLoading, isAuthenticated } = useAuth();
+
+  const { data: onboarding } = useQuery<UserOnboarding | null>({
+    queryKey: ["/api/onboarding"],
+    enabled: isAuthenticated,
+  });
 
   // If the auth probe finished and there is no user, send the visitor to the
   // login screen instead of leaving them stuck on a spinner.
@@ -215,6 +230,44 @@ export default function ProfilePage() {
                   </div>
                 </form>
               </Form>
+            </Card>
+
+            <Card className="p-5" data-testid="card-journey">
+              <button
+                type="button"
+                onClick={() => navigate("/profile/onboarding")}
+                className="w-full flex items-center gap-3 text-left"
+                data-testid="button-edit-onboarding"
+              >
+                <div className="w-9 h-9 rounded-lg bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+                  {onboarding?.identityKey ? (
+                    <span className="text-lg leading-none">
+                      {Q5_ICONS[onboarding.identityKey] ?? "🌿"}
+                    </span>
+                  ) : (
+                    <Sparkles className="w-4 h-4 text-emerald-500" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3
+                    className="text-sm font-medium"
+                    data-testid="text-journey-title"
+                  >
+                    {t("profile.journeyTitle")}
+                  </h3>
+                  <p
+                    className="text-xs text-muted-foreground truncate"
+                    data-testid="text-journey-subtitle"
+                  >
+                    {onboarding?.identityKey
+                      ? t(
+                          `onboarding.identities.${onboarding.identityKey}.name`,
+                        )
+                      : t("profile.journeySubtitleEmpty")}
+                  </p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+              </button>
             </Card>
 
             {emailEndsWithGmail ? (

@@ -63,6 +63,9 @@ Points are calculated by the backend based on category and quantity. This includ
 ### Interactive Calendar (Target Detail Page)
 The `ConsistencyCalendar` allows users to interact with dates to log or update deed progress for targets. It supports checkbox and increment modes, handles future date locking, and fetches real-time status. Period progress bars (weekly, monthly, one-time) visualize target progress. All client-side time calculations use `Asia/Jakarta` timezone for consistency.
 
+### Onboarding Settings
+- After completing onboarding, users can revisit and edit their identity (Q5) and Q1–Q5 answers from `/profile/onboarding`. The page reuses `POST /api/onboarding/complete` (idempotent upsert) and the shared `Q4_TO_REMINDER_TIME` map (in `shared/schema.ts`) so changing Q4 also updates `push_subscriptions.reminder_time`. The Profile page exposes a "Your spiritual journey" card linking into this flow. All copy is localized in id/en/ms.
+
 ### Streak Freezer
 - **Functionality**: Allows users to "freeze" missed days to maintain streaks using points purchased in-app.
 - **Tables**: `streak_freezes`, `point_purchases`, `user_streak_state`.

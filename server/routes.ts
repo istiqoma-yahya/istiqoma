@@ -5,7 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
-import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, STREAK_FREEZER_PACKS } from "@shared/schema";
+import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS } from "@shared/schema";
 import { checkRateLimit, generateRecommendations } from "./recommendations";
 import { calculatePoints } from "./calculatePoints";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
@@ -1000,14 +1000,10 @@ export async function registerRoutes(
       const data = { ...parsed, identityKey: parsed.q5 };
       const row = await storage.upsertUserOnboarding(userId, data);
 
-      // Map Q4 → reminder time and update push subscription if present
-      const Q4_TO_TIME: Record<string, string> = {
-        subuh: "05:30",
-        ashar: "16:00",
-        isya: "20:00",
-        tidur: "22:00",
-      };
-      const reminderTime = Q4_TO_TIME[data.q4];
+      // Map Q4 → reminder time and update push subscription if present.
+      // Mapping is shared with the client so the Settings edit page can
+      // preview the time the user will be reminded.
+      const reminderTime = Q4_TO_REMINDER_TIME[data.q4];
       if (reminderTime) {
         const existing = await storage.getPushSubscription(userId);
         if (existing) {

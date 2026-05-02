@@ -829,6 +829,21 @@
     "connectGmailTitle": "Connect Gmail",
     "connectGmailDesc": "Link a Google account to your sign-in. You'll be sent to the Replit login screen, where you can choose Google.",
     "connectGmailCta": "Connect Gmail",
-    "gmailConnected": "Connected as {{email}}"
+    "gmailConnected": "Connected as {{email}}",
+    "journeyTitle": "Your spiritual journey",
+    "journeySubtitleEmpty": "Tell us about yourself to personalize Istiqoma"
+  },
+  "onboardingSettings": {
+    "title": "Your journey",
+    "identityHeading": "Your identity",
+    "reminderPreview": "We'll send your daily reflection reminder around {{time}}.",
+    "saveButton": "Save changes",
+    "saving": "Saving…",
+    "saveSuccess": "Your answers were saved",
+    "saveError": "Couldn't save your answers",
+    "incompleteError": "Please answer every question and pick at least one focus.",
+    "unsavedChanges": "Unsaved changes",
+    "notCompletedYet": "You haven't finished onboarding yet.",
+    "startOnboardingCta": "Start onboarding"
   }
 }

@@ -830,6 +830,21 @@
     "connectGmailTitle": "Sambungkan Gmail",
     "connectGmailDesc": "Pautkan akaun Google ke log masuk anda. Anda akan dibawa ke skrin log masuk Replit, di mana anda boleh memilih Google.",
     "connectGmailCta": "Sambungkan Gmail",
-    "gmailConnected": "Disambungkan sebagai {{email}}"
+    "gmailConnected": "Disambungkan sebagai {{email}}",
+    "journeyTitle": "Perjalanan spiritual anda",
+    "journeySubtitleEmpty": "Beritahu kami tentang diri anda untuk memperibadikan Istiqoma"
+  },
+  "onboardingSettings": {
+    "title": "Perjalanan anda",
+    "identityHeading": "Identiti anda",
+    "reminderPreview": "Peringatan renungan harian anda akan dihantar sekitar {{time}}.",
+    "saveButton": "Simpan perubahan",
+    "saving": "Menyimpan…",
+    "saveSuccess": "Jawapan anda telah disimpan",
+    "saveError": "Gagal menyimpan jawapan anda",
+    "incompleteError": "Sila jawab semua soalan dan pilih sekurang-kurangnya satu fokus.",
+    "unsavedChanges": "Perubahan belum disimpan",
+    "notCompletedYet": "Anda belum menyelesaikan onboarding.",
+    "startOnboardingCta": "Mulakan onboarding"
   }
 }

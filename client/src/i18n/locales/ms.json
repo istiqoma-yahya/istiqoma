@@ -589,6 +589,18 @@
     "noStreak": "Mulakan streak anda hari ini!",
     "day": "Hari"
   },
+  "streakDetail": {
+    "title": "Streak",
+    "back": "Kembali",
+    "prevMonth": "Bulan sebelumnya",
+    "nextMonth": "Bulan seterusnya",
+    "daysPracticed": "Hari beramal",
+    "freezersUsed": "Pelindung digunakan",
+    "empty": "Tiada aktiviti bulan ini.",
+    "legendDeed": "Hari beramal",
+    "legendFrozen": "Diselamatkan pelindung",
+    "legendInactive": "Tidak aktif"
+  },
   "streakFreezer": {
     "title": "Pelindung Streak",
     "back": "Kembali",

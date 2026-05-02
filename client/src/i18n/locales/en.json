@@ -588,6 +588,18 @@
     "noStreak": "Start your streak today!",
     "day": "Day"
   },
+  "streakDetail": {
+    "title": "Streak",
+    "back": "Back",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "daysPracticed": "Days practiced",
+    "freezersUsed": "Freezers used",
+    "empty": "No activity this month yet.",
+    "legendDeed": "Deed day",
+    "legendFrozen": "Saved by freezer",
+    "legendInactive": "Inactive"
+  },
   "streakFreezer": {
     "title": "Streak Freezer",
     "back": "Back",

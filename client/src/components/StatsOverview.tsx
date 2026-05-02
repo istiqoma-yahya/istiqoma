@@ -69,8 +69,8 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
         transition={{ delay: 0.1 }}
         className={`glass-card p-5 border cursor-pointer hover:bg-muted/30 transition-colors ${hasActivityToday ? "border-orange-500/20" : "border-gray-400/20"}`}
         data-testid="card-stats-streak"
-        onClick={() => navigate("/streak-freezer")}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/streak-freezer"); } }}
+        onClick={() => navigate("/streak")}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/streak"); } }}
         role="button"
         tabIndex={0}
       >
@@ -83,14 +83,17 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
               </div>
             )}
           </div>
-          <span
-            className="text-xs font-medium px-2 py-0.5 rounded-lg flex items-center gap-1 bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300"
+          <button
+            type="button"
+            className="text-xs font-medium px-2 py-0.5 rounded-lg flex items-center gap-1 bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/60 transition-colors"
             data-testid="chip-stats-freezer"
             title={t('streakFreezer.chipTooltip')}
+            onClick={(e) => { e.stopPropagation(); navigate("/streak-freezer"); }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); } }}
           >
             <Snowflake className="w-3 h-3" />
             {formatNumber(freezerAvailable)}
-          </span>
+          </button>
         </div>
         <div>
           <p className="text-muted-foreground font-medium text-sm mb-0.5">{t('streak.daysInARow')}</p>

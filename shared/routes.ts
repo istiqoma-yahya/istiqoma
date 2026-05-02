@@ -287,6 +287,23 @@ export const api = {
         401: errorSchemas.unauthorized,
       },
     },
+    month: {
+      method: "GET" as const,
+      path: "/api/streak/month",
+      responses: {
+        200: z.object({
+          days: z.array(z.object({
+            date: z.string(),
+            hadDeed: z.boolean(),
+            wasFrozen: z.boolean(),
+          })),
+          daysPracticed: z.number(),
+          freezersUsed: z.number(),
+        }),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+      },
+    },
   },
   streakFreezer: {
     get: {

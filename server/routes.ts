@@ -8,6 +8,8 @@ import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pus
 import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, STREAK_FREEZER_PACKS } from "@shared/schema";
 import { calculatePoints } from "./calculatePoints";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
+import { format } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
 
 function getErrorStatus(err: unknown): number | undefined {
   if (
@@ -756,6 +758,84 @@ export async function registerRoutes(
     } catch (err) {
       throw err;
     }
+  });
+
+  // ─── Streak month calendar ───────────────────────────────────
+  // Read-only monthly view of the user's streak. Returns one entry per
+  // calendar day in the requested month interpreted in the user's timezone,
+  // marking whether the day had a logged deed and whether it was rescued
+  // by a streak freezer. Reuses the same data sources as /api/streak so
+  // the calendar is always consistent with the dashboard streak number.
+  app.get(api.streak.month.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const monthQuerySchema = z.object({
+      year: z.coerce.number().int().min(1970).max(9999),
+      month: z.coerce.number().int().min(1).max(12),
+      timezone: z.string().optional(),
+    });
+    const parsed = monthQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: parsed.error.issues[0]?.message ?? "Invalid query",
+        field: parsed.error.issues[0]?.path?.join(".") ?? undefined,
+      });
+    }
+    const { year, month, timezone: rawTz } = parsed.data;
+
+    // Resolve timezone with the same fallback strategy as the rest of the
+    // app: explicit query → user's push subscription → Asia/Jakarta.
+    let tz = parseTimezone(rawTz);
+    if (!tz) {
+      const sub = await storage.getPushSubscription(userId);
+      tz = parseTimezone(sub?.timezone) ?? "Asia/Jakarta";
+    }
+
+    const monthStr = String(month).padStart(2, "0");
+    const lastDayInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    const lastDayStr = String(lastDayInMonth).padStart(2, "0");
+    const monthStartUtc = fromZonedTime(`${year}-${monthStr}-01T00:00:00`, tz);
+    const monthEndUtc = fromZonedTime(`${year}-${monthStr}-${lastDayStr}T23:59:59.999`, tz);
+
+    // Distinct deed dates within the month, bucketed by the user's
+    // local calendar day. We pull the raw createdAt timestamps and bucket
+    // in JS so the bucketing rule is identical to the rest of the app
+    // (toZonedTime + format yyyy-MM-dd).
+    const deedRows = await db
+      .select({ createdAt: deeds.createdAt })
+      .from(deeds)
+      .where(
+        and(
+          eq(deeds.userId, userId),
+          gte(deeds.createdAt, monthStartUtc),
+          lte(deeds.createdAt, monthEndUtc),
+        ),
+      );
+    const deedDateSet = new Set<string>();
+    for (const row of deedRows) {
+      if (!row.createdAt) continue;
+      const local = toZonedTime(row.createdAt, tz);
+      deedDateSet.add(format(local, "yyyy-MM-dd"));
+    }
+
+    // streak_freezes is already keyed by YYYY-MM-DD strings (date column)
+    // so we simply membership-check each day in the month against the set.
+    const frozenDates = await storage.getFrozenDates(userId);
+
+    const days: { date: string; hadDeed: boolean; wasFrozen: boolean }[] = [];
+    let daysPracticed = 0;
+    let freezersUsed = 0;
+    for (let d = 1; d <= lastDayInMonth; d++) {
+      const dayStr = `${year}-${monthStr}-${String(d).padStart(2, "0")}`;
+      const hadDeed = deedDateSet.has(dayStr);
+      // wasFrozen is only true when a freezer rescued a day with no deed,
+      // matching the model used by /api/streak's frozenDays array.
+      const wasFrozen = !hadDeed && frozenDates.has(dayStr);
+      if (hadDeed) daysPracticed++;
+      if (wasFrozen) freezersUsed++;
+      days.push({ date: dayStr, hadDeed, wasFrozen });
+    }
+
+    res.json({ days, daysPracticed, freezersUsed });
   });
 
   // ─── Streak Freezer ──────────────────────────────────────────

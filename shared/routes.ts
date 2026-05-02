@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, targetRecommendationsRequestSchema, targetRecommendationsResponseSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -252,6 +252,19 @@ export const api = {
         200: z.array(z.custom<typeof deeds.$inferSelect>()),
         401: errorSchemas.unauthorized,
         404: errorSchemas.notFound,
+      },
+    },
+    recommendations: {
+      method: "POST" as const,
+      path: "/api/targets/recommendations",
+      input: targetRecommendationsRequestSchema,
+      responses: {
+        200: targetRecommendationsResponseSchema,
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+        429: errorSchemas.validation,
+        500: errorSchemas.internal,
+        503: errorSchemas.internal,
       },
     },
     detail: {

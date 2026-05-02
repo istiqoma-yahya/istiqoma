@@ -6,6 +6,7 @@ import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
 import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, STREAK_FREEZER_PACKS } from "@shared/schema";
+import { checkRateLimit, generateRecommendations } from "./recommendations";
 import { calculatePoints } from "./calculatePoints";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
 import { format } from "date-fns";
@@ -473,6 +474,44 @@ export async function registerRoutes(
     const timezone = parseTimezone(req.query.timezone);
     const breakdown = await storage.getDailyBreakdown(id, userId, startDate, endDate, timezone);
     res.json(breakdown);
+  });
+
+  app.post(api.targets.recommendations.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { language } = api.targets.recommendations.input.parse(req.body);
+
+      const limit = checkRateLimit(userId);
+      if (!limit.allowed) {
+        res.setHeader("Retry-After", String(limit.retryAfterSeconds ?? 60));
+        return res.status(429).json({
+          message: "Too many recommendation requests. Please try again later.",
+        });
+      }
+
+      const onboarding = await storage.getUserOnboarding(userId);
+
+      let recommendations;
+      try {
+        recommendations = await generateRecommendations(onboarding, language);
+      } catch (err) {
+        console.error("Recommendations: Anthropic call failed", err);
+        return res.status(503).json({
+          message: "Failed to fetch recommendations. Please try again.",
+        });
+      }
+
+      if (recommendations.length === 0) {
+        return res.status(503).json({
+          message: "No valid recommendations were returned. Please try again.",
+        });
+      }
+
+      res.json({ recommendations });
+    } catch (err) {
+      const status = getErrorStatus(err) ?? 400;
+      res.status(status).json({ message: getErrorMessage(err) });
+    }
   });
 
   app.get(api.targets.detail.path, isAuthenticated, async (req: any, res) => {

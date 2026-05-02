@@ -4,9 +4,11 @@ import { useCreateTarget } from "@/hooks/use-targets";
 import { useTranslation } from "react-i18next";
 import { TargetForm } from "@/components/TargetForm";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import { RecommendationsEntryCard } from "@/components/RecommendationsEntryCard";
 import { useToast } from "@/hooks/use-toast";
 import { X } from "lucide-react";
-import type { InsertTarget } from "@shared/schema";
+import { clearRecommendation, loadRecommendation } from "@/lib/recommendationStorage";
+import type { InsertTarget, TargetRecommendation } from "@shared/schema";
 
 export default function CreateTargetPage() {
   const { t } = useTranslation();
@@ -15,28 +17,62 @@ export default function CreateTargetPage() {
   const { toast } = useToast();
   const createTarget = useCreateTarget();
 
-  const prefilledCategory = useMemo(() => {
-    const params = new URLSearchParams(search);
-    return params.get("category") || undefined;
-  }, [search]);
+  const params = useMemo(() => new URLSearchParams(search), [search]);
+  const prefilledCategory = params.get("category") || undefined;
+  const recommendationId = params.get("recommendation") || undefined;
 
-  const defaultValues = prefilledCategory
-    ? ({
-        name: "",
-        category: prefilledCategory,
-        targetValue: 10,
-        period: "daily" as const,
-        targetType: "achievement" as const,
-        recurrence: "recurring" as const,
+  // Derive the recommendation directly from the URL on every render. Wouter
+  // does NOT remount this component when navigating from /targets/new to
+  // /targets/new?recommendation=<id>; it only updates `search`. Combined with
+  // the `key={recommendationId || ...}` on TargetForm below, this guarantees
+  // the form re-initializes with the recommendation defaults on the very
+  // first render after the URL changes (no useEffect lag).
+  const recommendation = useMemo<TargetRecommendation | null>(
+    () => (recommendationId ? loadRecommendation(recommendationId) : null),
+    [recommendationId],
+  );
+
+  const defaultValues = useMemo<Partial<InsertTarget> | undefined>(() => {
+    if (recommendation) {
+      return {
+        name: recommendation.name,
+        category: recommendation.category,
+        targetValue: recommendation.targetValue,
+        period: recommendation.period,
+        targetType: "achievement",
+        recurrence: recommendation.recurrence,
+        dzikirType: recommendation.dzikirType,
+        sholatType: recommendation.sholatType,
+        fastingType: recommendation.fastingType,
+        isJamaah: recommendation.isJamaah,
+        quranUnit: recommendation.quranUnit,
+        sedekahType: recommendation.sedekahType,
+        customUnit: recommendation.customUnit,
         notificationTimes: [],
         intentionWhen: "",
         intentionWhere: "",
-      } as Partial<InsertTarget>)
-    : undefined;
+      };
+    }
+    if (prefilledCategory) {
+      return {
+        name: "",
+        category: prefilledCategory,
+        targetValue: 10,
+        period: "daily",
+        targetType: "achievement",
+        recurrence: "recurring",
+        notificationTimes: [],
+        intentionWhen: "",
+        intentionWhere: "",
+      };
+    }
+    return undefined;
+  }, [recommendation, prefilledCategory]);
 
   const handleSubmit = async (data: InsertTarget) => {
     try {
       await createTarget.mutateAsync(data);
+      if (recommendationId) clearRecommendation(recommendationId);
       toast({
         title: t("targets.targetCreated"),
         description: t("targets.targetCreatedDesc"),
@@ -52,6 +88,7 @@ export default function CreateTargetPage() {
   };
 
   const handleCancel = () => {
+    if (recommendationId) clearRecommendation(recommendationId);
     navigate("/targets");
   };
 
@@ -79,7 +116,10 @@ export default function CreateTargetPage() {
           {t("targets.addTargetSubtitle")}
         </p>
 
+        {!recommendation && <RecommendationsEntryCard surface="create-target" />}
+
         <TargetForm
+          key={recommendationId || prefilledCategory || "blank"}
           mode="create"
           defaultValues={defaultValues}
           onSubmit={handleSubmit}

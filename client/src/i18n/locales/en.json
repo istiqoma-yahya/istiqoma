@@ -157,7 +157,9 @@
     "Fasting Fardhu": "Fasting Fardhu",
     "Fasting Sunnah": "Fasting Sunnah",
     "Baca Quran": "Recite Quran",
-    "Shodaqoh": "Shodaqoh"
+    "Shodaqoh": "Shodaqoh",
+    "Birrul Walidayn": "Kindness to Parents",
+    "Tolabul Ilmi": "Seeking Knowledge"
   },
   "dzikir": {
     "title": "Dzikir Counter",
@@ -640,6 +642,26 @@
     "purchaseErrorTitle": "Purchase failed",
     "insufficientPointsTitle": "Not enough points",
     "insufficientPointsDescription": "Earn more points by recording good deeds, then try again."
+  },
+  "recommendations": {
+    "entryTitle": "Need target ideas?",
+    "entryDesc": "See personalized suggestions based on your onboarding answers, each backed by a verse from the Quran or an authentic hadith.",
+    "entryCta": "See suggestions",
+    "dismiss": "Dismiss",
+    "seeSuggestions": "See suggestions",
+    "sheetTitle": "Suggested targets for you",
+    "disclaimer": "These are AI-generated suggestions grounded in the Quran and authentic hadith from Sahih al-Bukhari and Sahih Muslim. Always verify with a trusted scholar.",
+    "errorTitle": "Couldn't load suggestions",
+    "errorDesc": "Please try again in a moment.",
+    "retry": "Try again",
+    "empty": "No suggestions are available right now.",
+    "useThisTarget": "Use this target",
+    "backToList": "Back to suggestions",
+    "sourceKind": {
+      "quran": "Quran",
+      "bukhari": "Sahih al-Bukhari",
+      "muslim": "Sahih Muslim"
+    }
   },
   "onboarding": {
     "intro": "Introduction",

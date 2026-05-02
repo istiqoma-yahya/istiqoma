@@ -65,6 +65,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { format, isPast, type Locale } from "date-fns";
+import { RecommendationsEntryCard } from "@/components/RecommendationsEntryCard";
 import { id as idLocale, ms as msLocale, enUS } from "date-fns/locale";
 
 interface TargetCardProps {
@@ -566,17 +567,20 @@ export default function TargetsPage() {
         </div>
 
         {targetsArray.length === 0 && folderList.length === 0 ? (
-          <Card className="p-8 text-center">
-            <Target className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-semibold text-lg mb-2" data-testid="text-no-targets">
-              {t("targets.noTargets")}
-            </h3>
-            <p className="text-muted-foreground mb-4">{t("targets.noTargetsDesc")}</p>
-            <Button onClick={() => navigate("/targets/new")} data-testid="button-add-first-target">
-              <Plus className="w-4 h-4 mr-1" />
-              {t("targets.addFirstTarget")}
-            </Button>
-          </Card>
+          <>
+            <RecommendationsEntryCard surface="targets-empty" />
+            <Card className="p-8 text-center">
+              <Target className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="font-semibold text-lg mb-2" data-testid="text-no-targets">
+                {t("targets.noTargets")}
+              </h3>
+              <p className="text-muted-foreground mb-4">{t("targets.noTargetsDesc")}</p>
+              <Button onClick={() => navigate("/targets/new")} data-testid="button-add-first-target">
+                <Plus className="w-4 h-4 mr-1" />
+                {t("targets.addFirstTarget")}
+              </Button>
+            </Card>
+          </>
         ) : (
           <div className="space-y-4">
             {folderList.map((folder) => {

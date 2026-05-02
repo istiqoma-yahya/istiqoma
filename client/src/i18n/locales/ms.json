@@ -157,7 +157,9 @@
     "Fasting Fardhu": "Puasa Fardhu",
     "Fasting Sunnah": "Puasa Sunat",
     "Baca Quran": "Baca Quran",
-    "Shodaqoh": "Sedekah"
+    "Shodaqoh": "Sedekah",
+    "Birrul Walidayn": "Bakti kepada Ibu Bapa",
+    "Tolabul Ilmi": "Menuntut Ilmu"
   },
   "dzikir": {
     "title": "Kaunter Zikir",
@@ -641,6 +643,26 @@
     "purchaseErrorTitle": "Pembelian gagal",
     "insufficientPointsTitle": "Mata tidak mencukupi",
     "insufficientPointsDescription": "Kumpul lebih banyak mata dengan mencatat amalan baik, kemudian cuba lagi."
+  },
+  "recommendations": {
+    "entryTitle": "Perlukan idea sasaran?",
+    "entryDesc": "Lihat cadangan yang diperibadikan berdasarkan jawapan onboarding anda, setiap satunya berdasarkan ayat al-Quran atau hadis sahih.",
+    "entryCta": "Lihat cadangan",
+    "dismiss": "Tutup",
+    "seeSuggestions": "Lihat cadangan",
+    "sheetTitle": "Sasaran yang dicadangkan untuk anda",
+    "disclaimer": "Cadangan ini dijana oleh AI dan berasaskan al-Quran serta hadis sahih dari Sahih al-Bukhari dan Sahih Muslim. Sila sentiasa sahkan dengan ulama yang dipercayai.",
+    "errorTitle": "Gagal memuatkan cadangan",
+    "errorDesc": "Sila cuba lagi sebentar.",
+    "retry": "Cuba lagi",
+    "empty": "Tiada cadangan tersedia buat masa ini.",
+    "useThisTarget": "Gunakan sasaran ini",
+    "backToList": "Kembali ke senarai",
+    "sourceKind": {
+      "quran": "Al-Quran",
+      "bukhari": "Sahih al-Bukhari",
+      "muslim": "Sahih Muslim"
+    }
   },
   "onboarding": {
     "intro": "Pengenalan",

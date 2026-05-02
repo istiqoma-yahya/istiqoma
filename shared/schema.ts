@@ -419,3 +419,63 @@ export const insertUserOnboardingSchema = createInsertSchema(userOnboarding)
 
 export type UserOnboarding = typeof userOnboarding.$inferSelect;
 export type InsertUserOnboarding = z.infer<typeof insertUserOnboardingSchema>;
+
+// ─── Target Recommendations (LLM-backed) ──────────────────────
+// Citations are restricted server-side to Quran, Sahih al-Bukhari, or
+// Sahih Muslim. Any item the model returns with a different `source.kind`
+// is dropped before responding to the client.
+export const RECOMMENDATION_LANGUAGES = ["id", "en", "ms"] as const;
+export type RecommendationLanguage = (typeof RECOMMENDATION_LANGUAGES)[number];
+
+export const RECOMMENDATION_SOURCE_KINDS = ["quran", "bukhari", "muslim"] as const;
+export type RecommendationSourceKind = (typeof RECOMMENDATION_SOURCE_KINDS)[number];
+
+export const RECOMMENDATION_CATEGORIES = [
+  "Sholat Fardhu",
+  "Sholat Sunnah",
+  "Dzikir",
+  "Puasa",
+  "Baca Quran",
+  "Shodaqoh",
+  "Birrul Walidayn",
+  "Tolabul Ilmi",
+] as const;
+export type RecommendationCategory = (typeof RECOMMENDATION_CATEGORIES)[number];
+
+export const recommendationSourceSchema = z.object({
+  kind: z.enum(RECOMMENDATION_SOURCE_KINDS),
+  reference: z.string().min(1).max(200),
+  arabic: z.string().min(1).max(4000),
+  translation: z.string().min(1).max(4000),
+});
+
+export const targetRecommendationSchema = z.object({
+  id: z.string().min(1).max(80),
+  name: z.string().min(1).max(120),
+  category: z.enum(RECOMMENDATION_CATEGORIES),
+  targetValue: z.number().int().min(1).max(100000),
+  period: z.enum(["daily", "weekly", "monthly"]).optional(),
+  recurrence: z.enum(["recurring", "oneTime"]).default("recurring"),
+  dzikirType: z.string().max(120).optional(),
+  sholatType: z.string().max(60).optional(),
+  fastingType: z.string().max(60).optional(),
+  isJamaah: z.boolean().optional(),
+  quranUnit: z.enum(["ayat", "halaman", "surat", "juz"]).optional(),
+  sedekahType: z.enum(["uang", "hitungan"]).optional(),
+  customUnit: z.enum(["hitungan", "ayat", "halaman", "surat", "juz", "rakaat", "hari", "uang", "times", "days"]).optional(),
+  whyItFits: z.string().min(1).max(500),
+  source: recommendationSourceSchema,
+});
+
+export type TargetRecommendation = z.infer<typeof targetRecommendationSchema>;
+
+export const targetRecommendationsRequestSchema = z.object({
+  language: z.enum(RECOMMENDATION_LANGUAGES).default("id"),
+});
+
+export const targetRecommendationsResponseSchema = z.object({
+  recommendations: z.array(targetRecommendationSchema),
+});
+
+export type TargetRecommendationsRequest = z.infer<typeof targetRecommendationsRequestSchema>;
+export type TargetRecommendationsResponse = z.infer<typeof targetRecommendationsResponseSchema>;

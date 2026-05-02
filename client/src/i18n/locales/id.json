@@ -157,7 +157,9 @@
     "Fasting Fardhu": "Puasa Fardhu",
     "Fasting Sunnah": "Puasa Sunnah",
     "Baca Quran": "Baca Quran",
-    "Shodaqoh": "Shodaqoh"
+    "Shodaqoh": "Shodaqoh",
+    "Birrul Walidayn": "Birrul Walidayn",
+    "Tolabul Ilmi": "Tolabul Ilmi"
   },
   "dzikir": {
     "title": "Penghitung Dzikir",
@@ -641,6 +643,26 @@
     "purchaseErrorTitle": "Pembelian gagal",
     "insufficientPointsTitle": "Poin tidak cukup",
     "insufficientPointsDescription": "Kumpulkan poin lagi dengan mencatat amal baik, lalu coba lagi."
+  },
+  "recommendations": {
+    "entryTitle": "Butuh ide target?",
+    "entryDesc": "Lihat saran yang dipersonalisasi berdasarkan jawaban onboarding-mu, lengkap dengan dalil dari Al-Quran dan hadits sahih.",
+    "entryCta": "Lihat saran",
+    "dismiss": "Tutup",
+    "seeSuggestions": "Lihat saran",
+    "sheetTitle": "Saran target untukmu",
+    "disclaimer": "Saran ini dihasilkan oleh AI dan didasarkan pada Al-Quran serta hadits dari Sahih al-Bukhari dan Sahih Muslim. Selalu konfirmasikan dengan ulama yang terpercaya.",
+    "errorTitle": "Gagal memuat saran",
+    "errorDesc": "Coba lagi sebentar.",
+    "retry": "Coba lagi",
+    "empty": "Belum ada saran tersedia.",
+    "useThisTarget": "Gunakan target ini",
+    "backToList": "Kembali ke daftar",
+    "sourceKind": {
+      "quran": "Al-Quran",
+      "bukhari": "Sahih al-Bukhari",
+      "muslim": "Sahih Muslim"
+    }
   },
   "onboarding": {
     "intro": "Pengenalan",

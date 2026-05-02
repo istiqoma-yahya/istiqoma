@@ -658,6 +658,11 @@
     "empty": "Belum ada saran tersedia.",
     "useThisTarget": "Gunakan target ini",
     "backToList": "Kembali ke daftar",
+    "previewName": "Nama target",
+    "previewCategory": "Kategori",
+    "previewAmount": "Jumlah",
+    "previewPeriod": "Periode",
+    "previewRecurrence": "Pengulangan",
     "sourceKind": {
       "quran": "Al-Quran",
       "bukhari": "Sahih al-Bukhari",

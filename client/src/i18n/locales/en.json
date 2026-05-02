@@ -657,6 +657,11 @@
     "empty": "No suggestions are available right now.",
     "useThisTarget": "Use this target",
     "backToList": "Back to suggestions",
+    "previewName": "Target name",
+    "previewCategory": "Category",
+    "previewAmount": "Amount",
+    "previewPeriod": "Period",
+    "previewRecurrence": "Recurrence",
     "sourceKind": {
       "quran": "Quran",
       "bukhari": "Sahih al-Bukhari",

@@ -111,7 +111,35 @@ export function RecommendationsSheet({ open, onOpenChange }: RecommendationsShee
                   {selected.targetValue}
                   {periodLabel(selected) ? ` · ${periodLabel(selected)}` : ""}
                 </Badge>
+                <Badge variant="outline" data-testid="badge-recommendation-recurrence">
+                  {selected.recurrence === "oneTime"
+                    ? t("targets.oneTime")
+                    : t("targets.recurring")}
+                </Badge>
               </div>
+
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs rounded-md border border-border bg-muted/30 p-3">
+                <dt className="text-muted-foreground">{t("recommendations.previewName")}</dt>
+                <dd className="font-medium text-right" data-testid="text-recommendation-preview-name">
+                  {selected.name}
+                </dd>
+                <dt className="text-muted-foreground">{t("recommendations.previewCategory")}</dt>
+                <dd className="font-medium text-right">
+                  {translateCategoryName(selected.category)}
+                </dd>
+                <dt className="text-muted-foreground">{t("recommendations.previewAmount")}</dt>
+                <dd className="font-medium text-right">{selected.targetValue}</dd>
+                <dt className="text-muted-foreground">{t("recommendations.previewPeriod")}</dt>
+                <dd className="font-medium text-right" data-testid="text-recommendation-preview-period">
+                  {periodLabel(selected) || "—"}
+                </dd>
+                <dt className="text-muted-foreground">{t("recommendations.previewRecurrence")}</dt>
+                <dd className="font-medium text-right" data-testid="text-recommendation-preview-recurrence">
+                  {selected.recurrence === "oneTime"
+                    ? t("targets.oneTime")
+                    : t("targets.recurring")}
+                </dd>
+              </dl>
 
               <p className="text-sm text-muted-foreground" data-testid="text-recommendation-why">
                 {selected.whyItFits}

@@ -18,27 +18,81 @@ interface LocationState {
 
 const LOCATION_STORAGE_KEY = "qibla_last_location";
 
-function getSavedLocation(): { latitude: number; longitude: number } | null {
+interface SavedLocation {
+  latitude: number;
+  longitude: number;
+  placeName?: string | null;
+}
+
+function getSavedLocation(): SavedLocation | null {
   try {
     const saved = localStorage.getItem(LOCATION_STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
       if (typeof parsed.latitude === "number" && typeof parsed.longitude === "number") {
-        return parsed;
+        return {
+          latitude: parsed.latitude,
+          longitude: parsed.longitude,
+          placeName: typeof parsed.placeName === "string" ? parsed.placeName : null,
+        };
       }
     }
   } catch {}
   return null;
 }
 
-function saveLocation(latitude: number, longitude: number) {
+function saveLocation(latitude: number, longitude: number, placeName?: string | null) {
   try {
-    localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify({ latitude, longitude }));
+    localStorage.setItem(
+      LOCATION_STORAGE_KEY,
+      JSON.stringify({ latitude, longitude, placeName: placeName ?? null })
+    );
   } catch {}
 }
 
+function buildPlaceName(address: Record<string, string> | undefined): string | null {
+  if (!address) return null;
+  const locality =
+    address.city ||
+    address.town ||
+    address.village ||
+    address.municipality ||
+    address.county ||
+    address.suburb ||
+    null;
+  const region = address.state || address.region || null;
+  const country = address.country || null;
+  const parts = [locality, region, country].filter(
+    (p): p is string => typeof p === "string" && p.length > 0
+  );
+  if (parts.length === 0) return null;
+  return parts.join(", ");
+}
+
+async function reverseGeocode(
+  latitude: number,
+  longitude: number,
+  language: string,
+  signal: AbortSignal
+): Promise<string | null> {
+  const url = new URL("https://nominatim.openstreetmap.org/reverse");
+  url.searchParams.set("lat", String(latitude));
+  url.searchParams.set("lon", String(longitude));
+  url.searchParams.set("format", "json");
+  url.searchParams.set("zoom", "10");
+  url.searchParams.set("addressdetails", "1");
+  url.searchParams.set("accept-language", language);
+  const res = await fetch(url.toString(), {
+    signal,
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return buildPlaceName(data?.address);
+}
+
 export default function QiblaPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const saved = getSavedLocation();
   const [location, setLocation] = useState<LocationState>({
@@ -48,6 +102,8 @@ export default function QiblaPage() {
     loading: false,
     requested: saved !== null,
   });
+  const [placeName, setPlaceName] = useState<string | null>(saved?.placeName ?? null);
+  const [placeLoading, setPlaceLoading] = useState(false);
   const [compassHeading, setCompassHeading] = useState<number | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [compassEnabled, setCompassEnabled] = useState(false);
@@ -67,19 +123,51 @@ export default function QiblaPage() {
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        saveLocation(lat, lng);
-        setLocation({
-          latitude: lat,
-          longitude: lng,
-          error: null,
-          loading: false,
-          requested: true,
+        setLocation((prev) => {
+          const movedFar =
+            prev.latitude === null ||
+            prev.longitude === null ||
+            Math.abs(prev.latitude - lat) > 0.05 ||
+            Math.abs(prev.longitude - lng) > 0.05;
+          if (movedFar) {
+            setPlaceName(null);
+          }
+          saveLocation(lat, lng, movedFar ? null : saved?.placeName ?? null);
+          return {
+            latitude: lat,
+            longitude: lng,
+            error: null,
+            loading: false,
+            requested: true,
+          };
         });
       },
       () => {},
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
     );
   }, []);
+
+  useEffect(() => {
+    if (location.latitude === null || location.longitude === null) return;
+    if (placeName) return;
+    const controller = new AbortController();
+    setPlaceLoading(true);
+    reverseGeocode(location.latitude, location.longitude, i18n.language || "en", controller.signal)
+      .then((name) => {
+        if (controller.signal.aborted) return;
+        if (name) {
+          setPlaceName(name);
+          if (location.latitude !== null && location.longitude !== null) {
+            saveLocation(location.latitude, location.longitude, name);
+          }
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!controller.signal.aborted) setPlaceLoading(false);
+      });
+    return () => controller.abort();
+  }, [location.latitude, location.longitude, placeName, i18n.language]);
 
   const dateString = currentTime.toDateString();
   const dateOnly = useMemo(() => {
@@ -155,7 +243,8 @@ export default function QiblaPage() {
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        saveLocation(lat, lng);
+        setPlaceName(null);
+        saveLocation(lat, lng, null);
         setLocation({
           latitude: lat,
           longitude: lng,
@@ -474,20 +563,29 @@ export default function QiblaPage() {
               <div className="grid grid-cols-2 gap-4">
                 <Card className="p-6">
                   <div className="text-muted-foreground text-sm mb-2">{t("qibla.distanceToKaaba")}</div>
-                  <div className="text-2xl font-bold text-foreground">
+                  <div className="text-2xl font-bold text-foreground" data-testid="text-distance-kaaba">
                     {distanceToKaaba !== null
-                      ? distanceToKaaba > 1000
-                        ? `${(distanceToKaaba / 1000).toFixed(0)}k km`
-                        : `${Math.round(distanceToKaaba)} km`
+                      ? `${new Intl.NumberFormat(i18n.language || "en").format(
+                          Math.round(distanceToKaaba)
+                        )} km`
                       : "--"}
                   </div>
                 </Card>
                 <Card className="p-6">
                   <div className="text-muted-foreground text-sm mb-2">{t("qibla.yourLocation")}</div>
-                  <div className="text-sm font-medium text-foreground">
-                    {location.latitude !== null && location.longitude !== null
-                      ? `${location.latitude.toFixed(4)}°, ${location.longitude.toFixed(4)}°`
-                      : "--"}
+                  <div className="text-sm font-medium text-foreground" data-testid="text-your-location">
+                    {location.latitude === null || location.longitude === null ? (
+                      "--"
+                    ) : placeName ? (
+                      placeName
+                    ) : placeLoading ? (
+                      <span className="inline-flex items-center gap-2 text-muted-foreground">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        {t("qibla.locatingPlace")}
+                      </span>
+                    ) : (
+                      `${location.latitude.toFixed(4)}°, ${location.longitude.toFixed(4)}°`
+                    )}
                   </div>
                 </Card>
               </div>

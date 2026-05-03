@@ -264,6 +264,7 @@
     "qiblaDirection": "Qibla Direction",
     "distanceToKaaba": "Distance to Kaaba",
     "yourLocation": "Your Location",
+    "locatingPlace": "Locating…",
     "enableCompass": "Enable Live Compass",
     "tapToActivate": "Tap to activate compass",
     "compassActive": "Compass Active",

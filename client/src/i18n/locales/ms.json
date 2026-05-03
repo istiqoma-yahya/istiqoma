@@ -826,6 +826,7 @@
     "usernameLabel": "Nama pengguna",
     "usernamePlaceholder": "cth. yusuf123",
     "usernameHelp": "Sehingga 40 aksara. Biarkan kosong untuk kosongkan.",
+    "usernameTaken": "Nama pengguna itu telah digunakan. Sila pilih yang lain.",
     "phoneLabel": "Nombor telefon",
     "phonePlaceholder": "+60 12-345 6789",
     "phoneHelp": "Hanya digit, ruang, +, -, ( dan ). Sehingga 30 aksara.",

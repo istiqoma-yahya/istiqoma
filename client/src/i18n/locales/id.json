@@ -826,6 +826,7 @@
     "usernameLabel": "Nama pengguna",
     "usernamePlaceholder": "mis. yusuf123",
     "usernameHelp": "Maksimal 40 karakter. Kosongkan untuk menghapus.",
+    "usernameTaken": "Nama pengguna itu sudah dipakai. Silakan pilih yang lain.",
     "phoneLabel": "Nomor telepon",
     "phonePlaceholder": "+62 812 3456 7890",
     "phoneHelp": "Hanya angka, spasi, +, -, ( dan ). Maksimal 30 karakter.",

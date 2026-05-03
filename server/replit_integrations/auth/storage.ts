@@ -2,6 +2,19 @@ import { users, type User, type UpsertUser } from "@shared/models/auth";
 import { db } from "../../db";
 import { eq } from "drizzle-orm";
 
+/**
+ * Thrown by `updateProfile` when the requested username collides
+ * (case-insensitively) with another user's username. The route layer
+ * translates this into a 409 response so the client can surface it as
+ * a field-level error.
+ */
+export class UsernameTakenError extends Error {
+  constructor() {
+    super("Username is already taken");
+    this.name = "UsernameTakenError";
+  }
+}
+
 // Interface for auth storage operations
 // (IMPORTANT) These user operations are mandatory for Replit Auth.
 export interface IAuthStorage {
@@ -47,16 +60,36 @@ class AuthStorage implements IAuthStorage {
     userId: string,
     data: { username: string | null; phoneNumber: string | null },
   ): Promise<User | undefined> {
-    const [user] = await db
-      .update(users)
-      .set({
-        username: data.username,
-        phoneNumber: data.phoneNumber,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, userId))
-      .returning();
-    return user;
+    try {
+      const [user] = await db
+        .update(users)
+        .set({
+          username: data.username,
+          phoneNumber: data.phoneNumber,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, userId))
+        .returning();
+      return user;
+    } catch (err: unknown) {
+      // Postgres unique_violation on the case-insensitive username index
+      // means another user already claimed this handle. Translate into a
+      // typed error so the route layer can return a clean 409.
+      const code =
+        (err as { code?: string })?.code ??
+        (err as { cause?: { code?: string } })?.cause?.code;
+      const constraint =
+        (err as { constraint?: string })?.constraint ??
+        (err as { cause?: { constraint?: string } })?.cause?.constraint;
+      if (
+        code === "23505" &&
+        (constraint === "users_username_lower_unique" ||
+          constraint === undefined)
+      ) {
+        throw new UsernameTakenError();
+      }
+      throw err;
+    }
   }
 }
 

@@ -1,5 +1,12 @@
 import { sql } from "drizzle-orm";
-import { index, jsonb, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+import {
+  index,
+  jsonb,
+  pgTable,
+  timestamp,
+  uniqueIndex,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { z } from "zod";
 
 // Session storage table.
@@ -30,7 +37,11 @@ export const users = pgTable("users", {
   phoneNumber: varchar("phone_number"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  // Case-insensitive uniqueness on `username`. Postgres allows multiple NULLs
+  // in a unique index, so users who haven't set a username are unaffected.
+  uniqueIndex("users_username_lower_unique").on(sql`lower(${table.username})`),
+]);
 
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;

@@ -83,6 +83,17 @@ export default function ProfilePage() {
       toast({ title: t("profile.saveSuccess") });
     },
     onError: (err: Error) => {
+      // apiRequest throws errors shaped as "<status>: <body>". A 409 means
+      // the username is already claimed by another user — surface that as
+      // an inline field error instead of a generic toast.
+      const match = err.message.match(/^(\d{3}):/);
+      if (match && match[1] === "409") {
+        form.setError("username", {
+          type: "server",
+          message: t("profile.usernameTaken"),
+        });
+        return;
+      }
       toast({
         title: t("profile.saveError"),
         description: err.message,
@@ -182,6 +193,14 @@ export default function ProfilePage() {
                             maxLength={40}
                             placeholder={t("profile.usernamePlaceholder")}
                             data-testid="input-username"
+                            onChange={(e) => {
+                              field.onChange(e);
+                              // Clear the server-side "username taken" error
+                              // as soon as the user edits the field again.
+                              if (form.formState.errors.username?.type === "server") {
+                                form.clearErrors("username");
+                              }
+                            }}
                           />
                         </FormControl>
                         <FormDescription>

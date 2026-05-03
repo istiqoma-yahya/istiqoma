@@ -825,6 +825,7 @@
     "usernameLabel": "Username",
     "usernamePlaceholder": "e.g. yusuf123",
     "usernameHelp": "Up to 40 characters. Leave blank to clear.",
+    "usernameTaken": "That username is already taken. Please pick another.",
     "phoneLabel": "Phone number",
     "phonePlaceholder": "+62 812 3456 7890",
     "phoneHelp": "Digits, spaces, +, -, ( and ) only. Up to 30 characters.",

@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { authStorage } from "./storage";
+import { authStorage, UsernameTakenError } from "./storage";
 import { isAuthenticated } from "./replitAuth";
 import { api } from "@shared/routes";
 import { storage } from "../../storage";
@@ -32,10 +32,21 @@ export function registerAuthRoutes(app: Express): void {
           field: typeof first?.path?.[0] === "string" ? first.path[0] : undefined,
         });
       }
-      const updated = await authStorage.updateProfile(userId, {
-        username: normalizeProfileField(parsed.data.username),
-        phoneNumber: normalizeProfileField(parsed.data.phoneNumber),
-      });
+      let updated;
+      try {
+        updated = await authStorage.updateProfile(userId, {
+          username: normalizeProfileField(parsed.data.username),
+          phoneNumber: normalizeProfileField(parsed.data.phoneNumber),
+        });
+      } catch (err) {
+        if (err instanceof UsernameTakenError) {
+          return res.status(409).json({
+            message: "That username is already taken",
+            field: "username",
+          });
+        }
+        throw err;
+      }
       if (!updated) {
         return res.status(404).json({ message: "User not found" });
       }

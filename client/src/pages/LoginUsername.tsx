@@ -44,6 +44,7 @@ import {
   type UsernameSigninInput,
   type UsernameSignupInput,
 } from "@shared/models/auth";
+import istiqomaVerticalLogo from "@assets/Istiqoma_New_Vertical_Logo_1777797342711.png";
 
 type ServerError = { message?: string; field?: string; minutes?: number };
 
@@ -260,6 +261,14 @@ export default function LoginUsername() {
       </header>
 
       <main className="container max-w-md mx-auto px-4 py-8">
+        <div className="flex justify-center mb-6">
+          <img
+            src={istiqomaVerticalLogo}
+            alt="Istiqoma"
+            className="h-32 w-auto"
+            data-testid="img-logo-vertical"
+          />
+        </div>
         <Card className="p-5">
           <Tabs
             value={tab}

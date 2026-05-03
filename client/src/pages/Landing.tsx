@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import testimonialAvatar from "@/assets/testimonial-yahya.png";
+import istiqomaHorizontalLogo from "@assets/Istiqoma_New_Horizontal_Logo_1777797342711.png";
 import { useInstallPWA } from "@/hooks/use-install-pwa";
 
 declare global {
@@ -70,11 +71,13 @@ export default function Landing() {
             className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border py-3 px-6 shadow-xl"
           >
             <div className="container mx-auto flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-                  <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-lg">I</span>
-                </div>
-                <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-xl tracking-tight hidden sm:block">Istiqoma</span>
+              <div className="flex items-center">
+                <img
+                  src={istiqomaHorizontalLogo}
+                  alt="Istiqoma"
+                  className="h-8 w-auto"
+                  data-testid="img-logo-sticky"
+                />
               </div>
               <div className="flex items-center gap-3">
                 <button
@@ -103,11 +106,13 @@ export default function Landing() {
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
       {/* Navbar */}
       <nav className="container mx-auto px-6 py-6 relative z-10 flex items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20" data-testid="img-logo">
-            <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-2xl" data-testid="text-logo-initial">I</span>
-          </div>
-          <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-2xl tracking-tight" data-testid="text-app-name">Istiqoma</span>
+        <div className="flex items-center">
+          <img
+            src={istiqomaHorizontalLogo}
+            alt="Istiqoma"
+            className="h-10 w-auto"
+            data-testid="img-logo"
+          />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <LanguageSwitcher />

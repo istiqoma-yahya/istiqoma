@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import istiqomaHorizontalLogo from "@assets/Istiqoma_New_Horizontal_Logo_1777797342711.png";
 
 export default function Dashboard() {
   const { user, logout, isLoggingOut } = useAuth();
@@ -62,11 +63,13 @@ export default function Dashboard() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-500">
-              <span style={{ fontFamily: "'Alhabsyi', serif" }} className="text-xl">I</span>
-            </div>
-            <h1 style={{ fontFamily: "'Alhabsyi', serif" }} className="text-2xl">Istiqoma</h1>
+          <div className="flex items-center">
+            <img
+              src={istiqomaHorizontalLogo}
+              alt="Istiqoma"
+              className="h-9 w-auto"
+              data-testid="img-logo"
+            />
           </div>
 
           <div className="flex items-center gap-2">

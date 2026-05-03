@@ -35,6 +35,10 @@ type FakeLogin = {
   pinHash: string;
   failedAttempts: number;
   lockedUntil: Date | null;
+  recoveryCodeHash: string | null;
+  recoveryCodeUsedAt: Date | null;
+  recoveryFailedAttempts: number;
+  recoveryLockedUntil: Date | null;
   pinUpdatedAt: Date;
   createdAt: Date;
 };
@@ -74,6 +78,10 @@ function makeFakes() {
           pinHash: data.pinHash,
           failedAttempts: 0,
           lockedUntil: null,
+          recoveryCodeHash: null,
+          recoveryCodeUsedAt: null,
+          recoveryFailedAttempts: 0,
+          recoveryLockedUntil: null,
           pinUpdatedAt: new Date(),
           createdAt: new Date(),
         };
@@ -107,6 +115,50 @@ function makeFakes() {
           login.pinHash = pinHash;
           login.failedAttempts = 0;
           login.lockedUntil = null;
+        }
+      };
+      (authStorage as any).setRecoveryCodeHash = async (
+        userId: string,
+        hash: string | null,
+      ) => {
+        const login = byUserId.get(userId);
+        if (login) {
+          login.recoveryCodeHash = hash;
+          login.recoveryCodeUsedAt = hash === null ? new Date() : null;
+        }
+      };
+      (authStorage as any).recordFailedRecoveryAttempt = async (
+        userId: string,
+        lockedUntil: Date | null,
+      ) => {
+        const login = byUserId.get(userId);
+        if (!login) return undefined;
+        login.recoveryFailedAttempts += 1;
+        login.recoveryLockedUntil = lockedUntil;
+        return login as any;
+      };
+      (authStorage as any).clearFailedRecoveryAttempts = async (
+        userId: string,
+      ) => {
+        const login = byUserId.get(userId);
+        if (login) {
+          login.recoveryFailedAttempts = 0;
+          login.recoveryLockedUntil = null;
+        }
+      };
+      (authStorage as any).consumeRecoveryAndResetPin = async (
+        userId: string,
+        pinHash: string,
+      ) => {
+        const login = byUserId.get(userId);
+        if (login) {
+          login.pinHash = pinHash;
+          login.failedAttempts = 0;
+          login.lockedUntil = null;
+          login.recoveryCodeHash = null;
+          login.recoveryCodeUsedAt = new Date();
+          login.recoveryFailedAttempts = 0;
+          login.recoveryLockedUntil = null;
         }
       };
       // Skip default-category seeding — we don't care about it here.
@@ -216,6 +268,10 @@ test("POST /signup: happy path returns 201, dup returns 409", async () => {
     assert.equal(ok.status, 201);
     assert.equal(ok.body.username, "abu_yusuf");
     assert.match(ok.body.id, /^u\d+$/);
+    // Signup must surface a one-time recovery code so the user can save it.
+    assert.equal(typeof ok.body.recoveryCode, "string");
+    // Five dash-separated groups of four base32 chars (no 0/1/I/L/O).
+    assert.match(ok.body.recoveryCode, /^[A-Z2-9]{4}(-[A-Z2-9]{4}){4}$/);
 
     const dup = await req(`${url}/api/auth/username/signup`, {
       method: "POST",
@@ -411,6 +467,225 @@ test("POST /signin then /change-pin: happy path rotates PIN and rejects wrong cu
       )) as FakeLogin
     ).pinHash;
     assert.notEqual(afterHash, beforeHash);
+  } finally {
+    await close();
+    fakes.reset();
+  }
+});
+
+// ---- forgot-pin (recovery code) flow --------------------------------------
+
+test("POST /signup → /forgot-pin: recovery code resets the PIN exactly once", async () => {
+  const fakes = makeFakes();
+  fakes.install();
+  const { url, close } = await start(buildApp());
+  try {
+    const signup = await req(`${url}/api/auth/username/signup`, {
+      method: "POST",
+      body: { username: "forgetful", pin: "1234", confirmPin: "1234" },
+    });
+    assert.equal(signup.status, 201);
+    const code = signup.body.recoveryCode as string;
+    assert.equal(typeof code, "string");
+
+    // Right code rotates the PIN. Old PIN must no longer work; new one does.
+    const reset = await req(`${url}/api/auth/username/forgot-pin`, {
+      method: "POST",
+      body: {
+        username: "forgetful",
+        recoveryCode: code,
+        newPin: "9999",
+        confirmPin: "9999",
+      },
+    });
+    assert.equal(reset.status, 200);
+
+    const oldPin = await req(`${url}/api/auth/username/signin`, {
+      method: "POST",
+      body: { username: "forgetful", pin: "1234" },
+    });
+    assert.equal(oldPin.status, 401);
+    const newPin = await req(`${url}/api/auth/username/signin`, {
+      method: "POST",
+      body: { username: "forgetful", pin: "9999" },
+    });
+    assert.equal(newPin.status, 200);
+
+    // Code must be one-time: a second use returns 401 (not 200).
+    const reuse = await req(`${url}/api/auth/username/forgot-pin`, {
+      method: "POST",
+      body: {
+        username: "forgetful",
+        recoveryCode: code,
+        newPin: "5555",
+        confirmPin: "5555",
+      },
+    });
+    assert.equal(reuse.status, 401);
+    assert.equal(reuse.body.field, "recoveryCode");
+  } finally {
+    await close();
+    fakes.reset();
+  }
+});
+
+test("POST /forgot-pin: tolerates dashes/whitespace/lowercase in the code", async () => {
+  const fakes = makeFakes();
+  fakes.install();
+  const { url, close } = await start(buildApp());
+  try {
+    const signup = await req(`${url}/api/auth/username/signup`, {
+      method: "POST",
+      body: { username: "tolerant", pin: "1234", confirmPin: "1234" },
+    });
+    const code = signup.body.recoveryCode as string;
+    // Re-format: drop dashes, lower-case, sprinkle whitespace.
+    const messy = `  ${code.replace(/-/g, "").toLowerCase().match(/.{1,5}/g)!.join(" ")}  `;
+    const reset = await req(`${url}/api/auth/username/forgot-pin`, {
+      method: "POST",
+      body: {
+        username: "tolerant",
+        recoveryCode: messy,
+        newPin: "8888",
+        confirmPin: "8888",
+      },
+    });
+    assert.equal(reset.status, 200);
+  } finally {
+    await close();
+    fakes.reset();
+  }
+});
+
+test("POST /forgot-pin: locks recovery for 15min after 5 wrong codes (423 with minutes)", async () => {
+  const fakes = makeFakes();
+  fakes.install();
+  // Create a user with a known recovery code by going through /signup.
+  const { url, close } = await start(buildApp());
+  try {
+    await req(`${url}/api/auth/username/signup`, {
+      method: "POST",
+      body: { username: "bruteme", pin: "1234", confirmPin: "1234" },
+    });
+    let lastStatus = 0;
+    let lastBody: any = null;
+    for (let i = 0; i < 5; i++) {
+      const r = await req(`${url}/api/auth/username/forgot-pin`, {
+        method: "POST",
+        // 20-char wrong code from the same alphabet.
+        body: {
+          username: "bruteme",
+          recoveryCode: "AAAA-AAAA-AAAA-AAAA-AAAA",
+          newPin: "9999",
+          confirmPin: "9999",
+        },
+      });
+      lastStatus = r.status;
+      lastBody = r.body;
+    }
+    assert.equal(lastStatus, 423);
+    assert.equal(typeof lastBody.minutes, "number");
+    assert.ok(lastBody.minutes > 0 && lastBody.minutes <= 15);
+
+    // Even the right code is now blocked while the recovery lockout holds.
+    // (We don't know the real code here, but any submission must 423.)
+    const blocked = await req(`${url}/api/auth/username/forgot-pin`, {
+      method: "POST",
+      body: {
+        username: "bruteme",
+        recoveryCode: "BBBB-BBBB-BBBB-BBBB-BBBB",
+        newPin: "9999",
+        confirmPin: "9999",
+      },
+    });
+    assert.equal(blocked.status, 423);
+
+    // The PIN-signin endpoint must be unaffected by the recovery lockout.
+    const signin = await req(`${url}/api/auth/username/signin`, {
+      method: "POST",
+      body: { username: "bruteme", pin: "1234" },
+    });
+    assert.equal(signin.status, 200);
+  } finally {
+    await close();
+    fakes.reset();
+  }
+});
+
+test("POST /forgot-pin: malformed input is rejected up-front (400)", async () => {
+  const fakes = makeFakes();
+  fakes.install();
+  const { url, close } = await start(buildApp());
+  try {
+    // Recovery code too short.
+    const r = await req(`${url}/api/auth/username/forgot-pin`, {
+      method: "POST",
+      body: {
+        username: "anyuser",
+        recoveryCode: "ABCD",
+        newPin: "1234",
+        confirmPin: "1234",
+      },
+    });
+    assert.equal(r.status, 400);
+    // PIN mismatch.
+    const r2 = await req(`${url}/api/auth/username/forgot-pin`, {
+      method: "POST",
+      body: {
+        username: "anyuser",
+        recoveryCode: "AAAA-AAAA-AAAA-AAAA-AAAA",
+        newPin: "1234",
+        confirmPin: "9999",
+      },
+    });
+    assert.equal(r2.status, 400);
+  } finally {
+    await close();
+    fakes.reset();
+  }
+});
+
+test("POST /forgot-pin: PIN reset clears any active sign-in lockout", async () => {
+  const fakes = makeFakes();
+  fakes.install();
+  const { url, close } = await start(buildApp());
+  try {
+    const signup = await req(`${url}/api/auth/username/signup`, {
+      method: "POST",
+      body: { username: "lockedout", pin: "1234", confirmPin: "1234" },
+    });
+    const code = signup.body.recoveryCode as string;
+
+    // Lock the account by burning 5 wrong PINs.
+    for (let i = 0; i < 5; i++) {
+      await req(`${url}/api/auth/username/signin`, {
+        method: "POST",
+        body: { username: "lockedout", pin: "9999" },
+      });
+    }
+    // Confirm it's locked.
+    const locked = await req(`${url}/api/auth/username/signin`, {
+      method: "POST",
+      body: { username: "lockedout", pin: "1234" },
+    });
+    assert.equal(locked.status, 423);
+
+    // Recovery succeeds AND clears the PIN-signin lockout.
+    const reset = await req(`${url}/api/auth/username/forgot-pin`, {
+      method: "POST",
+      body: {
+        username: "lockedout",
+        recoveryCode: code,
+        newPin: "7777",
+        confirmPin: "7777",
+      },
+    });
+    assert.equal(reset.status, 200);
+    const signin = await req(`${url}/api/auth/username/signin`, {
+      method: "POST",
+      body: { username: "lockedout", pin: "7777" },
+    });
+    assert.equal(signin.status, 200);
   } finally {
     await close();
     fakes.reset();

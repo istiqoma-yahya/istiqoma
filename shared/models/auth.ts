@@ -99,6 +99,16 @@ export const usernameLogins = pgTable(
     pinUpdatedAt: timestamp("pin_updated_at").defaultNow().notNull(),
     failedAttempts: integer("failed_attempts").notNull().default(0),
     lockedUntil: timestamp("locked_until"),
+    // One-time recovery code for "forgot PIN" flow. Shown to the user
+    // once at signup, stored here as a scrypt hash. Cleared after use.
+    recoveryCodeHash: varchar("recovery_code_hash"),
+    recoveryCodeUsedAt: timestamp("recovery_code_used_at"),
+    // Independent lockout state for the recovery-code endpoint so a
+    // PIN-based lockout doesn't keep a legitimate forgetful user out.
+    recoveryFailedAttempts: integer("recovery_failed_attempts")
+      .notNull()
+      .default(0),
+    recoveryLockedUntil: timestamp("recovery_locked_until"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [
@@ -117,6 +127,10 @@ export const insertUsernameLoginSchema = createInsertSchema(usernameLogins).omit
   pinUpdatedAt: true,
   failedAttempts: true,
   lockedUntil: true,
+  recoveryCodeHash: true,
+  recoveryCodeUsedAt: true,
+  recoveryFailedAttempts: true,
+  recoveryLockedUntil: true,
   createdAt: true,
 });
 
@@ -159,6 +173,44 @@ export const usernameSigninSchema = z.object({
 });
 
 export type UsernameSigninInput = z.infer<typeof usernameSigninSchema>;
+
+// Recovery code: 20 base32 characters (Crockford-friendly subset, excluding
+// 0/O/1/I/L) shown to users at signup as 5 dash-separated groups of 4.
+// `normalizeRecoveryCode` strips dashes/whitespace and uppercases input
+// so users can paste with any spacing/dashes/case.
+export const RECOVERY_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+export const RECOVERY_CODE_LENGTH = 20;
+
+export function formatRecoveryCode(raw: string): string {
+  const norm = normalizeRecoveryCode(raw);
+  return norm.match(/.{1,4}/g)?.join("-") ?? norm;
+}
+
+export function normalizeRecoveryCode(raw: string): string {
+  return raw.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+}
+
+export const forgotPinSchema = z
+  .object({
+    username: usernameLoginUsernameSchema,
+    recoveryCode: z
+      .string()
+      .transform((v) => normalizeRecoveryCode(v))
+      .refine((v) => v.length === RECOVERY_CODE_LENGTH, {
+        message: "Recovery code must be 20 characters",
+      })
+      .refine((v) => /^[A-Z2-9]+$/.test(v), {
+        message: "Recovery code contains invalid characters",
+      }),
+    newPin: usernameLoginPinSchema,
+    confirmPin: z.string(),
+  })
+  .refine((d) => d.newPin === d.confirmPin, {
+    path: ["confirmPin"],
+    message: "PINs do not match",
+  });
+
+export type ForgotPinInput = z.infer<typeof forgotPinSchema>;
 
 export const changePinSchema = z
   .object({

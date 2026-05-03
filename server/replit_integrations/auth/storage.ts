@@ -49,6 +49,16 @@ export interface IAuthStorage {
   ): Promise<UsernameLogin | undefined>;
   clearFailedPinAttempts(userId: string): Promise<void>;
   updatePinHash(userId: string, pinHash: string): Promise<void>;
+  setRecoveryCodeHash(userId: string, hash: string | null): Promise<void>;
+  recordFailedRecoveryAttempt(
+    userId: string,
+    lockedUntil: Date | null,
+  ): Promise<UsernameLogin | undefined>;
+  clearFailedRecoveryAttempts(userId: string): Promise<void>;
+  consumeRecoveryAndResetPin(
+    userId: string,
+    pinHash: string,
+  ): Promise<void>;
 }
 
 class AuthStorage implements IAuthStorage {
@@ -219,6 +229,63 @@ class AuthStorage implements IAuthStorage {
         pinUpdatedAt: new Date(),
         failedAttempts: 0,
         lockedUntil: null,
+      })
+      .where(eq(usernameLogins.userId, userId));
+  }
+
+  async setRecoveryCodeHash(
+    userId: string,
+    hash: string | null,
+  ): Promise<void> {
+    await db
+      .update(usernameLogins)
+      .set({
+        recoveryCodeHash: hash,
+        recoveryCodeUsedAt: hash === null ? new Date() : null,
+      })
+      .where(eq(usernameLogins.userId, userId));
+  }
+
+  async recordFailedRecoveryAttempt(
+    userId: string,
+    lockedUntil: Date | null,
+  ): Promise<UsernameLogin | undefined> {
+    const [row] = await db
+      .update(usernameLogins)
+      .set({
+        recoveryFailedAttempts: sql`${usernameLogins.recoveryFailedAttempts} + 1`,
+        recoveryLockedUntil: lockedUntil,
+      })
+      .where(eq(usernameLogins.userId, userId))
+      .returning();
+    return row;
+  }
+
+  async clearFailedRecoveryAttempts(userId: string): Promise<void> {
+    await db
+      .update(usernameLogins)
+      .set({ recoveryFailedAttempts: 0, recoveryLockedUntil: null })
+      .where(eq(usernameLogins.userId, userId));
+  }
+
+  async consumeRecoveryAndResetPin(
+    userId: string,
+    pinHash: string,
+  ): Promise<void> {
+    // Burn the recovery code AND reset the PIN + every lockout counter in
+    // one atomic write so a partial failure can't leave the account in a
+    // half-recovered state (e.g. PIN reset but recovery code still valid).
+    await db
+      .update(usernameLogins)
+      .set({
+        pinHash,
+        pinUpdatedAt: new Date(),
+        failedAttempts: 0,
+        lockedUntil: null,
+        recoveryCodeHash: null,
+        recoveryCodeUsedAt: new Date(),
+        recoveryFailedAttempts: 0,
+        recoveryLockedUntil: null,
       })
       .where(eq(usernameLogins.userId, userId));
   }

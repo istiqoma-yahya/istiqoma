@@ -1,11 +1,13 @@
 import type { Express, Request } from "express";
 import {
   changePinSchema,
+  forgotPinSchema,
   usernameSigninSchema,
   usernameSignupSchema,
 } from "@shared/models/auth";
 import { authStorage, UsernameTakenError } from "./storage";
 import { hashPin, verifyPin } from "./pinHash";
+import { generateRecoveryCode } from "./recoveryCode";
 import { storage } from "../../storage";
 import { isAuthenticated } from "./replitAuth";
 
@@ -105,11 +107,21 @@ export function registerUsernameAuthRoutes(app: Express): void {
         username,
         pinHash,
       });
+      // Generate a one-time recovery code, store its scrypt hash, and
+      // surface the plaintext to the client EXACTLY ONCE in this response.
+      // The user is expected to copy/save it; we never store it in plain.
+      const recovery = generateRecoveryCode();
+      const recoveryHash = await hashPin(recovery.raw);
+      await authStorage.setRecoveryCodeHash(user.id, recoveryHash);
       await seedDefaultCategoriesFor(user.id);
       await establishSession(req, user.id);
       // `users.username` is intentionally NULL for username-login accounts.
       // The chosen handle lives in `username_logins` — return it from there.
-      res.status(201).json({ id: user.id, username: login.username });
+      res.status(201).json({
+        id: user.id,
+        username: login.username,
+        recoveryCode: recovery.formatted,
+      });
     } catch (err) {
       if (err instanceof UsernameTakenError) {
         return res
@@ -194,6 +206,91 @@ export function registerUsernameAuthRoutes(app: Express): void {
     } catch (err) {
       console.error("[username-signin] error:", err);
       res.status(500).json({ message: "Failed to sign in" });
+    }
+  });
+
+  app.post("/api/auth/username/forgot-pin", async (req, res) => {
+    const parsed = forgotPinSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const first = parsed.error.issues[0];
+      return res.status(400).json({
+        message: first?.message ?? "Invalid input",
+        field: typeof first?.path?.[0] === "string" ? first.path[0] : undefined,
+      });
+    }
+    // Recovery shares the same per-IP rate limiter as signin so an attacker
+    // can't pivot from PIN-stuffing to recovery-code-stuffing on the same
+    // address without paying the budget.
+    const ipCheck = tickIpAttempts(req);
+    if (!ipCheck.allowed) {
+      return res
+        .status(429)
+        .json({ message: "Too many attempts. Please try again later." });
+    }
+    try {
+      const lower = parsed.data.username.toLowerCase();
+      const login = await authStorage.getUsernameLoginByUsername(lower);
+      // Always do equal-ish work for unknown usernames so attackers can't
+      // distinguish "no such user" from "wrong code" via timing.
+      if (!login || !login.recoveryCodeHash) {
+        // Burn a hash compare on a throwaway value so the response time
+        // matches the real path (defense-in-depth, not strict CT).
+        await verifyPin(parsed.data.recoveryCode, "scrypt$00$00");
+        return res
+          .status(401)
+          .json({ message: "Invalid recovery code", field: "recoveryCode" });
+      }
+      if (
+        login.recoveryLockedUntil &&
+        login.recoveryLockedUntil.getTime() > Date.now()
+      ) {
+        const minutes = Math.ceil(
+          (login.recoveryLockedUntil.getTime() - Date.now()) / 60_000,
+        );
+        return res.status(423).json({
+          message: `Recovery locked. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+          minutes,
+        });
+      }
+      // If a previous lockout window has elapsed, zero the recovery counter
+      // so the user gets a fresh budget (mirrors the PIN-signin path).
+      if (
+        login.recoveryLockedUntil ||
+        (login.recoveryFailedAttempts ?? 0) >= MAX_FAILED_ATTEMPTS
+      ) {
+        await authStorage.clearFailedRecoveryAttempts(login.userId);
+        login.recoveryFailedAttempts = 0;
+        login.recoveryLockedUntil = null;
+      }
+      const ok = await verifyPin(
+        parsed.data.recoveryCode,
+        login.recoveryCodeHash,
+      );
+      if (!ok) {
+        const nextCount = (login.recoveryFailedAttempts ?? 0) + 1;
+        const lockedUntil =
+          nextCount >= MAX_FAILED_ATTEMPTS
+            ? new Date(Date.now() + LOCKOUT_MS)
+            : null;
+        await authStorage.recordFailedRecoveryAttempt(login.userId, lockedUntil);
+        if (lockedUntil) {
+          return res.status(423).json({
+            message: `Recovery locked. Try again in ${Math.ceil(LOCKOUT_MS / 60_000)} minutes.`,
+            minutes: Math.ceil(LOCKOUT_MS / 60_000),
+          });
+        }
+        return res
+          .status(401)
+          .json({ message: "Invalid recovery code", field: "recoveryCode" });
+      }
+      // Success: rotate PIN, burn recovery code, clear all lockout state.
+      const newHash = await hashPin(parsed.data.newPin);
+      await authStorage.consumeRecoveryAndResetPin(login.userId, newHash);
+      clearIpAttemptsOnSuccess(req);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[username-forgot-pin] error:", err);
+      res.status(500).json({ message: "Failed to reset PIN" });
     }
   });
 

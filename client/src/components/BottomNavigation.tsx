@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { BarChart3, Home, Circle, Compass, Target } from "lucide-react";
+import { Home, Circle, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 
@@ -55,33 +55,6 @@ export function BottomNavigation() {
             <span>{t('nav.qibla')}</span>
           </Button>
 
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/targets")}
-            className={`flex flex-col items-center gap-1 py-2 text-xs font-medium transition-colors ${
-              isActive("/targets")
-                ? "text-emerald-500"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-            data-testid="button-nav-targets"
-          >
-            <Target className="w-5 h-5" />
-            <span>{t('nav.targets')}</span>
-          </Button>
-
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/progress")}
-            className={`flex flex-col items-center gap-1 py-2 text-xs font-medium transition-colors ${
-              isActive("/progress")
-                ? "text-emerald-500"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-            data-testid="button-nav-progress"
-          >
-            <BarChart3 className="w-5 h-5" />
-            <span>{t('nav.progress')}</span>
-          </Button>
         </div>
       </div>
     </nav>

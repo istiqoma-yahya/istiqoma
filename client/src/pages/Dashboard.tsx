@@ -2,17 +2,14 @@ import { useEffect, useState } from "react";
 import { RecordDeedChooserDialog } from "@/components/RecordDeedChooserDialog";
 import { useAuth } from "@/hooks/use-auth";
 import { useDeeds } from "@/hooks/use-deeds";
-import { useTargetsWithProgress } from "@/hooks/use-targets";
 import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
 import { OnboardingHintCard } from "@/components/OnboardingHintCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { getTargetDisplayTitle } from "@/lib/targets";
-import { Loader2, LogOut, User, Settings, Plus, Target, Trophy, ChevronRight, ThumbsDown, Bell } from "lucide-react";
+import { Loader2, LogOut, User, Settings, Plus, Target, ChevronRight, BarChart3, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -29,7 +26,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export default function Dashboard() {
   const { user, logout, isLoggingOut } = useAuth();
   const { data: deeds, isLoading } = useDeeds();
-  const { data: targets } = useTargetsWithProgress();
   const [, navigate] = useLocation();
   const { t } = useTranslation();
   const [chooserOpen, setChooserOpen] = useState(false);
@@ -153,85 +149,31 @@ export default function Dashboard() {
 
         <StatsOverview deeds={sortedDeeds} />
 
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="flex items-center gap-2 text-[20px] font-bold">
+        <div className="mb-6 flex flex-col gap-3">
+          <button
+            type="button"
+            onClick={() => navigate("/targets")}
+            className="w-full text-left touch-manipulation"
+            data-testid="link-home-targets"
+          >
+            <Card className="p-4 flex items-center gap-3 hover:border-emerald-500/50 hover:bg-muted/50 transition-colors active:scale-[0.99]">
               <Target className="w-5 h-5 text-emerald-500" />
-              {t('dashboard.activeTargets')}
-            </h3>
-            {targets && targets.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/targets")}
-                className="text-muted-foreground"
-                data-testid="button-view-all-targets"
-              >
-                {t('dashboard.viewAll')}
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            )}
-          </div>
-          {targets && targets.length > 0 ? (
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {targets.slice(0, 3).map((target) => (
-                <button
-                  key={target.id}
-                  type="button"
-                  className="w-full text-left touch-manipulation"
-                  onClick={() => navigate(`/targets/${target.id}`)}
-                  data-testid={`card-dashboard-target-${target.id}`}
-                >
-                  <Card className="p-3 hover:border-emerald-500/50 hover:bg-muted/50 transition-colors active:scale-[0.98]">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm truncate">
-                        {getTargetDisplayTitle(target, t)}
-                      </span>
-                      {target.targetType === "limit" ? (
-                        target.currentValue > target.targetValue && (
-                          <ThumbsDown className="w-4 h-4 text-rose-500" />
-                        )
-                      ) : (
-                        target.percentComplete >= 100 && (
-                          <Trophy className="w-4 h-4 text-emerald-500" />
-                        )
-                      )}
-                    </div>
-                    <Progress 
-                      value={target.targetType === "limit" ? Math.min(100, target.percentComplete) : target.percentComplete} 
-                      className={`h-2 mb-1 bg-gray-300 dark:bg-gray-600 ${target.targetType === "limit" ? "[&>div]:bg-rose-500" : ""}`} 
-                    />
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{target.currentValue} / {target.targetValue}</span>
-                      <span className={target.targetType === "limit" 
-                        ? (target.currentValue <= target.targetValue ? "text-emerald-500 font-medium" : "text-rose-500 font-medium")
-                        : (target.percentComplete >= 100 ? "text-emerald-500 font-medium" : "")
-                      }>
-                        {target.percentComplete}%
-                      </span>
-                    </div>
-                  </Card>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <Card className="p-4 border-dashed">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-3" data-testid="text-no-targets-dashboard">
-                  {t('dashboard.noTargetsYet')}
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate("/targets")}
-                  data-testid="button-setup-targets"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  {t('dashboard.setupTargets')}
-                </Button>
-              </div>
+              <span className="flex-1 font-medium">{t('nav.targets')}</span>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </Card>
-          )}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/progress")}
+            className="w-full text-left touch-manipulation"
+            data-testid="link-home-progress"
+          >
+            <Card className="p-4 flex items-center gap-3 hover:border-emerald-500/50 hover:bg-muted/50 transition-colors active:scale-[0.99]">
+              <BarChart3 className="w-5 h-5 text-emerald-500" />
+              <span className="flex-1 font-medium">{t('nav.progress')}</span>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </Card>
+          </button>
         </div>
 
         <div className="space-y-6">

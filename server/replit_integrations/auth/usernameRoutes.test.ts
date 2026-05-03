@@ -691,3 +691,54 @@ test("POST /forgot-pin: PIN reset clears any active sign-in lockout", async () =
     fakes.reset();
   }
 });
+
+// ---- per-IP rate limit -----------------------------------------------------
+// Placed last because the IP-attempt counter is module-level state shared
+// across tests; once we exceed the budget, every subsequent signin from the
+// same IP within the 10-minute window returns 429.
+
+test("POST /signin: per-IP cap returns 429 after 20 attempts in the window", async () => {
+  const fakes = makeFakes();
+  fakes.install();
+  const pinHash = await hashPin("1234");
+  await (authStorage as any).createUsernameUser({
+    username: "ipvictim",
+    pinHash,
+  });
+  const { url, close } = await start(buildApp());
+  try {
+    // Burn the budget against non-existent users so we don't trip the
+    // per-username lockout (which would intercept with 423). Each request
+    // returns 401 (username not found) and ticks the IP counter once.
+    for (let i = 0; i < 20; i++) {
+      const r = await req(`${url}/api/auth/username/signin`, {
+        method: "POST",
+        body: { username: `noone${i}`, pin: "0000" },
+      });
+      assert.equal(r.status, 401, `attempt #${i + 1} should still be allowed`);
+    }
+    // 21st attempt: even with the right credentials, the IP cap fires
+    // before any DB lookup so we get 429, not 200.
+    const blocked = await req(`${url}/api/auth/username/signin`, {
+      method: "POST",
+      body: { username: "ipvictim", pin: "1234" },
+    });
+    assert.equal(blocked.status, 429);
+    assert.match(String(blocked.body.message ?? ""), /too many/i);
+
+    // /forgot-pin shares the same per-IP counter, so it's also blocked.
+    const blockedForgot = await req(`${url}/api/auth/username/forgot-pin`, {
+      method: "POST",
+      body: {
+        username: "ipvictim",
+        recoveryCode: "AAAA-AAAA-AAAA-AAAA-AAAA",
+        newPin: "5678",
+        confirmPin: "5678",
+      },
+    });
+    assert.equal(blockedForgot.status, 429);
+  } finally {
+    await close();
+    fakes.reset();
+  }
+});

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, targetRecommendationsRequestSchema, targetRecommendationsResponseSchema, updateProfileSchema, voiceParseRequestSchema, voiceParseResponseSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding, type NewlyEarnedBadge } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, targetRecommendationsRequestSchema, targetRecommendationsResponseSchema, updateProfileSchema, voiceParseRequestSchema, voiceParseResponseSchema, insertQuranBookmarkSchema, upsertQuranReadingStateSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding, quranBookmarks, quranReadingState, type NewlyEarnedBadge } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -587,6 +587,52 @@ export const api = {
             .nullable(),
           total: z.number().int(),
         }),
+        401: errorSchemas.unauthorized,
+      },
+    },
+  },
+  quran: {
+    listBookmarks: {
+      method: "GET" as const,
+      path: "/api/quran/bookmarks",
+      responses: {
+        200: z.array(z.custom<typeof quranBookmarks.$inferSelect>()),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    addBookmark: {
+      method: "POST" as const,
+      path: "/api/quran/bookmarks",
+      input: insertQuranBookmarkSchema,
+      responses: {
+        201: z.custom<typeof quranBookmarks.$inferSelect>(),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+      },
+    },
+    removeBookmark: {
+      method: "DELETE" as const,
+      path: "/api/quran/bookmarks/:surah/:verse",
+      responses: {
+        204: z.void(),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    getReadingState: {
+      method: "GET" as const,
+      path: "/api/quran/reading-state",
+      responses: {
+        200: z.custom<typeof quranReadingState.$inferSelect | null>(),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    updateReadingState: {
+      method: "PUT" as const,
+      path: "/api/quran/reading-state",
+      input: upsertQuranReadingStateSchema,
+      responses: {
+        200: z.custom<typeof quranReadingState.$inferSelect>(),
+        400: errorSchemas.validation,
         401: errorSchemas.unauthorized,
       },
     },

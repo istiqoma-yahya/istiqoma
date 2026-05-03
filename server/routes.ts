@@ -1325,5 +1325,68 @@ export async function registerRoutes(
     }
   });
 
+  // ─── Qur'an ──────────────────────────────────────────────────
+  // Personal data only (bookmarks + last-read / reciter pref). All public
+  // Qur'an content (chapters, verses, audio) is fetched directly from the
+  // public quran.com API by the frontend; we deliberately do not proxy it
+  // server-side because it's read-heavy, CORS-enabled, and benefits from
+  // browser caching.
+  app.get(api.quran.listBookmarks.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const rows = await storage.getQuranBookmarks(userId);
+    res.json(rows);
+  });
+
+  app.post(api.quran.addBookmark.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const input = api.quran.addBookmark.input.parse(req.body);
+      const userId = req.user.claims.sub;
+      const bookmark = await storage.addQuranBookmark(userId, input);
+      res.status(201).json(bookmark);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join("."),
+        });
+      }
+      throw err;
+    }
+  });
+
+  app.delete(api.quran.removeBookmark.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const surah = parseInt(req.params.surah, 10);
+    const verse = parseInt(req.params.verse, 10);
+    if (isNaN(surah) || isNaN(verse)) {
+      return res.status(400).json({ message: "Invalid surah or verse" });
+    }
+    await storage.removeQuranBookmark(userId, surah, verse);
+    res.status(204).send();
+  });
+
+  app.get(api.quran.getReadingState.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const row = await storage.getQuranReadingState(userId);
+    res.json(row);
+  });
+
+  app.put(api.quran.updateReadingState.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const input = api.quran.updateReadingState.input.parse(req.body);
+      const userId = req.user.claims.sub;
+      const row = await storage.upsertQuranReadingState(userId, input);
+      res.json(row);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join("."),
+        });
+      }
+      throw err;
+    }
+  });
+
   return httpServer;
 }

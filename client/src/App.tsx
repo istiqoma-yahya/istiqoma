@@ -26,6 +26,10 @@ import DeedHistoryPage from "@/pages/DeedHistoryPage";
 import StreakFreezerPage from "@/pages/StreakFreezerPage";
 import StreakDetailPage from "@/pages/StreakDetailPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
+import QuranHomePage from "@/pages/QuranHomePage";
+import QuranSurahPage from "@/pages/QuranSurahPage";
+import QuranBookmarksPage from "@/pages/QuranBookmarksPage";
+import { QuranAudioProvider } from "@/components/QuranAudioProvider";
 import { useDeeds } from "@/hooks/use-deeds";
 import NotFound from "@/pages/not-found";
 import { NotificationPrompt } from "@/components/NotificationPrompt";
@@ -60,6 +64,9 @@ function Router() {
       <Route path="/profile" component={ProfilePage} />
       <Route path="/login/username" component={LoginUsername} />
       <Route path="/leaderboard" component={LeaderboardPage} />
+      <Route path="/quran" component={QuranHomePage} />
+      <Route path="/quran/bookmarks" component={QuranBookmarksPage} />
+      <Route path="/quran/:id" component={QuranSurahPage} />
       <Route path="/profile/onboarding" component={OnboardingSettingsPage} />
       <Route path="/deeds" component={DeedHistoryPage} />
       <Route path="/streak" component={StreakDetailPage} />
@@ -82,10 +89,12 @@ function App() {
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <Toaster />
-          <Router />
-          <BadgeCelebration />
-          <NotificationPrompt />
+          <QuranAudioProvider>
+            <Toaster />
+            <Router />
+            <BadgeCelebration />
+            <NotificationPrompt />
+          </QuranAudioProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </ThemeProvider>

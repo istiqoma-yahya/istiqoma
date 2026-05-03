@@ -549,6 +549,49 @@ export const targetRecommendationsResponseSchema = z.object({
 export type TargetRecommendationsRequest = z.infer<typeof targetRecommendationsRequestSchema>;
 export type TargetRecommendationsResponse = z.infer<typeof targetRecommendationsResponseSchema>;
 
+// ─── Qur'an ───────────────────────────────────────────────────
+// Per-user bookmarks of Qur'an verses. Unique on (user, surah, verse) so
+// the same verse can't be bookmarked twice; a duplicate POST is treated
+// as idempotent. Surah / verse numbers are 1-indexed to match the public
+// quran.com API.
+export const quranBookmarks = pgTable("quran_bookmarks", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  surahNumber: integer("surah_number").notNull(),
+  verseNumber: integer("verse_number").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqUserVerse: uniqueIndex("uniq_quran_bookmark_user_verse")
+    .on(table.userId, table.surahNumber, table.verseNumber),
+}));
+
+// One row per user holding their last-read position and preferred reciter
+// for Qur'an audio. Acts as a simple key-value resume marker that syncs
+// across devices.
+export const quranReadingState = pgTable("quran_reading_state", {
+  userId: varchar("user_id").primaryKey().references(() => users.id),
+  lastSurahNumber: integer("last_surah_number"),
+  lastVerseNumber: integer("last_verse_number"),
+  preferredReciterId: integer("preferred_reciter_id"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertQuranBookmarkSchema = z.object({
+  surahNumber: z.number().int().min(1).max(114),
+  verseNumber: z.number().int().min(1).max(286),
+});
+
+export const upsertQuranReadingStateSchema = z.object({
+  lastSurahNumber: z.number().int().min(1).max(114).nullable().optional(),
+  lastVerseNumber: z.number().int().min(1).max(286).nullable().optional(),
+  preferredReciterId: z.number().int().min(1).nullable().optional(),
+});
+
+export type QuranBookmark = typeof quranBookmarks.$inferSelect;
+export type InsertQuranBookmark = z.infer<typeof insertQuranBookmarkSchema>;
+export type QuranReadingState = typeof quranReadingState.$inferSelect;
+export type UpsertQuranReadingState = z.infer<typeof upsertQuranReadingStateSchema>;
+
 // ─── Voice-deed parsing (audio/transcript -> structured deed fields) ──
 export const VOICE_PARSE_LANGUAGES = ["id", "en", "ms", "ar"] as const;
 export type VoiceParseLanguage = (typeof VOICE_PARSE_LANGUAGES)[number];

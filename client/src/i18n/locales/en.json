@@ -8,7 +8,25 @@
     "progress": "Progress",
     "dzikir": "Dzikir",
     "qibla": "Prayer",
-    "targets": "Targets"
+    "targets": "Targets",
+    "quran": "Quran"
+  },
+  "quranMenu": {
+    "title": "Quran",
+    "continueReading": "Continue Reading",
+    "startReading": "Start Reading",
+    "bookmarks": "Bookmarks",
+    "noBookmarks": "No bookmarks yet",
+    "noBookmarksHint": "Tap the bookmark icon next to a verse to save it here.",
+    "searchSurah": "Search surah by name or number",
+    "verses": "verses",
+    "verseShort": "Verse",
+    "bismillah": "In the name of Allah, the Most Gracious, the Most Merciful",
+    "bookmarkAdded": "Bookmark saved",
+    "bookmarkRemoved": "Bookmark removed",
+    "nowPlaying": "Now Playing",
+    "reciter": "Reciter",
+    "close": "Close"
   },
   "landing": {
     "title": "A better you.",

@@ -29,6 +29,12 @@ The frontend uses a component-based architecture with dedicated directories for 
 
 The backend handles Replit Auth integration, CRUD operations for deeds, categories, and targets, streak calculation, push notification management, and static file serving.
 
+### Qur'an Menu
+- Routes: `/quran` (chapter list + continue-reading), `/quran/:id` (surah reader), `/quran/bookmarks`.
+- Public Qur'an content (chapters, verses, audio) is fetched directly from `https://api.quran.com/api/v4` from the browser (no server proxy).
+- Personal data (verse bookmarks, last-read position, preferred reciter) is persisted via own backend in `quran_bookmarks` and `quran_reading_state` tables.
+- Surah-level audio uses a single shared `<audio>` element via `QuranAudioProvider`, which powers a Spotify-style mini player and a full-screen Now Playing sheet with reciter picker.
+
 ### API Contract & Mobile Readiness
 - A typed API contract (`shared/routes.ts`) defines all endpoints with Zod schemas for input/output.
 - `API_REFERENCE.md` provides documentation for mobile/external clients.

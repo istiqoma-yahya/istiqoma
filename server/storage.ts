@@ -1,6 +1,6 @@
 import { db } from "./db";
 export { db };
-import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize } from "@shared/schema";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte, isNull } from "drizzle-orm";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -83,6 +83,11 @@ export interface IStorage {
     points: { earned: number; spent: number; available: number };
     purchased: { packSize: number; pointsCost: number; freezersGranted: number };
   }>;
+  getQuranBookmarks(userId: string): Promise<QuranBookmark[]>;
+  addQuranBookmark(userId: string, bookmark: InsertQuranBookmark): Promise<QuranBookmark>;
+  removeQuranBookmark(userId: string, surahNumber: number, verseNumber: number): Promise<void>;
+  getQuranReadingState(userId: string): Promise<QuranReadingState | null>;
+  upsertQuranReadingState(userId: string, data: UpsertQuranReadingState): Promise<QuranReadingState>;
   getLeaderboard(
     currentUserId: string,
     period: "daily" | "monthly" | "yearly",
@@ -1141,6 +1146,85 @@ export class DatabaseStorage implements IStorage {
         purchased: { packSize: pack.size, pointsCost: pack.cost, freezersGranted: pack.size },
       };
     });
+  }
+
+  // ─── Qur'an ──────────────────────────────────────────────────
+  async getQuranBookmarks(userId: string): Promise<QuranBookmark[]> {
+    return await db
+      .select()
+      .from(quranBookmarks)
+      .where(eq(quranBookmarks.userId, userId))
+      .orderBy(asc(quranBookmarks.surahNumber), asc(quranBookmarks.verseNumber));
+  }
+
+  async addQuranBookmark(userId: string, bookmark: InsertQuranBookmark): Promise<QuranBookmark> {
+    // Idempotent: if the (user, surah, verse) row already exists, return it
+    // instead of letting the unique index raise. Bookmark toggling on the
+    // client should never error on a double-tap.
+    const existing = await db
+      .select()
+      .from(quranBookmarks)
+      .where(
+        and(
+          eq(quranBookmarks.userId, userId),
+          eq(quranBookmarks.surahNumber, bookmark.surahNumber),
+          eq(quranBookmarks.verseNumber, bookmark.verseNumber),
+        ),
+      )
+      .limit(1);
+    if (existing[0]) return existing[0];
+    const [created] = await db
+      .insert(quranBookmarks)
+      .values({ userId, ...bookmark })
+      .returning();
+    return created;
+  }
+
+  async removeQuranBookmark(userId: string, surahNumber: number, verseNumber: number): Promise<void> {
+    await db
+      .delete(quranBookmarks)
+      .where(
+        and(
+          eq(quranBookmarks.userId, userId),
+          eq(quranBookmarks.surahNumber, surahNumber),
+          eq(quranBookmarks.verseNumber, verseNumber),
+        ),
+      );
+  }
+
+  async getQuranReadingState(userId: string): Promise<QuranReadingState | null> {
+    const [row] = await db
+      .select()
+      .from(quranReadingState)
+      .where(eq(quranReadingState.userId, userId))
+      .limit(1);
+    return row || null;
+  }
+
+  async upsertQuranReadingState(userId: string, data: UpsertQuranReadingState): Promise<QuranReadingState> {
+    const now = new Date();
+    // Only overwrite columns the caller actually supplied. e.g. updating
+    // just the reciter must not blow away the saved last-read position.
+    const set: Record<string, unknown> = { updatedAt: now };
+    if (data.lastSurahNumber !== undefined) set.lastSurahNumber = data.lastSurahNumber;
+    if (data.lastVerseNumber !== undefined) set.lastVerseNumber = data.lastVerseNumber;
+    if (data.preferredReciterId !== undefined) set.preferredReciterId = data.preferredReciterId;
+
+    const [row] = await db
+      .insert(quranReadingState)
+      .values({
+        userId,
+        lastSurahNumber: data.lastSurahNumber ?? null,
+        lastVerseNumber: data.lastVerseNumber ?? null,
+        preferredReciterId: data.preferredReciterId ?? null,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: quranReadingState.userId,
+        set,
+      })
+      .returning();
+    return row;
   }
 
   // ─── Leaderboard ─────────────────────────────────────────────

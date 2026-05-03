@@ -3,12 +3,30 @@
     "name": "Istiqoma",
     "tagline": "Dibina untuk Ummah"
   },
+  "quranMenu": {
+    "title": "Al-Quran",
+    "continueReading": "Sambung Membaca",
+    "startReading": "Mula Membaca",
+    "bookmarks": "Tanda Buku",
+    "noBookmarks": "Tiada tanda buku lagi",
+    "noBookmarksHint": "Ketik ikon tanda buku di sebelah ayat untuk menyimpannya di sini.",
+    "searchSurah": "Cari surah mengikut nama atau nombor",
+    "verses": "ayat",
+    "verseShort": "Ayat",
+    "bismillah": "Dengan nama Allah Yang Maha Pemurah, Maha Mengasihani",
+    "bookmarkAdded": "Tanda buku disimpan",
+    "bookmarkRemoved": "Tanda buku dipadam",
+    "nowPlaying": "Sedang Dimainkan",
+    "reciter": "Qari",
+    "close": "Tutup"
+  },
   "nav": {
     "home": "Utama",
     "progress": "Progres",
     "dzikir": "Zikir",
     "qibla": "Solat",
-    "targets": "Sasaran"
+    "targets": "Sasaran",
+    "quran": "Quran"
   },
   "landing": {
     "title": "Menjadi lebih baik.",

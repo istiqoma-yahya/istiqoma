@@ -80,6 +80,10 @@ The `ConsistencyCalendar` allows users to interact with dates to log or update d
 ### Onboarding Settings
 - After completing onboarding, users can revisit and edit their identity (Q5) and Q1–Q5 answers from `/profile/onboarding`. The page reuses `POST /api/onboarding/complete` (idempotent upsert) and the shared `Q4_TO_REMINDER_TIME` map (in `shared/schema.ts`) so changing Q4 also updates `push_subscriptions.reminder_time`. The Profile page exposes a "Your spiritual journey" card linking into this flow. All copy is localized in id/en/ms.
 
+### Islamic Quiz & Localization
+- **UI Strings**: The `quiz` namespace in `client/src/i18n/locales/{en,id,ms}.json` covers all UI surfaces (intro, question flow, result modals, leaderboard). All three locales are kept in sync key-for-key.
+- **Question Bank Language**: Question text and explanations in `server/quiz-seed.ts` are intentionally English-only. Rationale: the questions use Arabic-derived Islamic terminology (Salah, Wudu, Hajj, Sawm, Surah, Aqidah, Ramadan, etc.) that is identical across English/Indonesian/Malay, and accurate translation of Quranic/hadith citations requires expert review. If a fully translated question bank is needed later, add per-locale columns to `quiz_questions` (e.g. `question_text_id`, `explanation_id`) and extend the seeder + API to return locale-appropriate fields based on the user's `i18n.language`.
+
 ### Streak Freezer
 - **Functionality**: Allows users to "freeze" missed days to maintain streaks using points purchased in-app.
 - **Tables**: `streak_freezes`, `point_purchases`, `user_streak_state`.

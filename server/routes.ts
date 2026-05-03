@@ -14,6 +14,7 @@ import {
   invalidateUserRecommendationCache,
 } from "./recommendations";
 import { checkVoiceParseRateLimit, parseVoiceDeed } from "./voiceParse";
+import { registerVoiceTranscribeRoute } from "./voiceTranscribe";
 import { calculatePoints } from "./calculatePoints";
 import { evaluateBadgesForUser } from "./badges";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
@@ -59,6 +60,7 @@ export async function registerRoutes(
   await setupAuth(app);
   registerAuthRoutes(app);
   registerUsernameAuthRoutes(app);
+  registerVoiceTranscribeRoute(app);
 
   // Deeds Routes - Protected
   app.get(api.deeds.list.path, isAuthenticated, async (req: any, res) => {

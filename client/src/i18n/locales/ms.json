@@ -1052,6 +1052,12 @@
     "rateLimited": "Anda telah menggunakan rakaman suara dengan banyak. Sila tunggu seketika dan cuba lagi.",
     "serviceUnavailable": "Perkhidmatan suara tidak tersedia buat sementara waktu. Sila cuba lagi atau taip amalan secara manual.",
     "error": "Sesuatu tidak kena. Sila cuba lagi.",
+    "aborted": "Rakaman terhenti. Sila cuba lagi.",
+    "serviceNotAllowed": "Perkhidmatan pengecaman suara disekat. Sila semak tetapan pelayar atau cuba pada rangkaian lain.",
+    "badGrammar": "Kami tidak dapat memproses tatabahasa pertuturan. Sila cuba lagi atau taip amalan secara manual.",
+    "unknownError": "Rakaman suara gagal ({{code}}). Sila cuba lagi atau taip amalan secara manual.",
+    "tooLarge": "Rakaman terlalu panjang. Sila rakam yang lebih pendek.",
+    "transcribing": "Mentranskripsi rakaman anda…",
     "retry": "Cuba lagi",
     "switchToText": "Taip sahaja",
     "reviewToast": "Sila semak amalan anda sebelum menyimpan"

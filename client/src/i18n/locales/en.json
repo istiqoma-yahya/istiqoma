@@ -1051,6 +1051,12 @@
     "rateLimited": "You've used voice recording a lot recently. Please wait a bit and try again.",
     "serviceUnavailable": "The voice service is temporarily unavailable. Please try again or type the deed instead.",
     "error": "Something went wrong. Please try again.",
+    "aborted": "Recording was interrupted. Please try again.",
+    "serviceNotAllowed": "The voice recognition service was blocked. Please check your browser settings or try again on a different network.",
+    "badGrammar": "We couldn't process the speech grammar. Please try again or type the deed instead.",
+    "unknownError": "Voice recording failed ({{code}}). Please try again or type the deed instead.",
+    "tooLarge": "That recording is too long. Please record a shorter clip.",
+    "transcribing": "Transcribing your recording…",
     "retry": "Try again",
     "switchToText": "Type instead",
     "reviewToast": "Please review your deed before saving it"

@@ -1052,6 +1052,12 @@
     "rateLimited": "Kamu sudah merekam suara cukup banyak. Tunggu sebentar lalu coba lagi.",
     "serviceUnavailable": "Layanan suara sedang tidak tersedia. Silakan coba lagi atau ketik amalan secara manual.",
     "error": "Terjadi kesalahan. Silakan coba lagi.",
+    "aborted": "Perekaman terputus. Silakan coba lagi.",
+    "serviceNotAllowed": "Layanan pengenalan suara diblokir. Periksa pengaturan browser-mu atau coba di jaringan lain.",
+    "badGrammar": "Kami tidak bisa memproses tata bahasa ucapanmu. Silakan coba lagi atau ketik amalan secara manual.",
+    "unknownError": "Perekaman suara gagal ({{code}}). Silakan coba lagi atau ketik amalan secara manual.",
+    "tooLarge": "Rekaman terlalu panjang. Silakan rekam yang lebih pendek.",
+    "transcribing": "Mentranskrip rekamanmu…",
     "retry": "Coba lagi",
     "switchToText": "Ketik saja",
     "reviewToast": "Mohon periksa amalanmu sebelum menyimpan"

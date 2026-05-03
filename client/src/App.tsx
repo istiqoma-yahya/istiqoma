@@ -24,6 +24,7 @@ import OnboardingSettingsPage from "@/pages/OnboardingSettingsPage";
 import DeedHistoryPage from "@/pages/DeedHistoryPage";
 import StreakFreezerPage from "@/pages/StreakFreezerPage";
 import StreakDetailPage from "@/pages/StreakDetailPage";
+import LeaderboardPage from "@/pages/LeaderboardPage";
 import { useDeeds } from "@/hooks/use-deeds";
 import NotFound from "@/pages/not-found";
 import { NotificationPrompt } from "@/components/NotificationPrompt";
@@ -55,6 +56,7 @@ function Router() {
       <Route path="/categories" component={CategoryManagement} />
       <Route path="/notifications" component={NotificationsPage} />
       <Route path="/profile" component={ProfilePage} />
+      <Route path="/leaderboard" component={LeaderboardPage} />
       <Route path="/profile/onboarding" component={OnboardingSettingsPage} />
       <Route path="/deeds" component={DeedHistoryPage} />
       <Route path="/streak" component={StreakDetailPage} />

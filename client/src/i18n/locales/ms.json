@@ -855,6 +855,22 @@
     "journeyTitle": "Perjalanan spiritual anda",
     "journeySubtitleEmpty": "Beritahu kami tentang diri anda untuk memperibadikan Istiqoma"
   },
+  "leaderboard": {
+    "title": "Papan Kedudukan",
+    "profileEntrySubtitle": "Lihat kedudukan anda berbanding pengguna lain",
+    "daily": "Hari ini",
+    "monthly": "Bulan ini",
+    "yearly": "Tahun ini",
+    "you": "Anda",
+    "points": "mata",
+    "loading": "Memuatkan papan kedudukan…",
+    "error": "Gagal memuatkan papan kedudukan.",
+    "retry": "Cuba lagi",
+    "emptyState": "Belum ada sesiapa yang memperoleh mata dalam tempoh ini. Jadilah yang pertama!",
+    "endOfList": "Hujung papan kedudukan",
+    "backToMyRank": "Kembali ke kedudukan saya ({{rank}})",
+    "anonymous": "Tanpa Nama"
+  },
   "recordChooser": {
     "title": "Bagaimana anda ingin merakam?",
     "subtitle": "Pilih cara untuk merekod amalan ini.",

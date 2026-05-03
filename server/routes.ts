@@ -31,6 +31,20 @@ function getErrorStatus(err: unknown): number | undefined {
   return undefined;
 }
 
+// Mask an email so other users' identities are never exposed by the
+// leaderboard. Keeps the first character of the local part and the
+// domain, so "yusuf@gmail.com" → "y***@gmail.com". Returns null/empty
+// inputs unchanged.
+function maskEmail(email: string | null | undefined): string | null {
+  if (!email) return null;
+  const at = email.indexOf("@");
+  if (at <= 0) return "***";
+  const local = email.slice(0, at);
+  const domain = email.slice(at);
+  const head = local.slice(0, 1);
+  return `${head}***${domain}`;
+}
+
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
   return "Internal Server Error";
@@ -1137,6 +1151,68 @@ export async function registerRoutes(
       res.status(204).send();
     } catch (err) {
       const status = getErrorStatus(err) ?? 400;
+      res.status(status).json({ message: getErrorMessage(err) });
+    }
+  });
+
+  // ─── Leaderboard ──────────────────────────────────────────────
+  // Public leaderboard ranked by deed points within the user's chosen
+  // window (daily/monthly/yearly, computed in their local timezone).
+  // Returns a windowed slice plus the current user's rank so the client
+  // can center its view on them and load more above/below as needed.
+  // Other users' emails are masked server-side; the requester's own
+  // email is returned unmasked for the "you" row.
+  app.get(api.leaderboard.list.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const periodRaw = String(req.query.period ?? "daily");
+      if (periodRaw !== "daily" && periodRaw !== "monthly" && periodRaw !== "yearly") {
+        return res.status(400).json({ message: "Invalid period" });
+      }
+      const period = periodRaw as "daily" | "monthly" | "yearly";
+
+      const beforeRank = req.query.beforeRank != null ? parseInt(String(req.query.beforeRank), 10) : null;
+      const afterRank = req.query.afterRank != null ? parseInt(String(req.query.afterRank), 10) : null;
+      const limit = req.query.limit != null ? parseInt(String(req.query.limit), 10) : 50;
+      const timezone = parseTimezone(req.query.timezone);
+
+      let mode: "around" | "before" | "after" = "around";
+      let cursor: number | null = null;
+      if (beforeRank != null && !Number.isNaN(beforeRank)) {
+        mode = "before";
+        cursor = beforeRank;
+      } else if (afterRank != null && !Number.isNaN(afterRank)) {
+        mode = "after";
+        cursor = afterRank;
+      }
+
+      const result = await storage.getLeaderboard(userId, period, {
+        mode,
+        cursor,
+        limit: Number.isFinite(limit) ? limit : 50,
+        timezone,
+      });
+
+      const entries = result.entries.map((e) => {
+        const isCurrentUser = e.userId === userId;
+        // Mask other users' emails server-side. The requester's own
+        // email is returned raw (it's already their data) and the
+        // client always re-masks it before rendering so the UI never
+        // shows a raw email.
+        return {
+          rank: e.rank,
+          userId: e.userId,
+          username: e.username,
+          email: isCurrentUser ? e.email : maskEmail(e.email),
+          profileImageUrl: e.profileImageUrl,
+          points: e.points,
+          isCurrentUser,
+        };
+      });
+
+      res.json({ entries, me: result.me, total: result.total });
+    } catch (err) {
+      const status = getErrorStatus(err) ?? 500;
       res.status(status).json({ message: getErrorMessage(err) });
     }
   });

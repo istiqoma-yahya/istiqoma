@@ -554,6 +554,32 @@ export const api = {
       },
     },
   },
+  leaderboard: {
+    list: {
+      method: "GET" as const,
+      path: "/api/leaderboard",
+      responses: {
+        200: z.object({
+          entries: z.array(
+            z.object({
+              rank: z.number().int(),
+              userId: z.string(),
+              username: z.string().nullable(),
+              email: z.string().nullable(),
+              profileImageUrl: z.string().nullable(),
+              points: z.number().int(),
+              isCurrentUser: z.boolean(),
+            }),
+          ),
+          me: z
+            .object({ rank: z.number().int(), points: z.number().int() })
+            .nullable(),
+          total: z.number().int(),
+        }),
+        401: errorSchemas.unauthorized,
+      },
+    },
+  },
 };
 
 export type CreateCategoryRequest = z.infer<typeof api.categories.create.input>;

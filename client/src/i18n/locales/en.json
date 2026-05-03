@@ -854,6 +854,22 @@
     "journeyTitle": "Your spiritual journey",
     "journeySubtitleEmpty": "Tell us about yourself to personalize Istiqoma"
   },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "profileEntrySubtitle": "See how you stack up against others",
+    "daily": "Today",
+    "monthly": "This month",
+    "yearly": "This year",
+    "you": "You",
+    "points": "pts",
+    "loading": "Loading leaderboard…",
+    "error": "Couldn't load the leaderboard.",
+    "retry": "Try again",
+    "emptyState": "No one has earned points in this period yet. Be the first!",
+    "endOfList": "End of leaderboard",
+    "backToMyRank": "Back to my rank ({{rank}})",
+    "anonymous": "Anonymous"
+  },
   "recordChooser": {
     "title": "How would you like to record?",
     "subtitle": "Pick how you want to log this deed.",

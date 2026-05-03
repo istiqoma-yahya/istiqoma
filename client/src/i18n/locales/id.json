@@ -855,6 +855,22 @@
     "journeyTitle": "Perjalanan spiritualmu",
     "journeySubtitleEmpty": "Ceritakan tentang dirimu untuk mempersonalisasi Istiqoma"
   },
+  "leaderboard": {
+    "title": "Papan Peringkat",
+    "profileEntrySubtitle": "Lihat posisimu di antara pengguna lain",
+    "daily": "Hari ini",
+    "monthly": "Bulan ini",
+    "yearly": "Tahun ini",
+    "you": "Kamu",
+    "points": "poin",
+    "loading": "Memuat papan peringkat…",
+    "error": "Gagal memuat papan peringkat.",
+    "retry": "Coba lagi",
+    "emptyState": "Belum ada yang mengumpulkan poin di periode ini. Jadilah yang pertama!",
+    "endOfList": "Akhir papan peringkat",
+    "backToMyRank": "Kembali ke peringkatku ({{rank}})",
+    "anonymous": "Anonim"
+  },
   "recordChooser": {
     "title": "Bagaimana cara mencatat amalanmu?",
     "subtitle": "Pilih cara mencatat amalan ini.",

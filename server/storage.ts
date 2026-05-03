@@ -1,8 +1,8 @@
 import { db } from "./db";
 export { db };
-import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize } from "@shared/schema";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte, isNull } from "drizzle-orm";
-import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from "date-fns";
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 
 // Default timezone for users (Indonesia)
@@ -83,7 +83,25 @@ export interface IStorage {
     points: { earned: number; spent: number; available: number };
     purchased: { packSize: number; pointsCost: number; freezersGranted: number };
   }>;
+  getLeaderboard(
+    currentUserId: string,
+    period: "daily" | "monthly" | "yearly",
+    opts: { mode: "around" | "before" | "after"; cursor: number | null; limit: number; timezone?: string },
+  ): Promise<{
+    entries: LeaderboardEntry[];
+    me: { rank: number; points: number } | null;
+    total: number;
+  }>;
 }
+
+export type LeaderboardEntry = {
+  rank: number;
+  userId: string;
+  username: string | null;
+  email: string | null;
+  profileImageUrl: string | null;
+  points: number;
+};
 
 export class DatabaseStorage implements IStorage {
   async getDeeds(userId: string): Promise<Deed[]> {
@@ -1123,6 +1141,147 @@ export class DatabaseStorage implements IStorage {
         purchased: { packSize: pack.size, pointsCost: pack.cost, freezersGranted: pack.size },
       };
     });
+  }
+
+  // ─── Leaderboard ─────────────────────────────────────────────
+  // Ranks all users by deed points within the requested time window
+  // (daily/monthly/yearly, computed in the user's local timezone) and
+  // returns a windowed slice around a target rank. Users with 0 points
+  // in the window are excluded from the ranking. Ties are broken
+  // deterministically by user id (ROW_NUMBER) so ranks are stable
+  // across requests.
+  async getLeaderboard(
+    currentUserId: string,
+    period: "daily" | "monthly" | "yearly",
+    opts: { mode: "around" | "before" | "after"; cursor: number | null; limit: number; timezone?: string },
+  ): Promise<{
+    entries: LeaderboardEntry[];
+    me: { rank: number; points: number } | null;
+    total: number;
+  }> {
+    const tz = await this.resolveUserTimezone(currentUserId, opts.timezone);
+    const nowInTz = toZonedTime(new Date(), tz);
+    let startUtc: Date;
+    let endUtc: Date;
+    switch (period) {
+      case "daily":
+        startUtc = fromZonedTime(startOfDay(nowInTz), tz);
+        endUtc = fromZonedTime(endOfDay(nowInTz), tz);
+        break;
+      case "monthly":
+        startUtc = fromZonedTime(startOfMonth(nowInTz), tz);
+        endUtc = fromZonedTime(endOfMonth(nowInTz), tz);
+        break;
+      case "yearly":
+        startUtc = fromZonedTime(startOfYear(nowInTz), tz);
+        endUtc = fromZonedTime(endOfYear(nowInTz), tz);
+        break;
+    }
+
+    // Resolve effective cursor first when mode = around and no cursor is
+    // provided. We look up the current user's rank in this window so the
+    // initial fetch is centered on them. If the user has no points in this
+    // window (so no rank), default the window to the top of the board.
+    let cursor = opts.cursor;
+    let me: { rank: number; points: number } | null = null;
+    if (opts.mode === "around" && cursor === null) {
+      const meRows = await db.execute(sql`
+        WITH user_points AS (
+          SELECT u.id,
+            COALESCE(SUM(CASE WHEN d.created_at >= ${startUtc} AND d.created_at <= ${endUtc} THEN d.points ELSE 0 END), 0)::int AS pts
+          FROM ${users} u
+          LEFT JOIN ${deeds} d ON d.user_id = u.id
+          GROUP BY u.id
+        ),
+        ranked AS (
+          SELECT id, pts,
+            (ROW_NUMBER() OVER (ORDER BY pts DESC, id ASC))::int AS rank
+          FROM user_points
+          WHERE pts > 0
+        )
+        SELECT rank, pts FROM ranked WHERE id = ${currentUserId}
+      `);
+      const row = (meRows.rows ?? meRows)[0] as { rank?: number; pts?: number } | undefined;
+      if (row && typeof row.rank === "number") {
+        me = { rank: Number(row.rank), points: Number(row.pts ?? 0) };
+        cursor = me.rank;
+      } else {
+        cursor = 1;
+      }
+    }
+
+    const limit = Math.max(1, Math.min(100, opts.limit | 0 || 50));
+    let lowRank: number;
+    let highRank: number;
+    switch (opts.mode) {
+      case "around": {
+        const half = Math.floor(limit / 2);
+        const c = cursor ?? 1;
+        lowRank = Math.max(1, c - half);
+        highRank = c + half;
+        break;
+      }
+      case "before": {
+        const c = cursor ?? 1;
+        lowRank = Math.max(1, c - limit);
+        highRank = Math.max(1, c - 1);
+        break;
+      }
+      case "after": {
+        const c = cursor ?? 0;
+        lowRank = c + 1;
+        highRank = c + limit;
+        break;
+      }
+    }
+
+    const result = await db.execute(sql`
+      WITH user_points AS (
+        SELECT u.id, u.username, u.email, u.profile_image_url,
+          COALESCE(SUM(CASE WHEN d.created_at >= ${startUtc} AND d.created_at <= ${endUtc} THEN d.points ELSE 0 END), 0)::int AS pts
+        FROM ${users} u
+        LEFT JOIN ${deeds} d ON d.user_id = u.id
+        GROUP BY u.id
+      ),
+      ranked AS (
+        SELECT id, username, email, profile_image_url, pts,
+          (ROW_NUMBER() OVER (ORDER BY pts DESC, id ASC))::int AS rank
+        FROM user_points
+        WHERE pts > 0
+      ),
+      window_rows AS (
+        SELECT * FROM ranked
+        WHERE rank BETWEEN ${lowRank} AND ${highRank}
+        ORDER BY rank
+      )
+      SELECT
+        (SELECT COALESCE(json_agg(row_to_json(w) ORDER BY w.rank), '[]'::json) FROM window_rows w) AS entries,
+        (SELECT row_to_json(m) FROM (SELECT rank, pts FROM ranked WHERE id = ${currentUserId}) m) AS me,
+        (SELECT COUNT(*)::int FROM ranked) AS total
+    `);
+
+    const row = (result.rows ?? result)[0] as {
+      entries: Array<{ id: string; username: string | null; email: string | null; profile_image_url: string | null; pts: number; rank: number }>;
+      me: { rank: number; pts: number } | null;
+      total: number;
+    };
+
+    const entries: LeaderboardEntry[] = (row.entries ?? []).map((r) => ({
+      rank: Number(r.rank),
+      userId: r.id,
+      username: r.username,
+      email: r.email,
+      profileImageUrl: r.profile_image_url,
+      points: Number(r.pts),
+    }));
+
+    if (!me && row.me) {
+      me = { rank: Number(row.me.rank), points: Number(row.me.pts) };
+    } else if (!me && opts.mode !== "around") {
+      // Other modes might be called without me being computed; keep as null.
+    }
+
+    return { entries, me, total: Number(row.total ?? 0) };
   }
 }
 

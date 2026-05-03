@@ -404,7 +404,9 @@ function hariRayaDeedCount(ctx: EvalContext): number {
   return count;
 }
 
-function evaluateBadge(def: BadgeDef, ctx: EvalContext): number {
+export type { EvalContext };
+
+export function evaluateBadge(def: BadgeDef, ctx: EvalContext): number {
   const c = def.criteria;
   switch (c.kind) {
     case "deedCount": {
@@ -520,16 +522,18 @@ function evaluateBadge(def: BadgeDef, ctx: EvalContext): number {
   }
 }
 
-export async function evaluateBadgesForUser(
-  userId: string,
-): Promise<{ snapshot: BadgesSnapshot; newlyEarned: NewlyEarnedBadge[] }> {
-  const ctx = await buildContext(userId);
+export type ExistingBadgeRow = Pick<UserBadge, "badgeId" | "tier" | "earnedAt">;
 
-  const existing = await db
-    .select()
-    .from(userBadges)
-    .where(eq(userBadges.userId, userId));
-  const existingMap = new Map<string, UserBadge[]>();
+export function computeBadgeResults(
+  ctx: EvalContext,
+  existing: ExistingBadgeRow[],
+  now: Date = new Date(),
+): {
+  snapshot: BadgesSnapshot;
+  newlyEarned: NewlyEarnedBadge[];
+  toInsert: Array<{ badgeId: string; tier: number }>;
+} {
+  const existingMap = new Map<string, ExistingBadgeRow[]>();
   for (const row of existing) {
     const list = existingMap.get(row.badgeId) || [];
     list.push(row);
@@ -539,6 +543,7 @@ export async function evaluateBadgesForUser(
   const toInsert: Array<{ badgeId: string; tier: number }> = [];
   const newlyEarned: NewlyEarnedBadge[] = [];
   const progressList: BadgeProgress[] = [];
+  const nowIso = now.toISOString();
 
   for (const def of BADGE_CATALOG) {
     const value = evaluateBadge(def, ctx);
@@ -547,7 +552,6 @@ export async function evaluateBadgesForUser(
     for (const r of existingMap.get(def.id) || []) {
       earnedAt[r.tier] = r.earnedAt instanceof Date ? r.earnedAt.toISOString() : String(r.earnedAt);
     }
-    // Persist any tier that has been earned but isn't yet in the table.
     for (let t = 1; t <= earnedTier; t++) {
       if (!earnedAt[t]) {
         toInsert.push({ badgeId: def.id, tier: t });
@@ -559,6 +563,7 @@ export async function evaluateBadgesForUser(
           icon: def.icon,
           family: def.family,
         });
+        earnedAt[t] = nowIso;
       }
     }
     progressList.push({
@@ -573,19 +578,6 @@ export async function evaluateBadgesForUser(
       earnedTier,
       earnedAt,
     });
-  }
-
-  if (toInsert.length > 0) {
-    const nowIso = new Date();
-    await db
-      .insert(userBadges)
-      .values(toInsert.map((r) => ({ userId, badgeId: r.badgeId, tier: r.tier })))
-      .onConflictDoNothing();
-    // Reflect newly persisted timestamps in returned progress.
-    for (const ne of newlyEarned) {
-      const item = progressList.find((p) => p.badgeId === ne.badgeId);
-      if (item) item.earnedAt[ne.tier] = nowIso.toISOString();
-    }
   }
 
   let earnedCount = 0;
@@ -607,5 +599,29 @@ export async function evaluateBadgesForUser(
       latestEarned,
     },
     newlyEarned,
+    toInsert,
   };
 }
+
+export async function evaluateBadgesForUser(
+  userId: string,
+): Promise<{ snapshot: BadgesSnapshot; newlyEarned: NewlyEarnedBadge[] }> {
+  const ctx = await buildContext(userId);
+
+  const existing = await db
+    .select()
+    .from(userBadges)
+    .where(eq(userBadges.userId, userId));
+
+  const { snapshot, newlyEarned, toInsert } = computeBadgeResults(ctx, existing);
+
+  if (toInsert.length > 0) {
+    await db
+      .insert(userBadges)
+      .values(toInsert.map((r) => ({ userId, badgeId: r.badgeId, tier: r.tier })))
+      .onConflictDoNothing();
+  }
+
+  return { snapshot, newlyEarned };
+}
+

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar, doublePrecision, date, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar, doublePrecision, date, uniqueIndex, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations, sql } from "drizzle-orm";
@@ -214,6 +214,14 @@ export const purchaseStreakFreezerSchema = z.object({
 });
 
 export type PurchaseStreakFreezerRequest = z.infer<typeof purchaseStreakFreezerSchema>;
+
+export const recommendationRateLimitCalls = pgTable("recommendation_rate_limit_calls", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  calledAt: timestamp("called_at").notNull().defaultNow(),
+}, (table) => ({
+  byUserAndTime: index("rec_rate_limit_user_time_idx").on(table.userId, table.calledAt),
+}));
 
 export const pushSubscriptions = pgTable("push_subscriptions", {
   id: serial("id").primaryKey(),

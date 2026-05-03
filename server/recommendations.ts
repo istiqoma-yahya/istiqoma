@@ -1,9 +1,12 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createHash } from "crypto";
+import { and, asc, eq, lte, sql } from "drizzle-orm";
+import { db } from "./db";
 import {
   Q3_TO_CATEGORY,
   RECOMMENDATION_CATEGORIES,
   RECOMMENDATION_SOURCE_KINDS,
+  recommendationRateLimitCalls,
   targetRecommendationSchema,
   type RecommendationLanguage,
   type TargetRecommendation,
@@ -23,26 +26,12 @@ const anthropic = new Anthropic({
 
 const MODEL = "claude-sonnet-4-6";
 
-// In-memory per-user rate limiter. Allows up to N calls per hour, evaluated
-// on every call (sliding window). Restarts when the process restarts; that's
-// acceptable for credit-spend protection. A periodic sweep evicts stale
-// entries so the map can't grow unbounded across many users.
+// Per-user sliding-window rate limiter backed by Postgres so counters survive
+// process restarts and are shared across replicas. Allows up to N calls per
+// window. Each request prunes its own user's expired rows, so the table
+// stays bounded without a separate sweep job.
 const RATE_LIMIT_MAX = 10;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
-const RATE_LIMIT_SWEEP_MS = 15 * 60 * 1000;
-const callsByUser = new Map<string, number[]>();
-let lastSweep = Date.now();
-
-function sweepRateLimitMap(now: number): void {
-  if (now - lastSweep < RATE_LIMIT_SWEEP_MS) return;
-  lastSweep = now;
-  const cutoff = now - RATE_LIMIT_WINDOW_MS;
-  for (const [userId, timestamps] of callsByUser) {
-    const fresh = timestamps.filter((t) => t > cutoff);
-    if (fresh.length === 0) callsByUser.delete(userId);
-    else if (fresh.length !== timestamps.length) callsByUser.set(userId, fresh);
-  }
-}
 
 export interface RateLimitResult {
   allowed: boolean;
@@ -136,22 +125,62 @@ export function invalidateUserRecommendationCache(userId: string): void {
   }
 }
 
-export function checkRateLimit(userId: string): RateLimitResult {
+// Stable 64-bit advisory-lock key derived from the user id. We split the
+// sha256 of the user id into two 32-bit halves and pass them to
+// pg_advisory_xact_lock(int4, int4) so concurrent rate-limit checks for the
+// SAME user serialize, while different users do not contend.
+function advisoryLockKeysForUser(userId: string): { hi: number; lo: number } {
+  const hash = createHash("sha256").update(userId).digest();
+  // Read as signed int32 so values fit Postgres' int4 parameters.
+  const hi = hash.readInt32BE(0);
+  const lo = hash.readInt32BE(4);
+  return { hi, lo };
+}
+
+export async function checkRateLimit(userId: string): Promise<RateLimitResult> {
   const now = Date.now();
-  sweepRateLimitMap(now);
-  const cutoff = now - RATE_LIMIT_WINDOW_MS;
-  const existing = (callsByUser.get(userId) || []).filter((t) => t > cutoff);
-  if (existing.length >= RATE_LIMIT_MAX) {
-    const retryAfterSeconds = Math.max(
-      1,
-      Math.ceil((existing[0] + RATE_LIMIT_WINDOW_MS - now) / 1000),
-    );
-    callsByUser.set(userId, existing);
-    return { allowed: false, retryAfterSeconds };
-  }
-  existing.push(now);
-  callsByUser.set(userId, existing);
-  return { allowed: true };
+  const cutoff = new Date(now - RATE_LIMIT_WINDOW_MS);
+  const { hi, lo } = advisoryLockKeysForUser(userId);
+
+  // Run prune + count + insert inside a single transaction guarded by a
+  // per-user Postgres advisory lock so concurrent requests for the same
+  // user (across replicas / event-loop ticks) cannot all observe < MAX
+  // rows and each insert. Different users take different locks, so this
+  // does not serialize unrelated traffic.
+  return await db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(${hi}, ${lo})`);
+
+    // Match the previous in-memory semantics exactly: a timestamp <= cutoff
+    // is expired (the old code kept only `t > cutoff`).
+    await tx
+      .delete(recommendationRateLimitCalls)
+      .where(
+        and(
+          eq(recommendationRateLimitCalls.userId, userId),
+          lte(recommendationRateLimitCalls.calledAt, cutoff),
+        ),
+      );
+
+    const existing = await tx
+      .select({ calledAt: recommendationRateLimitCalls.calledAt })
+      .from(recommendationRateLimitCalls)
+      .where(eq(recommendationRateLimitCalls.userId, userId))
+      .orderBy(asc(recommendationRateLimitCalls.calledAt));
+
+    if (existing.length >= RATE_LIMIT_MAX) {
+      const oldest = existing[0].calledAt.getTime();
+      const retryAfterSeconds = Math.max(
+        1,
+        Math.ceil((oldest + RATE_LIMIT_WINDOW_MS - now) / 1000),
+      );
+      return { allowed: false, retryAfterSeconds } as RateLimitResult;
+    }
+
+    await tx
+      .insert(recommendationRateLimitCalls)
+      .values({ userId, calledAt: new Date(now) });
+    return { allowed: true } as RateLimitResult;
+  });
 }
 
 const Q1_LABELS: Record<string, string> = {

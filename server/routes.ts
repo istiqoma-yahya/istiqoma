@@ -511,7 +511,7 @@ export async function registerRoutes(
         }
       }
 
-      const limit = checkRateLimit(userId);
+      const limit = await checkRateLimit(userId);
       if (!limit.allowed) {
         res.setHeader("Retry-After", String(limit.retryAfterSeconds ?? 60));
         return res.status(429).json({

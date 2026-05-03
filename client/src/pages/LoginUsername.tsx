@@ -241,7 +241,7 @@ export default function LoginUsername() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-border app-header bg-background/80 backdrop-blur-md">
         <div className="container max-w-md mx-auto px-4 h-16 flex items-center gap-2">
           <Button
             variant="ghost"

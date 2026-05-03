@@ -68,7 +68,7 @@ export default function Landing() {
             initial={{ y: -100 }}
             animate={{ y: 0 }}
             exit={{ y: -100 }}
-            className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border py-3 px-6 shadow-xl"
+            className="fixed top-0 left-0 right-0 z-50 app-header bg-background/80 backdrop-blur-lg border-b border-border py-3 px-6 shadow-xl"
           >
             <div className="container mx-auto flex items-center justify-between gap-4">
               <div className="flex items-center">

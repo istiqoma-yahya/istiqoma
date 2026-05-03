@@ -382,7 +382,7 @@ export default function SholatPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
-      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-border app-header bg-background/80 backdrop-blur-md">
         <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
           <h1 className="font-display font-bold text-xl flex items-center gap-2">
             <Moon className="w-5 h-5 text-emerald-500" />

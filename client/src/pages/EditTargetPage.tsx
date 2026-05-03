@@ -57,7 +57,7 @@ export default function EditTargetPage() {
     return (
       <div className="min-h-screen bg-background text-foreground pb-20">
         {/* Sticky Header */}
-        <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+        <header className="sticky top-0 z-50 border-b border-border app-header bg-background/80 backdrop-blur-md">
           <div className="container max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
             <h1 className="font-display font-bold text-xl">
               {t("targets.editTarget")}
@@ -93,7 +93,7 @@ export default function EditTargetPage() {
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-border app-header bg-background/80 backdrop-blur-md">
         <div className="container max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
           <h1 className="font-display font-bold text-xl" data-testid="text-edit-target-title">
             {t("targets.editTarget")}

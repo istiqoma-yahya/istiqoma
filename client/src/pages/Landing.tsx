@@ -164,51 +164,37 @@ export default function Landing() {
               >
                 {t('landing.authChooser.title')}
               </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  type="button"
-                  onClick={handleGoogleLogin}
-                  className="btn-primary flex-1 text-base px-6 py-3.5 flex items-center justify-center gap-2"
-                  data-testid="button-chooser-google"
-                >
-                  <SiGoogle className="w-5 h-5" />
-                  <span>{t('landing.authChooser.continueGoogle')}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleUsernameLogin}
-                  className="btn-secondary flex-1 text-base px-6 py-3.5 flex items-center justify-center gap-2 border border-border"
-                  data-testid="button-chooser-username"
-                >
-                  <KeyRound className="w-5 h-5" />
-                  <span>{t('landing.authChooser.continueUsername')}</span>
-                </button>
-              </div>
               <button
                 type="button"
-                onClick={() => setShowTour(true)}
-                className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
-                data-testid="button-take-tour"
+                onClick={handleGoogleLogin}
+                className="btn-primary w-full text-base px-6 py-3.5 flex items-center justify-center gap-2"
+                data-testid="button-chooser-google"
               >
-                <div className="w-6 h-6 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
-                  <Play className="w-3 h-3 text-emerald-500 ml-0.5" />
-                </div>
-                <span>Take the interactive tour</span>
+                <SiGoogle className="w-5 h-5 shrink-0" />
+                <span className="whitespace-nowrap">{t('landing.authChooser.continueGoogle')}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleUsernameLogin}
+                className="btn-secondary w-full text-base px-6 py-3.5 flex items-center justify-center gap-2 border border-border"
+                data-testid="button-chooser-username"
+              >
+                <KeyRound className="w-5 h-5 shrink-0" />
+                <span className="whitespace-nowrap">{t('landing.authChooser.continueUsername')}</span>
               </button>
               {isInstallable && !isInstalled && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.3 }}
-                  className="mt-1 flex justify-center md:justify-start"
                 >
                   <button
                     onClick={install}
-                    className="flex items-center gap-2 text-sm text-white border border-white rounded-md px-4 py-2 hover:bg-white/10 transition-colors"
+                    className="btn-secondary w-full text-base px-6 py-3.5 flex items-center justify-center gap-2 border border-border"
                     data-testid="button-download-app-hero"
                   >
-                    <Download className="w-4 h-4" />
-                    {t('landing.downloadApp')}
+                    <Download className="w-5 h-5 shrink-0" />
+                    <span className="whitespace-nowrap">{t('landing.downloadApp')}</span>
                   </button>
                 </motion.div>
               )}

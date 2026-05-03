@@ -35,7 +35,14 @@ export const api = {
       path: "/api/deeds",
       input: insertDeedSchema,
       responses: {
-        201: z.custom<typeof deeds.$inferSelect>(),
+        // Created deed plus optional metadata about a streak-freezer refund
+        // triggered by this insert (e.g. backdated entries that land on a
+        // previously auto-frozen day). Existing clients can ignore the
+        // refund fields safely.
+        201: z.custom<typeof deeds.$inferSelect & {
+          freezerRefunded?: boolean;
+          refundedDate?: string | null;
+        }>(),
         400: errorSchemas.validation,
         401: errorSchemas.unauthorized,
       },
@@ -309,6 +316,11 @@ export const api = {
           weekDays: z.array(z.boolean()),
           hasActivityToday: z.boolean(),
           frozenDays: z.array(z.boolean()),
+          // Calendar dates (YYYY-MM-DD) that were auto-frozen during THIS
+          // streak read — i.e. the user has not yet been notified about
+          // these specific freezer consumptions. The client uses this to
+          // show a one-time toast/banner so silent consumption is visible.
+          newlyFrozenDates: z.array(z.string()),
         }),
         401: errorSchemas.unauthorized,
       },
@@ -362,6 +374,13 @@ export const api = {
             available: z.number(),
           }),
           frozenDates: z.array(z.string()),
+          // Richer per-entry view of the same set, including refund state.
+          // Refunded entries (refundedAt != null) are kept on the ledger so
+          // the client can surface "this freezer was refunded" history.
+          frozenEntries: z.array(z.object({
+            date: z.string(),
+            refundedAt: z.string().nullable(),
+          })),
           packs: z.array(z.object({
             size: z.number(),
             cost: z.number(),

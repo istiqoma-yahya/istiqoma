@@ -148,6 +148,12 @@ export const streakFreezes = pgTable("streak_freezes", {
   userId: varchar("user_id").notNull().references(() => users.id),
   frozenDate: date("frozen_date").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
+  // Set when a freezer that was auto-consumed for this date is later
+  // refunded — typically because the user backdated a deed onto the
+  // frozen day. Refunded rows are excluded from the active "used" /
+  // "available" balance and from getFrozenDates(), but kept on the
+  // ledger so we can surface refund events on the Streak Freezer page.
+  refundedAt: timestamp("refunded_at"),
 }, (table) => ({
   uniqUserDate: uniqueIndex("uniq_streak_freeze_user_date").on(table.userId, table.frozenDate),
 }));

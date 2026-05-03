@@ -97,7 +97,18 @@ export async function registerRoutes(
 
       try {
         const deed = await storage.createDeed(userId, deedWithCalculatedPoints);
-        return res.status(201).json(deed);
+        // If this deed lands on a calendar day that was previously rescued
+        // by an auto-consumed freezer, refund that freezer. The streak walk
+        // freezes by UTC calendar date, so we derive the deed's UTC date
+        // from its createdAt to match.
+        const deedDate = deed.createdAt
+          ? new Date(deed.createdAt).toISOString().slice(0, 10)
+          : null;
+        let freezerRefunded = false;
+        if (deedDate) {
+          freezerRefunded = await storage.refundFreezerForDate(userId, deedDate);
+        }
+        return res.status(201).json({ ...deed, freezerRefunded, refundedDate: freezerRefunded ? deedDate : null });
       } catch (insertErr: any) {
         // Postgres unique_violation: another concurrent request beat us to
         // creating the same Sholat Fardhu deed for this (user, prayer, day).
@@ -830,6 +841,10 @@ export async function registerRoutes(
       let isToday = true;
       let checkDate = new Date(todayUTC);
       let walked = 0;
+      // Track freezers consumed during THIS walk so the client can surface a
+      // one-time notice. We don't include freezers consumed on previous walks
+      // because those have already had a chance to be shown.
+      const newlyFrozenDates: string[] = [];
       while (walked < SAFETY_MAX_DAYS) {
         const checkStr = checkDate.toISOString().split("T")[0];
         // Hard stop at the no-revive floor.
@@ -844,6 +859,7 @@ export async function registerRoutes(
           const frozen = await storage.consumeFreezerForDate(userId, checkStr);
           if (frozen) {
             frozenDates.add(checkStr);
+            newlyFrozenDates.push(checkStr);
             streakCount++;
           } else {
             // Out of freezers on a real past gap → streak breaks here.
@@ -877,7 +893,7 @@ export async function registerRoutes(
       }
 
       const hasActivityToday = deedDates.has(todayStr);
-      res.json({ streakCount, weekDays, hasActivityToday, frozenDays });
+      res.json({ streakCount, weekDays, hasActivityToday, frozenDays, newlyFrozenDates });
     } catch (err) {
       throw err;
     }
@@ -1026,15 +1042,23 @@ export async function registerRoutes(
   // ─── Streak Freezer ──────────────────────────────────────────
   app.get(api.streakFreezer.get.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
-    const [freezer, points, frozen] = await Promise.all([
+    const [freezer, points, entries] = await Promise.all([
       storage.getStreakFreezerBalance(userId),
       storage.getPointsBalance(userId),
-      storage.getFrozenDates(userId),
+      storage.getFreezerEntries(userId),
     ]);
+    // frozenDates retains its original meaning: the set of currently-active
+    // (non-refunded) frozen calendar dates. frozenEntries adds refund state
+    // so the freezer page can render refunded events alongside active ones.
+    const activeDates = entries
+      .filter((e) => e.refundedAt === null)
+      .map((e) => e.date)
+      .sort();
     res.json({
       freezer,
       points,
-      frozenDates: Array.from(frozen).sort(),
+      frozenDates: activeDates,
+      frozenEntries: entries,
       packs: STREAK_FREEZER_PACKS.map((p) => ({
         size: p.size,
         cost: p.cost,

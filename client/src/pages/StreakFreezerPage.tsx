@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Snowflake, Gem, Loader2, Check } from "lucide-react";
+import { ArrowLeft, Snowflake, Gem, Loader2, Check, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -26,10 +26,16 @@ interface StreakFreezerPack {
   discountPercent: number;
 }
 
+interface FreezerEntry {
+  date: string;
+  refundedAt: string | null;
+}
+
 interface StreakFreezerData {
   freezer: { owned: number; used: number; available: number };
   points: { earned: number; spent: number; available: number };
   frozenDates: string[];
+  frozenEntries: FreezerEntry[];
   packs: StreakFreezerPack[];
 }
 
@@ -104,7 +110,7 @@ export default function StreakFreezerPage() {
     );
   }
 
-  const { freezer, points, frozenDates, packs } = data;
+  const { freezer, points, frozenEntries, packs } = data;
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
@@ -235,7 +241,7 @@ export default function StreakFreezerPage() {
 
         <div>
           <h3 className="text-base font-semibold mb-3">{t("streakFreezer.frozenDaysTitle")}</h3>
-          {frozenDates.length === 0 ? (
+          {frozenEntries.length === 0 ? (
             <Card className="p-6 border-dashed text-center">
               <p className="text-sm text-muted-foreground" data-testid="text-no-frozen-days">
                 {t("streakFreezer.noFrozenDays")}
@@ -243,24 +249,50 @@ export default function StreakFreezerPage() {
             </Card>
           ) : (
             <Card className="divide-y divide-border" data-testid="list-frozen-days">
-              {frozenDates.slice().reverse().map((date) => (
-                <div
-                  key={date}
-                  className="flex items-center gap-3 px-4 py-3"
-                  data-testid={`row-frozen-date-${date}`}
-                >
-                  <div className="p-2 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
-                    <Snowflake className="w-4 h-4" />
+              {frozenEntries.slice().reverse().map((entry) => {
+                const isRefunded = entry.refundedAt !== null;
+                return (
+                  <div
+                    key={entry.date}
+                    className="flex items-center gap-3 px-4 py-3"
+                    data-testid={`row-frozen-date-${entry.date}`}
+                  >
+                    <div
+                      className={`p-2 rounded-lg ${
+                        isRefunded
+                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                          : "bg-sky-500/10 text-sky-600 dark:text-sky-400"
+                      }`}
+                    >
+                      {isRefunded ? (
+                        <RotateCcw className="w-4 h-4" />
+                      ) : (
+                        <Snowflake className="w-4 h-4" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p
+                        className={`text-sm font-medium ${isRefunded ? "line-through text-muted-foreground" : ""}`}
+                        data-testid={`text-frozen-date-${entry.date}`}
+                      >
+                        {formatDate(entry.date)}
+                      </p>
+                      <p className="text-xs text-muted-foreground" data-testid={`text-frozen-status-${entry.date}`}>
+                        {isRefunded
+                          ? t("streakFreezer.refundedByBackdate")
+                          : t("streakFreezer.savedByFreezer")}
+                      </p>
+                    </div>
+                    {isRefunded ? (
+                      <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400" data-testid={`text-refunded-${entry.date}`}>
+                        {t("streakFreezer.refundedBadge")}
+                      </span>
+                    ) : (
+                      <Check className="w-4 h-4 text-sky-500" />
+                    )}
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium" data-testid={`text-frozen-date-${date}`}>{formatDate(date)}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {t("streakFreezer.savedByFreezer")}
-                    </p>
-                  </div>
-                  <Check className="w-4 h-4 text-sky-500" />
-                </div>
-              ))}
+                );
+              })}
             </Card>
           )}
         </div>

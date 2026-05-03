@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl, errorSchemas } from "@shared/routes";
 import { type InsertDeed } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 type CreateDeedRequest = InsertDeed;
@@ -23,6 +24,7 @@ export function useDeeds() {
 export function useCreateDeed() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (data: CreateDeedRequest) => {
@@ -48,8 +50,22 @@ export function useCreateDeed() {
       }
       return api.deeds.create.responses[201].parse(await res.json());
     },
-    onSuccess: () => {
+    onSuccess: (deed) => {
       queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
+      // If the server refunded a freezer because this deed landed on a
+      // previously auto-frozen day, also refresh the freezer & streak views
+      // and surface a confirmation toast.
+      const refunded = (deed as { freezerRefunded?: boolean }).freezerRefunded;
+      const refundedDate = (deed as { refundedDate?: string | null }).refundedDate ?? null;
+      if (refunded) {
+        queryClient.invalidateQueries({ queryKey: ["/api/streak-freezer"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/streak"] });
+        toast({
+          title: t("streakFreezer.refundToastTitle"),
+          description: t("streakFreezer.refundToastDescription", { date: refundedDate ?? "" }),
+        });
+        return;
+      }
       toast({
         title: "Deed Recorded",
         description: "Your deed has been successfully tracked.",

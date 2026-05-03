@@ -4,7 +4,9 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useEffect } from "react";
 import { formatNumber } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface StatsOverviewProps {
   deeds: Deed[];
@@ -13,15 +15,52 @@ interface StatsOverviewProps {
 export function StatsOverview({ deeds }: StatsOverviewProps) {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
+  const { toast } = useToast();
   const totalDeeds = deeds.length;
   // Fallback only — once /api/streak-freezer resolves we use the canonical
   // available balance (earned − spent). This keeps the dashboard consistent
   // with the freezer page so spent points don't appear to "disappear" later.
   const earnedPoints = deeds.reduce((acc, d) => acc + d.points, 0);
 
-  const { data: streakData } = useQuery<{ streakCount: number; weekDays: boolean[]; hasActivityToday: boolean; frozenDays: boolean[] }>({
+  const { data: streakData } = useQuery<{
+    streakCount: number;
+    weekDays: boolean[];
+    hasActivityToday: boolean;
+    frozenDays: boolean[];
+    newlyFrozenDates?: string[];
+  }>({
     queryKey: ["/api/streak"],
   });
+
+  // Surface a one-time toast whenever /api/streak reports freezers it
+  // consumed during the current walk. We dedupe per (browser session, date)
+  // via sessionStorage so navigating between pages doesn't re-fire it, while
+  // still allowing the user to see it again after a hard reload.
+  useEffect(() => {
+    const dates = streakData?.newlyFrozenDates ?? [];
+    if (dates.length === 0) return;
+    const STORAGE_KEY = "amalin:notified-frozen-dates";
+    let seen: string[] = [];
+    try {
+      seen = JSON.parse(sessionStorage.getItem(STORAGE_KEY) ?? "[]");
+    } catch {
+      seen = [];
+    }
+    const fresh = dates.filter((d) => !seen.includes(d));
+    if (fresh.length === 0) return;
+    toast({
+      title: t("streakFreezer.autoConsumedToastTitle", { count: fresh.length }),
+      description: t("streakFreezer.autoConsumedToastDescription", {
+        count: fresh.length,
+        dates: fresh.join(", "),
+      }),
+    });
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify([...seen, ...fresh]));
+    } catch {
+      // sessionStorage is best-effort; ignore quota / privacy-mode failures.
+    }
+  }, [streakData?.newlyFrozenDates, toast, t]);
 
   const { data: freezerData } = useQuery<{
     freezer: { owned: number; used: number; available: number };

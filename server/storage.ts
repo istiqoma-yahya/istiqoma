@@ -73,7 +73,9 @@ export interface IStorage {
   getStreakFreezerBalance(userId: string): Promise<{ owned: number; used: number; available: number }>;
   getPointsBalance(userId: string): Promise<{ earned: number; spent: number; available: number }>;
   getFrozenDates(userId: string): Promise<Set<string>>;
+  getFreezerEntries(userId: string): Promise<{ date: string; refundedAt: string | null }[]>;
   consumeFreezerForDate(userId: string, dateStr: string): Promise<boolean>;
+  refundFreezerForDate(userId: string, dateStr: string): Promise<boolean>;
   getStreakFloor(userId: string): Promise<string | null>;
   setStreakFloor(userId: string, dateStr: string): Promise<void>;
   purchaseStreakFreezers(userId: string, packSize: StreakFreezerPackSize): Promise<{
@@ -927,7 +929,7 @@ export class DatabaseStorage implements IStorage {
     const [usedRow] = await db
       .select({ total: sql<number>`COUNT(*)::int` })
       .from(streakFreezes)
-      .where(eq(streakFreezes.userId, userId));
+      .where(and(eq(streakFreezes.userId, userId), isNull(streakFreezes.refundedAt)));
     const owned = Number(grantedRow?.total ?? 0);
     const used = Number(usedRow?.total ?? 0);
     return { owned, used, available: Math.max(0, owned - used) };
@@ -968,12 +970,30 @@ export class DatabaseStorage implements IStorage {
     const rows = await db
       .select({ d: streakFreezes.frozenDate })
       .from(streakFreezes)
-      .where(eq(streakFreezes.userId, userId));
+      .where(and(eq(streakFreezes.userId, userId), isNull(streakFreezes.refundedAt)));
     return new Set(
       rows
         .map((r) => this.normalizeDateColumn(r.d))
         .filter((s): s is string => s !== null),
     );
+  }
+
+  async getFreezerEntries(userId: string): Promise<{ date: string; refundedAt: string | null }[]> {
+    const rows = await db
+      .select({ d: streakFreezes.frozenDate, refundedAt: streakFreezes.refundedAt })
+      .from(streakFreezes)
+      .where(eq(streakFreezes.userId, userId))
+      .orderBy(asc(streakFreezes.frozenDate));
+    return rows
+      .map((r) => {
+        const date = this.normalizeDateColumn(r.d);
+        if (date === null) return null;
+        return {
+          date,
+          refundedAt: r.refundedAt ? r.refundedAt.toISOString() : null,
+        };
+      })
+      .filter((e): e is { date: string; refundedAt: string | null } => e !== null);
   }
 
   async getStreakFloor(userId: string): Promise<string | null> {
@@ -1011,7 +1031,7 @@ export class DatabaseStorage implements IStorage {
       const [usedRow] = await tx
         .select({ total: sql<number>`COUNT(*)::int` })
         .from(streakFreezes)
-        .where(eq(streakFreezes.userId, userId));
+        .where(and(eq(streakFreezes.userId, userId), isNull(streakFreezes.refundedAt)));
       const available = Number(grantedRow?.total ?? 0) - Number(usedRow?.total ?? 0);
       if (available <= 0) return false;
       try {
@@ -1025,6 +1045,24 @@ export class DatabaseStorage implements IStorage {
         }
         throw err;
       }
+    });
+  }
+
+  async refundFreezerForDate(userId: string, dateStr: string): Promise<boolean> {
+    return await db.transaction(async (tx) => {
+      await this.acquireUserFreezerLock(tx, userId);
+      const updated = await tx
+        .update(streakFreezes)
+        .set({ refundedAt: new Date() })
+        .where(
+          and(
+            eq(streakFreezes.userId, userId),
+            eq(streakFreezes.frozenDate, dateStr),
+            isNull(streakFreezes.refundedAt),
+          ),
+        )
+        .returning({ id: streakFreezes.id });
+      return updated.length > 0;
     });
   }
 
@@ -1076,7 +1114,7 @@ export class DatabaseStorage implements IStorage {
       const [usedRow] = await tx
         .select({ total: sql<number>`COUNT(*)::int` })
         .from(streakFreezes)
-        .where(eq(streakFreezes.userId, userId));
+        .where(and(eq(streakFreezes.userId, userId), isNull(streakFreezes.refundedAt)));
       const owned = Number(newGranted[0]?.total ?? 0);
       const used = Number(usedRow?.total ?? 0);
       return {

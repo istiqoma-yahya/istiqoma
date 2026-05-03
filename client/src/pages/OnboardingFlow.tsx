@@ -189,7 +189,7 @@ export default function OnboardingFlow() {
           >
             {screen === "s0" && (
               <div className="ob-center">
-                <div className="ob-logo-mark">🌿</div>
+                <div className="ob-logo-mark">🕌</div>
                 <p className="ob-app-title">إستقامة</p>
                 <p className="ob-app-tagline">{t("onboarding.splashTagline")}</p>
                 <div className="ob-divider" />

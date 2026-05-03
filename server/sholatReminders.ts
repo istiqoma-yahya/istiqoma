@@ -3,6 +3,7 @@ import { toZonedTime } from 'date-fns-tz';
 import { storage } from './storage';
 import type { PushSubscription } from '@shared/schema';
 import webpush from 'web-push';
+import { getDisplayName, sholatReminderCopy } from './notificationCopy';
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
@@ -80,6 +81,7 @@ export async function sendSholatReminders(): Promise<void> {
       ];
 
       const todayStr = `${nowInUserTz.getFullYear()}-${String(nowInUserTz.getMonth() + 1).padStart(2, '0')}-${String(nowInUserTz.getDate()).padStart(2, '0')}`;
+      let cachedName: string | null | undefined;
 
       for (const prayer of prayers) {
         const prayerTimeInUserTz = toZonedTime(prayer.time, userTimezone);
@@ -96,9 +98,19 @@ export async function sendSholatReminders(): Promise<void> {
           const hours = prayerTimeInUserTz.getHours().toString().padStart(2, '0');
           const minutes = prayerTimeInUserTz.getMinutes().toString().padStart(2, '0');
 
+          if (cachedName === undefined) {
+            cachedName = await getDisplayName(subscription.userId);
+          }
+          const { title, body } = sholatReminderCopy(subscription.userId, cachedName, {
+            prayerName,
+            hours,
+            minutes,
+            minutesBefore: MINUTES_BEFORE,
+          });
+
           await sendToSubscription(subscription, {
-            title: `Waktu Sholat ${prayerName}`,
-            body: `Sholat ${prayerName} ${MINUTES_BEFORE} menit lagi (${hours}:${minutes}). Siapkan diri untuk sholat.`,
+            title,
+            body,
             url: '/',
             tag: `sholat-${prayer.key}`,
             sound: subscription.notificationSound ?? 'chime',

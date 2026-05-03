@@ -2,6 +2,7 @@ import webpush from 'web-push';
 import { toZonedTime } from 'date-fns-tz';
 import { storage } from './storage';
 import type { PushSubscription } from '@shared/schema';
+import { getDisplayName, dailyReminderCopy, targetReminderCopy } from './notificationCopy';
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
@@ -70,9 +71,11 @@ export async function sendDailyReminders(): Promise<void> {
     const reminderTotalMinutes = reminderHour * 60 + reminderMinute;
     
     if (Math.abs(currentTotalMinutes - reminderTotalMinutes) <= 1) {
+      const name = await getDisplayName(subscription.userId);
+      const { title, body } = dailyReminderCopy(subscription.userId, name);
       await sendToSubscription(subscription, {
-        title: 'Istiqoma Daily Reminder',
-        body: 'Time to log your deeds for today!',
+        title,
+        body,
         url: '/',
         tag: 'daily-reminder',
         sound: subscription.notificationSound ?? 'chime',
@@ -124,6 +127,7 @@ export async function sendTargetReminders(): Promise<void> {
     const todayStr = `${nowInUserTz.getFullYear()}-${String(nowInUserTz.getMonth() + 1).padStart(2, '0')}-${String(nowInUserTz.getDate()).padStart(2, '0')}`;
 
     const targetsWithProgress = await storage.getTargetsWithProgress(subscription.userId);
+    let cachedName: string | null | undefined;
 
     for (const target of targetsWithProgress) {
       if (!target.isActive) continue;
@@ -147,17 +151,19 @@ export async function sendTargetReminders(): Promise<void> {
         const goal = target.targetValue;
         const percentComplete = target.percentComplete;
 
-        let body: string;
-        if (target.targetType === "limit") {
-          body = `${targetName}: ${progress}/${goal} used. ${percentComplete <= 100 ? 'Within limit.' : 'Limit exceeded!'}`;
-        } else if (percentComplete >= 100) {
-          body = `${targetName}: Target achieved! ${progress}/${goal}. MasyaAllah!`;
-        } else {
-          body = `${targetName}: ${progress}/${goal} (${percentComplete}%). Keep going!`;
+        if (cachedName === undefined) {
+          cachedName = await getDisplayName(subscription.userId);
         }
+        const { title, body } = targetReminderCopy(subscription.userId, cachedName, {
+          targetName,
+          progress,
+          goal,
+          percent: percentComplete,
+          targetType: target.targetType,
+        });
 
         await sendToSubscription(subscription, {
-          title: 'Target Reminder',
+          title,
           body,
           url: `/targets/${target.id}`,
           tag: `target-reminder-${target.id}`,

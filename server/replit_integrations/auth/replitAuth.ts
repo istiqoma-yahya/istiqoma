@@ -5,6 +5,7 @@ import {
   type VerifyFunction,
 } from "openid-client/passport";
 import type { Request } from "express";
+import { randomBytes } from "crypto";
 
 import passport from "passport";
 import session from "express-session";
@@ -47,13 +48,20 @@ export function getSession() {
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
     createTableIfMissing: false,
-    ttl: sessionTtl,
+    ttl: sessionTtl / 1000, // connect-pg-simple expects seconds
     tableName: "sessions",
   });
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
-    resave: false,
+    // Roll the cookie forward on every request so an active user's
+    // session window is "7 days of inactivity" rather than a hard
+    // 7-day cap from initial login. Pair with `resave: true` so the
+    // store TTL is also refreshed (connect-pg-simple only writes when
+    // the session is saved). `saveUninitialized: false` still keeps
+    // anonymous traffic out of the session table.
+    resave: true,
+    rolling: true,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
@@ -248,10 +256,78 @@ export async function setupAuth(app: Express) {
   });
 }
 
+// Reason codes emitted by the auth middleware. Surfaced in structured logs
+// so we can diagnose "I got logged out" reports without leaking tokens.
+type AuthFailureReason =
+  | "not_authenticated"
+  | "no_expires_at"
+  | "no_refresh_token"
+  | "refresh_invalid_grant"
+  | "refresh_transient_error";
+
+function newRequestId(): string {
+  return randomBytes(6).toString("hex");
+}
+
+function logAuthFailure(
+  req: any,
+  reason: AuthFailureReason,
+  extra?: Record<string, unknown>,
+) {
+  const userId = (req.user as any)?.claims?.sub;
+  const reqId = newRequestId();
+  // Single line, no token values. `extra` is for non-sensitive details
+  // like the OAuth `error` code or HTTP status from the refresh call.
+  console.warn(
+    `[auth] failure reason=${reason} user=${userId ?? "anon"} req=${reqId} path=${req.path}${
+      extra ? " " + JSON.stringify(extra) : ""
+    }`,
+  );
+}
+
+// Classify a token-refresh failure as either "the refresh token itself
+// is no longer valid" (must log the user out) or "transient infrastructure
+// problem" (network blip, 5xx, timeout — keep the user signed in).
+function isInvalidGrantError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const e = err as {
+    error?: string;
+    status?: number;
+    code?: string;
+    name?: string;
+  };
+  // openid-client / oauth4webapi surface OAuth-style errors via
+  // ResponseBodyError, which exposes `.error` (the OAuth error code) and
+  // `.status` (HTTP status). `invalid_grant` is the canonical "refresh
+  // token is no longer usable" signal. A 4xx other than 5xx with an
+  // OAuth error string also indicates a definitive rejection.
+  // Be conservative: only treat the canonical "refresh token is no longer
+  // usable" OAuth error codes as definitive logouts. Other 4xx responses
+  // (e.g. 429 rate limit) should be retried as transient — logging the
+  // user out on a rate-limit blip would be a regression.
+  const definitiveErrors = new Set([
+    "invalid_grant",
+    "invalid_token",
+    "invalid_client",
+    "unauthorized_client",
+    "unsupported_grant_type",
+  ]);
+  if (typeof e.error === "string" && definitiveErrors.has(e.error)) {
+    return true;
+  }
+  return false;
+}
+
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated()) {
+    logAuthFailure(req, "not_authenticated");
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  if (!user?.expires_at) {
+    logAuthFailure(req, "no_expires_at");
     return res.status(401).json({ message: "Unauthorized" });
   }
 
@@ -262,17 +338,89 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
 
   const refreshToken = user.refresh_token;
   if (!refreshToken) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
+    logAuthFailure(req, "no_refresh_token");
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
-  try {
+  // Retry the refresh once on transient failures, each attempt bounded by
+  // a short timeout so a hung token endpoint can't stall the request. A
+  // timeout is treated as a transient error (not invalid_grant), which
+  // means the second attempt runs and, if that also fails, the safe-method
+  // bypass below applies.
+  const REFRESH_TIMEOUT_MS = 4000;
+  const tryRefresh = async () => {
     const config = await getOidcConfig();
-    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
+    let timer: NodeJS.Timeout | undefined;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        reject(
+          Object.assign(new Error("refresh timeout"), {
+            name: "RefreshTimeoutError",
+          }),
+        );
+      }, REFRESH_TIMEOUT_MS);
+    });
+    try {
+      return await Promise.race([
+        client.refreshTokenGrant(config, refreshToken),
+        timeoutPromise,
+      ]);
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  };
+
+  try {
+    let tokenResponse;
+    try {
+      tokenResponse = await tryRefresh();
+    } catch (firstErr) {
+      if (isInvalidGrantError(firstErr)) throw firstErr;
+      // Transient — retry once before giving up on this request.
+      tokenResponse = await tryRefresh();
+    }
     updateUserSession(user, tokenResponse);
     return next();
   } catch (error) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
+    if (isInvalidGrantError(error)) {
+      // Refresh token is genuinely invalid/expired/revoked. Tear down the
+      // session cleanly so the next request hits the normal login flow
+      // instead of getting stuck retrying with a dead token.
+      const e = error as { error?: string; status?: number };
+      logAuthFailure(req, "refresh_invalid_grant", {
+        oauthError: e.error,
+        status: e.status,
+      });
+      req.logout(() => {
+        req.session?.destroy?.(() => {
+          res.status(401).json({ message: "Unauthorized" });
+        });
+      });
+      return;
+    }
+
+    // Transient failure (network error, 5xx, timeout, etc). Don't punish
+    // the user for an upstream blip — but the access token IS expired and
+    // we couldn't prove the refresh token is still valid, so we should
+    // not authorize sensitive mutations. Allow safe (read-only) methods
+    // through using the still-valid session; reject write methods with
+    // 401 without destroying the session, so the user stays signed in
+    // and the next request can retry the refresh.
+    const e = error as { name?: string; message?: string; status?: number };
+    const safeMethod =
+      req.method === "GET" ||
+      req.method === "HEAD" ||
+      req.method === "OPTIONS";
+    logAuthFailure(req, "refresh_transient_error", {
+      name: e.name,
+      status: e.status,
+      message: e.message?.slice(0, 200),
+      method: req.method,
+      allowed: safeMethod,
+    });
+    if (safeMethod) {
+      return next();
+    }
+    return res.status(401).json({ message: "Unauthorized" });
   }
 };

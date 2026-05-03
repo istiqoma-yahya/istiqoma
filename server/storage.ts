@@ -1,6 +1,6 @@
 import { db } from "./db";
 export { db };
-import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization } from "@shared/schema";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte, isNull } from "drizzle-orm";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -91,6 +91,8 @@ export interface IStorage {
   getQuranMemorizations(userId: string, surahNumber?: number): Promise<QuranMemorization[]>;
   addQuranMemorization(userId: string, data: InsertQuranMemorization): Promise<QuranMemorization>;
   removeQuranMemorization(userId: string, surahNumber: number, verseNumber: number): Promise<void>;
+  hasQuranMemorizationAward(userId: string, surahNumber: number, verseNumber: number): Promise<boolean>;
+  recordQuranMemorizationAward(userId: string, surahNumber: number, verseNumber: number, deedId: number): Promise<boolean>;
   getLeaderboard(
     currentUserId: string,
     period: "daily" | "monthly" | "yearly",
@@ -1279,6 +1281,44 @@ export class DatabaseStorage implements IStorage {
           eq(quranMemorizations.verseNumber, verseNumber),
         ),
       );
+  }
+
+  async hasQuranMemorizationAward(userId: string, surahNumber: number, verseNumber: number): Promise<boolean> {
+    const rows = await db
+      .select({ id: quranMemorizationAwards.id })
+      .from(quranMemorizationAwards)
+      .where(
+        and(
+          eq(quranMemorizationAwards.userId, userId),
+          eq(quranMemorizationAwards.surahNumber, surahNumber),
+          eq(quranMemorizationAwards.verseNumber, verseNumber),
+        ),
+      )
+      .limit(1);
+    return rows.length > 0;
+  }
+
+  // Insert an award ledger row. Uses ON CONFLICT DO NOTHING on the unique
+  // (user, surah, verse) index so a concurrent second request can't create
+  // a duplicate award. Returns true if this call inserted a fresh row
+  // (i.e. caller should treat the deed as freshly awarded), false if the
+  // award was already present.
+  async recordQuranMemorizationAward(
+    userId: string,
+    surahNumber: number,
+    verseNumber: number,
+    deedId: number,
+  ): Promise<boolean> {
+    const inserted = await db
+      .insert(quranMemorizationAwards)
+      .values({ userId, surahNumber, verseNumber, deedId })
+      .onConflictDoNothing({ target: [
+        quranMemorizationAwards.userId,
+        quranMemorizationAwards.surahNumber,
+        quranMemorizationAwards.verseNumber,
+      ] })
+      .returning({ id: quranMemorizationAwards.id });
+    return inserted.length > 0;
   }
 
   // ─── Leaderboard ─────────────────────────────────────────────

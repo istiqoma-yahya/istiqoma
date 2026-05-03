@@ -1405,6 +1405,53 @@ export async function registerRoutes(
       const input = api.quran.addMemorization.input.parse(req.body);
       const userId = req.user.claims.sub;
       const row = await storage.addQuranMemorization(userId, input);
+
+      // Award deed points the first time this verse is ever memorized.
+      // Dedup is anchored on the persistent `quran_memorization_awards`
+      // ledger (NOT on `quran_memorizations`) so a user can't farm points
+      // by repeatedly unmarking and re-marking the same verse — once the
+      // award row exists, it stays even if memorization is later removed.
+      const alreadyAwarded = await storage.hasQuranMemorizationAward(
+        userId,
+        input.surahNumber,
+        input.verseNumber,
+      );
+      if (!alreadyAwarded) {
+        const points = calculatePoints({ category: "Hafalan Quran", quantity: 1 });
+        try {
+          const deed = await storage.createDeed(userId, {
+            description: `Memorized Surah ${input.surahNumber}:${input.verseNumber}`,
+            category: "Hafalan Quran",
+            points,
+            quantity: 1,
+            deedType: "good",
+          });
+          // Race-safe: a concurrent second request might have inserted the
+          // award row first. In that case `recordQuranMemorizationAward`
+          // returns false and we roll back this duplicate deed so we don't
+          // double-credit the user.
+          const inserted = await storage.recordQuranMemorizationAward(
+            userId,
+            input.surahNumber,
+            input.verseNumber,
+            deed.id,
+          );
+          if (!inserted) {
+            await storage.deleteDeed(deed.id, userId);
+          } else {
+            try {
+              await evaluateBadgesForUser(userId);
+            } catch (e) {
+              console.error("Badge evaluation failed (memorization award)", e);
+            }
+          }
+        } catch (e) {
+          // Don't fail the memorization tap if the deed-award side-channel
+          // hits a transient error — the verse is still marked memorized.
+          console.error("Failed to award memorization deed", e);
+        }
+      }
+
       res.status(201).json(row);
     } catch (err) {
       if (err instanceof z.ZodError) {

@@ -621,6 +621,24 @@ export const insertQuranMemorizationSchema = z.object({
 export type QuranMemorization = typeof quranMemorizations.$inferSelect;
 export type InsertQuranMemorization = z.infer<typeof insertQuranMemorizationSchema>;
 
+// Persistent ledger of which (user, surah, verse) tuples have already been
+// awarded deed points for memorization. We keep this separate from
+// `quran_memorizations` (which gets deleted on unmark) so a user cannot farm
+// points by toggling memorization on/off — once awarded, the row stays.
+export const quranMemorizationAwards = pgTable("quran_memorization_awards", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  surahNumber: integer("surah_number").notNull(),
+  verseNumber: integer("verse_number").notNull(),
+  deedId: integer("deed_id").references(() => deeds.id, { onDelete: "set null" }),
+  awardedAt: timestamp("awarded_at").defaultNow(),
+}, (table) => ({
+  uniqUserVerseAward: uniqueIndex("uniq_quran_memorization_award_user_verse")
+    .on(table.userId, table.surahNumber, table.verseNumber),
+}));
+
+export type QuranMemorizationAward = typeof quranMemorizationAwards.$inferSelect;
+
 export const upsertQuranReadingStateSchema = z.object({
   lastSurahNumber: z.number().int().min(1).max(114).nullable().optional(),
   lastVerseNumber: z.number().int().min(1).max(286).nullable().optional(),

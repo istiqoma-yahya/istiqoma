@@ -55,6 +55,12 @@ Users can select from 8 unit types for custom categories in deeds/targets (e.g.,
 ### Automatic Point Calculation
 Points are calculated by the backend based on category and quantity. This includes flat points for certain activities and quantity-multiplied points for others (e.g., Sholat Fardhu, Puasa, Baca Quran).
 
+### Quran Memorization Rewards
+- Marking a verse as memorized via `POST /api/quran/memorizations` automatically logs a deed in category **"Hafalan Quran"** worth **50 points per verse**, so memorization contributes to streaks and the leaderboard like any other deed.
+- Deduplication is anchored on a persistent ledger table `quran_memorization_awards` keyed uniquely on `(user_id, surah_number, verse_number)`. The award row is **never deleted on unmark**, so users cannot farm points by toggling memorization on/off — re-marking the same verse simply finds an existing award row and skips deed creation.
+- Race-safe: if a concurrent second request inserts the award row first, the duplicate deed created by the loser is rolled back via `deleteDeed` before the response returns.
+- Award failures are non-fatal: if deed creation throws, the verse is still marked memorized and the response succeeds; the error is only logged.
+
 ### Push Notifications & Reminders
 - **Features**: Auto-prompt, daily reminders, Sholat reminders (using `adhan` library), target alerts.
 - **Location**: User coordinates stored for prayer time calculation.

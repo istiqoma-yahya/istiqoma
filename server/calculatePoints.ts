@@ -22,6 +22,7 @@ const PROTECTED_CATEGORIES = [
   "fasting sunnah",
   "baca quran",
   "quran",
+  "hafalan quran",
   "shodaqoh",
   "sedekah",
   "sodaqoh",
@@ -77,6 +78,10 @@ export function calculatePoints(input: CalculatePointsInput): number {
       default:
         return 1 * quantity;
     }
+  }
+
+  if (categoryLower === "hafalan quran") {
+    return 50 * quantity;
   }
 
   if (categoryLower === "shodaqoh" || categoryLower === "sedekah" || categoryLower === "sodaqoh") {

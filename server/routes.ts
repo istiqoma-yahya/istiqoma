@@ -364,7 +364,8 @@ export async function registerRoutes(
 
   app.get(api.targets.listWithProgress.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
-    const targetsWithProgress = await storage.getTargetsWithProgress(userId);
+    const timezone = parseTimezone(req.query.timezone);
+    const targetsWithProgress = await storage.getTargetsWithProgress(userId, timezone);
     res.json(targetsWithProgress);
   });
 
@@ -551,14 +552,14 @@ export async function registerRoutes(
       return res.status(400).json({ message: "Invalid ID" });
     }
 
-    const targetsWithProgress = await storage.getTargetsWithProgress(userId);
+    const timezone = parseTimezone(req.query.timezone);
+    const targetsWithProgress = await storage.getTargetsWithProgress(userId, timezone);
     const target = targetsWithProgress.find(t => t.id === id);
     if (!target) {
       return res.status(404).json({ message: "Target not found" });
     }
 
     const periodsBack = 90;
-    const timezone = parseTimezone(req.query.timezone);
     await storage.calculateAndSaveTargetHistory(id, userId, periodsBack, timezone);
     const { history, currentStreak } = await storage.getTargetHistoryWithStreak(id, userId, periodsBack);
 

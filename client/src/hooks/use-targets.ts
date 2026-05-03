@@ -25,7 +25,11 @@ export function useTargetsWithProgress() {
   return useQuery<TargetWithProgress[]>({
     queryKey: [api.targets.listWithProgress.path],
     queryFn: async () => {
-      const res = await fetch(api.targets.listWithProgress.path, { credentials: "include" });
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const url = tz
+        ? `${api.targets.listWithProgress.path}?timezone=${encodeURIComponent(tz)}`
+        : api.targets.listWithProgress.path;
+      const res = await fetch(url, { credentials: "include" });
       if (res.status === 401) return [];
       if (!res.ok) throw new Error("Failed to fetch targets with progress");
       return await res.json();

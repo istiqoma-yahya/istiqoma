@@ -126,7 +126,7 @@ export async function sendTargetReminders(): Promise<void> {
     const currentTotalMinutes = currentHour * 60 + currentMinute;
     const todayStr = `${nowInUserTz.getFullYear()}-${String(nowInUserTz.getMonth() + 1).padStart(2, '0')}-${String(nowInUserTz.getDate()).padStart(2, '0')}`;
 
-    const targetsWithProgress = await storage.getTargetsWithProgress(subscription.userId);
+    const targetsWithProgress = await storage.getTargetsWithProgress(subscription.userId, userTimezone);
     let cachedName: string | null | undefined;
 
     for (const target of targetsWithProgress) {

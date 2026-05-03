@@ -45,7 +45,7 @@ export interface IStorage {
   reorderCategories(userId: string, orderedIds: number[]): Promise<Category[]>;
   markCategoryProtected(id: number, userId: string): Promise<void>;
   getTargets(userId: string): Promise<Target[]>;
-  getTargetsWithProgress(userId: string): Promise<TargetWithProgress[]>;
+  getTargetsWithProgress(userId: string, timezone?: string): Promise<TargetWithProgress[]>;
   createTarget(userId: string, target: InsertTarget): Promise<Target>;
   updateTarget(id: number, userId: string, target: Partial<InsertTarget>): Promise<Target>;
   deleteTarget(id: number, userId: string): Promise<void>;
@@ -238,10 +238,11 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(targets.createdAt));
   }
 
-  async getTargetsWithProgress(userId: string): Promise<TargetWithProgress[]> {
+  async getTargetsWithProgress(userId: string, timezone?: string): Promise<TargetWithProgress[]> {
     const userTargets = await this.getTargets(userId);
     const userDeeds = await this.getDeeds(userId);
     const now = new Date();
+    const tz = await this.resolveUserTimezone(userId, timezone);
 
     return userTargets.map((target) => {
       const isOneTime = target.recurrence === "oneTime";
@@ -294,25 +295,25 @@ export class DatabaseStorage implements IStorage {
       let periodEnd: Date;
       
       // Convert current time to user's timezone for period calculations
-      const nowInUserTz = toZonedTime(now, DEFAULT_TIMEZONE);
+      const nowInUserTz = toZonedTime(now, tz);
 
       switch (target.period) {
         case "daily":
           // Calculate start/end of day in user's timezone, then convert back to UTC
-          periodStart = fromZonedTime(startOfDay(nowInUserTz), DEFAULT_TIMEZONE);
-          periodEnd = fromZonedTime(endOfDay(nowInUserTz), DEFAULT_TIMEZONE);
+          periodStart = fromZonedTime(startOfDay(nowInUserTz), tz);
+          periodEnd = fromZonedTime(endOfDay(nowInUserTz), tz);
           break;
         case "weekly":
-          periodStart = fromZonedTime(startOfWeek(nowInUserTz, { weekStartsOn: 1 }), DEFAULT_TIMEZONE);
-          periodEnd = fromZonedTime(endOfWeek(nowInUserTz, { weekStartsOn: 1 }), DEFAULT_TIMEZONE);
+          periodStart = fromZonedTime(startOfWeek(nowInUserTz, { weekStartsOn: 1 }), tz);
+          periodEnd = fromZonedTime(endOfWeek(nowInUserTz, { weekStartsOn: 1 }), tz);
           break;
         case "monthly":
-          periodStart = fromZonedTime(startOfMonth(nowInUserTz), DEFAULT_TIMEZONE);
-          periodEnd = fromZonedTime(endOfMonth(nowInUserTz), DEFAULT_TIMEZONE);
+          periodStart = fromZonedTime(startOfMonth(nowInUserTz), tz);
+          periodEnd = fromZonedTime(endOfMonth(nowInUserTz), tz);
           break;
         default:
-          periodStart = fromZonedTime(startOfDay(nowInUserTz), DEFAULT_TIMEZONE);
-          periodEnd = fromZonedTime(endOfDay(nowInUserTz), DEFAULT_TIMEZONE);
+          periodStart = fromZonedTime(startOfDay(nowInUserTz), tz);
+          periodEnd = fromZonedTime(endOfDay(nowInUserTz), tz);
       }
 
       // For achievement targets: count good deeds

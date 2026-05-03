@@ -12,12 +12,34 @@ function fmt(s: number) {
   return `${m}:${String(r).padStart(2, "0")}`;
 }
 
+function fmtBytes(bytes: number) {
+  if (!bytes || !isFinite(bytes)) return "0 MB";
+  const mb = bytes / (1024 * 1024);
+  if (mb >= 10) return `${Math.round(mb)} MB`;
+  return `${mb.toFixed(1)} MB`;
+}
+
 export function QuranMiniPlayer() {
-  const { current, isPlaying, isLoading, position, duration, toggle, stop, seekBy, seekTo, reciterName } =
-    useQuranAudio();
+  const {
+    current,
+    isPlaying,
+    isLoading,
+    position,
+    duration,
+    toggle,
+    stop,
+    seekBy,
+    seekTo,
+    reciterName,
+    downloadProgress,
+  } = useQuranAudio();
   const [openFull, setOpenFull] = useState(false);
 
   if (!current) return null;
+
+  const pct = downloadProgress && downloadProgress.total > 0
+    ? Math.min(100, Math.round((downloadProgress.loaded / downloadProgress.total) * 100))
+    : null;
 
   return (
     <>
@@ -40,9 +62,22 @@ export function QuranMiniPlayer() {
                   <div className="text-sm font-medium truncate" data-testid="text-mini-surah-name">
                     {current.surahName}
                   </div>
-                  <div className="text-xs text-muted-foreground truncate" data-testid="text-mini-reciter">
-                    {reciterName ?? current.surahArabic}
-                  </div>
+                  {downloadProgress ? (
+                    <div
+                      className="text-xs text-muted-foreground truncate"
+                      data-testid="text-mini-download-progress"
+                    >
+                      {pct != null
+                        ? `Downloading… ${pct}% (${fmtBytes(downloadProgress.loaded)}${
+                            downloadProgress.total ? ` / ${fmtBytes(downloadProgress.total)}` : ""
+                          })`
+                        : `Downloading… ${fmtBytes(downloadProgress.loaded)}`}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-muted-foreground truncate" data-testid="text-mini-reciter">
+                      {reciterName ?? current.surahArabic}
+                    </div>
+                  )}
                 </div>
                 <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" />
               </button>
@@ -90,15 +125,32 @@ export function QuranMiniPlayer() {
               </Button>
             </div>
             <div className="px-3 pb-2">
-              <Slider
-                value={[position]}
-                max={duration || 1}
-                step={1}
-                onValueChange={(v) => seekTo(v[0])}
-                disabled={!duration}
-                data-testid="slider-quran-progress"
-                aria-label="Audio progress"
-              />
+              {downloadProgress ? (
+                <div
+                  className="h-1.5 w-full rounded-full bg-muted overflow-hidden"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={pct ?? undefined}
+                  aria-label="Download progress"
+                  data-testid="bar-mini-download"
+                >
+                  <div
+                    className="h-full bg-emerald-500 transition-[width] duration-150"
+                    style={{ width: pct != null ? `${pct}%` : "25%" }}
+                  />
+                </div>
+              ) : (
+                <Slider
+                  value={[position]}
+                  max={duration || 1}
+                  step={1}
+                  onValueChange={(v) => seekTo(v[0])}
+                  disabled={!duration}
+                  data-testid="slider-quran-progress"
+                  aria-label="Audio progress"
+                />
+              )}
               <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
                 <span data-testid="text-mini-position">{fmt(position)}</span>
                 <span data-testid="text-mini-duration">{fmt(duration)}</span>

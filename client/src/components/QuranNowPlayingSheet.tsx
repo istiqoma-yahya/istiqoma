@@ -34,7 +34,15 @@ export function QuranNowPlayingSheet({
     toggle,
     seekBy,
     seekTo,
+    downloadProgress,
   } = useQuranAudio();
+  const pct = downloadProgress && downloadProgress.total > 0
+    ? Math.min(100, Math.round((downloadProgress.loaded / downloadProgress.total) * 100))
+    : null;
+  const fmtMb = (b: number) => {
+    const mb = b / (1024 * 1024);
+    return mb >= 10 ? `${Math.round(mb)} MB` : `${mb.toFixed(1)} MB`;
+  };
   const { data: reciters } = useReciters();
 
   // Surface a curated subset first (recognizable names) and the rest
@@ -65,18 +73,50 @@ export function QuranNowPlayingSheet({
             </div>
 
             <div className="w-full max-w-md mx-auto">
-              <Slider
-                value={[position]}
-                max={duration || 1}
-                step={1}
-                onValueChange={(v) => seekTo(v[0])}
-                disabled={!duration}
-                data-testid="slider-seek"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span data-testid="text-position">{fmt(position)}</span>
-                <span data-testid="text-duration">{fmt(duration)}</span>
-              </div>
+              {downloadProgress ? (
+                <div className="space-y-2" data-testid="now-playing-download">
+                  <div
+                    className="h-2 w-full rounded-full bg-muted overflow-hidden"
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={pct ?? undefined}
+                    aria-label="Download progress"
+                  >
+                    <div
+                      className="h-full bg-emerald-500 transition-[width] duration-150"
+                      style={{ width: pct != null ? `${pct}%` : "25%" }}
+                    />
+                  </div>
+                  <div
+                    className="flex justify-between text-xs text-muted-foreground"
+                    data-testid="text-now-playing-download-progress"
+                  >
+                    <span>
+                      {pct != null ? `Downloading… ${pct}%` : "Downloading…"}
+                    </span>
+                    <span>
+                      {fmtMb(downloadProgress.loaded)}
+                      {downloadProgress.total ? ` / ${fmtMb(downloadProgress.total)}` : ""}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <Slider
+                    value={[position]}
+                    max={duration || 1}
+                    step={1}
+                    onValueChange={(v) => seekTo(v[0])}
+                    disabled={!duration}
+                    data-testid="slider-seek"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                    <span data-testid="text-position">{fmt(position)}</span>
+                    <span data-testid="text-duration">{fmt(duration)}</span>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="flex items-center justify-center gap-6 mt-6 mb-8">

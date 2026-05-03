@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, targetRecommendationsRequestSchema, targetRecommendationsResponseSchema, updateProfileSchema, voiceParseRequestSchema, voiceParseResponseSchema, insertQuranBookmarkSchema, upsertQuranReadingStateSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding, quranBookmarks, quranReadingState, type NewlyEarnedBadge } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, targetRecommendationsRequestSchema, targetRecommendationsResponseSchema, updateProfileSchema, voiceParseRequestSchema, voiceParseResponseSchema, insertQuranBookmarkSchema, upsertQuranReadingStateSchema, insertQuranMemorizationSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding, quranBookmarks, quranReadingState, quranMemorizations, type NewlyEarnedBadge } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -633,6 +633,32 @@ export const api = {
       responses: {
         200: z.custom<typeof quranReadingState.$inferSelect>(),
         400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+      },
+    },
+    listMemorizations: {
+      method: "GET" as const,
+      path: "/api/quran/memorizations",
+      responses: {
+        200: z.array(z.custom<typeof quranMemorizations.$inferSelect>()),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    addMemorization: {
+      method: "POST" as const,
+      path: "/api/quran/memorizations",
+      input: insertQuranMemorizationSchema,
+      responses: {
+        201: z.custom<typeof quranMemorizations.$inferSelect>(),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+      },
+    },
+    removeMemorization: {
+      method: "DELETE" as const,
+      path: "/api/quran/memorizations/:surah/:verse",
+      responses: {
+        204: z.void(),
         401: errorSchemas.unauthorized,
       },
     },

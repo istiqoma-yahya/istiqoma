@@ -599,6 +599,28 @@ export const insertQuranBookmarkSchema = z.object({
   verseNumber: z.number().int().min(1).max(286),
 });
 
+// Per-user, per-verse memorization status. Presence of a row means the
+// verse is marked memorized for that user. Removing the row unsets it.
+// Unique on (user, surah, verse) so the same verse can't be flagged twice.
+export const quranMemorizations = pgTable("quran_memorizations", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  surahNumber: integer("surah_number").notNull(),
+  verseNumber: integer("verse_number").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqUserVerse: uniqueIndex("uniq_quran_memorization_user_verse")
+    .on(table.userId, table.surahNumber, table.verseNumber),
+}));
+
+export const insertQuranMemorizationSchema = z.object({
+  surahNumber: z.number().int().min(1).max(114),
+  verseNumber: z.number().int().min(1).max(286),
+});
+
+export type QuranMemorization = typeof quranMemorizations.$inferSelect;
+export type InsertQuranMemorization = z.infer<typeof insertQuranMemorizationSchema>;
+
 export const upsertQuranReadingStateSchema = z.object({
   lastSurahNumber: z.number().int().min(1).max(114).nullable().optional(),
   lastVerseNumber: z.number().int().min(1).max(286).nullable().optional(),

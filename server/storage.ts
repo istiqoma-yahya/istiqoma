@@ -1,6 +1,6 @@
 import { db } from "./db";
 export { db };
-import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState } from "@shared/schema";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte, isNull } from "drizzle-orm";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -88,6 +88,9 @@ export interface IStorage {
   removeQuranBookmark(userId: string, surahNumber: number, verseNumber: number): Promise<void>;
   getQuranReadingState(userId: string): Promise<QuranReadingState | null>;
   upsertQuranReadingState(userId: string, data: UpsertQuranReadingState): Promise<QuranReadingState>;
+  getQuranMemorizations(userId: string, surahNumber?: number): Promise<QuranMemorization[]>;
+  addQuranMemorization(userId: string, data: InsertQuranMemorization): Promise<QuranMemorization>;
+  removeQuranMemorization(userId: string, surahNumber: number, verseNumber: number): Promise<void>;
   getLeaderboard(
     currentUserId: string,
     period: "daily" | "monthly" | "yearly",
@@ -1231,6 +1234,51 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return row;
+  }
+
+  async getQuranMemorizations(userId: string, surahNumber?: number): Promise<QuranMemorization[]> {
+    const where = surahNumber !== undefined
+      ? and(eq(quranMemorizations.userId, userId), eq(quranMemorizations.surahNumber, surahNumber))
+      : eq(quranMemorizations.userId, userId);
+    return await db
+      .select()
+      .from(quranMemorizations)
+      .where(where)
+      .orderBy(asc(quranMemorizations.surahNumber), asc(quranMemorizations.verseNumber));
+  }
+
+  async addQuranMemorization(userId: string, data: InsertQuranMemorization): Promise<QuranMemorization> {
+    // Idempotent: a re-tap of "mark memorized" should converge on the
+    // existing row instead of raising on the unique index.
+    const existing = await db
+      .select()
+      .from(quranMemorizations)
+      .where(
+        and(
+          eq(quranMemorizations.userId, userId),
+          eq(quranMemorizations.surahNumber, data.surahNumber),
+          eq(quranMemorizations.verseNumber, data.verseNumber),
+        ),
+      )
+      .limit(1);
+    if (existing[0]) return existing[0];
+    const [created] = await db
+      .insert(quranMemorizations)
+      .values({ userId, ...data })
+      .returning();
+    return created;
+  }
+
+  async removeQuranMemorization(userId: string, surahNumber: number, verseNumber: number): Promise<void> {
+    await db
+      .delete(quranMemorizations)
+      .where(
+        and(
+          eq(quranMemorizations.userId, userId),
+          eq(quranMemorizations.surahNumber, surahNumber),
+          eq(quranMemorizations.verseNumber, verseNumber),
+        ),
+      );
   }
 
   // ─── Leaderboard ─────────────────────────────────────────────

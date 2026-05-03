@@ -13,7 +13,7 @@ import {
   type Reciter,
   type ChapterAudio,
 } from "@/lib/quranApi";
-import type { QuranArabicFont, QuranArabicFontSize, QuranArabicLineHeight, QuranBookmark, QuranReadingState } from "@shared/schema";
+import type { QuranArabicFont, QuranArabicFontSize, QuranArabicLineHeight, QuranBookmark, QuranMemorization, QuranReadingState } from "@shared/schema";
 
 const STALE_5_MIN = 5 * 60 * 1000;
 const STALE_24_HR = 24 * 60 * 60 * 1000;
@@ -104,6 +104,50 @@ export function useRemoveBookmark() {
 export function useReadingState() {
   return useQuery<QuranReadingState | null>({
     queryKey: ["/api/quran/reading-state"],
+  });
+}
+
+export function useMemorizations(surahNumber?: number) {
+  return useQuery<QuranMemorization[]>({
+    queryKey:
+      surahNumber !== undefined
+        ? ["/api/quran/memorizations", surahNumber]
+        : ["/api/quran/memorizations"],
+    // Custom fetcher because the default one joins keys with "/", which
+    // would turn the surah filter into a path segment. The endpoint takes
+    // ?surah=N as a query parameter instead.
+    queryFn: async () => {
+      const url =
+        surahNumber !== undefined
+          ? `/api/quran/memorizations?surah=${surahNumber}`
+          : "/api/quran/memorizations";
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+      return res.json();
+    },
+  });
+}
+
+export function useAddMemorization() {
+  return useMutation({
+    mutationFn: async (input: { surahNumber: number; verseNumber: number }) => {
+      const res = await apiRequest("POST", "/api/quran/memorizations", input);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/quran/memorizations"] });
+    },
+  });
+}
+
+export function useRemoveMemorization() {
+  return useMutation({
+    mutationFn: async ({ surahNumber, verseNumber }: { surahNumber: number; verseNumber: number }) => {
+      await apiRequest("DELETE", `/api/quran/memorizations/${surahNumber}/${verseNumber}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/quran/memorizations"] });
+    },
   });
 }
 

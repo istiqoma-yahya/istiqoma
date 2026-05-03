@@ -1390,5 +1390,43 @@ export async function registerRoutes(
     }
   });
 
+  app.get(api.quran.listMemorizations.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    // Optional ?surah=N filter — keeps payloads small when the client only
+    // needs memorization data for the surah currently being read.
+    const surahParam = typeof req.query.surah === "string" ? parseInt(req.query.surah, 10) : NaN;
+    const surahFilter = !isNaN(surahParam) && surahParam >= 1 && surahParam <= 114 ? surahParam : undefined;
+    const rows = await storage.getQuranMemorizations(userId, surahFilter);
+    res.json(rows);
+  });
+
+  app.post(api.quran.addMemorization.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const input = api.quran.addMemorization.input.parse(req.body);
+      const userId = req.user.claims.sub;
+      const row = await storage.addQuranMemorization(userId, input);
+      res.status(201).json(row);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join("."),
+        });
+      }
+      throw err;
+    }
+  });
+
+  app.delete(api.quran.removeMemorization.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const surah = parseInt(req.params.surah, 10);
+    const verse = parseInt(req.params.verse, 10);
+    if (isNaN(surah) || isNaN(verse)) {
+      return res.status(400).json({ message: "Invalid surah or verse" });
+    }
+    await storage.removeQuranMemorization(userId, surah, verse);
+    res.status(204).send();
+  });
+
   return httpServer;
 }

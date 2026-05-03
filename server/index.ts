@@ -1,3 +1,11 @@
+// Force Node to prefer IPv4 results from DNS lookups. Without this, Node 18+
+// returns AAAA (IPv6) records first, and the Replit deployment environment
+// cannot route to Supabase over IPv6 — causing
+// `getaddrinfo EAI_AGAIN aws-*.pooler.supabase.com` on every DB call. Must be
+// set before any module that opens a DB connection is imported.
+import dns from "node:dns";
+dns.setDefaultResultOrder("ipv4first");
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";

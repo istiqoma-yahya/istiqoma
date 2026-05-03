@@ -23,8 +23,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import istiqomaHorizontalLogo from "@assets/Istiqoma_New_Horizontal_Logo_1777797342711.png";
+import istiqomaHorizontalLogoDark from "@assets/Istiqoma_New_Horizontal_Logo_-_Darkmode_1777804992389.png";
+import { useTheme } from "@/components/ThemeProvider";
 
 export default function Dashboard() {
+  const { theme } = useTheme();
+  const logoSrc = theme === "dark" ? istiqomaHorizontalLogoDark : istiqomaHorizontalLogo;
   const { user, logout, isLoggingOut } = useAuth();
   const { data: deeds, isLoading } = useDeeds();
   const [, navigate] = useLocation();
@@ -65,7 +69,7 @@ export default function Dashboard() {
         <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center">
             <img
-              src={istiqomaHorizontalLogo}
+              src={logoSrc}
               alt="Istiqoma"
               className="h-9 w-auto"
               data-testid="img-logo"

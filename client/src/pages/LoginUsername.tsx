@@ -45,6 +45,8 @@ import {
   type UsernameSignupInput,
 } from "@shared/models/auth";
 import istiqomaVerticalLogo from "@assets/Istiqoma_New_Vertical_Logo_1777797342711.png";
+import istiqomaVerticalLogoDark from "@assets/Istiqoma_New_Vertical_Logo_-_Darkmode_1777804992400.png";
+import { useTheme } from "@/components/ThemeProvider";
 
 type ServerError = { message?: string; field?: string; minutes?: number };
 
@@ -93,6 +95,8 @@ function useLockoutCountdown(minutes: number | null): {
 
 export default function LoginUsername() {
   const { t } = useTranslation();
+  const { theme } = useTheme();
+  const logoSrc = theme === "dark" ? istiqomaVerticalLogoDark : istiqomaVerticalLogo;
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [tab, setTab] = useState<"signin" | "signup">("signin");
@@ -263,7 +267,7 @@ export default function LoginUsername() {
       <main className="container max-w-md mx-auto px-4 py-8">
         <div className="flex justify-center mb-6">
           <img
-            src={istiqomaVerticalLogo}
+            src={logoSrc}
             alt="Istiqoma"
             className="h-32 w-auto"
             data-testid="img-logo-vertical"

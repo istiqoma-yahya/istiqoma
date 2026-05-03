@@ -7,6 +7,8 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import testimonialAvatar from "@/assets/testimonial-yahya.png";
 import istiqomaHorizontalLogo from "@assets/Istiqoma_New_Horizontal_Logo_1777797342711.png";
+import istiqomaHorizontalLogoDark from "@assets/Istiqoma_New_Horizontal_Logo_-_Darkmode_1777804992389.png";
+import { useTheme } from "@/components/ThemeProvider";
 import { useInstallPWA } from "@/hooks/use-install-pwa";
 
 declare global {
@@ -20,6 +22,8 @@ declare global {
 
 export default function Landing() {
   const { t } = useTranslation();
+  const { theme } = useTheme();
+  const logoSrc = theme === "dark" ? istiqomaHorizontalLogoDark : istiqomaHorizontalLogo;
   const [showSticky, setShowSticky] = useState(false);
   const { isInstallable, isInstalled, install } = useInstallPWA();
 
@@ -73,7 +77,7 @@ export default function Landing() {
             <div className="container mx-auto flex items-center justify-between gap-4">
               <div className="flex items-center">
                 <img
-                  src={istiqomaHorizontalLogo}
+                  src={logoSrc}
                   alt="Istiqoma"
                   className="h-8 w-auto"
                   data-testid="img-logo-sticky"
@@ -108,7 +112,7 @@ export default function Landing() {
       <nav className="container mx-auto px-6 py-6 relative z-10 flex items-center justify-between gap-4">
         <div className="flex items-center">
           <img
-            src={istiqomaHorizontalLogo}
+            src={logoSrc}
             alt="Istiqoma"
             className="h-10 w-auto"
             data-testid="img-logo"

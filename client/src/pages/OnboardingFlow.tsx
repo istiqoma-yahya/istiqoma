@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Loader2 } from "lucide-react";
 import type { Q1, Q2, Q3, Q4, Q5 } from "@/lib/onboardingTypes";
+import type { User } from "@/hooks/use-auth";
 import "./onboarding.css";
 
 type Answers = {
@@ -103,9 +104,14 @@ export default function OnboardingFlow() {
         identityKey: answers.q5,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
+    onSuccess: async () => {
+      queryClient.setQueryData<User | null>(["/api/auth/user"], (prev) =>
+        prev ? { ...prev, onboardingComplete: true } : prev,
+      );
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] }),
+      ]);
     },
   });
 

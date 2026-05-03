@@ -1,7 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { User as AuthUser } from "@shared/models/auth";
 
-export type User = AuthUser & { onboardingComplete?: boolean };
+export type User = AuthUser & {
+  onboardingComplete?: boolean;
+  authProvider?: "username" | "replit";
+};
 
 async function fetchUser(): Promise<User | null> {
   const response = await fetch("/api/auth/user", {

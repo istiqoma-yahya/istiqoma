@@ -14,7 +14,26 @@ export function registerAuthRoutes(app: Express): void {
         return res.status(404).json({ message: "User not found" });
       }
       const onboarding = await storage.getUserOnboarding(userId);
-      res.json({ ...user, onboardingComplete: !!onboarding?.completed });
+      // Tell the client whether this user signed in via Google SSO or via the
+      // self-contained username + PIN flow. The client uses this to show /
+      // hide PIN management and the "Connect Gmail" affordance.
+      const authProvider: "username" | "replit" =
+        req.user?.authProvider === "username" ? "username" : "replit";
+      // For username-auth users, `users.username` is intentionally NULL —
+      // the chosen handle lives in the separate `username_logins` namespace.
+      // Surface it on the response so the profile page can display it.
+      let displayUser = user as typeof user & { username: string | null };
+      if (authProvider === "username") {
+        const login = await authStorage.getUsernameLoginByUserId(userId);
+        if (login) {
+          displayUser = { ...user, username: login.username };
+        }
+      }
+      res.json({
+        ...displayUser,
+        onboardingComplete: !!onboarding?.completed,
+        authProvider,
+      });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -24,6 +43,7 @@ export function registerAuthRoutes(app: Express): void {
   app.patch(api.auth.updateProfile.path, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      const isUsernameAuth = req.user?.authProvider === "username";
       const parsed = api.auth.updateProfile.input.safeParse(req.body);
       if (!parsed.success) {
         const first = parsed.error.issues[0];
@@ -34,8 +54,13 @@ export function registerAuthRoutes(app: Express): void {
       }
       let updated;
       try {
+        // Username-auth users do not own a `users.username` — their handle
+        // lives in `username_logins`. Strip the field server-side so other
+        // profile edits (phone number, etc.) still go through.
         updated = await authStorage.updateProfile(userId, {
-          username: normalizeProfileField(parsed.data.username),
+          username: isUsernameAuth
+            ? undefined
+            : normalizeProfileField(parsed.data.username),
           phoneNumber: normalizeProfileField(parsed.data.phoneNumber),
         });
       } catch (err) {

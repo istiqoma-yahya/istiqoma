@@ -1235,13 +1235,20 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
+    // `users.username` is the SSO display field. Username-login users
+    // intentionally have NULL there — their handle lives in
+    // `username_logins`. COALESCE so both kinds of users get a name on
+    // the leaderboard.
     const result = await db.execute(sql`
       WITH user_points AS (
-        SELECT u.id, u.username, u.email, u.profile_image_url,
+        SELECT u.id,
+          COALESCE(u.username, ul.username) AS username,
+          u.email, u.profile_image_url,
           COALESCE(SUM(CASE WHEN d.created_at >= ${startUtc} AND d.created_at <= ${endUtc} THEN d.points ELSE 0 END), 0)::int AS pts
         FROM ${users} u
+        LEFT JOIN username_logins ul ON ul.user_id = u.id
         LEFT JOIN ${deeds} d ON d.user_id = u.id
-        GROUP BY u.id
+        GROUP BY u.id, ul.username
       ),
       ranked AS (
         SELECT id, username, email, profile_image_url, pts,

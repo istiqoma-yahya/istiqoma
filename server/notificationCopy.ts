@@ -10,6 +10,12 @@ export async function getDisplayName(userId: string): Promise<DisplayName> {
     if (first) return first;
     const username = (user.username || "").trim();
     if (username) return username;
+    // Username-login users have NULL `users.username` by design — their
+    // handle lives in `username_logins`. Fall back to that so notification
+    // copy still has a name to greet them with.
+    const login = await authStorage.getUsernameLoginByUserId(userId);
+    const loginUsername = (login?.username || "").trim();
+    if (loginUsername) return loginUsername;
     return null;
   } catch {
     return null;

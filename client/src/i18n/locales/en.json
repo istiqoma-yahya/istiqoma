@@ -16,6 +16,7 @@
     "subtitle": "Istiqoma helps you build consistent habits in prayer, good deeds, and self-reflection. Track your journey to become a better believer, one deed at a time.",
     "startTracking": "Begin Your Journey",
     "login": "Login",
+    "usernameLogin": "Sign in with username",
     "featuresLabel": "Features",
     "featuresTitle": "Your Spiritual Companion",
     "featuresSubtitle": "A comprehensive suite of tools designed to help you balance worldly life with your spiritual obligations.",
@@ -852,7 +853,41 @@
     "connectGmailCta": "Connect Gmail",
     "gmailConnected": "Connected as {{email}}",
     "journeyTitle": "Your spiritual journey",
-    "journeySubtitleEmpty": "Tell us about yourself to personalize Istiqoma"
+    "journeySubtitleEmpty": "Tell us about yourself to personalize Istiqoma",
+    "changePinHeading": "Change PIN",
+    "changePinDesc": "Your PIN keeps your account safe. Choose 4–8 digits and remember it — it can't be recovered.",
+    "currentPinLabel": "Current PIN",
+    "newPinLabel": "New PIN",
+    "confirmPinLabel": "Confirm new PIN",
+    "changePinButton": "Update PIN",
+    "changePinSuccess": "PIN updated",
+    "changePinError": "Couldn't change your PIN",
+    "changePinWrongCurrent": "Current PIN is wrong"
+  },
+  "usernameAuth": {
+    "pageTitle": "Sign in with username",
+    "tabs": {
+      "signin": "Sign in",
+      "signup": "Create account"
+    },
+    "fields": {
+      "username": "Username",
+      "pin": "PIN",
+      "confirmPin": "Confirm PIN"
+    },
+    "usernameHelp": "3–40 characters. Letters, digits, _ and - only.",
+    "pinHelp": "4–8 digits.",
+    "pinRecoveryWarning": "Your PIN cannot be recovered. Please write it down somewhere safe — if you forget it, you will lose access to this account.",
+    "signinButton": "Sign in",
+    "signupButton": "Create account",
+    "errors": {
+      "usernameTaken": "That username is already taken. Please pick another.",
+      "usernameNotFound": "We couldn't find that username.",
+      "wrongPin": "Wrong PIN. Please try again.",
+      "lockedFor": "Account locked. Try again in {{minutes}} minute(s).",
+      "signinFailed": "Couldn't sign you in",
+      "signupFailed": "Couldn't create your account"
+    }
   },
   "achievements": {
     "heading": "Achievements",

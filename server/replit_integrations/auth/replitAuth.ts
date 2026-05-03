@@ -247,16 +247,37 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
 
-  app.get("/api/logout", (req, res) => {
+  app.get("/api/logout", buildLogoutHandler(config));
+}
+
+// Exported so tests can exercise the username-vs-Replit branching without
+// running the full OIDC discovery flow. The logout handler picks the OIDC
+// end-session redirect for Replit sessions and a plain session-destroy /
+// home redirect for username-login sessions (which carry no OIDC token).
+export function buildLogoutHandler(
+  config: client.Configuration,
+): RequestHandler {
+  return (req, res) => {
+    const hasAccessToken = (u: unknown): u is { access_token: string } =>
+      typeof u === "object" &&
+      u !== null &&
+      typeof (u as { access_token?: unknown }).access_token === "string";
+    const isReplitSession = hasAccessToken(req.user);
     req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
-      );
+      if (isReplitSession) {
+        res.redirect(
+          client.buildEndSessionUrl(config, {
+            client_id: process.env.REPL_ID!,
+            post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+          }).href,
+        );
+      } else {
+        req.session?.destroy?.(() => {
+          res.redirect("/");
+        });
+      }
     });
-  });
+  };
 }
 
 // Reason codes emitted by the auth middleware. Surfaced in structured logs
@@ -346,6 +367,13 @@ export function createIsAuthenticated(
   if (!req.isAuthenticated()) {
     logAuthFailure(req, "not_authenticated");
     return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  // Username + PIN sessions don't carry an OIDC token. Their lifetime is
+  // governed entirely by the rolling cookie + session store, so there's
+  // nothing to refresh — let them through.
+  if (user?.authProvider === "username") {
+    return next();
   }
 
   if (!user?.expires_at) {

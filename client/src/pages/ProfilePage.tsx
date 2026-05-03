@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ChevronRight, Loader2, Mail, Sparkles, Trophy, User as UserIcon } from "lucide-react";
+import { ArrowLeft, ChevronRight, Loader2, Lock, Mail, Sparkles, Trophy, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
-import { updateProfileSchema, type UpdateProfileInput } from "@shared/models/auth";
+import {
+  changePinSchema,
+  updateProfileSchema,
+  type ChangePinInput,
+  type UpdateProfileInput,
+} from "@shared/models/auth";
 import type { UserOnboarding } from "@shared/schema";
 
 const Q5_ICONS: Record<string, string> = {
@@ -105,6 +110,51 @@ export default function ProfilePage() {
 
   const onSubmit = (values: UpdateProfileInput) => saveMutation.mutate(values);
 
+  const isUsernameAuth = user?.authProvider === "username";
+
+  const pinForm = useForm<ChangePinInput>({
+    resolver: zodResolver(changePinSchema),
+    defaultValues: { currentPin: "", newPin: "", confirmPin: "" },
+  });
+
+  const changePinMutation = useMutation({
+    mutationFn: async (values: ChangePinInput) => {
+      const res = await apiRequest(
+        "POST",
+        "/api/auth/username/change-pin",
+        values,
+      );
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: t("profile.changePinSuccess") });
+      pinForm.reset({ currentPin: "", newPin: "", confirmPin: "" });
+    },
+    onError: (err: Error) => {
+      const match = err.message.match(/^(\d{3}):\s*([\s\S]*)$/);
+      let body: { message?: string; field?: string } = {};
+      if (match) {
+        try {
+          body = JSON.parse(match[2]);
+        } catch {
+          body = { message: match[2] };
+        }
+      }
+      if (body.field === "currentPin") {
+        pinForm.setError("currentPin", {
+          type: "server",
+          message: t("profile.changePinWrongCurrent"),
+        });
+        return;
+      }
+      toast({
+        title: t("profile.changePinError"),
+        description: body.message ?? err.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const emailEndsWithGmail = (user?.email ?? "").toLowerCase().endsWith("@gmail.com");
   const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(" ");
   const avatarInitial =
@@ -181,36 +231,52 @@ export default function ProfilePage() {
                   className="space-y-5"
                   data-testid="form-profile"
                 >
-                  <FormField
-                    control={form.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("profile.usernameLabel")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            value={field.value ?? ""}
-                            maxLength={40}
-                            placeholder={t("profile.usernamePlaceholder")}
-                            data-testid="input-username"
-                            onChange={(e) => {
-                              field.onChange(e);
-                              // Clear the server-side "username taken" error
-                              // as soon as the user edits the field again.
-                              if (form.formState.errors.username?.type === "server") {
-                                form.clearErrors("username");
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          {t("profile.usernameHelp")}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {isUsernameAuth ? (
+                    // Username-auth users have their handle in the separate
+                    // `username_logins` namespace; it's set at signup and
+                    // shown here read-only. The editable profile field is
+                    // only for SSO users who own a `users.username`.
+                    <FormItem>
+                      <FormLabel>{t("profile.usernameLabel")}</FormLabel>
+                      <Input
+                        value={user?.username ?? ""}
+                        readOnly
+                        disabled
+                        data-testid="input-username-readonly"
+                      />
+                    </FormItem>
+                  ) : (
+                    <FormField
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("profile.usernameLabel")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              value={field.value ?? ""}
+                              maxLength={40}
+                              placeholder={t("profile.usernamePlaceholder")}
+                              data-testid="input-username"
+                              onChange={(e) => {
+                                field.onChange(e);
+                                // Clear the server-side "username taken" error
+                                // as soon as the user edits the field again.
+                                if (form.formState.errors.username?.type === "server") {
+                                  form.clearErrors("username");
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            {t("profile.usernameHelp")}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                   <FormField
                     control={form.control}
                     name="phoneNumber"
@@ -314,7 +380,105 @@ export default function ProfilePage() {
               </button>
             </Card>
 
-            {emailEndsWithGmail ? (
+            {isUsernameAuth && (
+              <Card className="p-5" data-testid="card-change-pin">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
+                    <Lock className="w-4 h-4 text-primary" />
+                  </div>
+                  <h2 className="text-base font-semibold" data-testid="text-change-pin-heading">
+                    {t("profile.changePinHeading")}
+                  </h2>
+                </div>
+                <p className="text-xs text-muted-foreground mb-4">
+                  {t("profile.changePinDesc")}
+                </p>
+                <Form {...pinForm}>
+                  <form
+                    onSubmit={pinForm.handleSubmit((v) =>
+                      changePinMutation.mutate(v),
+                    )}
+                    className="space-y-4"
+                    data-testid="form-change-pin"
+                  >
+                    <FormField
+                      control={pinForm.control}
+                      name="currentPin"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("profile.currentPinLabel")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="password"
+                              inputMode="numeric"
+                              autoComplete="current-password"
+                              maxLength={8}
+                              data-testid="input-current-pin"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={pinForm.control}
+                      name="newPin"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("profile.newPinLabel")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="password"
+                              inputMode="numeric"
+                              autoComplete="new-password"
+                              maxLength={8}
+                              data-testid="input-new-pin"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={pinForm.control}
+                      name="confirmPin"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("profile.confirmPinLabel")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="password"
+                              inputMode="numeric"
+                              autoComplete="new-password"
+                              maxLength={8}
+                              data-testid="input-confirm-pin"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex justify-end">
+                      <Button
+                        type="submit"
+                        disabled={changePinMutation.isPending}
+                        data-testid="button-change-pin-submit"
+                      >
+                        {changePinMutation.isPending && (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        )}
+                        {t("profile.changePinButton")}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </Card>
+            )}
+
+            {!isUsernameAuth && emailEndsWithGmail ? (
               <Card
                 className="p-5 border-emerald-500/30 bg-emerald-500/5"
                 data-testid="card-gmail-connected"

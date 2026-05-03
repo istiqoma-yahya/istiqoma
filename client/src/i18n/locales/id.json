@@ -16,6 +16,7 @@
     "subtitle": "Istiqoma membantu Anda membangun kebiasaan yang konsisten dalam berdoa, beramal, dan introspeksi diri. Lacak perjalanan Anda untuk menjadi seorang mukmin yang lebih baik, satu perbuatan demi satu perbuatan.",
     "startTracking": "Mulai Perjalananmu",
     "login": "Masuk",
+    "usernameLogin": "Masuk dengan nama pengguna",
     "featuresLabel": "Fitur",
     "featuresTitle": "Teman Spiritual Anda",
     "featuresSubtitle": "Rangkaian alat lengkap yang dirancang untuk membantumu menyeimbangkan kehidupan dunia dengan kewajiban spiritual.",
@@ -853,7 +854,41 @@
     "connectGmailCta": "Hubungkan Gmail",
     "gmailConnected": "Terhubung sebagai {{email}}",
     "journeyTitle": "Perjalanan spiritualmu",
-    "journeySubtitleEmpty": "Ceritakan tentang dirimu untuk mempersonalisasi Istiqoma"
+    "journeySubtitleEmpty": "Ceritakan tentang dirimu untuk mempersonalisasi Istiqoma",
+    "changePinHeading": "Ubah PIN",
+    "changePinDesc": "PIN menjaga keamanan akunmu. Pilih 4–8 digit dan ingat baik-baik — PIN tidak bisa dipulihkan.",
+    "currentPinLabel": "PIN saat ini",
+    "newPinLabel": "PIN baru",
+    "confirmPinLabel": "Konfirmasi PIN baru",
+    "changePinButton": "Perbarui PIN",
+    "changePinSuccess": "PIN diperbarui",
+    "changePinError": "Gagal mengubah PIN",
+    "changePinWrongCurrent": "PIN saat ini salah"
+  },
+  "usernameAuth": {
+    "pageTitle": "Masuk dengan nama pengguna",
+    "tabs": {
+      "signin": "Masuk",
+      "signup": "Buat akun"
+    },
+    "fields": {
+      "username": "Nama pengguna",
+      "pin": "PIN",
+      "confirmPin": "Konfirmasi PIN"
+    },
+    "usernameHelp": "3–40 karakter. Hanya huruf, angka, _ dan -.",
+    "pinHelp": "4–8 digit.",
+    "pinRecoveryWarning": "PIN-mu tidak bisa dipulihkan. Tulis di tempat yang aman — jika lupa, kamu akan kehilangan akses ke akun ini.",
+    "signinButton": "Masuk",
+    "signupButton": "Buat akun",
+    "errors": {
+      "usernameTaken": "Nama pengguna itu sudah dipakai. Silakan pilih yang lain.",
+      "usernameNotFound": "Nama pengguna tidak ditemukan.",
+      "wrongPin": "PIN salah. Silakan coba lagi.",
+      "lockedFor": "Akun dikunci. Coba lagi dalam {{minutes}} menit.",
+      "signinFailed": "Gagal masuk",
+      "signupFailed": "Gagal membuat akun"
+    }
   },
   "achievements": {
     "heading": "Pencapaian",

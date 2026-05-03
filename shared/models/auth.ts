@@ -1,12 +1,14 @@
 import { sql } from "drizzle-orm";
 import {
   index,
+  integer,
   jsonb,
   pgTable,
   timestamp,
   uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Session storage table.
@@ -77,3 +79,98 @@ export function normalizeProfileField(v: string): string | null {
   const trimmed = v.trim();
   return trimmed === "" ? null : trimmed;
 }
+
+// ---------------------------------------------------------------------------
+// Username + PIN sign-in (independent of Google SSO)
+// ---------------------------------------------------------------------------
+//
+// `username_logins` lives in its own namespace. The `username` column here is
+// independent of `users.username` (which is a user-editable display field
+// owned by Google-SSO accounts). Each row references a `users.id` so the rest
+// of the app (deeds, streaks, leaderboard, badges) works without changes.
+export const usernameLogins = pgTable(
+  "username_logins",
+  {
+    userId: varchar("user_id")
+      .primaryKey()
+      .references(() => users.id, { onDelete: "cascade" }),
+    username: varchar("username").notNull(),
+    pinHash: varchar("pin_hash").notNull(),
+    pinUpdatedAt: timestamp("pin_updated_at").defaultNow().notNull(),
+    failedAttempts: integer("failed_attempts").notNull().default(0),
+    lockedUntil: timestamp("locked_until"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    // Case-insensitive uniqueness within the username-login namespace only.
+    uniqueIndex("username_logins_username_lower_unique").on(
+      sql`lower(${table.username})`,
+    ),
+  ],
+);
+
+// Drizzle-zod insert schema for `username_logins`. Auto-generated columns
+// (timestamps, the lockout state, the failed-attempt counter) are omitted
+// so callers only need to supply `userId`, the chosen `username`, and the
+// scrypt-derived `pinHash`.
+export const insertUsernameLoginSchema = createInsertSchema(usernameLogins).omit({
+  pinUpdatedAt: true,
+  failedAttempts: true,
+  lockedUntil: true,
+  createdAt: true,
+});
+
+export type UsernameLogin = typeof usernameLogins.$inferSelect;
+export type InsertUsernameLogin = z.infer<typeof insertUsernameLoginSchema>;
+
+// Validation rules shared by client + server.
+export const USERNAME_REGEX = /^[A-Za-z0-9_-]{3,40}$/;
+export const PIN_REGEX = /^[0-9]{4,8}$/;
+
+export const usernameLoginUsernameSchema = z
+  .string()
+  .min(3, "Username must be 3–40 characters")
+  .max(40, "Username must be 3–40 characters")
+  .regex(USERNAME_REGEX, "Letters, digits, _ and - only");
+
+export const usernameLoginPinSchema = z
+  .string()
+  .regex(PIN_REGEX, "PIN must be 4–8 digits");
+
+export const usernameSignupSchema = z
+  .object({
+    username: usernameLoginUsernameSchema,
+    pin: usernameLoginPinSchema,
+    confirmPin: z.string(),
+  })
+  .refine((d) => d.pin === d.confirmPin, {
+    path: ["confirmPin"],
+    message: "PINs do not match",
+  });
+
+export type UsernameSignupInput = z.infer<typeof usernameSignupSchema>;
+
+// Sign-in must enforce the same format rules as signup so malformed input is
+// rejected up-front (no DB lookup, no PIN-hash comparison work) — this keeps
+// the per-IP rate limiter focused on real credential-stuffing attempts.
+export const usernameSigninSchema = z.object({
+  username: usernameLoginUsernameSchema,
+  pin: usernameLoginPinSchema,
+});
+
+export type UsernameSigninInput = z.infer<typeof usernameSigninSchema>;
+
+export const changePinSchema = z
+  .object({
+    // Tighten currentPin to the same 4–8-digit shape as newPin so malformed
+    // input is rejected up-front instead of being treated as a wrong PIN.
+    currentPin: usernameLoginPinSchema,
+    newPin: usernameLoginPinSchema,
+    confirmPin: z.string(),
+  })
+  .refine((d) => d.newPin === d.confirmPin, {
+    path: ["confirmPin"],
+    message: "PINs do not match",
+  });
+
+export type ChangePinInput = z.infer<typeof changePinSchema>;

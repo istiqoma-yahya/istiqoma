@@ -56,8 +56,10 @@ Points are calculated by the backend based on category and quantity. This includ
 - **Notification Sound**: User-configurable sound preference (chime, double, ding, none) synthesized via Web Audio API.
 
 ### Authentication
-- **Provider**: Replit Auth (OpenID Connect).
-- **Session Storage**: PostgreSQL-backed sessions with 1-week TTL.
+- **Providers**:
+  - Replit Auth (OpenID Connect) — primary, supports Google SSO.
+  - Username + PIN — first-class alternative for users without Google. Stored in `username_logins` (separate from `users.username` profile field), scrypt-hashed PINs, per-username lockout (5 wrong PINs → 15 min) and per-IP rate limit (20/10 min). Session marked with `authProvider: "username"` so OIDC token-refresh middleware short-circuits. Endpoints: `POST /api/auth/username/{signup,signin,change-pin}`. UI at `/login/username` with sign-in/sign-up tabs; PIN management on the profile page.
+- **Session Storage**: PostgreSQL-backed sessions with 1-week TTL (rolling).
 - **Security**: `isAuthenticated` middleware for protected routes.
 
 ### Interactive Calendar (Target Detail Page)

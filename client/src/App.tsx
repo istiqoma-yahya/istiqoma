@@ -20,6 +20,7 @@ import EditTargetPage from "@/pages/EditTargetPage";
 import TargetDetailPage from "@/pages/TargetDetailPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import ProfilePage from "@/pages/ProfilePage";
+import LoginUsername from "@/pages/LoginUsername";
 import OnboardingSettingsPage from "@/pages/OnboardingSettingsPage";
 import DeedHistoryPage from "@/pages/DeedHistoryPage";
 import StreakFreezerPage from "@/pages/StreakFreezerPage";
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/categories" component={CategoryManagement} />
       <Route path="/notifications" component={NotificationsPage} />
       <Route path="/profile" component={ProfilePage} />
+      <Route path="/login/username" component={LoginUsername} />
       <Route path="/leaderboard" component={LeaderboardPage} />
       <Route path="/profile/onboarding" component={OnboardingSettingsPage} />
       <Route path="/deeds" component={DeedHistoryPage} />

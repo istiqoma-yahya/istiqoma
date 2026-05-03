@@ -25,6 +25,10 @@ export default function Landing() {
     window.location.href = "/api/login";
   };
 
+  const handleUsernameLogin = () => {
+    window.location.href = "/login/username";
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       // Show sticky after scrolling 400px (roughly past hero button)
@@ -154,6 +158,16 @@ export default function Landing() {
                   </button>
                 </motion.div>
               )}
+            </div>
+            <div className="mt-3 text-center md:text-left">
+              <button
+                type="button"
+                onClick={handleUsernameLogin}
+                className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
+                data-testid="button-username-login"
+              >
+                {t('landing.usernameLogin')}
+              </button>
             </div>
           </motion.div>
 

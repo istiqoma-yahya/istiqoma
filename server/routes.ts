@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage, db } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
-import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
+import { setupAuth, registerAuthRoutes, registerUsernameAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
 import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS, type NewlyEarnedBadge } from "@shared/schema";
 import {
@@ -58,6 +58,7 @@ export async function registerRoutes(
   // Setup Replit Auth
   await setupAuth(app);
   registerAuthRoutes(app);
+  registerUsernameAuthRoutes(app);
 
   // Deeds Routes - Protected
   app.get(api.deeds.list.path, isAuthenticated, async (req: any, res) => {

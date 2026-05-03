@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins, Shield, Calendar, CheckCircle2, Download, KeyRound } from "lucide-react";
+import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins, Shield, Calendar, CheckCircle2, Download, KeyRound, Play } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -10,6 +10,7 @@ import istiqomaHorizontalLogo from "@assets/Istiqoma_New_Horizontal_Logo_1777797
 import istiqomaHorizontalLogoDark from "@assets/Istiqoma_New_Horizontal_Logo_-_Darkmode_1777804992389.png";
 import { useTheme } from "@/components/ThemeProvider";
 import { useInstallPWA } from "@/hooks/use-install-pwa";
+import { ProductTour } from "@/components/ProductTour";
 
 declare global {
   interface Window {
@@ -25,6 +26,7 @@ export default function Landing() {
   const { theme } = useTheme();
   const logoSrc = theme === "dark" ? istiqomaHorizontalLogoDark : istiqomaHorizontalLogo;
   const [showSticky, setShowSticky] = useState(false);
+  const [showTour, setShowTour] = useState(false);
   const { isInstallable, isInstalled, install } = useInstallPWA();
 
   const scrollToChooser = () => {
@@ -182,6 +184,17 @@ export default function Landing() {
                   <span>{t('landing.authChooser.continueUsername')}</span>
                 </button>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowTour(true)}
+                className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
+                data-testid="button-take-tour"
+              >
+                <div className="w-6 h-6 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
+                  <Play className="w-3 h-3 text-emerald-500 ml-0.5" />
+                </div>
+                <span>Take the interactive tour</span>
+              </button>
               {isInstallable && !isInstalled && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -298,6 +311,28 @@ export default function Landing() {
             <h2 className="text-3xl md:text-4xl font-bold font-display mb-4" data-testid="text-features-title">{t('landing.featuresTitle')}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto mb-12" data-testid="text-features-subtitle">{t('landing.featuresSubtitle')}</p>
             
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
+              className="mb-10"
+            >
+              <button
+                onClick={() => setShowTour(true)}
+                className="inline-flex items-center gap-3 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-500 dark:text-emerald-400 rounded-2xl px-6 py-3 text-sm font-medium transition-all hover:scale-[1.02] active:scale-[0.99]"
+                data-testid="button-take-tour-features"
+              >
+                <div className="w-7 h-7 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                  <Play className="w-3.5 h-3.5 ml-0.5" />
+                </div>
+                <div className="text-left">
+                  <span className="block font-semibold">See it in action</span>
+                  <span className="text-xs opacity-75">Take a 2-min interactive tour</span>
+                </div>
+                <ArrowRight className="w-4 h-4 opacity-60" />
+              </button>
+            </motion.div>
+
             <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-5">
               {[
                 {
@@ -521,6 +556,10 @@ export default function Landing() {
         <p data-testid="text-footer-copyright">© {new Date().getFullYear()} {t('app.name')}. {t('app.tagline')}</p>
       </footer>
 
+      {/* Product Tour Overlay */}
+      <AnimatePresence>
+        {showTour && <ProductTour onClose={() => setShowTour(false)} />}
+      </AnimatePresence>
     </div>
   );
 }

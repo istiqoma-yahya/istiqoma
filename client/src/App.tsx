@@ -28,6 +28,7 @@ import LeaderboardPage from "@/pages/LeaderboardPage";
 import { useDeeds } from "@/hooks/use-deeds";
 import NotFound from "@/pages/not-found";
 import { NotificationPrompt } from "@/components/NotificationPrompt";
+import { BadgeCelebration } from "@/components/BadgeCelebration";
 import { registerNotificationSoundListener, setupAudioUnlock } from "@/lib/sounds";
 
 function EditDeedRoute({ params }: { params: { id: string } }) {
@@ -81,6 +82,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <BadgeCelebration />
           <NotificationPrompt />
         </TooltipProvider>
       </QueryClientProvider>

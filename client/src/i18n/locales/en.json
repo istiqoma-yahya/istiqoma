@@ -878,6 +878,13 @@
     "newBadgesToastTitle": "New badges",
     "newBadgesToastDesc": "+{{count}} more badges unlocked",
     "newBadgeTierDesc": "{{tier}} tier — {{description}}",
+    "celebrationTitle": "Badge unlocked!",
+    "celebrationContinue": "Awesome!",
+    "celebrationNext": "Next",
+    "celebrationMore": "+{{count}} more to go",
+    "share": "Share",
+    "shareText": "I just unlocked the {{tier}} {{name}} badge on Istiqoma! 🏆",
+    "shareCopied": "Copied to clipboard",
     "badges": {
       "ahli-sholat": { "name": "Prayer Devotee", "description": "Total Fardhu prayers logged." },
       "jamaah-devotee": { "name": "Jamaah Devotee", "description": "Fardhu prayers performed in congregation." },

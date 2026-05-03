@@ -4,6 +4,7 @@ import { type InsertDeed } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { celebrateBadges } from "@/lib/badge-celebration";
 
 type CreateDeedRequest = InsertDeed;
 
@@ -53,7 +54,7 @@ export function useCreateDeed() {
     onSuccess: (deed) => {
       queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
       queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
-      // Surface celebratory toasts for any newly-earned badge tiers.
+      // Surface celebratory toasts + animation for newly-earned badge tiers.
       const newlyEarned = deed.newlyEarnedBadges;
       if (newlyEarned && newlyEarned.length > 0) {
         const tierLabels = ["", "Bronze", "Silver", "Gold", "Platinum"];
@@ -63,6 +64,7 @@ export function useCreateDeed() {
             description: `${b.name} • ${tierLabels[b.tier] ?? `Tier ${b.tier}`}`,
           });
         }
+        celebrateBadges(newlyEarned);
       }
       // If the server refunded a freezer because this deed landed on a
       // previously auto-frozen day, also refresh the freezer & streak views
@@ -168,6 +170,7 @@ export function useUpdateDeed() {
             description: `${b.name} • ${tierLabels[b.tier] ?? `Tier ${b.tier}`}`,
           });
         }
+        celebrateBadges(newlyEarned);
       } else {
         toast({
           title: "Deed Updated",

@@ -4,6 +4,7 @@ import { type InsertTarget, type TargetWithProgress, type TargetHistory } from "
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import type { NewlyEarnedBadge } from "@shared/schema";
+import { celebrateBadges } from "@/lib/badge-celebration";
 
 const TIER_NAMES = ["", "Bronze", "Silver", "Gold", "Platinum"];
 
@@ -18,6 +19,7 @@ function toastNewlyEarned(
       description: `${TIER_NAMES[b.tier] ?? ""} tier earned${b.description ? ` — ${b.description}` : ""}`,
     });
   }
+  celebrateBadges(badges);
 }
 
 export type TargetHistoryWithStreak = {

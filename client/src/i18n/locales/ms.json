@@ -879,6 +879,13 @@
     "newBadgesToastTitle": "Lencana baharu",
     "newBadgesToastDesc": "+{{count}} lencana lain dibuka",
     "newBadgeTierDesc": "Tahap {{tier}} — {{description}}",
+    "celebrationTitle": "Lencana dibuka!",
+    "celebrationContinue": "Hebat!",
+    "celebrationNext": "Seterusnya",
+    "celebrationMore": "+{{count}} lagi menunggu",
+    "share": "Kongsi",
+    "shareText": "Saya baru sahaja membuka lencana {{tier}} {{name}} di Istiqoma! 🏆",
+    "shareCopied": "Disalin ke papan keratan",
     "badges": {
       "ahli-sholat": { "name": "Ahli Solat", "description": "Jumlah Solat Fardhu yang dicatatkan." },
       "jamaah-devotee": { "name": "Jemaah Devotee", "description": "Solat Fardhu yang dilakukan berjemaah." },

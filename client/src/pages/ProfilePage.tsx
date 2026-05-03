@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { AchievementsSection } from "@/components/AchievementsSection";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -250,6 +251,8 @@ export default function ProfilePage() {
                 </form>
               </Form>
             </Card>
+
+            <AchievementsSection />
 
             <Card className="p-5" data-testid="card-leaderboard">
               <button

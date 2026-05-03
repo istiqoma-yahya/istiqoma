@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, targetRecommendationsRequestSchema, targetRecommendationsResponseSchema, updateProfileSchema, voiceParseRequestSchema, voiceParseResponseSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, targetRecommendationsRequestSchema, targetRecommendationsResponseSchema, updateProfileSchema, voiceParseRequestSchema, voiceParseResponseSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding, type NewlyEarnedBadge } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -42,6 +42,7 @@ export const api = {
         201: z.custom<typeof deeds.$inferSelect & {
           freezerRefunded?: boolean;
           refundedDate?: string | null;
+          newlyEarnedBadges?: NewlyEarnedBadge[];
         }>(),
         400: errorSchemas.validation,
         401: errorSchemas.unauthorized,
@@ -61,7 +62,7 @@ export const api = {
       path: "/api/deeds/:id",
       input: insertDeedSchema,
       responses: {
-        200: z.custom<typeof deeds.$inferSelect>(),
+        200: z.custom<typeof deeds.$inferSelect & { newlyEarnedBadges?: NewlyEarnedBadge[] }>(),
         400: errorSchemas.validation,
         401: errorSchemas.unauthorized,
         404: errorSchemas.notFound,
@@ -206,7 +207,7 @@ export const api = {
       path: "/api/targets",
       input: insertTargetSchema,
       responses: {
-        201: z.custom<typeof targets.$inferSelect>(),
+        201: z.custom<typeof targets.$inferSelect & { newlyEarnedBadges?: NewlyEarnedBadge[] }>(),
         400: errorSchemas.validation,
         401: errorSchemas.unauthorized,
         403: errorSchemas.forbidden,
@@ -217,7 +218,7 @@ export const api = {
       path: "/api/targets/:id",
       input: insertTargetSchema.partial(),
       responses: {
-        200: z.custom<typeof targets.$inferSelect>(),
+        200: z.custom<typeof targets.$inferSelect & { newlyEarnedBadges?: NewlyEarnedBadge[] }>(),
         400: errorSchemas.validation,
         401: errorSchemas.unauthorized,
         403: errorSchemas.forbidden,
@@ -250,7 +251,7 @@ export const api = {
       path: "/api/targets/:id/progress",
       input: z.object({ progress: z.number().min(0) }),
       responses: {
-        200: z.custom<typeof targets.$inferSelect>(),
+        200: z.custom<typeof targets.$inferSelect & { newlyEarnedBadges?: NewlyEarnedBadge[] }>(),
         400: errorSchemas.validation,
         401: errorSchemas.unauthorized,
         404: errorSchemas.notFound,
@@ -260,7 +261,7 @@ export const api = {
       method: "POST" as const,
       path: "/api/targets/:id/complete",
       responses: {
-        200: z.custom<typeof targets.$inferSelect>(),
+        200: z.custom<typeof targets.$inferSelect & { newlyEarnedBadges?: NewlyEarnedBadge[] }>(),
         401: errorSchemas.unauthorized,
         404: errorSchemas.notFound,
       },
@@ -550,6 +551,16 @@ export const api = {
       responses: {
         200: z.custom<typeof userOnboarding.$inferSelect>(),
         400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+      },
+    },
+  },
+  badges: {
+    list: {
+      method: "GET" as const,
+      path: "/api/badges",
+      responses: {
+        200: z.any(),
         401: errorSchemas.unauthorized,
       },
     },

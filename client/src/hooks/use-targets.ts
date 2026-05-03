@@ -3,6 +3,22 @@ import { api, buildUrl } from "@shared/routes";
 import { type InsertTarget, type TargetWithProgress, type TargetHistory } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import type { NewlyEarnedBadge } from "@shared/schema";
+
+const TIER_NAMES = ["", "Bronze", "Silver", "Gold", "Platinum"];
+
+function toastNewlyEarned(
+  badges: NewlyEarnedBadge[] | undefined,
+  toast: ReturnType<typeof useToast>["toast"],
+) {
+  if (!Array.isArray(badges) || badges.length === 0) return;
+  for (const b of badges) {
+    toast({
+      title: `🏆 ${b.name}`,
+      description: `${TIER_NAMES[b.tier] ?? ""} tier earned${b.description ? ` — ${b.description}` : ""}`,
+    });
+  }
+}
 
 export type TargetHistoryWithStreak = {
   history: TargetHistory[];
@@ -59,15 +75,19 @@ export function useCreateTarget() {
         }
         throw new Error("Failed to create target");
       }
-      return api.targets.create.responses[201].parse(await res.json());
+      const json = await res.json();
+      const parsed = api.targets.create.responses[201].parse(json);
+      return { ...parsed, newlyEarnedBadges: (json.newlyEarnedBadges ?? []) as NewlyEarnedBadge[] };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [api.targets.list.path] });
       queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+      queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
       toast({
         title: "Target Created",
         description: "Your spiritual goal has been set successfully.",
       });
+      toastNewlyEarned(data.newlyEarnedBadges, toast);
     },
     onError: (error) => {
       toast({
@@ -103,15 +123,19 @@ export function useUpdateTarget() {
         if (res.status === 404) throw new Error("Target not found");
         throw new Error("Failed to update target");
       }
-      return api.targets.update.responses[200].parse(await res.json());
+      const json = await res.json();
+      const parsed = api.targets.update.responses[200].parse(json);
+      return { ...parsed, newlyEarnedBadges: (json.newlyEarnedBadges ?? []) as NewlyEarnedBadge[] };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [api.targets.list.path] });
       queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+      queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
       toast({
         title: "Target Updated",
         description: "Your spiritual goal has been updated successfully.",
       });
+      toastNewlyEarned(data.newlyEarnedBadges, toast);
     },
     onError: (error) => {
       toast({
@@ -193,11 +217,15 @@ export function useUpdateTargetProgress() {
         if (res.status === 404) throw new Error("Target not found");
         throw new Error("Failed to update progress");
       }
-      return await res.json();
+      const json = await res.json();
+      const parsed = api.targets.updateProgress.responses[200].parse(json);
+      return { ...parsed, newlyEarnedBadges: (json.newlyEarnedBadges ?? []) as NewlyEarnedBadge[] };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [api.targets.list.path] });
       queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+      queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
+      toastNewlyEarned(data.newlyEarnedBadges, toast);
     },
     onError: (error) => {
       toast({
@@ -225,15 +253,19 @@ export function useCompleteTarget() {
         if (res.status === 404) throw new Error("Target not found");
         throw new Error("Failed to complete target");
       }
-      return await res.json();
+      const json = await res.json();
+      const parsed = api.targets.complete.responses[200].parse(json);
+      return { ...parsed, newlyEarnedBadges: (json.newlyEarnedBadges ?? []) as NewlyEarnedBadge[] };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [api.targets.list.path] });
       queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
+      queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
       toast({
         title: "Target Completed",
         description: "Congratulations on achieving your goal!",
       });
+      toastNewlyEarned(data.newlyEarnedBadges, toast);
     },
     onError: (error) => {
       toast({

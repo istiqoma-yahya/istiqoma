@@ -52,11 +52,23 @@ export function useCreateDeed() {
     },
     onSuccess: (deed) => {
       queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
+      queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
+      // Surface celebratory toasts for any newly-earned badge tiers.
+      const newlyEarned = deed.newlyEarnedBadges;
+      if (newlyEarned && newlyEarned.length > 0) {
+        const tierLabels = ["", "Bronze", "Silver", "Gold", "Platinum"];
+        for (const b of newlyEarned) {
+          toast({
+            title: t("achievements.toastTitle", { defaultValue: "Badge unlocked!" }),
+            description: `${b.name} • ${tierLabels[b.tier] ?? `Tier ${b.tier}`}`,
+          });
+        }
+      }
       // If the server refunded a freezer because this deed landed on a
       // previously auto-frozen day, also refresh the freezer & streak views
       // and surface a confirmation toast.
-      const refunded = (deed as { freezerRefunded?: boolean }).freezerRefunded;
-      const refundedDate = (deed as { refundedDate?: string | null }).refundedDate ?? null;
+      const refunded = deed.freezerRefunded;
+      const refundedDate = deed.refundedDate ?? null;
       if (refunded) {
         queryClient.invalidateQueries({ queryKey: ["/api/streak-freezer"] });
         queryClient.invalidateQueries({ queryKey: ["/api/streak"] });
@@ -66,10 +78,12 @@ export function useCreateDeed() {
         });
         return;
       }
-      toast({
-        title: "Deed Recorded",
-        description: "Your deed has been successfully tracked.",
-      });
+      if (!newlyEarned || newlyEarned.length === 0) {
+        toast({
+          title: "Deed Recorded",
+          description: "Your deed has been successfully tracked.",
+        });
+      }
     },
     onError: (error) => {
       toast({
@@ -100,6 +114,7 @@ export function useDeleteDeed() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
+      queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
       toast({
         title: "Deed Deleted",
         description: "The deed has been removed from your history.",
@@ -141,12 +156,24 @@ export function useUpdateDeed() {
       }
       return api.deeds.update.responses[200].parse(await res.json());
     },
-    onSuccess: () => {
+    onSuccess: (deed) => {
       queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
-      toast({
-        title: "Deed Updated",
-        description: "Your deed has been successfully updated.",
-      });
+      queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
+      const newlyEarned = deed.newlyEarnedBadges;
+      if (newlyEarned && newlyEarned.length > 0) {
+        const tierLabels = ["", "Bronze", "Silver", "Gold", "Platinum"];
+        for (const b of newlyEarned) {
+          toast({
+            title: "Badge unlocked!",
+            description: `${b.name} • ${tierLabels[b.tier] ?? `Tier ${b.tier}`}`,
+          });
+        }
+      } else {
+        toast({
+          title: "Deed Updated",
+          description: "Your deed has been successfully updated.",
+        });
+      }
     },
     onError: (error) => {
       toast({

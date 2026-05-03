@@ -5,7 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
-import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS } from "@shared/schema";
+import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS, type NewlyEarnedBadge } from "@shared/schema";
 import {
   checkRateLimit,
   generateRecommendations,
@@ -15,6 +15,7 @@ import {
 } from "./recommendations";
 import { checkVoiceParseRateLimit, parseVoiceDeed } from "./voiceParse";
 import { calculatePoints } from "./calculatePoints";
+import { evaluateBadgesForUser } from "./badges";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
 import { format } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -122,7 +123,14 @@ export async function registerRoutes(
         if (deedDate) {
           freezerRefunded = await storage.refundFreezerForDate(userId, deedDate);
         }
-        return res.status(201).json({ ...deed, freezerRefunded, refundedDate: freezerRefunded ? deedDate : null });
+        let newlyEarnedBadges: NewlyEarnedBadge[] = [];
+        try {
+          const result = await evaluateBadgesForUser(userId);
+          newlyEarnedBadges = result.newlyEarned;
+        } catch (e) {
+          console.error("Badge evaluation failed (createDeed)", e);
+        }
+        return res.status(201).json({ ...deed, freezerRefunded, refundedDate: freezerRefunded ? deedDate : null, newlyEarnedBadges });
       } catch (insertErr: any) {
         // Postgres unique_violation: another concurrent request beat us to
         // creating the same Sholat Fardhu deed for this (user, prayer, day).
@@ -166,6 +174,11 @@ export async function registerRoutes(
       return res.status(400).json({ message: "Invalid ID" });
     }
     await storage.deleteDeed(id, userId);
+    try {
+      await evaluateBadgesForUser(userId);
+    } catch (e) {
+      console.error("Badge evaluation failed (deleteDeed)", e);
+    }
     res.status(204).send();
   });
 
@@ -198,7 +211,14 @@ export async function registerRoutes(
       };
       
       const deed = await storage.updateDeed(id, userId, deedWithCalculatedPoints);
-      res.json(deed);
+      let newlyEarnedBadges: NewlyEarnedBadge[] = [];
+      try {
+        const result = await evaluateBadgesForUser(userId);
+        newlyEarnedBadges = result.newlyEarned;
+      } catch (e) {
+        console.error("Badge evaluation failed (updateDeed)", e);
+      }
+      res.json({ ...deed, newlyEarnedBadges });
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
@@ -452,7 +472,14 @@ export async function registerRoutes(
       const input = api.targets.create.input.parse(req.body);
       const userId = req.user.claims.sub;
       const target = await storage.createTarget(userId, input);
-      res.status(201).json(target);
+      let newlyEarnedBadges: NewlyEarnedBadge[] = [];
+      try {
+        const result = await evaluateBadgesForUser(userId);
+        newlyEarnedBadges = result.newlyEarned;
+      } catch (e) {
+        console.error("Badge evaluation failed (createTarget)", e);
+      }
+      res.status(201).json({ ...target, newlyEarnedBadges });
     } catch (err: unknown) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
@@ -477,7 +504,14 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Invalid ID" });
       }
       const target = await storage.updateTarget(id, userId, input);
-      res.json(target);
+      let newlyEarnedBadges: NewlyEarnedBadge[] = [];
+      try {
+        const result = await evaluateBadgesForUser(userId);
+        newlyEarnedBadges = result.newlyEarned;
+      } catch (e) {
+        console.error("Badge evaluation failed (updateTarget)", e);
+      }
+      res.json({ ...target, newlyEarnedBadges });
     } catch (err: unknown) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
@@ -695,7 +729,14 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Invalid ID" });
       }
       const target = await storage.updateTargetProgress(id, userId, progress);
-      res.json(target);
+      let newlyEarnedBadges: NewlyEarnedBadge[] = [];
+      try {
+        const result = await evaluateBadgesForUser(userId);
+        newlyEarnedBadges = result.newlyEarned;
+      } catch (e) {
+        console.error("Badge evaluation failed (updateTargetProgress)", e);
+      }
+      res.json({ ...target, newlyEarnedBadges });
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
@@ -714,7 +755,14 @@ export async function registerRoutes(
       return res.status(400).json({ message: "Invalid ID" });
     }
     const target = await storage.completeTarget(id, userId);
-    res.json(target);
+    let newlyEarnedBadges: NewlyEarnedBadge[] = [];
+    try {
+      const result = await evaluateBadgesForUser(userId);
+      newlyEarnedBadges = result.newlyEarned;
+    } catch (e) {
+      console.error("Badge evaluation failed (completeTarget)", e);
+    }
+    res.json({ ...target, newlyEarnedBadges });
   });
 
   app.get(api.push.status.path, isAuthenticated, async (req: any, res) => {
@@ -1211,6 +1259,18 @@ export async function registerRoutes(
       });
 
       res.json({ entries, me: result.me, total: result.total });
+    } catch (err) {
+      const status = getErrorStatus(err) ?? 500;
+      res.status(status).json({ message: getErrorMessage(err) });
+    }
+  });
+
+  // ─── Badges ──────────────────────────────────────────────────
+  app.get(api.badges.list.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { snapshot } = await evaluateBadgesForUser(userId);
+      res.json(snapshot);
     } catch (err) {
       const status = getErrorStatus(err) ?? 500;
       res.status(status).json({ message: getErrorMessage(err) });

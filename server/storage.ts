@@ -153,7 +153,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateDeed(id: number, userId: string, updateDeed: InsertDeed): Promise<Deed> {
-    const values: any = { ...updateDeed };
+    const values: any = { ...updateDeed, editCount: sql`${deeds.editCount} + 1` };
     const [deed] = await db
       .update(deeds)
       .set(values)

@@ -7,6 +7,9 @@ import { relations, sql } from "drizzle-orm";
 export * from "./models/auth";
 import { users } from "./models/auth";
 
+// Re-export badges (catalog + user_badges table)
+export * from "./badges";
+
 export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
@@ -31,6 +34,7 @@ export const deeds = pgTable("deeds", {
   quranUnit: text("quran_unit"),
   sedekahType: text("sedekah_type"),
   customUnit: text("custom_unit"),
+  editCount: integer("edit_count").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
   // Local calendar date (YYYY-MM-DD) the user assigned this deed to.
   // For Sholat Fardhu deeds this is the unique key with sholat_type and

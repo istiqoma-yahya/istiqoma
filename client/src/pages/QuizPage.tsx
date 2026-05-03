@@ -9,11 +9,27 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { QuizState, QuizActiveAttempt, QuizAnswerResult } from "@shared/schema";
 import { cn } from "@/lib/utils";
 
+// The default react-query fetcher throws errors of the form
+// `${status}: ${body}`. Strip the status prefix and try to read a `message`
+// field out of the JSON body so we can show the user a clean server message.
+function extractServerMessage(err: Error): string | null {
+  const raw = err.message ?? "";
+  const stripped = raw.replace(/^\d{3}:\s*/, "");
+  if (!stripped) return null;
+  try {
+    const parsed = JSON.parse(stripped);
+    if (parsed && typeof parsed.message === "string") return parsed.message;
+  } catch {
+    // not JSON — fall through and return the stripped text as-is
+  }
+  return stripped;
+}
+
 export default function QuizPage() {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
 
-  const { data: state, isLoading, isError, refetch } = useQuery<QuizState>({
+  const { data: state, isLoading, isError, error, refetch } = useQuery<QuizState>({
     queryKey: ["/api/quiz/state"],
   });
 
@@ -116,9 +132,18 @@ export default function QuizPage() {
   }
 
   if (isError || !state) {
+    const serverMessage = error instanceof Error ? extractServerMessage(error) : null;
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background px-4 text-center">
         <p className="text-muted-foreground">{t("quiz.error")}</p>
+        {serverMessage && (
+          <p
+            className="text-sm text-rose-600 dark:text-rose-400 max-w-md"
+            data-testid="text-quiz-load-error"
+          >
+            {serverMessage}
+          </p>
+        )}
         <Button onClick={() => refetch()} data-testid="button-quiz-retry">
           {t("quiz.retry")}
         </Button>

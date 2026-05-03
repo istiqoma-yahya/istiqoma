@@ -8,6 +8,57 @@ import { toZonedTime, fromZonedTime } from "date-fns-tz";
 // Default timezone for users (Indonesia)
 const DEFAULT_TIMEZONE = "Asia/Jakarta";
 
+// Typed error used by the quiz code-path so the route handlers (which read
+// `status` off the thrown error via getErrorStatus) get an HTTP status and
+// a clean JSON-safe message instead of a generic 500/HTML response.
+class QuizError extends Error {
+  readonly status: number;
+  constructor(message: string, status: number, options?: { cause?: unknown }) {
+    super(message);
+    this.name = "QuizError";
+    this.status = status;
+    if (options && "cause" in options) {
+      (this as Error & { cause?: unknown }).cause = options.cause;
+    }
+  }
+}
+
+// Translate raw Postgres errors raised by the quiz code-path into a QuizError
+// with a clear message. The most common failure mode in the wild is a missing
+// table (relation does not exist) when the dev DB hasn't been migrated — we
+// turn that into a 503 with an actionable message. Anything else is rethrown
+// untouched so route-level handling preserves existing semantics.
+function translateQuizDbError(err: unknown): unknown {
+  if (err instanceof QuizError) return err;
+  const code = (err as { code?: string } | null)?.code;
+  const message = (err as { message?: string } | null)?.message ?? "";
+  if (code === "42P01" || /relation .* does not exist/i.test(message)) {
+    return new QuizError(
+      "Quiz tables are not set up yet. Please run `npm run db:push` and restart the server.",
+      503,
+      { cause: err },
+    );
+  }
+  return err;
+}
+
+// Confirm the question bank has at least one row. We surface the empty-bank
+// case as a 503 with a clear message rather than letting the request silently
+// succeed (and bewilder the user) when seeding has failed or the table is
+// freshly created.
+async function assertQuizBankNonEmpty(): Promise<void> {
+  const result = await db.execute<{ exists: boolean }>(
+    sql`SELECT EXISTS (SELECT 1 FROM ${quizQuestions} LIMIT 1) AS exists`,
+  );
+  const row = ((result.rows ?? result) as Array<{ exists: boolean }>)[0];
+  if (!row?.exists) {
+    throw new QuizError(
+      "Quiz question bank is empty. Please seed the questions and try again.",
+      503,
+    );
+  }
+}
+
 // Validate an IANA timezone string. Returns the string if valid, otherwise undefined.
 function validateTimezone(tz: unknown): string | undefined {
   if (!tz || typeof tz !== "string") return undefined;
@@ -1485,6 +1536,15 @@ export class DatabaseStorage implements IStorage {
   // `quiz_attempts.completed = false` flag so the user can resume where
   // they left off. Progress only advances on a perfect score.
   async getQuizState(userId: string): Promise<QuizState> {
+    try {
+      return await this.getQuizStateInner(userId);
+    } catch (err) {
+      throw translateQuizDbError(err);
+    }
+  }
+
+  private async getQuizStateInner(userId: string): Promise<QuizState> {
+    await assertQuizBankNonEmpty();
     const [progress] = await db
       .select()
       .from(userQuizProgress)
@@ -1527,6 +1587,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async startQuizAttempt(userId: string): Promise<QuizActiveAttempt> {
+    try {
+      return await this.startQuizAttemptInner(userId);
+    } catch (err) {
+      throw translateQuizDbError(err);
+    }
+  }
+
+  private async startQuizAttemptInner(userId: string): Promise<QuizActiveAttempt> {
+    await assertQuizBankNonEmpty();
     // Reuse any in-progress attempt rather than creating a duplicate.
     const [existing] = await db
       .select()
@@ -1569,9 +1638,10 @@ export class DatabaseStorage implements IStorage {
       ids = ((fallback.rows ?? fallback) as Array<{ id: number }>).map((r) => Number(r.id));
     }
     if (ids.length < 10) {
-      const err: any = new Error("Quiz question bank is empty. Please try again later.");
-      err.status = 503;
-      throw err;
+      throw new QuizError(
+        "Not enough quiz questions are seeded yet. Please try again later.",
+        503,
+      );
     }
 
     const [attempt] = await db
@@ -1588,26 +1658,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async recordQuizAnswer(userId: string, attemptId: number, optionIndex: number): Promise<QuizAnswerResult> {
+    try {
+      return await this.recordQuizAnswerInner(userId, attemptId, optionIndex);
+    } catch (err) {
+      throw translateQuizDbError(err);
+    }
+  }
+
+  private async recordQuizAnswerInner(userId: string, attemptId: number, optionIndex: number): Promise<QuizAnswerResult> {
     const [attempt] = await db
       .select()
       .from(quizAttempts)
       .where(and(eq(quizAttempts.id, attemptId), eq(quizAttempts.userId, userId)));
     if (!attempt) {
-      const err: any = new Error("Attempt not found");
-      err.status = 404;
-      throw err;
+      throw new QuizError("Attempt not found", 404);
     }
     if (attempt.completed) {
-      const err: any = new Error("Attempt already completed");
-      err.status = 400;
-      throw err;
+      throw new QuizError("Attempt already completed", 400);
     }
     const answers = [...(attempt.answers ?? [])];
     const idx = answers.length;
     if (idx >= attempt.questionIds.length) {
-      const err: any = new Error("No more questions to answer");
-      err.status = 400;
-      throw err;
+      throw new QuizError("No more questions to answer", 400);
     }
     const questionId = attempt.questionIds[idx];
     const [question] = await db
@@ -1615,9 +1687,7 @@ export class DatabaseStorage implements IStorage {
       .from(quizQuestions)
       .where(eq(quizQuestions.id, questionId));
     if (!question) {
-      const err: any = new Error("Question missing from bank");
-      err.status = 500;
-      throw err;
+      throw new QuizError("Question missing from bank", 500);
     }
     const isCorrect = optionIndex === question.correctIndex;
     answers.push(optionIndex);
@@ -1690,6 +1760,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getQuizLeaderboard(currentUserId: string, limit: number): Promise<{
+    entries: QuizLeaderboardEntry[];
+    me: { rank: number; level: number; totalCorrect: number } | null;
+    total: number;
+  }> {
+    try {
+      return await this.getQuizLeaderboardInner(currentUserId, limit);
+    } catch (err) {
+      throw translateQuizDbError(err);
+    }
+  }
+
+  private async getQuizLeaderboardInner(currentUserId: string, limit: number): Promise<{
     entries: QuizLeaderboardEntry[];
     me: { rank: number; level: number; totalCorrect: number } | null;
     total: number;

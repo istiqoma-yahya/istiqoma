@@ -223,6 +223,17 @@ export const recommendationRateLimitCalls = pgTable("recommendation_rate_limit_c
   byUserAndTime: index("rec_rate_limit_user_time_idx").on(table.userId, table.calledAt),
 }));
 
+// Sliding-window rate limit ledger for the voice-deed parsing endpoint.
+// Same Postgres-backed pattern as recommendationRateLimitCalls so a runaway
+// client cannot burn AI credits across replicas/restarts.
+export const voiceParseRateLimitCalls = pgTable("voice_parse_rate_limit_calls", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  calledAt: timestamp("called_at").notNull().defaultNow(),
+}, (table) => ({
+  byUserAndTime: index("voice_parse_rate_limit_user_time_idx").on(table.userId, table.calledAt),
+}));
+
 export const pushSubscriptions = pgTable("push_subscriptions", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
@@ -527,3 +538,51 @@ export const targetRecommendationsResponseSchema = z.object({
 
 export type TargetRecommendationsRequest = z.infer<typeof targetRecommendationsRequestSchema>;
 export type TargetRecommendationsResponse = z.infer<typeof targetRecommendationsResponseSchema>;
+
+// ─── Voice-deed parsing (audio/transcript -> structured deed fields) ──
+export const VOICE_PARSE_LANGUAGES = ["id", "en", "ms", "ar"] as const;
+export type VoiceParseLanguage = (typeof VOICE_PARSE_LANGUAGES)[number];
+
+export const voiceParseRequestSchema = z.object({
+  transcript: z.string().min(1, "Transcript is required").max(4000, "Transcript is too long"),
+  language: z.enum(VOICE_PARSE_LANGUAGES).optional(),
+  // ISO 8601 timestamp the client believes is "now". Used so the model can
+  // resolve relative times like "yesterday morning" against the user's clock.
+  clientNowIso: z.string().optional(),
+  // IANA timezone for resolving relative times in the user's perspective.
+  timezone: z.string().optional(),
+});
+export type VoiceParseRequest = z.infer<typeof voiceParseRequestSchema>;
+
+// Mirrors the user-editable fields of insertDeedSchema. All fields are
+// optional because the AI only sets what was confidently inferred from
+// what the user said. The client uses these to prefill the deed form.
+export const voiceParsedDeedSchema = z.object({
+  category: z.string().max(120).optional(),
+  description: z.string().max(500).optional(),
+  quantity: z.number().int().min(1).max(100000).optional(),
+  customUnit: z
+    .enum(["hitungan", "ayat", "halaman", "surat", "juz", "rakaat", "hari", "uang", "times", "days"])
+    .optional(),
+  dzikirType: z.string().max(120).optional(),
+  sholatType: z.string().max(60).optional(),
+  fastingType: z.string().max(60).optional(),
+  isJamaah: z.boolean().optional(),
+  quranUnit: z.enum(["ayat", "halaman", "surat", "juz"]).optional(),
+  sedekahType: z.enum(["uang", "hitungan"]).optional(),
+  // ISO 8601. Only set if the user explicitly stated a time/date.
+  createdAtIso: z.string().optional(),
+});
+export type VoiceParsedDeed = z.infer<typeof voiceParsedDeedSchema>;
+
+export const voiceParseResponseSchema = z.object({
+  parsed: voiceParsedDeedSchema,
+  // Notes are debug-only and not shown to the user. Useful for surfacing
+  // why the AI couldn't pick a category, etc.
+  notes: z.string().max(500).optional(),
+  // True when the AI couldn't confidently fill at least the category. The
+  // client treats this as a failure and shows the retry/text-form UI.
+  lowConfidence: z.boolean().optional(),
+  transcript: z.string(),
+});
+export type VoiceParseResponse = z.infer<typeof voiceParseResponseSchema>;

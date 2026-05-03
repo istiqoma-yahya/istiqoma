@@ -846,6 +846,37 @@
     "journeyTitle": "Your spiritual journey",
     "journeySubtitleEmpty": "Tell us about yourself to personalize Istiqoma"
   },
+  "recordChooser": {
+    "title": "How would you like to record?",
+    "subtitle": "Pick how you want to log this deed.",
+    "text": "Type it",
+    "textHint": "Fill out the form yourself.",
+    "voice": "Speak it",
+    "voiceHint": "Describe it out loud and we'll fill the form."
+  },
+  "voiceCapture": {
+    "title": "Record by voice",
+    "instructions": "Tap the microphone, then describe a single deed in your own words. For example: \"I prayed Subuh in jamaah this morning.\"",
+    "start": "Start recording",
+    "stop": "Stop",
+    "cancel": "Cancel",
+    "processing": "Listening to what you said and filling the form…",
+    "timerHint": "Up to {{seconds}} seconds.",
+    "permissionDenied": "We need microphone permission to record your deed. Please allow it in your browser settings and try again.",
+    "noMicrophone": "No microphone was detected on this device.",
+    "noSpeech": "We didn't catch anything. Please try again.",
+    "networkError": "There was a network problem during transcription. Please try again.",
+    "languageNotSupported": "Your current language isn't supported by this browser's voice recognition. Please switch to a supported language or type the deed instead.",
+    "unsupportedTitle": "Voice recording isn't available",
+    "unsupported": "Your browser doesn't support voice recognition. Please use a recent version of Chrome, Edge, or Safari, or type the deed instead.",
+    "couldNotUnderstand": "We couldn't understand the deed. Please try again or type it instead.",
+    "rateLimited": "You've used voice recording a lot recently. Please wait a bit and try again.",
+    "serviceUnavailable": "The voice service is temporarily unavailable. Please try again or type the deed instead.",
+    "error": "Something went wrong. Please try again.",
+    "retry": "Try again",
+    "switchToText": "Type instead",
+    "reviewToast": "Please review your deed before saving it"
+  },
   "onboardingSettings": {
     "title": "Your journey",
     "identityHeading": "Your identity",

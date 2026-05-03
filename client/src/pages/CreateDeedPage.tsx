@@ -32,6 +32,28 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { CreateCategoryDialog } from "@/components/CreateCategoryDialog";
 import { PointsRewardDialog } from "@/components/PointsRewardDialog";
 import { StreakDialog } from "@/components/StreakDialog";
+import { useToast } from "@/hooks/use-toast";
+import type { VoiceParsedDeed } from "@shared/schema";
+
+const VOICE_DEED_PREFILL_KEY = "voice-deed-prefill";
+
+interface VoicePrefillSnapshot extends VoiceParsedDeed {
+  transcript?: string;
+}
+
+// Read+remove the one-shot voice prefill payload. Done synchronously at
+// module load so initial form defaults can use it without a flash.
+function consumeVoicePrefill(): VoicePrefillSnapshot | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(VOICE_DEED_PREFILL_KEY);
+    if (!raw) return null;
+    window.sessionStorage.removeItem(VOICE_DEED_PREFILL_KEY);
+    return JSON.parse(raw) as VoicePrefillSnapshot;
+  } catch {
+    return null;
+  }
+}
 
 const formSchema = insertDeedSchema.extend({
   points: z.coerce.number().min(1, "Points must be at least 1"),
@@ -54,6 +76,17 @@ function getCurrentDateTime() {
   };
 }
 
+function getDateTimeFromIso(iso: string) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return null;
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return { date: `${year}-${month}-${day}`, time: `${hours}:${minutes}` };
+}
+
 export default function CreateDeedPage() {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
@@ -61,7 +94,18 @@ export default function CreateDeedPage() {
   const { data: categories = [] } = useCategories();
   const translateCategoryName = useCategoryName();
   const { data: customDzikirTypes = [] } = useCustomDzikirTypes();
-  const [dateTime, setDateTime] = useState(getCurrentDateTime());
+  const { toast } = useToast();
+  // Read the voice prefill exactly once on mount so refresh/back-nav doesn't
+  // reapply stale values. useState(initializer) runs only on the first render.
+  const [voicePrefill] = useState<VoicePrefillSnapshot | null>(() => consumeVoicePrefill());
+  const initialDateTime = (() => {
+    if (voicePrefill?.createdAtIso) {
+      const dt = getDateTimeFromIso(voicePrefill.createdAtIso);
+      if (dt) return dt;
+    }
+    return getCurrentDateTime();
+  })();
+  const [dateTime, setDateTime] = useState(initialDateTime);
   const [showCreateCategoryDialog, setShowCreateCategoryDialog] = useState(false);
   const [rewardPoints, setRewardPoints] = useState<number | null>(null);
   const [showStreakDialog, setShowStreakDialog] = useState(false);
@@ -73,19 +117,27 @@ export default function CreateDeedPage() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      description: "",
-      category: "",
-      points: 1,
+      description: voicePrefill?.description ?? "",
+      category: voicePrefill?.category ?? "",
+      points: voicePrefill?.quantity ?? 1,
       createdAt: undefined,
-      dzikirType: undefined,
-      sholatType: undefined,
-      fastingType: undefined,
-      isJamaah: undefined,
-      quranUnit: undefined,
-      sedekahType: undefined,
-      customUnit: undefined,
+      dzikirType: voicePrefill?.dzikirType,
+      sholatType: voicePrefill?.sholatType,
+      fastingType: voicePrefill?.fastingType,
+      isJamaah: voicePrefill?.isJamaah,
+      quranUnit: voicePrefill?.quranUnit,
+      sedekahType: voicePrefill?.sedekahType,
+      customUnit: voicePrefill?.customUnit,
     },
   });
+
+  // Surface the "please review" snackbar once when arriving from voice capture.
+  useEffect(() => {
+    if (voicePrefill) {
+      toast({ title: t("voiceCapture.reviewToast") });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const watchedCategory = form.watch("category");
   const isDzikirCategory = watchedCategory?.toLowerCase() === "dzikir" || watchedCategory?.toLowerCase() === "dzikr";
@@ -183,9 +235,20 @@ export default function CreateDeedPage() {
 
   useEffect(() => {
     if (categories.length > 0 && !form.getValues("category")) {
-      form.setValue("category", categories[0].name);
+      // Don't auto-select a default if the voice flow attempted to set a
+      // category (even if it didn't match) — the user is reviewing.
+      if (!voicePrefill) {
+        form.setValue("category", categories[0].name);
+      } else if (voicePrefill.category) {
+        // Snap the prefilled category to the canonical casing if the user
+        // has it.
+        const match = categories.find(
+          (c) => c.name.toLowerCase() === voicePrefill.category!.toLowerCase(),
+        );
+        if (match) form.setValue("category", match.name);
+      }
     }
-  }, [categories, form]);
+  }, [categories, form, voicePrefill]);
   
   useEffect(() => {
     if (!isDzikirCategory) {

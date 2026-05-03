@@ -847,6 +847,37 @@
     "journeyTitle": "Perjalanan spiritualmu",
     "journeySubtitleEmpty": "Ceritakan tentang dirimu untuk mempersonalisasi Istiqoma"
   },
+  "recordChooser": {
+    "title": "Bagaimana cara mencatat amalanmu?",
+    "subtitle": "Pilih cara mencatat amalan ini.",
+    "text": "Ketik",
+    "textHint": "Isi formulir sendiri.",
+    "voice": "Suara",
+    "voiceHint": "Ceritakan dengan suara, kami akan mengisi formulirnya."
+  },
+  "voiceCapture": {
+    "title": "Rekam dengan suara",
+    "instructions": "Tekan tombol mikrofon, lalu ceritakan satu amalan dengan kata-katamu. Contoh: \"Tadi pagi aku sholat Subuh berjamaah.\"",
+    "start": "Mulai rekam",
+    "stop": "Berhenti",
+    "cancel": "Batal",
+    "processing": "Mendengarkan ceritamu dan mengisi formulir…",
+    "timerHint": "Maksimal {{seconds}} detik.",
+    "permissionDenied": "Kami butuh izin mikrofon untuk merekam amalanmu. Mohon izinkan di pengaturan browser, lalu coba lagi.",
+    "noMicrophone": "Tidak ada mikrofon yang terdeteksi di perangkat ini.",
+    "noSpeech": "Kami tidak menangkap apa-apa. Silakan coba lagi.",
+    "networkError": "Terjadi masalah jaringan saat transkripsi. Silakan coba lagi.",
+    "languageNotSupported": "Bahasa yang kamu pilih tidak didukung oleh pengenalan suara browser ini. Ganti bahasa atau ketik amalan sebagai gantinya.",
+    "unsupportedTitle": "Perekaman suara tidak tersedia",
+    "unsupported": "Browser-mu tidak mendukung pengenalan suara. Gunakan versi terbaru Chrome, Edge, atau Safari, atau ketik amalan secara manual.",
+    "couldNotUnderstand": "Kami belum bisa memahami amalanmu. Silakan coba lagi atau ketik secara manual.",
+    "rateLimited": "Kamu sudah merekam suara cukup banyak. Tunggu sebentar lalu coba lagi.",
+    "serviceUnavailable": "Layanan suara sedang tidak tersedia. Silakan coba lagi atau ketik amalan secara manual.",
+    "error": "Terjadi kesalahan. Silakan coba lagi.",
+    "retry": "Coba lagi",
+    "switchToText": "Ketik saja",
+    "reviewToast": "Mohon periksa amalanmu sebelum menyimpan"
+  },
   "onboardingSettings": {
     "title": "Perjalananmu",
     "identityHeading": "Identitasmu",

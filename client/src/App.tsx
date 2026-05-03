@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import AuthWrapper from "@/pages/AuthWrapper";
 import CategoryManagement from "@/pages/CategoryManagement";
 import CreateDeedPage from "@/pages/CreateDeedPage";
+import VoiceCaptureDeedPage from "@/pages/VoiceCaptureDeedPage";
 import EditDeedPage from "@/pages/EditDeedPage";
 import ProgressPage from "@/pages/ProgressPage";
 import DzikirPage from "@/pages/DzikirPage";
@@ -59,6 +60,7 @@ function Router() {
       <Route path="/streak" component={StreakDetailPage} />
       <Route path="/streak-freezer" component={StreakFreezerPage} />
       <Route path="/create-deed" component={CreateDeedPage} />
+      <Route path="/create-deed/voice" component={VoiceCaptureDeedPage} />
       <Route path="/edit-deed/:id" component={EditDeedRoute} />
       <Route component={NotFound} />
     </Switch>

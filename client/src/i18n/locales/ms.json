@@ -847,6 +847,37 @@
     "journeyTitle": "Perjalanan spiritual anda",
     "journeySubtitleEmpty": "Beritahu kami tentang diri anda untuk memperibadikan Istiqoma"
   },
+  "recordChooser": {
+    "title": "Bagaimana anda ingin merakam?",
+    "subtitle": "Pilih cara untuk merekod amalan ini.",
+    "text": "Taip",
+    "textHint": "Isi borang sendiri.",
+    "voice": "Suara",
+    "voiceHint": "Ceritakan dengan suara, kami akan isikan borangnya."
+  },
+  "voiceCapture": {
+    "title": "Rakam dengan suara",
+    "instructions": "Tekan butang mikrofon, kemudian ceritakan satu amalan dengan kata-kata anda. Contoh: \"Pagi tadi saya solat Subuh berjemaah.\"",
+    "start": "Mula rakam",
+    "stop": "Berhenti",
+    "cancel": "Batal",
+    "processing": "Mendengar dan mengisi borang…",
+    "timerHint": "Maksimum {{seconds}} saat.",
+    "permissionDenied": "Kami memerlukan kebenaran mikrofon untuk merakam amalan anda. Sila benarkan dalam tetapan pelayar dan cuba lagi.",
+    "noMicrophone": "Tiada mikrofon dikesan pada peranti ini.",
+    "noSpeech": "Kami tidak menangkap apa-apa. Sila cuba lagi.",
+    "networkError": "Terdapat masalah rangkaian semasa transkripsi. Sila cuba lagi.",
+    "languageNotSupported": "Bahasa anda tidak disokong oleh pengecaman suara pelayar ini. Sila tukar bahasa atau taip amalan secara manual.",
+    "unsupportedTitle": "Rakaman suara tidak tersedia",
+    "unsupported": "Pelayar anda tidak menyokong pengecaman suara. Sila gunakan versi terkini Chrome, Edge, atau Safari, atau taip amalan secara manual.",
+    "couldNotUnderstand": "Kami tidak dapat memahami amalan tersebut. Sila cuba lagi atau taip secara manual.",
+    "rateLimited": "Anda telah menggunakan rakaman suara dengan banyak. Sila tunggu seketika dan cuba lagi.",
+    "serviceUnavailable": "Perkhidmatan suara tidak tersedia buat sementara waktu. Sila cuba lagi atau taip amalan secara manual.",
+    "error": "Sesuatu tidak kena. Sila cuba lagi.",
+    "retry": "Cuba lagi",
+    "switchToText": "Taip sahaja",
+    "reviewToast": "Sila semak amalan anda sebelum menyimpan"
+  },
   "onboardingSettings": {
     "title": "Perjalanan anda",
     "identityHeading": "Identiti anda",

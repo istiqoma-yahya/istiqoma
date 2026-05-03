@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, targetRecommendationsRequestSchema, targetRecommendationsResponseSchema, updateProfileSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, targetRecommendationsRequestSchema, targetRecommendationsResponseSchema, updateProfileSchema, voiceParseRequestSchema, voiceParseResponseSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -58,6 +58,19 @@ export const api = {
         400: errorSchemas.validation,
         401: errorSchemas.unauthorized,
         404: errorSchemas.notFound,
+      },
+    },
+    voiceParse: {
+      method: "POST" as const,
+      path: "/api/deeds/voice-parse",
+      input: voiceParseRequestSchema,
+      responses: {
+        200: voiceParseResponseSchema,
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+        429: errorSchemas.validation,
+        500: errorSchemas.internal,
+        503: errorSchemas.internal,
       },
     },
   },

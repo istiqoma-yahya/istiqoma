@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { RecordDeedChooserDialog } from "@/components/RecordDeedChooserDialog";
 import { useAuth } from "@/hooks/use-auth";
 import { useDeeds } from "@/hooks/use-deeds";
 import { useTargetsWithProgress } from "@/hooks/use-targets";
@@ -31,6 +32,12 @@ export default function Dashboard() {
   const { data: targets } = useTargetsWithProgress();
   const [, navigate] = useLocation();
   const { t } = useTranslation();
+  const [chooserOpen, setChooserOpen] = useState(false);
+
+  const handleChooseRecordMode = (mode: "text" | "voice") => {
+    setChooserOpen(false);
+    navigate(mode === "voice" ? "/create-deed/voice" : "/create-deed");
+  };
 
   useEffect(() => {
     const saved = sessionStorage.getItem("dashboard-scroll");
@@ -133,7 +140,7 @@ export default function Dashboard() {
             <p className="text-muted-foreground">{t('dashboard.subtitle')}</p>
           </div>
           <button 
-            onClick={() => navigate("/create-deed")}
+            onClick={() => setChooserOpen(true)}
             className="btn-primary flex items-center justify-center gap-2"
             data-testid="button-create-deed"
           >
@@ -245,7 +252,7 @@ export default function Dashboard() {
                 {t('dashboard.startRecording')}
               </p>
               <button 
-                onClick={() => navigate("/create-deed")}
+                onClick={() => setChooserOpen(true)}
                 className="btn-primary flex items-center justify-center gap-2"
                 data-testid="button-create-deed-empty"
               >
@@ -262,6 +269,11 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+      <RecordDeedChooserDialog
+        open={chooserOpen}
+        onOpenChange={setChooserOpen}
+        onChoose={handleChooseRecordMode}
+      />
     </div>
   );
 }

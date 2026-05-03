@@ -13,6 +13,7 @@ import {
   setCachedRecommendations,
   invalidateUserRecommendationCache,
 } from "./recommendations";
+import { checkVoiceParseRateLimit, parseVoiceDeed } from "./voiceParse";
 import { calculatePoints } from "./calculatePoints";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
 import { format } from "date-fns";
@@ -178,6 +179,58 @@ export async function registerRoutes(
         return res.status(400).json({
           message: err.errors[0].message,
           field: err.errors[0].path.join('.'),
+        });
+      }
+      throw err;
+    }
+  });
+
+  app.post(api.deeds.voiceParse.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const input = api.deeds.voiceParse.input.parse(req.body);
+
+      const limit = await checkVoiceParseRateLimit(userId);
+      if (!limit.allowed) {
+        res.setHeader("Retry-After", String(limit.retryAfterSeconds ?? 60));
+        return res.status(429).json({
+          message: "Too many voice parses. Please try again later.",
+        });
+      }
+
+      const [cats, customDzikir] = await Promise.all([
+        storage.getCategories(userId),
+        storage.getCustomDzikirTypes(userId),
+      ]);
+
+      let result;
+      try {
+        result = await parseVoiceDeed({
+          transcript: input.transcript,
+          language: input.language,
+          clientNowIso: input.clientNowIso,
+          timezone: input.timezone,
+          categoryNames: cats.map((c) => c.name),
+          customDzikirLabels: customDzikir.map((d) => d.label),
+        });
+      } catch (err) {
+        console.error("VoiceParse: Anthropic call failed", err);
+        return res.status(503).json({
+          message: "Failed to parse voice deed. Please try again.",
+        });
+      }
+
+      res.json({
+        parsed: result.parsed,
+        notes: result.notes,
+        lowConfidence: result.lowConfidence,
+        transcript: input.transcript,
+      });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join("."),
         });
       }
       throw err;

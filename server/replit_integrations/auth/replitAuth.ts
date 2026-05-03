@@ -14,6 +14,7 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { authStorage } from "./storage";
 import { storage } from "../../storage";
+import { pool } from "../../db";
 
 const DEFAULT_CATEGORIES = [
   "Dzikir",
@@ -65,8 +66,12 @@ export function buildSessionOptions(store: session.Store): session.SessionOption
 
 export function getSession() {
   const pgStore = connectPg(session);
+  // Use the same Supabase pool as the rest of the app. The auto-injected
+  // DATABASE_URL points at Replit's built-in Postgres (hostname "helium")
+  // which is only resolvable inside the workspace, not from deployments —
+  // using it here causes `getaddrinfo EAI_AGAIN helium` on login in prod.
   const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
+    pool: pool as any,
     createTableIfMissing: false,
     ttl: SESSION_TTL_MS / 1000, // connect-pg-simple expects seconds
     tableName: "sessions",

@@ -1090,6 +1090,7 @@
     "leaderboardSubtitle": "Ranked by level reached, then total correct answers.",
     "leaderboardEmpty": "No one has earned a quiz score yet. Be the first!",
     "leaderboardRowSubtitle": "Level {{level}} · {{correct}} correct",
+    "yourRank": "Your rank",
     "levelShort": "Lv {{level}}",
     "correctShort": "correct",
     "intro": "Each level has 10 multiple-choice questions. Score 10/10 to advance to the next level.",

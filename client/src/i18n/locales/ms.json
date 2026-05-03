@@ -1091,6 +1091,7 @@
     "leaderboardSubtitle": "Disusun mengikut tahap tertinggi, kemudian jumlah jawapan betul.",
     "leaderboardEmpty": "Belum ada sesiapa menjawab kuiz. Jadilah yang pertama!",
     "leaderboardRowSubtitle": "Tahap {{level}} · {{correct}} betul",
+    "yourRank": "Kedudukan anda",
     "levelShort": "Lv {{level}}",
     "correctShort": "betul",
     "intro": "Setiap tahap mempunyai 10 soalan aneka pilihan. Dapatkan 10/10 untuk naik ke tahap berikutnya.",

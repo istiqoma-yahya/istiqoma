@@ -1091,6 +1091,7 @@
     "leaderboardSubtitle": "Diurutkan berdasarkan level tertinggi, lalu total jawaban benar.",
     "leaderboardEmpty": "Belum ada yang mengerjakan kuis. Jadilah yang pertama!",
     "leaderboardRowSubtitle": "Level {{level}} · {{correct}} benar",
+    "yourRank": "Peringkat Anda",
     "levelShort": "Lv {{level}}",
     "correctShort": "benar",
     "intro": "Setiap level berisi 10 soal pilihan ganda. Jawab 10/10 dengan benar untuk naik ke level berikutnya.",

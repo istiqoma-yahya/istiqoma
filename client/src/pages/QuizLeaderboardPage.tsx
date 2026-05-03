@@ -47,7 +47,7 @@ export default function QuizLeaderboardPage() {
         </div>
       </header>
 
-      <main className="container max-w-3xl mx-auto px-4 py-8">
+      <main className="container max-w-3xl mx-auto px-4 py-8 pb-32">
         <p className="text-sm text-muted-foreground mb-4">{t("quiz.leaderboardSubtitle")}</p>
 
         {isLoading ? (
@@ -114,6 +114,44 @@ export default function QuizLeaderboardPage() {
           </div>
         )}
       </main>
+
+      {data?.me && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur-md">
+          <div className="container max-w-3xl mx-auto px-4 py-3">
+            <Card
+              className="p-3 flex items-center gap-3 border-emerald-500/60 bg-emerald-500/5"
+              data-testid="card-quiz-leaderboard-me"
+            >
+              <span
+                className="font-mono text-sm w-8 text-emerald-600 dark:text-emerald-400 flex-shrink-0 text-center font-semibold"
+                data-testid="text-quiz-leaderboard-me-rank"
+              >
+                #{data.me.rank}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{t("quiz.yourRank")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("quiz.leaderboardRowSubtitle", {
+                    level: data.me.level,
+                    correct: data.me.totalCorrect,
+                  })}
+                </p>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <p
+                  className="text-lg font-display font-bold leading-none"
+                  data-testid="text-quiz-leaderboard-me-level"
+                >
+                  {t("quiz.levelShort", { level: data.me.level })}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5" data-testid="text-quiz-leaderboard-me-correct">
+                  {data.me.totalCorrect} {t("quiz.correctShort")}
+                </p>
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -134,7 +134,7 @@ export default function QuranBookmarksPage() {
                       {verse ? (
                         <>
                           <p
-                            className="font-arabic text-lg text-right mt-2 line-clamp-2"
+                            className="font-arabic text-arabic text-right mt-2 line-clamp-2"
                             dir="rtl"
                             data-testid={`text-bookmark-arabic-${b.surahNumber}-${b.verseNumber}`}
                           >

@@ -13,7 +13,7 @@ import {
   type Reciter,
   type ChapterAudio,
 } from "@/lib/quranApi";
-import type { QuranArabicFont, QuranBookmark, QuranReadingState } from "@shared/schema";
+import type { QuranArabicFont, QuranArabicFontSize, QuranArabicLineHeight, QuranBookmark, QuranReadingState } from "@shared/schema";
 
 const STALE_5_MIN = 5 * 60 * 1000;
 const STALE_24_HR = 24 * 60 * 60 * 1000;
@@ -114,6 +114,8 @@ export function useUpdateReadingState() {
       lastVerseNumber?: number | null;
       preferredReciterId?: number | null;
       arabicFont?: QuranArabicFont;
+      arabicFontSize?: QuranArabicFontSize;
+      arabicLineHeight?: QuranArabicLineHeight;
     }) => {
       const res = await apiRequest("PUT", "/api/quran/reading-state", input);
       return res.json();

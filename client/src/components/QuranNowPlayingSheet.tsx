@@ -67,7 +67,7 @@ export function QuranNowPlayingSheet({
               <div className="text-2xl font-semibold" data-testid="text-now-playing-name">
                 {current.surahName}
               </div>
-              <div className="text-3xl font-arabic mt-2 text-muted-foreground">
+              <div className="font-arabic text-arabic mt-2 text-muted-foreground">
                 {current.surahArabic}
               </div>
             </div>

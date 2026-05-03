@@ -91,6 +91,13 @@ export default {
         mono: ["var(--font-mono)"],
         arabic: ["var(--font-quran-arabic)"],
       },
+      // `text-arabic` applies the user's chosen Arabic verse size + line
+      // height in one utility. Both values come from CSS vars set by
+      // QuranFontProvider so the Arabic verse text on the surah, bookmarks,
+      // and now-playing screens reflows together as the user adjusts them.
+      fontSize: {
+        arabic: ["var(--quran-arabic-size)", { lineHeight: "var(--quran-arabic-leading)" }],
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },

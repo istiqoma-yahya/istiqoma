@@ -177,7 +177,7 @@ export default function QuranSurahPage() {
       <main className="container max-w-3xl mx-auto px-4 py-6">
         {chapter && chapter.id !== 1 && chapter.id !== 9 && (
           <div className="text-center mb-6 py-4 border-b border-border">
-            <div className="text-2xl font-arabic mb-2">
+            <div className="font-arabic text-arabic mb-2">
               بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
             </div>
             <div className="text-sm text-muted-foreground">{t("quranMenu.bismillah")}</div>
@@ -231,7 +231,7 @@ export default function QuranSurahPage() {
                       </div>
                     </div>
                     <p
-                      className="font-arabic text-2xl leading-relaxed text-right mb-3"
+                      className="font-arabic text-arabic text-right mb-3"
                       dir="rtl"
                       data-testid={`text-arabic-${v.verse_number}`}
                     >

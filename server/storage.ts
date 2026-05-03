@@ -1210,6 +1210,8 @@ export class DatabaseStorage implements IStorage {
     if (data.lastVerseNumber !== undefined) set.lastVerseNumber = data.lastVerseNumber;
     if (data.preferredReciterId !== undefined) set.preferredReciterId = data.preferredReciterId;
     if (data.arabicFont !== undefined) set.arabicFont = data.arabicFont;
+    if (data.arabicFontSize !== undefined) set.arabicFontSize = data.arabicFontSize;
+    if (data.arabicLineHeight !== undefined) set.arabicLineHeight = data.arabicLineHeight;
 
     const [row] = await db
       .insert(quranReadingState)
@@ -1219,6 +1221,8 @@ export class DatabaseStorage implements IStorage {
         lastVerseNumber: data.lastVerseNumber ?? null,
         preferredReciterId: data.preferredReciterId ?? null,
         ...(data.arabicFont !== undefined ? { arabicFont: data.arabicFont } : {}),
+        ...(data.arabicFontSize !== undefined ? { arabicFontSize: data.arabicFontSize } : {}),
+        ...(data.arabicLineHeight !== undefined ? { arabicLineHeight: data.arabicLineHeight } : {}),
         updatedAt: now,
       })
       .onConflictDoUpdate({

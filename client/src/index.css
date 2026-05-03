@@ -56,6 +56,11 @@
 
   /* Quran Arabic font. Set by QuranFontProvider; defaults to Uthmani-style. */
   --font-quran-arabic: 'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', serif;
+  /* Quran Arabic verse type scale. Defaults match the previous hard-coded
+     `text-2xl leading-relaxed` rendering so existing readers see no shift
+     until they pick a different size in the typography picker. */
+  --quran-arabic-size: 1.5rem;
+  --quran-arabic-leading: 1.9;
 }
 
 .dark {

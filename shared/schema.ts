@@ -572,12 +572,25 @@ export const QURAN_ARABIC_FONTS = ["uthmani", "naskh", "indopak", "scheherazade"
 export type QuranArabicFont = (typeof QURAN_ARABIC_FONTS)[number];
 export const DEFAULT_QURAN_ARABIC_FONT: QuranArabicFont = "uthmani";
 
+// Arabic verse type sizing. Values map to CSS font-size in QuranFontProvider.
+// Keep this list in sync with QURAN_ARABIC_FONT_SIZE_PX below.
+export const QURAN_ARABIC_FONT_SIZES = ["sm", "md", "lg", "xl"] as const;
+export type QuranArabicFontSize = (typeof QURAN_ARABIC_FONT_SIZES)[number];
+export const DEFAULT_QURAN_ARABIC_FONT_SIZE: QuranArabicFontSize = "md";
+
+// Arabic verse line-height. Values map to unitless CSS line-height.
+export const QURAN_ARABIC_LINE_HEIGHTS = ["compact", "normal", "relaxed", "loose"] as const;
+export type QuranArabicLineHeight = (typeof QURAN_ARABIC_LINE_HEIGHTS)[number];
+export const DEFAULT_QURAN_ARABIC_LINE_HEIGHT: QuranArabicLineHeight = "normal";
+
 export const quranReadingState = pgTable("quran_reading_state", {
   userId: varchar("user_id").primaryKey().references(() => users.id),
   lastSurahNumber: integer("last_surah_number"),
   lastVerseNumber: integer("last_verse_number"),
   preferredReciterId: integer("preferred_reciter_id"),
   arabicFont: text("arabic_font", { enum: QURAN_ARABIC_FONTS }).notNull().default(DEFAULT_QURAN_ARABIC_FONT),
+  arabicFontSize: text("arabic_font_size", { enum: QURAN_ARABIC_FONT_SIZES }).notNull().default(DEFAULT_QURAN_ARABIC_FONT_SIZE),
+  arabicLineHeight: text("arabic_line_height", { enum: QURAN_ARABIC_LINE_HEIGHTS }).notNull().default(DEFAULT_QURAN_ARABIC_LINE_HEIGHT),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
@@ -591,6 +604,8 @@ export const upsertQuranReadingStateSchema = z.object({
   lastVerseNumber: z.number().int().min(1).max(286).nullable().optional(),
   preferredReciterId: z.number().int().min(1).nullable().optional(),
   arabicFont: z.enum(QURAN_ARABIC_FONTS).optional(),
+  arabicFontSize: z.enum(QURAN_ARABIC_FONT_SIZES).optional(),
+  arabicLineHeight: z.enum(QURAN_ARABIC_LINE_HEIGHTS).optional(),
 });
 
 export type QuranBookmark = typeof quranBookmarks.$inferSelect;

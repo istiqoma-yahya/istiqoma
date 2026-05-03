@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { getSavedLocation, saveLocation, reverseGeocode, formatCoords } from "@/lib/location";
 import {
   isPushSupported,
   registerServiceWorker,
@@ -72,6 +73,13 @@ export function NotificationSettings() {
   });
 
   const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);
+  const [savedPlaceName, setSavedPlaceName] = useState<string | null>(
+    () => getSavedLocation()?.placeName ?? null,
+  );
+  const [savedCoords, setSavedCoords] = useState<{ lat: number; lng: number } | null>(() => {
+    const s = getSavedLocation();
+    return s ? { lat: s.latitude, lng: s.longitude } : null;
+  });
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (settings: Partial<{ dailyReminder: boolean; reminderTime: string; targetAlerts: boolean; sholatReminder: boolean; timezone: string; latitude: number; longitude: number; notificationSound: string }>) => {
@@ -243,10 +251,16 @@ export function NotificationSettings() {
 
             {settings?.sholatReminder && (
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-sm">
+                <div className="flex items-center gap-2 text-sm" data-testid="text-notification-location">
                   <MapPin className="w-4 h-4" />
                   {settings?.hasLocation ? (
-                    <span className="text-muted-foreground">{t("notifications.locationSaved")}</span>
+                    <span className="text-muted-foreground">
+                      {savedPlaceName
+                        ? savedPlaceName
+                        : savedCoords
+                        ? formatCoords(savedCoords.lat, savedCoords.lng)
+                        : t("notifications.locationSaved")}
+                    </span>
                   ) : (
                     <span className="text-muted-foreground">{t("notifications.locationRequired")}</span>
                   )}
@@ -261,10 +275,21 @@ export function NotificationSettings() {
                       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
                         navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: false, timeout: 10000 });
                       });
-                      updateSettingsMutation.mutate({
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                      });
+                      const lat = position.coords.latitude;
+                      const lng = position.coords.longitude;
+                      updateSettingsMutation.mutate({ latitude: lat, longitude: lng });
+                      setSavedCoords({ lat, lng });
+                      setSavedPlaceName(null);
+                      saveLocation(lat, lng, null);
+                      try {
+                        const controller = new AbortController();
+                        const lang = (typeof navigator !== "undefined" && navigator.language) || "en";
+                        const name = await reverseGeocode(lat, lng, lang, controller.signal);
+                        if (name) {
+                          setSavedPlaceName(name);
+                          saveLocation(lat, lng, name);
+                        }
+                      } catch {}
                     } catch {
                       toast({ title: t("common.error"), description: t("notifications.locationRequired"), variant: "destructive" });
                     } finally {

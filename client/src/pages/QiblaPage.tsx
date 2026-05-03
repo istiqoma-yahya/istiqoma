@@ -7,6 +7,12 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Compass, MapPin, Loader2, ArrowUp, Clock, Sun, Sunrise, Sunset, Moon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
+import {
+  getSavedLocation,
+  saveLocation,
+  reverseGeocode,
+  formatCoords,
+} from "@/lib/location";
 
 interface LocationState {
   latitude: number | null;
@@ -14,81 +20,6 @@ interface LocationState {
   error: string | null;
   loading: boolean;
   requested: boolean;
-}
-
-const LOCATION_STORAGE_KEY = "qibla_last_location";
-
-interface SavedLocation {
-  latitude: number;
-  longitude: number;
-  placeName?: string | null;
-}
-
-function getSavedLocation(): SavedLocation | null {
-  try {
-    const saved = localStorage.getItem(LOCATION_STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (typeof parsed.latitude === "number" && typeof parsed.longitude === "number") {
-        return {
-          latitude: parsed.latitude,
-          longitude: parsed.longitude,
-          placeName: typeof parsed.placeName === "string" ? parsed.placeName : null,
-        };
-      }
-    }
-  } catch {}
-  return null;
-}
-
-function saveLocation(latitude: number, longitude: number, placeName?: string | null) {
-  try {
-    localStorage.setItem(
-      LOCATION_STORAGE_KEY,
-      JSON.stringify({ latitude, longitude, placeName: placeName ?? null })
-    );
-  } catch {}
-}
-
-function buildPlaceName(address: Record<string, string> | undefined): string | null {
-  if (!address) return null;
-  const locality =
-    address.city ||
-    address.town ||
-    address.village ||
-    address.municipality ||
-    address.county ||
-    address.suburb ||
-    null;
-  const region = address.state || address.region || null;
-  const country = address.country || null;
-  const parts = [locality, region, country].filter(
-    (p): p is string => typeof p === "string" && p.length > 0
-  );
-  if (parts.length === 0) return null;
-  return parts.join(", ");
-}
-
-async function reverseGeocode(
-  latitude: number,
-  longitude: number,
-  language: string,
-  signal: AbortSignal
-): Promise<string | null> {
-  const url = new URL("https://nominatim.openstreetmap.org/reverse");
-  url.searchParams.set("lat", String(latitude));
-  url.searchParams.set("lon", String(longitude));
-  url.searchParams.set("format", "json");
-  url.searchParams.set("zoom", "10");
-  url.searchParams.set("addressdetails", "1");
-  url.searchParams.set("accept-language", language);
-  const res = await fetch(url.toString(), {
-    signal,
-    headers: { Accept: "application/json" },
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return buildPlaceName(data?.address);
 }
 
 export default function QiblaPage() {
@@ -584,7 +515,7 @@ export default function QiblaPage() {
                         {t("qibla.locatingPlace")}
                       </span>
                     ) : (
-                      `${location.latitude.toFixed(4)}°, ${location.longitude.toFixed(4)}°`
+                      formatCoords(location.latitude, location.longitude)
                     )}
                   </div>
                 </Card>

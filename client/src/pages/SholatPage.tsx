@@ -21,6 +21,12 @@ import {
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { usePrayerCompletion } from "@/hooks/use-prayer-completions";
+import {
+  getSavedLocation,
+  saveLocation as saveSharedLocation,
+  reverseGeocode,
+  formatCoords,
+} from "@/lib/location";
 
 interface LocationState {
   latitude: number | null;
@@ -30,27 +36,10 @@ interface LocationState {
   requested: boolean;
 }
 
-const LOCATION_STORAGE_KEY = "qibla_last_location";
-
 type PrayerKey = "fajr" | "dhuhr" | "asr" | "maghrib" | "isha";
 
-function getSavedLocation(): { latitude: number; longitude: number } | null {
-  try {
-    const saved = localStorage.getItem(LOCATION_STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (typeof parsed.latitude === "number" && typeof parsed.longitude === "number") {
-        return parsed;
-      }
-    }
-  } catch {}
-  return null;
-}
-
-function saveLocation(latitude: number, longitude: number) {
-  try {
-    localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify({ latitude, longitude }));
-  } catch {}
+function saveLocation(latitude: number, longitude: number, placeName?: string | null) {
+  saveSharedLocation(latitude, longitude, placeName);
 }
 
 function formatDateKey(d: Date): string {
@@ -73,7 +62,7 @@ const PRAYER_ICONS: Record<PrayerKey, typeof Sun> = {
 };
 
 export default function SholatPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [, navigate] = useLocation();
 
   const saved = getSavedLocation();
@@ -84,6 +73,8 @@ export default function SholatPage() {
     loading: false,
     requested: saved !== null,
   });
+  const [placeName, setPlaceName] = useState<string | null>(saved?.placeName ?? null);
+  const [placeLoading, setPlaceLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // selectedDate is always midnight of the chosen day
@@ -129,7 +120,13 @@ export default function SholatPage() {
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        saveLocation(lat, lng);
+        const prev = getSavedLocation();
+        const movedFar =
+          !prev ||
+          Math.abs(prev.latitude - lat) > 0.05 ||
+          Math.abs(prev.longitude - lng) > 0.05;
+        if (movedFar) setPlaceName(null);
+        saveLocation(lat, lng, movedFar ? null : prev?.placeName ?? null);
         setLocation({
           latitude: lat,
           longitude: lng,
@@ -142,6 +139,29 @@ export default function SholatPage() {
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
     );
   }, []);
+
+  // Reverse geocode to display a friendly place name; falls back to coords on failure.
+  useEffect(() => {
+    if (location.latitude === null || location.longitude === null) return;
+    if (placeName) return;
+    const controller = new AbortController();
+    const lat = location.latitude;
+    const lng = location.longitude;
+    setPlaceLoading(true);
+    reverseGeocode(lat, lng, i18n.language || "en", controller.signal)
+      .then((name) => {
+        if (controller.signal.aborted) return;
+        if (name) {
+          setPlaceName(name);
+          saveLocation(lat, lng, name);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!controller.signal.aborted) setPlaceLoading(false);
+      });
+    return () => controller.abort();
+  }, [location.latitude, location.longitude, placeName, i18n.language]);
 
   // Keep selectedDate in sync when the calendar day rolls over while on today
   useEffect(() => {
@@ -308,7 +328,13 @@ export default function SholatPage() {
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        saveLocation(lat, lng);
+        const prevSaved = getSavedLocation();
+        const movedFar =
+          !prevSaved ||
+          Math.abs(prevSaved.latitude - lat) > 0.05 ||
+          Math.abs(prevSaved.longitude - lng) > 0.05;
+        if (movedFar) setPlaceName(null);
+        saveLocation(lat, lng, movedFar ? null : prevSaved?.placeName ?? null);
         setLocation({
           latitude: lat,
           longitude: lng,
@@ -460,6 +486,27 @@ export default function SholatPage() {
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
+
+            {location.latitude !== null && location.longitude !== null && (
+              <div
+                className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground"
+                data-testid="text-your-location"
+              >
+                <MapPin className="w-3 h-3 shrink-0" />
+                {placeName ? (
+                  <span>{placeName}</span>
+                ) : placeLoading ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    {t("qibla.locatingPlace")}
+                  </span>
+                ) : (
+                  <span className="font-mono">
+                    {formatCoords(location.latitude, location.longitude)}
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Header: two-card row */}
             <div className="grid grid-cols-3 gap-3">

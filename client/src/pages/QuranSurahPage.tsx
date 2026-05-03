@@ -382,40 +382,46 @@ export default function QuranSurahPage() {
       <main className="container max-w-3xl mx-auto px-4 py-6">
         {memMode && (
           <div
-            className="mb-6 rounded-lg border border-border bg-card p-3 flex flex-wrap items-center gap-2"
+            className="mb-6 rounded-lg border border-border bg-card p-3"
             data-testid="panel-memorization-controls"
           >
-            <span className="text-sm font-medium mr-2">{t("quranMenu.applyToAll")}:</span>
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              size="sm"
-              onValueChange={(v) => v && applyToAll(v as DisplayMode)}
-            >
-              <ToggleGroupItem
-                value="full"
-                aria-label={t("quranMenu.displayFull")}
-                data-testid="button-apply-all-full"
+            <span className="block text-sm font-medium mb-2">{t("quranMenu.applyToAll")}:</span>
+            <div className="-mx-3 px-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                size="sm"
+                onValueChange={(v) => v && applyToAll(v as DisplayMode)}
+                className="inline-flex w-max flex-nowrap justify-start gap-2"
               >
-                <Eye className="w-4 h-4 mr-1" />
-                {t("quranMenu.displayFull")}
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="firstLast"
-                aria-label={t("quranMenu.displayFirstLast")}
-                data-testid="button-apply-all-first-last"
-              >
-                {t("quranMenu.displayFirstLast")}
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="hidden"
-                aria-label={t("quranMenu.displayHidden")}
-                data-testid="button-apply-all-hidden"
-              >
-                <EyeOff className="w-4 h-4 mr-1" />
-                {t("quranMenu.displayHidden")}
-              </ToggleGroupItem>
-            </ToggleGroup>
+                <ToggleGroupItem
+                  value="full"
+                  aria-label={t("quranMenu.displayFull")}
+                  data-testid="button-apply-all-full"
+                  className="shrink-0 whitespace-nowrap"
+                >
+                  <Eye className="w-4 h-4 mr-1" />
+                  {t("quranMenu.displayFull")}
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="firstLast"
+                  aria-label={t("quranMenu.displayFirstLast")}
+                  data-testid="button-apply-all-first-last"
+                  className="shrink-0 whitespace-nowrap"
+                >
+                  {t("quranMenu.displayFirstLast")}
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="hidden"
+                  aria-label={t("quranMenu.displayHidden")}
+                  data-testid="button-apply-all-hidden"
+                  className="shrink-0 whitespace-nowrap"
+                >
+                  <EyeOff className="w-4 h-4 mr-1" />
+                  {t("quranMenu.displayHidden")}
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
           </div>
         )}
 

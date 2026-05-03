@@ -6,6 +6,7 @@ import { sendDailyReminders, sendTargetReminders, isPushConfigured } from "./pus
 import { sendSholatReminders } from "./sholatReminders";
 import { pool } from "./db";
 import { migratePrayerCompletionsToDeeds } from "../scripts/migrate-prayer-completions-to-deeds";
+import { seedQuizQuestions } from "./quiz-seed";
 
 const app = express();
 const httpServer = createServer(app);
@@ -71,6 +72,12 @@ app.use((req, res, next) => {
     await migratePrayerCompletionsToDeeds(pool);
   } catch (err) {
     console.error("[startup] prayer-completions migration failed:", err);
+  }
+
+  try {
+    await seedQuizQuestions();
+  } catch (err) {
+    console.error("[startup] quiz seed failed:", err);
   }
 
   await registerRoutes(httpServer, app);

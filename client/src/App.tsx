@@ -26,6 +26,8 @@ import DeedHistoryPage from "@/pages/DeedHistoryPage";
 import StreakFreezerPage from "@/pages/StreakFreezerPage";
 import StreakDetailPage from "@/pages/StreakDetailPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
+import QuizPage from "@/pages/QuizPage";
+import QuizLeaderboardPage from "@/pages/QuizLeaderboardPage";
 import QuranHomePage from "@/pages/QuranHomePage";
 import QuranSurahPage from "@/pages/QuranSurahPage";
 import QuranBookmarksPage from "@/pages/QuranBookmarksPage";
@@ -66,6 +68,8 @@ function Router() {
       <Route path="/profile" component={ProfilePage} />
       <Route path="/login/username" component={LoginUsername} />
       <Route path="/leaderboard" component={LeaderboardPage} />
+      <Route path="/quiz" component={QuizPage} />
+      <Route path="/quiz/leaderboard" component={QuizLeaderboardPage} />
       <Route path="/quran" component={QuranHomePage} />
       <Route path="/quran/bookmarks" component={QuranBookmarksPage} />
       <Route path="/quran/memorization" component={QuranMemorizationProgressPage} />

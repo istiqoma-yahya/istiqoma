@@ -9,7 +9,8 @@
     "dzikir": "Dzikir",
     "qibla": "Prayer",
     "targets": "Targets",
-    "quran": "Quran"
+    "quran": "Quran",
+    "quiz": "Islamic Quiz"
   },
   "quranMenu": {
     "title": "Quran",
@@ -1079,6 +1080,34 @@
     "retry": "Try again",
     "switchToText": "Type instead",
     "reviewToast": "Please review your deed before saving it"
+  },
+  "quiz": {
+    "title": "Islamic Quiz",
+    "currentLevel": "Current Level",
+    "totalCorrect": "Total Correct",
+    "leaderboard": "Quiz Leaderboard",
+    "leaderboardTitle": "Quiz Leaderboard",
+    "leaderboardSubtitle": "Ranked by level reached, then total correct answers.",
+    "leaderboardEmpty": "No one has earned a quiz score yet. Be the first!",
+    "leaderboardRowSubtitle": "Level {{level}} · {{correct}} correct",
+    "levelShort": "Lv {{level}}",
+    "correctShort": "correct",
+    "intro": "Each level has 10 multiple-choice questions. Score 10/10 to advance to the next level.",
+    "levelHeading": "Level {{level}}",
+    "startLevel": "Start Level {{level}}",
+    "retryLevel": "Retry Level {{level}}",
+    "questionProgress": "Question {{index}} of {{total}}",
+    "correct": "Correct!",
+    "incorrect": "Not quite",
+    "learnMore": "Learn more",
+    "next": "Next question",
+    "finish": "See result",
+    "perfectScoreTitle": "Perfect score!",
+    "perfectScoreBody": "You unlocked Level {{level}}. Keep going!",
+    "tryAgainTitle": "Almost there",
+    "tryAgainBody": "You answered {{correct}} of {{total}} correctly. Score 10/10 to advance.",
+    "error": "Couldn't load the quiz.",
+    "retry": "Try again"
   },
   "onboardingSettings": {
     "title": "Your journey",

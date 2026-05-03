@@ -45,7 +45,8 @@
     "dzikir": "Zikir",
     "qibla": "Solat",
     "targets": "Sasaran",
-    "quran": "Quran"
+    "quran": "Quran",
+    "quiz": "Kuiz Islam"
   },
   "landing": {
     "title": "Menjadi lebih baik.",
@@ -1080,6 +1081,34 @@
     "retry": "Cuba lagi",
     "switchToText": "Taip sahaja",
     "reviewToast": "Sila semak amalan anda sebelum menyimpan"
+  },
+  "quiz": {
+    "title": "Kuiz Islam",
+    "currentLevel": "Tahap Semasa",
+    "totalCorrect": "Jumlah Betul",
+    "leaderboard": "Papan Pendahulu Kuiz",
+    "leaderboardTitle": "Papan Pendahulu Kuiz",
+    "leaderboardSubtitle": "Disusun mengikut tahap tertinggi, kemudian jumlah jawapan betul.",
+    "leaderboardEmpty": "Belum ada sesiapa menjawab kuiz. Jadilah yang pertama!",
+    "leaderboardRowSubtitle": "Tahap {{level}} · {{correct}} betul",
+    "levelShort": "Lv {{level}}",
+    "correctShort": "betul",
+    "intro": "Setiap tahap mempunyai 10 soalan aneka pilihan. Dapatkan 10/10 untuk naik ke tahap berikutnya.",
+    "levelHeading": "Tahap {{level}}",
+    "startLevel": "Mulakan Tahap {{level}}",
+    "retryLevel": "Cuba Semula Tahap {{level}}",
+    "questionProgress": "Soalan {{index}} dari {{total}}",
+    "correct": "Betul!",
+    "incorrect": "Belum tepat",
+    "learnMore": "Penjelasan",
+    "next": "Soalan seterusnya",
+    "finish": "Lihat keputusan",
+    "perfectScoreTitle": "Markah penuh!",
+    "perfectScoreBody": "Anda membuka Tahap {{level}}. Teruskan!",
+    "tryAgainTitle": "Hampir!",
+    "tryAgainBody": "Anda menjawab {{correct}} dari {{total}} dengan betul. Dapatkan 10/10 untuk naik tahap.",
+    "error": "Gagal memuatkan kuiz.",
+    "retry": "Cuba lagi"
   },
   "onboardingSettings": {
     "title": "Perjalanan anda",

@@ -45,7 +45,8 @@
     "dzikir": "Dzikir",
     "qibla": "Sholat",
     "targets": "Target",
-    "quran": "Qur'an"
+    "quran": "Qur'an",
+    "quiz": "Kuis Islami"
   },
   "landing": {
     "title": "Menjadi lebih baik.",
@@ -1080,6 +1081,34 @@
     "retry": "Coba lagi",
     "switchToText": "Ketik saja",
     "reviewToast": "Mohon periksa amalanmu sebelum menyimpan"
+  },
+  "quiz": {
+    "title": "Kuis Islami",
+    "currentLevel": "Level Saat Ini",
+    "totalCorrect": "Total Benar",
+    "leaderboard": "Papan Peringkat Kuis",
+    "leaderboardTitle": "Papan Peringkat Kuis",
+    "leaderboardSubtitle": "Diurutkan berdasarkan level tertinggi, lalu total jawaban benar.",
+    "leaderboardEmpty": "Belum ada yang menjawab kuis. Jadilah yang pertama!",
+    "leaderboardRowSubtitle": "Level {{level}} · {{correct}} benar",
+    "levelShort": "Lv {{level}}",
+    "correctShort": "benar",
+    "intro": "Setiap level berisi 10 soal pilihan ganda. Jawab 10/10 dengan benar untuk naik ke level berikutnya.",
+    "levelHeading": "Level {{level}}",
+    "startLevel": "Mulai Level {{level}}",
+    "retryLevel": "Ulangi Level {{level}}",
+    "questionProgress": "Soal {{index}} dari {{total}}",
+    "correct": "Benar!",
+    "incorrect": "Belum tepat",
+    "learnMore": "Penjelasan",
+    "next": "Soal berikutnya",
+    "finish": "Lihat hasil",
+    "perfectScoreTitle": "Skor sempurna!",
+    "perfectScoreBody": "Kamu membuka Level {{level}}. Lanjutkan!",
+    "tryAgainTitle": "Hampir!",
+    "tryAgainBody": "Kamu menjawab {{correct}} dari {{total}} dengan benar. Dapatkan 10/10 untuk naik level.",
+    "error": "Gagal memuat kuis.",
+    "retry": "Coba lagi"
   },
   "onboardingSettings": {
     "title": "Perjalananmu",

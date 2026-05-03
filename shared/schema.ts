@@ -700,3 +700,93 @@ export const voiceParseResponseSchema = z.object({
   transcript: z.string(),
 });
 export type VoiceParseResponse = z.infer<typeof voiceParseResponseSchema>;
+
+// ─── Quiz ─────────────────────────────────────────────────────
+// Islamic knowledge quiz. Question bank is seeded by developers; users
+// progress through levels of 10 multiple-choice questions, advancing
+// only on a perfect score. Progress is independent of deed points.
+export const quizQuestions = pgTable("quiz_questions", {
+  id: serial("id").primaryKey(),
+  level: integer("level").notNull(),
+  questionText: text("question_text").notNull(),
+  options: text("options").array().notNull(),
+  correctIndex: integer("correct_index").notNull(),
+  explanation: text("explanation").notNull(),
+  category: text("category"),
+}, (table) => ({
+  byLevel: index("quiz_questions_level_idx").on(table.level),
+}));
+
+export const userQuizProgress = pgTable("user_quiz_progress", {
+  userId: varchar("user_id").primaryKey().references(() => users.id),
+  currentLevel: integer("current_level").notNull().default(1),
+  totalCorrect: integer("total_correct").notNull().default(0),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const quizAttempts = pgTable("quiz_attempts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  level: integer("level").notNull(),
+  questionIds: integer("question_ids").array().notNull(),
+  answers: integer("answers").array().notNull().default(sql`'{}'::int[]`),
+  completed: boolean("completed").notNull().default(false),
+  allCorrect: boolean("all_correct").notNull().default(false),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+}, (table) => ({
+  byUserActive: index("quiz_attempts_user_active_idx").on(table.userId, table.completed),
+}));
+
+export type QuizQuestion = typeof quizQuestions.$inferSelect;
+export type UserQuizProgress = typeof userQuizProgress.$inferSelect;
+export type QuizAttempt = typeof quizAttempts.$inferSelect;
+
+// Question shape returned to the client during play (no correctIndex/explanation
+// until the user has answered). The play endpoints stitch this together
+// from QuizQuestion + the attempt's answers array.
+export type QuizPlayQuestion = {
+  id: number;
+  questionText: string;
+  options: string[];
+};
+
+export type QuizActiveAttempt = {
+  attemptId: number;
+  level: number;
+  questions: QuizPlayQuestion[];
+  answers: number[];
+};
+
+export type QuizState = {
+  currentLevel: number;
+  totalCorrect: number;
+  activeAttempt: QuizActiveAttempt | null;
+};
+
+export const quizAnswerInputSchema = z.object({
+  attemptId: z.number().int().positive(),
+  optionIndex: z.number().int().min(0).max(3),
+});
+export type QuizAnswerInput = z.infer<typeof quizAnswerInputSchema>;
+
+export type QuizAnswerResult = {
+  isCorrect: boolean;
+  correctIndex: number;
+  explanation: string;
+  attemptComplete: boolean;
+  allCorrect: boolean;
+  newLevel?: number;
+  totalCorrect?: number;
+};
+
+export type QuizLeaderboardEntry = {
+  rank: number;
+  userId: string;
+  username: string | null;
+  email: string | null;
+  profileImageUrl: string | null;
+  level: number;
+  totalCorrect: number;
+  isCurrentUser: boolean;
+};

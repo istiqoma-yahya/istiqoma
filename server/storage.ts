@@ -1,7 +1,7 @@
 import { db } from "./db";
 export { db };
-import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization } from "@shared/schema";
-import { eq, desc, and, asc, sql, gte, lte, isNull } from "drizzle-orm";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, quizQuestions, userQuizProgress, quizAttempts, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization, type QuizState, type QuizActiveAttempt, type QuizAnswerResult, type QuizLeaderboardEntry } from "@shared/schema";
+import { eq, desc, and, asc, sql, gte, lte, isNull, inArray } from "drizzle-orm";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 
@@ -100,6 +100,16 @@ export interface IStorage {
   ): Promise<{
     entries: LeaderboardEntry[];
     me: { rank: number; points: number } | null;
+    total: number;
+  }>;
+
+  // Quiz
+  getQuizState(userId: string): Promise<QuizState>;
+  startQuizAttempt(userId: string): Promise<QuizActiveAttempt>;
+  recordQuizAnswer(userId: string, attemptId: number, optionIndex: number): Promise<QuizAnswerResult>;
+  getQuizLeaderboard(currentUserId: string, limit: number): Promise<{
+    entries: QuizLeaderboardEntry[];
+    me: { rank: number; level: number; totalCorrect: number } | null;
     total: number;
   }>;
 }
@@ -1466,6 +1476,262 @@ export class DatabaseStorage implements IStorage {
       // Other modes might be called without me being computed; keep as null.
     }
 
+    return { entries, me, total: Number(row.total ?? 0) };
+  }
+
+  // ─── Quiz ───────────────────────────────────────────────────
+  // Per-user level/score tracking, plus an active in-progress attempt
+  // (10 questions). The active attempt persists across reloads via the
+  // `quiz_attempts.completed = false` flag so the user can resume where
+  // they left off. Progress only advances on a perfect score.
+  async getQuizState(userId: string): Promise<QuizState> {
+    const [progress] = await db
+      .select()
+      .from(userQuizProgress)
+      .where(eq(userQuizProgress.userId, userId));
+    const currentLevel = progress?.currentLevel ?? 1;
+    const totalCorrect = progress?.totalCorrect ?? 0;
+
+    const [active] = await db
+      .select()
+      .from(quizAttempts)
+      .where(and(eq(quizAttempts.userId, userId), eq(quizAttempts.completed, false)))
+      .orderBy(desc(quizAttempts.startedAt))
+      .limit(1);
+
+    let activeAttempt: QuizActiveAttempt | null = null;
+    if (active) {
+      const questions = await this.loadAttemptQuestions(active.questionIds);
+      activeAttempt = {
+        attemptId: active.id,
+        level: active.level,
+        questions,
+        answers: active.answers ?? [],
+      };
+    }
+
+    return { currentLevel, totalCorrect, activeAttempt };
+  }
+
+  private async loadAttemptQuestions(ids: number[]) {
+    if (!ids.length) return [];
+    const rows = await db
+      .select({ id: quizQuestions.id, questionText: quizQuestions.questionText, options: quizQuestions.options })
+      .from(quizQuestions)
+      .where(inArray(quizQuestions.id, ids));
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    return ids
+      .map((id) => byId.get(id))
+      .filter((r): r is { id: number; questionText: string; options: string[] } => Boolean(r))
+      .map((r) => ({ id: r.id, questionText: r.questionText, options: r.options }));
+  }
+
+  async startQuizAttempt(userId: string): Promise<QuizActiveAttempt> {
+    // Reuse any in-progress attempt rather than creating a duplicate.
+    const [existing] = await db
+      .select()
+      .from(quizAttempts)
+      .where(and(eq(quizAttempts.userId, userId), eq(quizAttempts.completed, false)))
+      .orderBy(desc(quizAttempts.startedAt))
+      .limit(1);
+    if (existing) {
+      const questions = await this.loadAttemptQuestions(existing.questionIds);
+      return {
+        attemptId: existing.id,
+        level: existing.level,
+        questions,
+        answers: existing.answers ?? [],
+      };
+    }
+
+    // Determine current level (or seed progress row).
+    const [progress] = await db
+      .select()
+      .from(userQuizProgress)
+      .where(eq(userQuizProgress.userId, userId));
+    const level = progress?.currentLevel ?? 1;
+    if (!progress) {
+      await db.insert(userQuizProgress).values({ userId, currentLevel: 1, totalCorrect: 0 }).onConflictDoNothing();
+    }
+
+    // Pick 10 random questions for the level. Levels beyond the seeded
+    // content fall back to a random sample drawn from the entire question
+    // bank so progression remains unlimited. We always require at least 10
+    // questions to exist somewhere in the bank.
+    const picked = await db.execute<{ id: number }>(sql`
+      SELECT id FROM ${quizQuestions} WHERE level = ${level} ORDER BY RANDOM() LIMIT 10
+    `);
+    let ids = ((picked.rows ?? picked) as Array<{ id: number }>).map((r) => Number(r.id));
+    if (ids.length < 10) {
+      const fallback = await db.execute<{ id: number }>(sql`
+        SELECT id FROM ${quizQuestions} ORDER BY RANDOM() LIMIT 10
+      `);
+      ids = ((fallback.rows ?? fallback) as Array<{ id: number }>).map((r) => Number(r.id));
+    }
+    if (ids.length < 10) {
+      const err: any = new Error("Quiz question bank is empty. Please try again later.");
+      err.status = 503;
+      throw err;
+    }
+
+    const [attempt] = await db
+      .insert(quizAttempts)
+      .values({ userId, level, questionIds: ids, answers: [] as number[] })
+      .returning();
+    const questions = await this.loadAttemptQuestions(attempt.questionIds);
+    return {
+      attemptId: attempt.id,
+      level: attempt.level,
+      questions,
+      answers: attempt.answers ?? [],
+    };
+  }
+
+  async recordQuizAnswer(userId: string, attemptId: number, optionIndex: number): Promise<QuizAnswerResult> {
+    const [attempt] = await db
+      .select()
+      .from(quizAttempts)
+      .where(and(eq(quizAttempts.id, attemptId), eq(quizAttempts.userId, userId)));
+    if (!attempt) {
+      const err: any = new Error("Attempt not found");
+      err.status = 404;
+      throw err;
+    }
+    if (attempt.completed) {
+      const err: any = new Error("Attempt already completed");
+      err.status = 400;
+      throw err;
+    }
+    const answers = [...(attempt.answers ?? [])];
+    const idx = answers.length;
+    if (idx >= attempt.questionIds.length) {
+      const err: any = new Error("No more questions to answer");
+      err.status = 400;
+      throw err;
+    }
+    const questionId = attempt.questionIds[idx];
+    const [question] = await db
+      .select()
+      .from(quizQuestions)
+      .where(eq(quizQuestions.id, questionId));
+    if (!question) {
+      const err: any = new Error("Question missing from bank");
+      err.status = 500;
+      throw err;
+    }
+    const isCorrect = optionIndex === question.correctIndex;
+    answers.push(optionIndex);
+
+    const isLast = answers.length === attempt.questionIds.length;
+    const allCorrect = isLast
+      ? await this.allAnswersCorrect(attempt.questionIds, answers)
+      : false;
+
+    // Every correct answer increments totalCorrect (the leaderboard
+    // tiebreaker after level). Level only advances on a perfect 10/10.
+    const [progress] = await db
+      .select()
+      .from(userQuizProgress)
+      .where(eq(userQuizProgress.userId, userId));
+    const baseLevel = progress?.currentLevel ?? attempt.level;
+    const baseTotal = progress?.totalCorrect ?? 0;
+    const nextLevel = baseLevel + (isLast && allCorrect ? 1 : 0);
+    const nextTotal = baseTotal + (isCorrect ? 1 : 0);
+
+    if (isCorrect || (isLast && allCorrect)) {
+      await db
+        .insert(userQuizProgress)
+        .values({ userId, currentLevel: nextLevel, totalCorrect: nextTotal, updatedAt: new Date() })
+        .onConflictDoUpdate({
+          target: userQuizProgress.userId,
+          set: { currentLevel: nextLevel, totalCorrect: nextTotal, updatedAt: new Date() },
+        });
+    }
+
+    if (isLast) {
+      await db
+        .update(quizAttempts)
+        .set({
+          answers,
+          completed: true,
+          allCorrect,
+          completedAt: new Date(),
+        })
+        .where(eq(quizAttempts.id, attempt.id));
+    } else {
+      await db
+        .update(quizAttempts)
+        .set({ answers })
+        .where(eq(quizAttempts.id, attempt.id));
+    }
+
+    const newLevel = isLast && allCorrect ? nextLevel : undefined;
+    const totalCorrect = nextTotal;
+
+    return {
+      isCorrect,
+      correctIndex: question.correctIndex,
+      explanation: question.explanation,
+      attemptComplete: isLast,
+      allCorrect,
+      newLevel,
+      totalCorrect,
+    };
+  }
+
+  private async allAnswersCorrect(questionIds: number[], answers: number[]): Promise<boolean> {
+    if (questionIds.length !== answers.length) return false;
+    const rows = await db
+      .select({ id: quizQuestions.id, correctIndex: quizQuestions.correctIndex })
+      .from(quizQuestions)
+      .where(inArray(quizQuestions.id, questionIds));
+    const correctById = new Map(rows.map((r) => [r.id, r.correctIndex]));
+    return questionIds.every((qid, i) => correctById.get(qid) === answers[i]);
+  }
+
+  async getQuizLeaderboard(currentUserId: string, limit: number): Promise<{
+    entries: QuizLeaderboardEntry[];
+    me: { rank: number; level: number; totalCorrect: number } | null;
+    total: number;
+  }> {
+    const cap = Math.max(1, Math.min(200, limit | 0 || 50));
+    const result = await db.execute(sql`
+      WITH base AS (
+        SELECT u.id, COALESCE(u.username, ul.username) AS username,
+          u.email, u.profile_image_url,
+          COALESCE(p.current_level, 1) AS level,
+          COALESCE(p.total_correct, 0) AS total_correct
+        FROM ${users} u
+        LEFT JOIN username_logins ul ON ul.user_id = u.id
+        INNER JOIN ${userQuizProgress} p ON p.user_id = u.id
+        WHERE COALESCE(p.total_correct, 0) > 0 OR COALESCE(p.current_level, 1) > 1
+      ),
+      ranked AS (
+        SELECT *, (ROW_NUMBER() OVER (ORDER BY level DESC, total_correct DESC, id ASC))::int AS rank
+        FROM base
+      )
+      SELECT
+        (SELECT COALESCE(json_agg(row_to_json(w) ORDER BY w.rank), '[]'::json)
+          FROM (SELECT * FROM ranked ORDER BY rank LIMIT ${cap}) w) AS entries,
+        (SELECT row_to_json(m) FROM (SELECT rank, level, total_correct FROM ranked WHERE id = ${currentUserId}) m) AS me,
+        (SELECT COUNT(*)::int FROM ranked) AS total
+    `);
+    const row = (result.rows ?? result)[0] as {
+      entries: Array<{ id: string; username: string | null; email: string | null; profile_image_url: string | null; level: number; total_correct: number; rank: number }>;
+      me: { rank: number; level: number; total_correct: number } | null;
+      total: number;
+    };
+    const entries: QuizLeaderboardEntry[] = (row.entries ?? []).map((r) => ({
+      rank: Number(r.rank),
+      userId: r.id,
+      username: r.username,
+      email: r.email,
+      profileImageUrl: r.profile_image_url,
+      level: Number(r.level),
+      totalCorrect: Number(r.total_correct),
+      isCurrentUser: r.id === currentUserId,
+    }));
+    const me = row.me ? { rank: Number(row.me.rank), level: Number(row.me.level), totalCorrect: Number(row.me.total_correct) } : null;
     return { entries, me, total: Number(row.total ?? 0) };
   }
 }

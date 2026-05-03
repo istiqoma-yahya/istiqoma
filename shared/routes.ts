@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, targetRecommendationsRequestSchema, targetRecommendationsResponseSchema, updateProfileSchema, voiceParseRequestSchema, voiceParseResponseSchema, insertQuranBookmarkSchema, upsertQuranReadingStateSchema, insertQuranMemorizationSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding, quranBookmarks, quranReadingState, quranMemorizations, type NewlyEarnedBadge } from "./schema";
+import { insertDeedSchema, insertCategorySchema, insertTargetSchema, insertTargetFolderSchema, insertPushSubscriptionSchema, insertUserOnboardingSchema, purchaseStreakFreezerSchema, targetRecommendationsRequestSchema, targetRecommendationsResponseSchema, updateProfileSchema, voiceParseRequestSchema, voiceParseResponseSchema, insertQuranBookmarkSchema, upsertQuranReadingStateSchema, insertQuranMemorizationSchema, quizAnswerInputSchema, deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, userOnboarding, quranBookmarks, quranReadingState, quranMemorizations, type NewlyEarnedBadge, type QuizState, type QuizActiveAttempt, type QuizAnswerResult, type QuizLeaderboardEntry } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -659,6 +659,47 @@ export const api = {
       path: "/api/quran/memorizations/:surah/:verse",
       responses: {
         204: z.void(),
+        401: errorSchemas.unauthorized,
+      },
+    },
+  },
+  quiz: {
+    state: {
+      method: "GET" as const,
+      path: "/api/quiz/state",
+      responses: {
+        200: z.custom<QuizState>(),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    start: {
+      method: "POST" as const,
+      path: "/api/quiz/start",
+      responses: {
+        200: z.custom<QuizActiveAttempt>(),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    answer: {
+      method: "POST" as const,
+      path: "/api/quiz/answer",
+      input: quizAnswerInputSchema,
+      responses: {
+        200: z.custom<QuizAnswerResult>(),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+        404: errorSchemas.notFound,
+      },
+    },
+    leaderboard: {
+      method: "GET" as const,
+      path: "/api/quiz/leaderboard",
+      responses: {
+        200: z.object({
+          entries: z.array(z.custom<QuizLeaderboardEntry>()),
+          me: z.object({ rank: z.number(), level: z.number(), totalCorrect: z.number() }).nullable(),
+          total: z.number(),
+        }),
         401: errorSchemas.unauthorized,
       },
     },

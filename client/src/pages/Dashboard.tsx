@@ -7,7 +7,7 @@ import { DeedCard } from "@/components/DeedCard";
 import { OnboardingHintCard } from "@/components/OnboardingHintCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { Loader2, LogOut, User, Settings, Plus, Target, ChevronRight, BarChart3, Bell } from "lucide-react";
+import { Loader2, LogOut, User, Settings, Plus, Target, ChevronRight, BarChart3, Bell, BookOpenCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
@@ -171,6 +171,18 @@ export default function Dashboard() {
             <Card className="p-4 flex items-center gap-3 hover:border-emerald-500/50 hover:bg-muted/50 transition-colors active:scale-[0.99]">
               <BarChart3 className="w-5 h-5 text-emerald-500" />
               <span className="flex-1 font-medium">{t('nav.progress')}</span>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </Card>
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/quiz")}
+            className="w-full text-left touch-manipulation"
+            data-testid="link-home-quiz"
+          >
+            <Card className="p-4 flex items-center gap-3 hover:border-emerald-500/50 hover:bg-muted/50 transition-colors active:scale-[0.99]">
+              <BookOpenCheck className="w-5 h-5 text-emerald-500" />
+              <span className="flex-1 font-medium">{t('nav.quiz')}</span>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </Card>
           </button>

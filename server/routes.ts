@@ -1475,5 +1475,62 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
+  // ─── Quiz ────────────────────────────────────────────────────
+  // Islamic quiz progression. Independent of deeds/points: users
+  // advance levels only on a perfect 10/10 score and the leaderboard
+  // ranks by (level desc, totalCorrect desc).
+  app.get(api.quiz.state.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const state = await storage.getQuizState(userId);
+      res.json(state);
+    } catch (err) {
+      const status = getErrorStatus(err) ?? 500;
+      res.status(status).json({ message: getErrorMessage(err) });
+    }
+  });
+
+  app.post(api.quiz.start.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const attempt = await storage.startQuizAttempt(userId);
+      res.json(attempt);
+    } catch (err) {
+      const status = getErrorStatus(err) ?? 500;
+      res.status(status).json({ message: getErrorMessage(err) });
+    }
+  });
+
+  app.post(api.quiz.answer.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const input = api.quiz.answer.input.parse(req.body);
+      const result = await storage.recordQuizAnswer(userId, input.attemptId, input.optionIndex);
+      res.json(result);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message, field: err.errors[0].path.join(".") });
+      }
+      const status = getErrorStatus(err) ?? 500;
+      res.status(status).json({ message: getErrorMessage(err) });
+    }
+  });
+
+  app.get(api.quiz.leaderboard.path, isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limit = req.query.limit != null ? parseInt(String(req.query.limit), 10) : 50;
+      const result = await storage.getQuizLeaderboard(userId, Number.isFinite(limit) ? limit : 50);
+      const entries = result.entries.map((e) => ({
+        ...e,
+        email: e.isCurrentUser ? e.email : maskEmail(e.email),
+      }));
+      res.json({ entries, me: result.me, total: result.total });
+    } catch (err) {
+      const status = getErrorStatus(err) ?? 500;
+      res.status(status).json({ message: getErrorMessage(err) });
+    }
+  });
+
   return httpServer;
 }

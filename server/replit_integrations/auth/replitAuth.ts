@@ -1,5 +1,10 @@
 import * as client from "openid-client";
-import { Strategy, type VerifyFunction } from "openid-client/passport";
+import {
+  Strategy,
+  type AuthenticateOptions,
+  type VerifyFunction,
+} from "openid-client/passport";
+import type { Request } from "express";
 
 import passport from "passport";
 import session from "express-session";
@@ -146,11 +151,32 @@ export async function setupAuth(app: Express) {
   // Keep track of registered strategies
   const registeredStrategies = new Set<string>();
 
+  // Strategy subclass that forwards a provider hint (acr_values) to the
+  // OIDC authorization request when the caller passes ?provider=google
+  // on /api/login. This makes Replit's OIDC jump straight into Google.
+  class ReplitProviderHintStrategy extends Strategy {
+    authorizationRequestParams<TOptions extends AuthenticateOptions>(
+      req: Request,
+      options: TOptions
+    ): URLSearchParams | Record<string, string> | undefined {
+      const base = super.authorizationRequestParams(req, options) ?? {};
+      const params = base instanceof URLSearchParams
+        ? base
+        : new URLSearchParams(base);
+      const provider =
+        typeof req.query?.provider === "string" ? req.query.provider : undefined;
+      if (provider === "google") {
+        params.set("acr_values", "google");
+      }
+      return params;
+    }
+  }
+
   // Helper function to ensure strategy exists for a domain
   const ensureStrategy = (domain: string) => {
     const strategyName = `replitauth:${domain}`;
     if (!registeredStrategies.has(strategyName)) {
-      const strategy = new Strategy(
+      const strategy = new ReplitProviderHintStrategy(
         {
           name: strategyName,
           config,
@@ -169,17 +195,44 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/login", (req, res, next) => {
     ensureStrategy(req.hostname);
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const provider =
+      typeof req.query.provider === "string" ? req.query.provider : undefined;
+
+    // When initiated from the Connect Gmail card, send the user back to
+    // /profile after the round-trip (success or cancel) instead of "/".
+    const sess = req.session as (typeof req.session) & {
+      returnTo?: string;
+      authFailureRedirect?: string;
+    };
+    if (provider === "google") {
+      sess.returnTo = "/profile";
+      sess.authFailureRedirect = "/profile";
+    } else {
+      delete sess.authFailureRedirect;
+      delete sess.returnTo;
+    }
+
+    const authOptions: AuthenticateOptions = {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
+    };
+    passport.authenticate(`replitauth:${req.hostname}`, authOptions)(
+      req,
+      res,
+      next
+    );
   });
 
   app.get("/api/callback", (req, res, next) => {
     ensureStrategy(req.hostname);
+    const sess = req.session as (typeof req.session) & {
+      authFailureRedirect?: string;
+    };
+    const failureRedirect = sess.authFailureRedirect ?? "/api/login";
+    delete sess.authFailureRedirect;
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
+      failureRedirect,
     })(req, res, next);
   });
 

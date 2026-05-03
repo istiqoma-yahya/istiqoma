@@ -322,7 +322,7 @@ export default function ProfilePage() {
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        window.location.href = "/api/login";
+                        window.location.href = "/api/login?provider=google";
                       }}
                       data-testid="button-connect-gmail"
                     >

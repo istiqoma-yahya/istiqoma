@@ -34,7 +34,10 @@
     "stopRecording": "Berhenti rakam",
     "playRecording": "Main rakaman",
     "deleteRecording": "Padam rakaman",
-    "micPermissionDenied": "Kebenaran mikrofon ditolak"
+    "micPermissionDenied": "Kebenaran mikrofon ditolak",
+    "memorizationProgress": "Kemajuan Hafazan",
+    "totalMemorized": "Jumlah dihafaz",
+    "surahsStarted": "{{started}} daripada {{total}} surah dimulakan"
   },
   "nav": {
     "home": "Utama",

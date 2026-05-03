@@ -34,7 +34,10 @@
     "stopRecording": "Berhenti merekam",
     "playRecording": "Putar rekaman",
     "deleteRecording": "Hapus rekaman",
-    "micPermissionDenied": "Izin mikrofon ditolak"
+    "micPermissionDenied": "Izin mikrofon ditolak",
+    "memorizationProgress": "Progres Hafalan",
+    "totalMemorized": "Total dihafal",
+    "surahsStarted": "{{started}} dari {{total}} surah dimulai"
   },
   "nav": {
     "home": "Beranda",

@@ -42,7 +42,10 @@
     "stopRecording": "Stop recording",
     "playRecording": "Play recording",
     "deleteRecording": "Delete recording",
-    "micPermissionDenied": "Microphone permission denied"
+    "micPermissionDenied": "Microphone permission denied",
+    "memorizationProgress": "Memorization Progress",
+    "totalMemorized": "Total memorized",
+    "surahsStarted": "{{started}} of {{total}} surahs started"
   },
   "landing": {
     "title": "A better you.",

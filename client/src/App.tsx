@@ -29,6 +29,7 @@ import LeaderboardPage from "@/pages/LeaderboardPage";
 import QuranHomePage from "@/pages/QuranHomePage";
 import QuranSurahPage from "@/pages/QuranSurahPage";
 import QuranBookmarksPage from "@/pages/QuranBookmarksPage";
+import QuranMemorizationProgressPage from "@/pages/QuranMemorizationProgressPage";
 import { QuranAudioProvider } from "@/components/QuranAudioProvider";
 import { QuranFontProvider } from "@/components/QuranFontProvider";
 import { useDeeds } from "@/hooks/use-deeds";
@@ -67,6 +68,7 @@ function Router() {
       <Route path="/leaderboard" component={LeaderboardPage} />
       <Route path="/quran" component={QuranHomePage} />
       <Route path="/quran/bookmarks" component={QuranBookmarksPage} />
+      <Route path="/quran/memorization" component={QuranMemorizationProgressPage} />
       <Route path="/quran/:id" component={QuranSurahPage} />
       <Route path="/profile/onboarding" component={OnboardingSettingsPage} />
       <Route path="/deeds" component={DeedHistoryPage} />

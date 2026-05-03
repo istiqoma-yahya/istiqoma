@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
-import { Search, Bookmark, BookOpen, Play } from "lucide-react";
+import { Search, Bookmark, BookOpen, Play, GraduationCap } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { QuranMiniPlayer } from "@/components/QuranMiniPlayer";
-import { useChapters, useReadingState, useBookmarks } from "@/hooks/use-quran";
+import { useChapters, useReadingState, useBookmarks, useMemorizations } from "@/hooks/use-quran";
 import { useQuranAudio } from "@/components/QuranAudioProvider";
 
 export default function QuranHomePage() {
@@ -19,6 +19,7 @@ export default function QuranHomePage() {
   const { data: chapters, isLoading } = useChapters();
   const { data: readingState } = useReadingState();
   const { data: bookmarks } = useBookmarks();
+  const { data: memorizations } = useMemorizations();
   const { playSurah } = useQuranAudio();
 
   const filtered = useMemo(() => {
@@ -77,7 +78,7 @@ export default function QuranHomePage() {
           </Card>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <Button
             variant="outline"
             className="h-auto py-4 flex flex-col items-center gap-1"
@@ -87,6 +88,16 @@ export default function QuranHomePage() {
             <Bookmark className="w-5 h-5 text-emerald-500" />
             <span className="text-sm">{t("quranMenu.bookmarks")}</span>
             <span className="text-xs text-muted-foreground">{bookmarks?.length ?? 0}</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-auto py-4 flex flex-col items-center gap-1"
+            onClick={() => navigate("/quran/memorization")}
+            data-testid="button-memorization-progress"
+          >
+            <GraduationCap className="w-5 h-5 text-emerald-500" />
+            <span className="text-sm">{t("quranMenu.memorize")}</span>
+            <span className="text-xs text-muted-foreground">{memorizations?.length ?? 0}</span>
           </Button>
           <Button
             variant="outline"

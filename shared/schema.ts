@@ -790,3 +790,58 @@ export type QuizLeaderboardEntry = {
   totalCorrect: number;
   isCurrentUser: boolean;
 };
+
+// ─── Admin: Campaign banners ──────────────────────────────────
+// Promotional 320x100 banners managed by the owner via /admin/campaigns.
+// `bannerImageUrl` stores a Replit Object Storage path of the form
+// `/objects/uploads/<uuid>` — the server normalizes the presigned upload
+// URL to this shape and tags the object public via ACL on save. The
+// public route `GET /objects/:path(*)` streams the banner.
+export const campaigns = pgTable("campaigns", {
+  id: serial("id").primaryKey(),
+  bannerImageUrl: text("banner_image_url").notNull(),
+  landingUrl: text("landing_url").notNull(),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+const dateString = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD");
+const httpUrl = z
+  .string()
+  .url("Must be a valid URL")
+  .refine((v) => /^https?:\/\//i.test(v), {
+    message: "URL must start with http:// or https://",
+  });
+
+export const insertCampaignSchema = z
+  .object({
+    bannerImageUrl: z.string().min(1, "Banner image is required"),
+    landingUrl: httpUrl,
+    startDate: dateString,
+    endDate: dateString,
+  })
+  .refine((d) => d.endDate >= d.startDate, {
+    path: ["endDate"],
+    message: "End date must be on or after start date",
+  });
+
+export const updateCampaignSchema = z
+  .object({
+    bannerImageUrl: z.string().min(1).optional(),
+    landingUrl: httpUrl.optional(),
+    startDate: dateString.optional(),
+    endDate: dateString.optional(),
+  })
+  .refine(
+    (d) =>
+      !d.startDate || !d.endDate || d.endDate >= d.startDate,
+    { path: ["endDate"], message: "End date must be on or after start date" },
+  );
+
+export type Campaign = typeof campaigns.$inferSelect;
+export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
+export type UpdateCampaign = z.infer<typeof updateCampaignSchema>;

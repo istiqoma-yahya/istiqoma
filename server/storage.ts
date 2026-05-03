@@ -1,6 +1,6 @@
 import { db } from "./db";
 export { db };
-import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, quizQuestions, userQuizProgress, quizAttempts, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization, type QuizState, type QuizActiveAttempt, type QuizAnswerResult, type QuizLeaderboardEntry } from "@shared/schema";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, quizQuestions, userQuizProgress, quizAttempts, campaigns, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization, type QuizState, type QuizActiveAttempt, type QuizAnswerResult, type QuizLeaderboardEntry, type Campaign, type InsertCampaign, type UpdateCampaign } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte, isNull, inArray } from "drizzle-orm";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -153,6 +153,13 @@ export interface IStorage {
     me: { rank: number; points: number } | null;
     total: number;
   }>;
+
+  // Admin: Campaigns
+  listCampaigns(): Promise<Campaign[]>;
+  getCampaign(id: number): Promise<Campaign | null>;
+  createCampaign(data: InsertCampaign): Promise<Campaign>;
+  updateCampaign(id: number, data: UpdateCampaign): Promise<Campaign | null>;
+  deleteCampaign(id: number): Promise<boolean>;
 
   // Quiz
   getQuizState(userId: string): Promise<QuizState>;
@@ -1815,6 +1822,48 @@ export class DatabaseStorage implements IStorage {
     }));
     const me = row.me ? { rank: Number(row.me.rank), level: Number(row.me.level), totalCorrect: Number(row.me.total_correct) } : null;
     return { entries, me, total: Number(row.total ?? 0) };
+  }
+
+  // ─── Admin: Campaigns ────────────────────────────────────────
+  async listCampaigns(): Promise<Campaign[]> {
+    return await db.select().from(campaigns).orderBy(desc(campaigns.createdAt));
+  }
+
+  async getCampaign(id: number): Promise<Campaign | null> {
+    const [row] = await db.select().from(campaigns).where(eq(campaigns.id, id)).limit(1);
+    return row ?? null;
+  }
+
+  async createCampaign(data: InsertCampaign): Promise<Campaign> {
+    const [row] = await db
+      .insert(campaigns)
+      .values({
+        bannerImageUrl: data.bannerImageUrl,
+        landingUrl: data.landingUrl,
+        startDate: data.startDate,
+        endDate: data.endDate,
+      })
+      .returning();
+    return row;
+  }
+
+  async updateCampaign(id: number, data: UpdateCampaign): Promise<Campaign | null> {
+    const patch: Record<string, unknown> = { updatedAt: new Date() };
+    if (data.bannerImageUrl !== undefined) patch.bannerImageUrl = data.bannerImageUrl;
+    if (data.landingUrl !== undefined) patch.landingUrl = data.landingUrl;
+    if (data.startDate !== undefined) patch.startDate = data.startDate;
+    if (data.endDate !== undefined) patch.endDate = data.endDate;
+    const [row] = await db
+      .update(campaigns)
+      .set(patch)
+      .where(eq(campaigns.id, id))
+      .returning();
+    return row ?? null;
+  }
+
+  async deleteCampaign(id: number): Promise<boolean> {
+    const result = await db.delete(campaigns).where(eq(campaigns.id, id)).returning({ id: campaigns.id });
+    return result.length > 0;
   }
 }
 

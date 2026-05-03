@@ -1,11 +1,11 @@
-import type { Express } from "express";
+import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage, db } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, registerUsernameAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
-import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS, type NewlyEarnedBadge } from "@shared/schema";
+import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS, insertCampaignSchema, updateCampaignSchema, type NewlyEarnedBadge } from "@shared/schema";
 import {
   checkRateLimit,
   generateRecommendations,
@@ -1532,5 +1532,245 @@ export async function registerRoutes(
     }
   });
 
+  // ─── Admin: Campaigns ─────────────────────────────────────────
+  // Owner-only CRUD for promotional banners. Allow-list is hardcoded so
+  // there's no separate roles table; callers must pass `isAuthenticated`
+  // first, then `isAdmin` (which inspects the email on the OIDC claims
+  // and the username-auth user record).
+  registerAdminCampaignRoutes(app);
+
   return httpServer;
+}
+
+const ADMIN_EMAILS = new Set<string>(["yahyaekananta@gmail.com"]);
+
+function normalizeEmail(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const t = v.trim().toLowerCase();
+  return t.length > 0 ? t : null;
+}
+
+async function isAdminEmail(req: any): Promise<boolean> {
+  const claimEmail = normalizeEmail(req?.user?.claims?.email);
+  if (claimEmail && ADMIN_EMAILS.has(claimEmail)) return true;
+  // Fallback for username-auth sessions whose claims may not include email:
+  // load the user row to check the email on file.
+  const userId = req?.user?.claims?.sub;
+  if (!userId) return false;
+  try {
+    const { authStorage } = await import("./replit_integrations/auth/storage");
+    const user = await authStorage.getUser(userId);
+    const email = normalizeEmail(user?.email);
+    return !!email && ADMIN_EMAILS.has(email);
+  } catch {
+    return false;
+  }
+}
+
+const isAdmin: import("express").RequestHandler = async (req: any, res, next) => {
+  const ok = await isAdminEmail(req);
+  if (!ok) return res.status(403).json({ message: "Not authorized" });
+  next();
+};
+
+// Banner uploads go through Replit Object Storage. The client gets a
+// presigned PUT URL from `/api/admin/campaigns/upload-url`, uploads the
+// raw file directly to GCS, then POSTs the returned `objectPath`
+// (e.g. `/objects/uploads/<uuid>`) as `bannerImageUrl`.
+function validateBannerObjectPath(
+  url: string,
+): { ok: true } | { ok: false; message: string } {
+  if (!/^\/objects\/[A-Za-z0-9._/-]+$/.test(url)) {
+    return {
+      ok: false,
+      message: "Banner image must be uploaded via the upload button",
+    };
+  }
+  return { ok: true };
+}
+
+async function publishBanner(
+  rawPath: string,
+  ownerId: string,
+): Promise<string> {
+  const { ObjectStorageService } = await import("./replit_integrations/object_storage");
+  const svc = new ObjectStorageService();
+  return svc.trySetObjectEntityAclPolicy(rawPath, {
+    owner: ownerId,
+    visibility: "public",
+  });
+}
+
+function registerAdminCampaignRoutes(app: Express) {
+  const adminJson = express.json({ limit: "1mb" });
+
+  // Public read endpoint that streams banner objects from Replit Object
+  // Storage. Banners are tagged public via ACL on create, so anyone can
+  // render them in an <img>; private/non-public objects return 401/404.
+  app.get("/objects/:objectPath(*)", async (req, res) => {
+    try {
+      const { ObjectStorageService, ObjectNotFoundError } = await import(
+        "./replit_integrations/object_storage"
+      );
+      const svc = new ObjectStorageService();
+      const file = await svc.getObjectEntityFile(req.path);
+      const allowed = await svc.canAccessObjectEntity({ objectFile: file });
+      if (!allowed) return res.status(401).json({ message: "Not authorized" });
+      await svc.downloadObject(file, res);
+    } catch (err: any) {
+      if (err?.name === "ObjectNotFoundError") {
+        return res.status(404).json({ message: "Object not found" });
+      }
+      console.error("Error serving object:", err);
+      return res.status(500).json({ message: "Failed to serve object" });
+    }
+  });
+
+  // Admin-only: request a presigned PUT URL for a new banner upload.
+  // Validates file metadata (content type + size) server-side before
+  // issuing the URL so the client cannot bypass the client-side checks.
+  const ALLOWED_BANNER_MIME = new Set([
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/webp",
+  ]);
+  const MAX_BANNER_BYTES = 2 * 1024 * 1024;
+  const uploadUrlInput = z.object({
+    contentType: z.string().min(1),
+    size: z.number().int().nonnegative(),
+    name: z.string().optional(),
+  });
+  app.post(
+    "/api/admin/campaigns/upload-url",
+    adminJson,
+    isAuthenticated,
+    isAdmin,
+    async (req, res) => {
+      try {
+        const input = uploadUrlInput.parse(req.body ?? {});
+        const mime = input.contentType.toLowerCase().split(";")[0].trim();
+        if (!ALLOWED_BANNER_MIME.has(mime)) {
+          return res.status(400).json({
+            message: "Banner must be PNG, JPEG, or WebP",
+            field: "contentType",
+          });
+        }
+        if (input.size > MAX_BANNER_BYTES) {
+          return res.status(400).json({
+            message: "Banner image is too large (max 2MB)",
+            field: "size",
+          });
+        }
+        const { ObjectStorageService } = await import(
+          "./replit_integrations/object_storage"
+        );
+        const svc = new ObjectStorageService();
+        const uploadURL = await svc.getObjectEntityUploadURL();
+        res.json({ uploadURL });
+      } catch (err) {
+        if (err instanceof z.ZodError) {
+          return res.status(400).json({
+            message: err.errors[0].message,
+            field: err.errors[0].path.join("."),
+          });
+        }
+        console.error("Failed to mint upload URL:", err);
+        res.status(500).json({ message: "Failed to create upload URL" });
+      }
+    },
+  );
+
+  app.get("/api/admin/campaigns", isAuthenticated, isAdmin, async (_req, res) => {
+    const rows = await storage.listCampaigns();
+    res.json(rows);
+  });
+
+  app.post("/api/admin/campaigns", adminJson, isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const input = insertCampaignSchema.parse(req.body);
+      // Accept either a `/objects/...` path or a full GCS URL the client
+      // received from the presigned upload — normalize+ACL via publishBanner.
+      const ownerId = req.user.claims.sub;
+      let normalized: string;
+      try {
+        normalized = await publishBanner(input.bannerImageUrl, ownerId);
+      } catch (e) {
+        return res
+          .status(400)
+          .json({ message: "Banner upload not found", field: "bannerImageUrl" });
+      }
+      const banner = validateBannerObjectPath(normalized);
+      if (!banner.ok) {
+        return res.status(400).json({ message: banner.message, field: "bannerImageUrl" });
+      }
+      const row = await storage.createCampaign({ ...input, bannerImageUrl: normalized });
+      res.status(201).json(row);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join("."),
+        });
+      }
+      throw err;
+    }
+  });
+
+  app.patch("/api/admin/campaigns/:id", adminJson, isAuthenticated, isAdmin, async (req: any, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (!Number.isFinite(id)) return res.status(400).json({ message: "Invalid ID" });
+    try {
+      const input = updateCampaignSchema.parse(req.body);
+      if (input.bannerImageUrl) {
+        const ownerId = req.user.claims.sub;
+        let normalized: string;
+        try {
+          normalized = await publishBanner(input.bannerImageUrl, ownerId);
+        } catch {
+          return res
+            .status(400)
+            .json({ message: "Banner upload not found", field: "bannerImageUrl" });
+        }
+        const banner = validateBannerObjectPath(normalized);
+        if (!banner.ok) {
+          return res.status(400).json({ message: banner.message, field: "bannerImageUrl" });
+        }
+        input.bannerImageUrl = normalized;
+      }
+      // If only one of start/end is provided, validate against the existing row
+      // so a partial update can't end up with end < start.
+      if ((input.startDate && !input.endDate) || (!input.startDate && input.endDate)) {
+        const existing = await storage.getCampaign(id);
+        if (!existing) return res.status(404).json({ message: "Campaign not found" });
+        const start = input.startDate ?? existing.startDate;
+        const end = input.endDate ?? existing.endDate;
+        if (end < start) {
+          return res.status(400).json({
+            message: "End date must be on or after start date",
+            field: "endDate",
+          });
+        }
+      }
+      const row = await storage.updateCampaign(id, input);
+      if (!row) return res.status(404).json({ message: "Campaign not found" });
+      res.json(row);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join("."),
+        });
+      }
+      throw err;
+    }
+  });
+
+  app.delete("/api/admin/campaigns/:id", isAuthenticated, isAdmin, async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (!Number.isFinite(id)) return res.status(400).json({ message: "Invalid ID" });
+    const deleted = await storage.deleteCampaign(id);
+    if (!deleted) return res.status(404).json({ message: "Campaign not found" });
+    res.status(204).send();
+  });
 }

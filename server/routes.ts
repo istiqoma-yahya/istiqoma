@@ -907,6 +907,68 @@ export async function registerRoutes(
     res.json({ days, daysPracticed, freezersUsed });
   });
 
+  // Read-only per-day view: returns the deeds the user logged on a given
+  // local calendar day, plus whether that day was rescued by a streak
+  // freezer. Used by the streak calendar to drill into a specific day.
+  app.get(api.streak.day.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const dayQuerySchema = z.object({
+      date: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format. Use YYYY-MM-DD"),
+      timezone: z.string().optional(),
+    });
+    const parsed = dayQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: parsed.error.issues[0]?.message ?? "Invalid query",
+        field: parsed.error.issues[0]?.path?.join(".") ?? undefined,
+      });
+    }
+    const { date: dateStr, timezone: rawTz } = parsed.data;
+
+    let tz = parseTimezone(rawTz);
+    if (!tz) {
+      const sub = await storage.getPushSubscription(userId);
+      tz = parseTimezone(sub?.timezone) ?? "Asia/Jakarta";
+    }
+
+    // Reject future days outright. The calendar already disables them;
+    // this is a defensive guard against direct API calls.
+    const todayStr = format(toZonedTime(new Date(), tz), "yyyy-MM-dd");
+    if (dateStr > todayStr) {
+      return res.json({ date: dateStr, hadDeed: false, wasFrozen: false, deeds: [] });
+    }
+
+    const dayStartUtc = fromZonedTime(`${dateStr}T00:00:00`, tz);
+    const dayEndUtc = fromZonedTime(`${dateStr}T23:59:59.999`, tz);
+
+    const dayDeedsRaw = await db
+      .select()
+      .from(deeds)
+      .where(
+        and(
+          eq(deeds.userId, userId),
+          gte(deeds.createdAt, dayStartUtc),
+          lte(deeds.createdAt, dayEndUtc),
+        ),
+      );
+
+    // Bucket by the user's local timezone date the same way the month
+    // endpoint does, so a deed that crosses midnight in UTC still lands
+    // on the local day the user expects.
+    const dayDeeds = dayDeedsRaw.filter((d) => {
+      if (!d.createdAt) return false;
+      return format(toZonedTime(d.createdAt, tz), "yyyy-MM-dd") === dateStr;
+    });
+
+    const hadDeed = dayDeeds.length > 0;
+    const frozenDates = await storage.getFrozenDates(userId);
+    const wasFrozen = !hadDeed && frozenDates.has(dateStr);
+
+    res.json({ date: dateStr, hadDeed, wasFrozen, deeds: dayDeeds });
+  });
+
   // ─── Streak Freezer ──────────────────────────────────────────
   app.get(api.streakFreezer.get.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;

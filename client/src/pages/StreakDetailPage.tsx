@@ -18,12 +18,23 @@ import {
   addMonths,
   subMonths,
   isSameMonth,
+  parseISO,
 } from "date-fns";
 import { id as idLocale, ms as msLocale, enUS } from "date-fns/locale";
 import { toZonedTime } from "date-fns-tz";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { formatNumber } from "@/lib/utils";
+import { useCategoryName } from "@/hooks/use-categories";
+import { useDzikirTypeName } from "@/hooks/use-dzikir-types";
+import type { Deed } from "@shared/schema";
 
 const USER_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -37,6 +48,13 @@ interface StreakMonthData {
   days: MonthDay[];
   daysPracticed: number;
   freezersUsed: number;
+}
+
+interface StreakDayData {
+  date: string;
+  hadDeed: boolean;
+  wasFrozen: boolean;
+  deeds: Deed[];
 }
 
 type GridCell =
@@ -53,6 +71,70 @@ type GridCell =
       isFuture: boolean;
     };
 
+function DeedRow({ deed }: { deed: Deed }) {
+  const { t } = useTranslation();
+  const translateCategoryName = useCategoryName();
+  const translateDzikirType = useDzikirTypeName();
+
+  const getDescription = () => {
+    const isDzikirCategory =
+      deed.category?.toLowerCase() === "dzikir" ||
+      deed.category?.toLowerCase() === "dzikr";
+    if (isDzikirCategory) {
+      if (deed.dzikirType) return translateDzikirType(deed.dzikirType);
+      return t("dzikir.dzikirDeedDesc", {
+        count: formatNumber(deed.points || 0),
+      } as Record<string, string>);
+    }
+    if (deed.sholatType && deed.sholatType !== "any") {
+      const sholatLabel = t(`sholat.types.${deed.sholatType}`);
+      if (deed.isJamaah) return `${sholatLabel} ${t("sholat.inCongregation")}`;
+      return sholatLabel;
+    }
+    if (deed.fastingType && deed.fastingType !== "any") {
+      return t(`fasting.types.${deed.fastingType}`);
+    }
+    if (deed.quranUnit) {
+      const unit = t(`quran.units.${deed.quranUnit}`);
+      return deed.quantity != null
+        ? `${formatNumber(deed.quantity)} ${unit}`
+        : unit;
+    }
+    if (deed.sedekahType) return t(`sedekah.types.${deed.sedekahType}`);
+    if (deed.description && deed.description.trim() !== "") return deed.description;
+    return translateCategoryName(deed.category);
+  };
+
+  const time = deed.createdAt ? format(new Date(deed.createdAt), "p") : "";
+
+  return (
+    <div
+      className="flex items-start justify-between gap-3 p-3 rounded-lg border border-border bg-emerald-500/5"
+      data-testid={`row-streak-day-deed-${deed.id}`}
+    >
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
+          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-600 dark:text-blue-400">
+            {translateCategoryName(deed.category)}
+          </span>
+          {time && (
+            <span className="text-xs text-muted-foreground">{time}</span>
+          )}
+        </div>
+        <p className="text-sm font-medium text-foreground leading-snug break-words">
+          {getDescription()}
+        </p>
+      </div>
+      <span
+        className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap"
+        data-testid={`text-streak-day-deed-points-${deed.id}`}
+      >
+        +{formatNumber(deed.points)} {t("stats.points")}
+      </span>
+    </div>
+  );
+}
+
 export default function StreakDetailPage() {
   const { t, i18n } = useTranslation();
   const [, navigate] = useLocation();
@@ -62,6 +144,7 @@ export default function StreakDetailPage() {
   const [currentMonth, setCurrentMonth] = useState(() =>
     toZonedTime(new Date(), USER_TIMEZONE),
   );
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth() + 1;
@@ -79,6 +162,22 @@ export default function StreakDetailPage() {
       });
       if (!res.ok) throw new Error("Failed to load streak month");
       return (await res.json()) as StreakMonthData;
+    },
+  });
+
+  const { data: dayData, isLoading: isDayLoading } = useQuery<StreakDayData>({
+    queryKey: ["/api/streak/day", selectedDate],
+    enabled: selectedDate !== null,
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        date: selectedDate as string,
+        timezone: USER_TIMEZONE,
+      });
+      const res = await fetch(`/api/streak/day?${params.toString()}`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to load streak day");
+      return (await res.json()) as StreakDayData;
     },
   });
 
@@ -132,6 +231,12 @@ export default function StreakDetailPage() {
     !isLoading &&
     (data?.daysPracticed ?? 0) === 0 &&
     (data?.freezersUsed ?? 0) === 0;
+
+  const sheetOpen = selectedDate !== null;
+  const selectedDateObj = selectedDate ? parseISO(selectedDate) : null;
+  const selectedDayState = selectedDate
+    ? dayStateMap.get(selectedDate)
+    : undefined;
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
@@ -305,24 +410,50 @@ export default function StreakDetailPage() {
                     }
                   }
 
+                  // Only past/today days that had a deed or were frozen are
+                  // tappable. Future days and inactive past days have no
+                  // detail to show so we render them as static cells.
+                  const isClickable = cell.isActive && !cell.isFuture;
+
+                  const inner = (
+                    <div className={innerClasses.join(" ")}>
+                      <span className="relative z-10 leading-none">
+                        {cell.date.getDate()}
+                      </span>
+                      {cell.wasFrozen && (
+                        <Snowflake
+                          className="absolute top-0.5 right-0.5 w-3 h-3 text-white/90"
+                          strokeWidth={2.5}
+                          data-testid={`icon-frozen-${cell.dateStr}`}
+                        />
+                      )}
+                    </div>
+                  );
+
+                  if (isClickable) {
+                    return (
+                      <button
+                        key={cell.key}
+                        type="button"
+                        className="aspect-square p-0 bg-transparent border-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-full"
+                        onClick={() => setSelectedDate(cell.dateStr)}
+                        data-testid={`button-streak-day-${cell.dateStr}`}
+                        aria-label={format(cell.date, "PPP", {
+                          locale: dateLocale,
+                        })}
+                      >
+                        {inner}
+                      </button>
+                    );
+                  }
+
                   return (
                     <div
                       key={cell.key}
                       className="aspect-square"
                       data-testid={`cell-streak-day-${cell.dateStr}`}
                     >
-                      <div className={innerClasses.join(" ")}>
-                        <span className="relative z-10 leading-none">
-                          {cell.date.getDate()}
-                        </span>
-                        {cell.wasFrozen && (
-                          <Snowflake
-                            className="absolute top-0.5 right-0.5 w-3 h-3 text-white/90"
-                            strokeWidth={2.5}
-                            data-testid={`icon-frozen-${cell.dateStr}`}
-                          />
-                        )}
-                      </div>
+                      {inner}
                     </div>
                   );
                 })}
@@ -363,6 +494,73 @@ export default function StreakDetailPage() {
           </div>
         </Card>
       </main>
+
+      <Sheet
+        open={sheetOpen}
+        onOpenChange={(open) => {
+          if (!open) setSelectedDate(null);
+        }}
+      >
+        <SheetContent
+          side="bottom"
+          className="rounded-t-2xl max-h-[80vh] overflow-y-auto"
+          data-testid="sheet-streak-day"
+        >
+          <SheetHeader>
+            <SheetTitle data-testid="text-streak-day-title">
+              {selectedDateObj
+                ? format(selectedDateObj, "PPPP", { locale: dateLocale })
+                : ""}
+            </SheetTitle>
+            <SheetDescription data-testid="text-streak-day-subtitle">
+              {selectedDayState?.wasFrozen
+                ? t("streakDetail.dayFrozenSubtitle")
+                : selectedDayState?.hadDeed
+                  ? t("streakDetail.dayDeedsSubtitle")
+                  : t("streakDetail.dayInactiveSubtitle")}
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="mt-4 space-y-2">
+            {isDayLoading ? (
+              <div
+                className="h-24 rounded-md bg-muted/40 animate-pulse"
+                data-testid="streak-day-skeleton"
+              />
+            ) : selectedDayState?.wasFrozen && (dayData?.deeds.length ?? 0) === 0 ? (
+              <div
+                className="flex items-start gap-3 p-4 rounded-lg border border-sky-500/20 bg-sky-500/5"
+                data-testid="streak-day-frozen-card"
+              >
+                <div className="p-2 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 shrink-0">
+                  <Snowflake className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium text-foreground">
+                    {t("streakDetail.frozenTitle")}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t("streakDetail.frozenBody")}
+                  </p>
+                </div>
+              </div>
+            ) : (dayData?.deeds.length ?? 0) > 0 ? (
+              <div className="space-y-2" data-testid="list-streak-day-deeds">
+                {dayData!.deeds.map((d) => (
+                  <DeedRow key={d.id} deed={d} />
+                ))}
+              </div>
+            ) : (
+              <p
+                className="text-sm text-muted-foreground text-center py-6"
+                data-testid="text-streak-day-empty"
+              >
+                {t("streakDetail.dayEmpty")}
+              </p>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

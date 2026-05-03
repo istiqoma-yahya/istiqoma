@@ -615,7 +615,13 @@
     "empty": "Belum ada aktivitas bulan ini.",
     "legendDeed": "Hari beramal",
     "legendFrozen": "Diselamatkan pelindung",
-    "legendInactive": "Tidak aktif"
+    "legendInactive": "Tidak aktif",
+    "dayDeedsSubtitle": "Amal yang kamu catat di hari ini",
+    "dayFrozenSubtitle": "Pelindung streak menyelamatkan hari ini",
+    "dayInactiveSubtitle": "Tidak ada aktivitas tercatat",
+    "dayEmpty": "Tidak ada amal yang tercatat pada hari ini.",
+    "frozenTitle": "Diselamatkan pelindung streak",
+    "frozenBody": "Kamu tidak mencatat amal pada hari ini, tetapi satu pelindung streak otomatis dipakai untuk menjaga streakmu tetap berjalan."
   },
   "streakFreezer": {
     "title": "Pelindung Streak",

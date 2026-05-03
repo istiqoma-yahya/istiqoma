@@ -614,7 +614,13 @@
     "empty": "No activity this month yet.",
     "legendDeed": "Deed day",
     "legendFrozen": "Saved by freezer",
-    "legendInactive": "Inactive"
+    "legendInactive": "Inactive",
+    "dayDeedsSubtitle": "Deeds you logged on this day",
+    "dayFrozenSubtitle": "A streak freezer kept this day alive",
+    "dayInactiveSubtitle": "No activity recorded",
+    "dayEmpty": "No deeds were logged on this day.",
+    "frozenTitle": "Saved by a streak freezer",
+    "frozenBody": "You didn't log a deed on this day, but a streak freezer was used automatically to keep your streak going."
   },
   "streakFreezer": {
     "title": "Streak Freezer",

@@ -317,6 +317,20 @@ export const api = {
         401: errorSchemas.unauthorized,
       },
     },
+    day: {
+      method: "GET" as const,
+      path: "/api/streak/day",
+      responses: {
+        200: z.object({
+          date: z.string(),
+          hadDeed: z.boolean(),
+          wasFrozen: z.boolean(),
+          deeds: z.array(z.custom<typeof deeds.$inferSelect>()),
+        }),
+        400: errorSchemas.validation,
+        401: errorSchemas.unauthorized,
+      },
+    },
   },
   streakFreezer: {
     get: {

@@ -42,33 +42,36 @@ const getOidcConfig = memoize(
   { maxAge: 3600 * 1000 }
 );
 
-export function getSession() {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: sessionTtl / 1000, // connect-pg-simple expects seconds
-    tableName: "sessions",
-  });
-  return session({
+export const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 1 week
+
+// Session options shared between the production `getSession()` (which uses
+// connect-pg-simple) and tests (which inject a memorystore). `rolling: true`
+// + `resave: true` together implement "7 days of inactivity" rather than a
+// hard 7-day cap from initial login.
+export function buildSessionOptions(store: session.Store): session.SessionOptions {
+  return {
     secret: process.env.SESSION_SECRET!,
-    store: sessionStore,
-    // Roll the cookie forward on every request so an active user's
-    // session window is "7 days of inactivity" rather than a hard
-    // 7-day cap from initial login. Pair with `resave: true` so the
-    // store TTL is also refreshed (connect-pg-simple only writes when
-    // the session is saved). `saveUninitialized: false` still keeps
-    // anonymous traffic out of the session table.
+    store,
     resave: true,
     rolling: true,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       secure: true,
-      maxAge: sessionTtl,
+      maxAge: SESSION_TTL_MS,
     },
+  };
+}
+
+export function getSession() {
+  const pgStore = connectPg(session);
+  const sessionStore = new pgStore({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: false,
+    ttl: SESSION_TTL_MS / 1000, // connect-pg-simple expects seconds
+    tableName: "sessions",
   });
+  return session(buildSessionOptions(sessionStore));
 }
 
 function updateUserSession(
@@ -318,7 +321,26 @@ function isInvalidGrantError(err: unknown): boolean {
   return false;
 }
 
-export const isAuthenticated: RequestHandler = async (req, res, next) => {
+// Dependencies of the auth middleware that are swapped out in tests so we
+// don't reach out to the real OIDC issuer or token endpoint.
+export type IsAuthenticatedDeps = {
+  refreshTokens: (refreshToken: string) =>
+    Promise<client.TokenEndpointResponse & client.TokenEndpointResponseHelpers>;
+  refreshTimeoutMs?: number;
+};
+
+const defaultDeps: IsAuthenticatedDeps = {
+  refreshTokens: async (refreshToken: string) => {
+    const config = await getOidcConfig();
+    return client.refreshTokenGrant(config, refreshToken);
+  },
+  refreshTimeoutMs: 4000,
+};
+
+export function createIsAuthenticated(
+  deps: IsAuthenticatedDeps = defaultDeps,
+): RequestHandler {
+  return async (req, res, next) => {
   const user = req.user as any;
 
   if (!req.isAuthenticated()) {
@@ -347,9 +369,8 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   // timeout is treated as a transient error (not invalid_grant), which
   // means the second attempt runs and, if that also fails, the safe-method
   // bypass below applies.
-  const REFRESH_TIMEOUT_MS = 4000;
+  const REFRESH_TIMEOUT_MS = deps.refreshTimeoutMs ?? 4000;
   const tryRefresh = async () => {
-    const config = await getOidcConfig();
     let timer: NodeJS.Timeout | undefined;
     const timeoutPromise = new Promise<never>((_, reject) => {
       timer = setTimeout(() => {
@@ -362,7 +383,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     });
     try {
       return await Promise.race([
-        client.refreshTokenGrant(config, refreshToken),
+        deps.refreshTokens(refreshToken),
         timeoutPromise,
       ]);
     } finally {
@@ -423,4 +444,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     }
     return res.status(401).json({ message: "Unauthorized" });
   }
-};
+  };
+}
+
+export const isAuthenticated: RequestHandler = createIsAuthenticated();

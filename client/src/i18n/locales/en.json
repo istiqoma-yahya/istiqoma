@@ -290,6 +290,19 @@
       "permissionDenied": "Location permission denied. Please enable it in your browser settings.",
       "unavailable": "Location information is unavailable.",
       "timeout": "Location request timed out."
+    },
+    "changeLocation": "Change location",
+    "setLocationManually": "Set location manually",
+    "useAutomaticLocation": "Use automatic location",
+    "manualBadge": "Manual",
+    "locationSearch": {
+      "title": "Set your location",
+      "description": "Search for a city or place to override the detected location.",
+      "placeholder": "Search city or place…",
+      "hint": "Type at least two characters to search.",
+      "searching": "Searching…",
+      "empty": "No matching places found.",
+      "error": "Could not search places. Please try again."
     }
   },
   "sholatPage": {

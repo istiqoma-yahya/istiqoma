@@ -290,6 +290,19 @@
       "permissionDenied": "Kebenaran lokasi ditolak. Sila aktifkan dalam tetapan pelayar.",
       "unavailable": "Maklumat lokasi tidak tersedia.",
       "timeout": "Permintaan lokasi tamat masa."
+    },
+    "changeLocation": "Tukar lokasi",
+    "setLocationManually": "Tetapkan lokasi secara manual",
+    "useAutomaticLocation": "Guna lokasi automatik",
+    "manualBadge": "Manual",
+    "locationSearch": {
+      "title": "Tetapkan lokasi anda",
+      "description": "Cari bandar atau tempat untuk menggantikan lokasi yang dikesan.",
+      "placeholder": "Cari bandar atau tempat…",
+      "hint": "Taip sekurang-kurangnya dua aksara untuk mencari.",
+      "searching": "Mencari…",
+      "empty": "Tiada tempat yang sepadan dijumpai.",
+      "error": "Gagal mencari tempat. Sila cuba lagi."
     }
   },
   "sholatPage": {

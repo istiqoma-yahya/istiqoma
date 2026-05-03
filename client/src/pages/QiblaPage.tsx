@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Compass, MapPin, Loader2, ArrowUp, Clock, Sun, Sunrise, Sunset, Moon } from "lucide-react";
+import { Compass, MapPin, Loader2, ArrowUp, Clock, Sun, Sunrise, Sunset, Moon, Search, X, Pencil } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import {
@@ -12,7 +12,17 @@ import {
   saveLocation,
   reverseGeocode,
   formatCoords,
+  searchPlaces,
+  type PlaceSuggestion,
 } from "@/lib/location";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 interface LocationState {
   latitude: number | null;
@@ -35,6 +45,12 @@ export default function QiblaPage() {
   });
   const [placeName, setPlaceName] = useState<string | null>(saved?.placeName ?? null);
   const [placeLoading, setPlaceLoading] = useState(false);
+  const [manualOverride, setManualOverride] = useState<boolean>(saved?.manual === true);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<PlaceSuggestion[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [compassHeading, setCompassHeading] = useState<number | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [compassEnabled, setCompassEnabled] = useState(false);
@@ -50,6 +66,7 @@ export default function QiblaPage() {
 
   useEffect(() => {
     if (!navigator.geolocation) return;
+    if (saved?.manual === true) return;
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude;
@@ -63,7 +80,7 @@ export default function QiblaPage() {
           if (movedFar) {
             setPlaceName(null);
           }
-          saveLocation(lat, lng, movedFar ? null : saved?.placeName ?? null);
+          saveLocation(lat, lng, movedFar ? null : saved?.placeName ?? null, false);
           return {
             latitude: lat,
             longitude: lng,
@@ -89,7 +106,7 @@ export default function QiblaPage() {
         if (name) {
           setPlaceName(name);
           if (location.latitude !== null && location.longitude !== null) {
-            saveLocation(location.latitude, location.longitude, name);
+            saveLocation(location.latitude, location.longitude, name, manualOverride);
           }
         }
       })
@@ -98,7 +115,100 @@ export default function QiblaPage() {
         if (!controller.signal.aborted) setPlaceLoading(false);
       });
     return () => controller.abort();
-  }, [location.latitude, location.longitude, placeName, i18n.language]);
+  }, [location.latitude, location.longitude, placeName, i18n.language, manualOverride]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    const trimmed = searchQuery.trim();
+    if (trimmed.length < 2) {
+      setSearchResults([]);
+      setSearchLoading(false);
+      setSearchError(null);
+      return;
+    }
+    const controller = new AbortController();
+    const handle = setTimeout(() => {
+      setSearchLoading(true);
+      setSearchError(null);
+      searchPlaces(trimmed, i18n.language || "en", controller.signal)
+        .then((results) => {
+          if (controller.signal.aborted) return;
+          setSearchResults(results);
+        })
+        .catch((err) => {
+          if (controller.signal.aborted) return;
+          if (err?.name === "AbortError") return;
+          setSearchError(t("qibla.locationSearch.error"));
+          setSearchResults([]);
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setSearchLoading(false);
+        });
+    }, 350);
+    return () => {
+      clearTimeout(handle);
+      controller.abort();
+    };
+  }, [searchQuery, searchOpen, i18n.language, t]);
+
+  const selectManualPlace = (place: PlaceSuggestion) => {
+    saveLocation(place.latitude, place.longitude, place.displayName, true);
+    setManualOverride(true);
+    setPlaceName(place.displayName);
+    setLocation({
+      latitude: place.latitude,
+      longitude: place.longitude,
+      error: null,
+      loading: false,
+      requested: true,
+    });
+    setSearchOpen(false);
+    setSearchQuery("");
+    setSearchResults([]);
+    setPermissionDenied(false);
+  };
+
+  const clearManualOverride = () => {
+    if (!navigator.geolocation) {
+      return;
+    }
+    setLocation((prev) => ({ ...prev, loading: true, error: null }));
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setManualOverride(false);
+        setPlaceName(null);
+        saveLocation(lat, lng, null, false);
+        setLocation({
+          latitude: lat,
+          longitude: lng,
+          error: null,
+          loading: false,
+          requested: true,
+        });
+      },
+      (error) => {
+        let errorMessage = t("qibla.errors.unableToRetrieve");
+        if (error.code === error.PERMISSION_DENIED) {
+          errorMessage = t("qibla.errors.permissionDenied");
+          setPermissionDenied(true);
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          errorMessage = t("qibla.errors.unavailable");
+        } else if (error.code === error.TIMEOUT) {
+          errorMessage = t("qibla.errors.timeout");
+        }
+        setLocation((prev) => ({
+          latitude: prev.latitude,
+          longitude: prev.longitude,
+          error: prev.latitude !== null ? null : errorMessage,
+          loading: false,
+          requested: true,
+        }));
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+    );
+  };
 
   const dateString = currentTime.toDateString();
   const dateOnly = useMemo(() => {
@@ -175,7 +285,8 @@ export default function QiblaPage() {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
         setPlaceName(null);
-        saveLocation(lat, lng, null);
+        setManualOverride(false);
+        saveLocation(lat, lng, null, false);
         setLocation({
           latitude: lat,
           longitude: lng,
@@ -332,6 +443,16 @@ export default function QiblaPage() {
                 <MapPin className="w-4 h-4 mr-2" />
                 {t("qibla.enableLocation")}
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-3"
+                onClick={() => setSearchOpen(true)}
+                data-testid="button-set-location-manually"
+              >
+                <Search className="w-4 h-4 mr-2" />
+                {t("qibla.setLocationManually")}
+              </Button>
             </Card>
           ) : location.loading ? (
             <Card className="p-12 text-center flex flex-col items-center justify-center">
@@ -348,9 +469,19 @@ export default function QiblaPage() {
               <p className="text-muted-foreground mb-6 max-w-md">
                 {location.error}
               </p>
-              <Button onClick={requestLocation} data-testid="button-retry-location">
-                {t("qibla.tryAgain")}
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button onClick={requestLocation} data-testid="button-retry-location">
+                  {t("qibla.tryAgain")}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setSearchOpen(true)}
+                  data-testid="button-set-location-manually-error"
+                >
+                  <Search className="w-4 h-4 mr-2" />
+                  {t("qibla.setLocationManually")}
+                </Button>
+              </div>
             </Card>
           ) : (
             <div className="space-y-8">
@@ -503,7 +634,17 @@ export default function QiblaPage() {
                   </div>
                 </Card>
                 <Card className="p-6">
-                  <div className="text-muted-foreground text-sm mb-2">{t("qibla.yourLocation")}</div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="text-muted-foreground text-sm">{t("qibla.yourLocation")}</div>
+                    {manualOverride && (
+                      <span
+                        className="text-[10px] uppercase tracking-wide font-medium text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded"
+                        data-testid="badge-manual-location"
+                      >
+                        {t("qibla.manualBadge")}
+                      </span>
+                    )}
+                  </div>
                   <div className="text-sm font-medium text-foreground" data-testid="text-your-location">
                     {location.latitude === null || location.longitude === null ? (
                       "--"
@@ -516,6 +657,28 @@ export default function QiblaPage() {
                       </span>
                     ) : (
                       formatCoords(location.latitude, location.longitude)
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSearchOpen(true)}
+                      data-testid="button-change-location"
+                    >
+                      <Pencil className="w-3 h-3 mr-1.5" />
+                      {t("qibla.changeLocation")}
+                    </Button>
+                    {manualOverride && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearManualOverride}
+                        data-testid="button-clear-manual-location"
+                      >
+                        <X className="w-3 h-3 mr-1.5" />
+                        {t("qibla.useAutomaticLocation")}
+                      </Button>
                     )}
                   </div>
                 </Card>
@@ -544,6 +707,66 @@ export default function QiblaPage() {
 
         <BottomNavigation />
       </div>
+
+      <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("qibla.locationSearch.title")}</DialogTitle>
+            <DialogDescription>
+              {t("qibla.locationSearch.description")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t("qibla.locationSearch.placeholder")}
+                className="pl-9"
+                data-testid="input-location-search"
+              />
+            </div>
+            <div className="min-h-[120px] max-h-[320px] overflow-y-auto -mx-2">
+              {searchLoading ? (
+                <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  {t("qibla.locationSearch.searching")}
+                </div>
+              ) : searchError ? (
+                <div className="text-sm text-rose-500 px-3 py-4" data-testid="text-search-error">
+                  {searchError}
+                </div>
+              ) : searchQuery.trim().length < 2 ? (
+                <div className="text-sm text-muted-foreground px-3 py-4">
+                  {t("qibla.locationSearch.hint")}
+                </div>
+              ) : searchResults.length === 0 ? (
+                <div className="text-sm text-muted-foreground px-3 py-4" data-testid="text-search-empty">
+                  {t("qibla.locationSearch.empty")}
+                </div>
+              ) : (
+                <ul className="flex flex-col">
+                  {searchResults.map((result, idx) => (
+                    <li key={`${result.latitude},${result.longitude},${idx}`}>
+                      <button
+                        type="button"
+                        onClick={() => selectManualPlace(result)}
+                        className="w-full text-left px-3 py-2.5 rounded-md hover:bg-muted flex items-start gap-2 text-sm"
+                        data-testid={`button-location-result-${idx}`}
+                      >
+                        <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-emerald-500" />
+                        <span className="flex-1">{result.displayName}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

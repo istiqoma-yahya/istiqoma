@@ -4,6 +4,7 @@ export interface SavedLocation {
   latitude: number;
   longitude: number;
   placeName?: string | null;
+  manual?: boolean;
 }
 
 export function getSavedLocation(): SavedLocation | null {
@@ -16,6 +17,7 @@ export function getSavedLocation(): SavedLocation | null {
           latitude: parsed.latitude,
           longitude: parsed.longitude,
           placeName: typeof parsed.placeName === "string" ? parsed.placeName : null,
+          manual: parsed.manual === true,
         };
       }
     }
@@ -27,11 +29,12 @@ export function saveLocation(
   latitude: number,
   longitude: number,
   placeName?: string | null,
+  manual: boolean = false,
 ) {
   try {
     localStorage.setItem(
       LOCATION_STORAGE_KEY,
-      JSON.stringify({ latitude, longitude, placeName: placeName ?? null }),
+      JSON.stringify({ latitude, longitude, placeName: placeName ?? null, manual }),
     );
   } catch {}
 }
@@ -90,4 +93,46 @@ export async function reverseGeocode(
   const name = buildPlaceName(data?.address);
   if (name) placeNameCache.set(key, name);
   return name;
+}
+
+export interface PlaceSuggestion {
+  displayName: string;
+  latitude: number;
+  longitude: number;
+}
+
+export async function searchPlaces(
+  query: string,
+  language: string,
+  signal: AbortSignal,
+): Promise<PlaceSuggestion[]> {
+  const trimmed = query.trim();
+  if (trimmed.length < 2) return [];
+  const url = new URL("https://nominatim.openstreetmap.org/search");
+  url.searchParams.set("q", trimmed);
+  url.searchParams.set("format", "json");
+  url.searchParams.set("addressdetails", "1");
+  url.searchParams.set("limit", "6");
+  url.searchParams.set("accept-language", language);
+  const res = await fetch(url.toString(), {
+    signal,
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  if (!Array.isArray(data)) return [];
+  return data
+    .map((item: any) => {
+      const lat = parseFloat(item.lat);
+      const lon = parseFloat(item.lon);
+      if (!isFinite(lat) || !isFinite(lon)) return null;
+      const friendly = buildPlaceName(item.address) || item.display_name || null;
+      if (!friendly) return null;
+      return {
+        displayName: friendly,
+        latitude: lat,
+        longitude: lon,
+      } as PlaceSuggestion;
+    })
+    .filter((x): x is PlaceSuggestion => x !== null);
 }

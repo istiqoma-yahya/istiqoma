@@ -290,6 +290,19 @@
       "permissionDenied": "Izin lokasi ditolak. Silakan aktifkan di pengaturan browser.",
       "unavailable": "Informasi lokasi tidak tersedia.",
       "timeout": "Permintaan lokasi timeout."
+    },
+    "changeLocation": "Ubah lokasi",
+    "setLocationManually": "Atur lokasi secara manual",
+    "useAutomaticLocation": "Gunakan lokasi otomatis",
+    "manualBadge": "Manual",
+    "locationSearch": {
+      "title": "Atur lokasimu",
+      "description": "Cari kota atau tempat untuk menggantikan lokasi yang terdeteksi.",
+      "placeholder": "Cari kota atau tempat…",
+      "hint": "Ketik minimal dua karakter untuk mencari.",
+      "searching": "Mencari…",
+      "empty": "Tidak ada tempat yang cocok ditemukan.",
+      "error": "Gagal mencari tempat. Silakan coba lagi."
     }
   },
   "sholatPage": {

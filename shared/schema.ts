@@ -568,11 +568,16 @@ export const quranBookmarks = pgTable("quran_bookmarks", {
 // One row per user holding their last-read position and preferred reciter
 // for Qur'an audio. Acts as a simple key-value resume marker that syncs
 // across devices.
+export const QURAN_ARABIC_FONTS = ["uthmani", "naskh", "indopak", "scheherazade"] as const;
+export type QuranArabicFont = (typeof QURAN_ARABIC_FONTS)[number];
+export const DEFAULT_QURAN_ARABIC_FONT: QuranArabicFont = "uthmani";
+
 export const quranReadingState = pgTable("quran_reading_state", {
   userId: varchar("user_id").primaryKey().references(() => users.id),
   lastSurahNumber: integer("last_surah_number"),
   lastVerseNumber: integer("last_verse_number"),
   preferredReciterId: integer("preferred_reciter_id"),
+  arabicFont: text("arabic_font", { enum: QURAN_ARABIC_FONTS }).notNull().default(DEFAULT_QURAN_ARABIC_FONT),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
@@ -585,6 +590,7 @@ export const upsertQuranReadingStateSchema = z.object({
   lastSurahNumber: z.number().int().min(1).max(114).nullable().optional(),
   lastVerseNumber: z.number().int().min(1).max(286).nullable().optional(),
   preferredReciterId: z.number().int().min(1).nullable().optional(),
+  arabicFont: z.enum(QURAN_ARABIC_FONTS).optional(),
 });
 
 export type QuranBookmark = typeof quranBookmarks.$inferSelect;

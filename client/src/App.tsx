@@ -30,6 +30,7 @@ import QuranHomePage from "@/pages/QuranHomePage";
 import QuranSurahPage from "@/pages/QuranSurahPage";
 import QuranBookmarksPage from "@/pages/QuranBookmarksPage";
 import { QuranAudioProvider } from "@/components/QuranAudioProvider";
+import { QuranFontProvider } from "@/components/QuranFontProvider";
 import { useDeeds } from "@/hooks/use-deeds";
 import NotFound from "@/pages/not-found";
 import { NotificationPrompt } from "@/components/NotificationPrompt";
@@ -89,12 +90,14 @@ function App() {
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <QuranAudioProvider>
-            <Toaster />
-            <Router />
-            <BadgeCelebration />
-            <NotificationPrompt />
-          </QuranAudioProvider>
+          <QuranFontProvider>
+            <QuranAudioProvider>
+              <Toaster />
+              <Router />
+              <BadgeCelebration />
+              <NotificationPrompt />
+            </QuranAudioProvider>
+          </QuranFontProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </ThemeProvider>

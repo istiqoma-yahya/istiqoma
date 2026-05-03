@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Amiri:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap');
 
 @font-face {
   font-family: 'Alhabsyi';
@@ -52,6 +53,9 @@
 
   --font-display: 'Outfit', sans-serif;
   --font-body: 'Inter', sans-serif;
+
+  /* Quran Arabic font. Set by QuranFontProvider; defaults to Uthmani-style. */
+  --font-quran-arabic: 'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', serif;
 }
 
 .dark {

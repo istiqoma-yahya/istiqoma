@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { QuranMiniPlayer } from "@/components/QuranMiniPlayer";
+import { QuranFontPicker } from "@/components/QuranFontPicker";
 import { useToast } from "@/hooks/use-toast";
 import {
   useChapter,
@@ -159,6 +160,7 @@ export default function QuranSurahPage() {
               </>
             ) : null}
           </div>
+          <QuranFontPicker />
           <Button
             size="icon"
             variant="ghost"

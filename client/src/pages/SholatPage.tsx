@@ -518,47 +518,50 @@ export default function SholatPage() {
               </button>
             </div>
 
-            {/* Imsak / Sunrise sub-times */}
-            {imsakTime && sunriseTime && (
+            {/* Sub-times: Imsak / Sunrise / Dhuha / Tahajjud */}
+            {(imsakTime || sunriseTime || dhuhaWindow || tahajjudWindow) && (
               <div
-                className="flex items-center justify-center gap-3 text-xs text-muted-foreground px-2"
+                className="grid grid-cols-2 sm:grid-cols-4 gap-x-3 gap-y-2 text-xs text-muted-foreground px-2"
                 data-testid="row-sub-times"
               >
-                <span className="flex items-center gap-1.5" data-testid="text-imsak">
-                  <Moon className="w-3 h-3" />
-                  <span>{t("sholatPage.imsak")}</span>
-                  <span className="font-mono">{format(imsakTime, "HH:mm")}</span>
-                </span>
-                <span aria-hidden="true">·</span>
-                <span className="flex items-center gap-1.5" data-testid="text-sunrise">
-                  <Sunrise className="w-3 h-3" />
-                  <span>{t("sholatPage.sunrise")}</span>
-                  <span className="font-mono">{format(sunriseTime, "HH:mm")}</span>
-                </span>
-              </div>
-            )}
-
-            {/* Sunnah windows: Dhuha / Tahajjud */}
-            {(dhuhaWindow || tahajjudWindow) && (
-              <div
-                className="flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-4 text-xs text-muted-foreground px-2"
-                data-testid="row-sunnah-windows"
-              >
+                {imsakTime && (
+                  <span
+                    className="flex items-center justify-center gap-1.5"
+                    data-testid="text-imsak"
+                  >
+                    <Moon className="w-3 h-3 shrink-0" />
+                    <span>{t("sholatPage.imsak")}</span>
+                    <span className="font-mono">{format(imsakTime, "HH:mm")}</span>
+                  </span>
+                )}
+                {sunriseTime && (
+                  <span
+                    className="flex items-center justify-center gap-1.5"
+                    data-testid="text-sunrise"
+                  >
+                    <Sunrise className="w-3 h-3 shrink-0" />
+                    <span>{t("sholatPage.sunrise")}</span>
+                    <span className="font-mono">{format(sunriseTime, "HH:mm")}</span>
+                  </span>
+                )}
                 {dhuhaWindow && (
-                  <span className="flex items-center gap-1.5" data-testid="text-dhuha-window">
-                    <Sun className="w-3 h-3" />
+                  <span
+                    className="flex items-center justify-center gap-1.5 whitespace-nowrap"
+                    data-testid="text-dhuha-window"
+                  >
+                    <Sun className="w-3 h-3 shrink-0" />
                     <span>{t("sholatPage.dhuha")}</span>
                     <span className="font-mono">
                       {format(dhuhaWindow.start, "HH:mm")}–{format(dhuhaWindow.end, "HH:mm")}
                     </span>
                   </span>
                 )}
-                {dhuhaWindow && tahajjudWindow && (
-                  <span aria-hidden="true" className="hidden sm:inline">·</span>
-                )}
                 {tahajjudWindow && (
-                  <span className="flex items-center gap-1.5" data-testid="text-tahajjud-window">
-                    <Moon className="w-3 h-3" />
+                  <span
+                    className="flex items-center justify-center gap-1.5 whitespace-nowrap"
+                    data-testid="text-tahajjud-window"
+                  >
+                    <Moon className="w-3 h-3 shrink-0" />
                     <span>{t("sholatPage.tahajjud")}</span>
                     <span className="font-mono">
                       {format(tahajjudWindow.start, "HH:mm")}–{format(tahajjudWindow.end, "HH:mm")}

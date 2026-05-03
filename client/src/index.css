@@ -111,32 +111,6 @@
 }
 
 @layer components {
-  /* Force the top navigation header to use the light-mode palette in both
-     light and dark themes, so descendants styled with theme tokens
-     (bg-background, text-foreground, border-border, etc.) automatically
-     render with dark text on a white surface even when .dark is active. */
-  .app-header {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --border: 214 32% 91%;
-    --card: 210 40% 98%;
-    --card-foreground: 222 47% 11%;
-    --card-border: 214 32% 91%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --accent: 158 64% 42%;
-    --accent-foreground: 0 0% 100%;
-    --primary: 158 64% 42%;
-    --primary-foreground: 0 0% 100%;
-    --input: 214 32% 91%;
-    --ring: 158 64% 42%;
-    color: hsl(var(--foreground));
-  }
-
   .glass-card {
     @apply bg-card backdrop-blur-xl border border-border rounded-2xl;
   }

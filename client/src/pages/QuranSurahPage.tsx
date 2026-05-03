@@ -328,7 +328,7 @@ export default function QuranSurahPage() {
 
   return (
     <div className="min-h-screen bg-background pb-32">
-      <header className="sticky top-0 z-20 app-header bg-background/80 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="container max-w-5xl mx-auto px-2 h-14 flex items-center gap-2">
           <Button
             size="icon"

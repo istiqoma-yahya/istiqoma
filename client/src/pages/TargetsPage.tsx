@@ -555,7 +555,7 @@ export default function TargetsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <header className="sticky top-0 z-50 border-b border-border app-header bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
           <h1 className="text-2xl font-bold text-foreground" data-testid="text-targets-title">
             {t("targets.title")}

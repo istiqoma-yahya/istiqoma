@@ -17,6 +17,12 @@
     "startTracking": "Mulai Perjalananmu",
     "login": "Masuk",
     "usernameLogin": "Masuk dengan nama pengguna",
+    "authChooser": {
+      "title": "Bagaimana Anda ingin melanjutkan?",
+      "description": "Pilih cara masuk untuk mulai mencatat amal Anda. Keduanya bisa untuk pengguna baru maupun yang sudah memiliki akun.",
+      "continueGoogle": "Lanjutkan dengan Google",
+      "continueUsername": "Lanjutkan dengan Nama Pengguna & PIN"
+    },
     "featuresLabel": "Fitur",
     "featuresTitle": "Teman Spiritual Anda",
     "featuresSubtitle": "Rangkaian alat lengkap yang dirancang untuk membantumu menyeimbangkan kehidupan dunia dengan kewajiban spiritual.",

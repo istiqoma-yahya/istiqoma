@@ -17,6 +17,12 @@
     "startTracking": "Mulakan Perjalanan Anda",
     "login": "Log Masuk",
     "usernameLogin": "Log masuk dengan nama pengguna",
+    "authChooser": {
+      "title": "Bagaimana anda ingin meneruskan?",
+      "description": "Pilih kaedah log masuk untuk mula menjejaki amalan anda. Kedua-duanya sesuai untuk pengguna baharu dan sedia ada.",
+      "continueGoogle": "Teruskan dengan Google",
+      "continueUsername": "Teruskan dengan Nama Pengguna & PIN"
+    },
     "featuresLabel": "Ciri-ciri",
     "featuresTitle": "Teman Rohani Anda",
     "featuresSubtitle": "Set alat lengkap yang direka untuk membantu anda mengimbangi kehidupan duniawi dengan tanggungjawab rohani.",

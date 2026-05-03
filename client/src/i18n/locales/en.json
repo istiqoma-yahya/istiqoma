@@ -17,6 +17,12 @@
     "startTracking": "Begin Your Journey",
     "login": "Login",
     "usernameLogin": "Sign in with username",
+    "authChooser": {
+      "title": "How would you like to continue?",
+      "description": "Choose a sign in method to start tracking your deeds. Both work for new and returning users.",
+      "continueGoogle": "Continue with Google",
+      "continueUsername": "Continue with Username & PIN"
+    },
     "featuresLabel": "Features",
     "featuresTitle": "Your Spiritual Companion",
     "featuresSubtitle": "A comprehensive suite of tools designed to help you balance worldly life with your spiritual obligations.",

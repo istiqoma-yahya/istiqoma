@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins, Shield, Calendar, CheckCircle2, Download } from "lucide-react";
+import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins, Shield, Calendar, CheckCircle2, Download, KeyRound } from "lucide-react";
+import { SiGoogle } from "react-icons/si";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -21,7 +22,16 @@ export default function Landing() {
   const [showSticky, setShowSticky] = useState(false);
   const { isInstallable, isInstalled, install } = useInstallPWA();
 
-  const handleLogin = () => {
+  const scrollToChooser = () => {
+    const el = document.querySelector('[data-testid="auth-chooser"]');
+    if (el && "scrollIntoView" in el) {
+      (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleGoogleLogin = () => {
     window.location.href = "/api/login";
   };
 
@@ -68,14 +78,14 @@ export default function Landing() {
               </div>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={handleLogin}
+                  onClick={scrollToChooser}
                   className="btn-secondary text-sm px-4 py-2 whitespace-nowrap"
                   data-testid="sticky-button-login"
                 >
                   {t('landing.login')}
                 </button>
                 <button
-                  onClick={handleLogin}
+                  onClick={scrollToChooser}
                   className="btn-primary text-sm px-4 py-2 flex items-center gap-2 whitespace-nowrap"
                   data-testid="sticky-button-start-tracking"
                 >
@@ -102,7 +112,7 @@ export default function Landing() {
         <div className="flex flex-wrap items-center gap-2">
           <LanguageSwitcher />
           <button 
-            onClick={handleLogin}
+            onClick={scrollToChooser}
             className="btn-secondary text-sm px-5 py-2.5"
             data-testid="button-login"
           >
@@ -133,20 +143,42 @@ export default function Landing() {
               {t('landing.subtitle')}
             </p>
             
-            <div className="flex flex-col items-center justify-center md:flex-row md:items-center md:justify-start gap-4">
-              <button 
-                onClick={handleLogin}
-                className="btn-primary w-full sm:w-auto text-lg px-8 py-4 flex items-center justify-center gap-2 group"
-                data-testid="button-start-tracking"
+            <div
+              className="flex flex-col gap-3 max-w-md mx-auto md:mx-0"
+              data-testid="auth-chooser"
+            >
+              <p
+                className="text-xs font-medium uppercase tracking-wider text-muted-foreground text-center md:text-left"
+                data-testid="text-auth-chooser-title"
               >
-                {t('landing.startTracking')}
-                <ArrowRight className="w-5 h-5" />
-              </button>
+                {t('landing.authChooser.title')}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  className="btn-primary flex-1 text-base px-6 py-3.5 flex items-center justify-center gap-2"
+                  data-testid="button-chooser-google"
+                >
+                  <SiGoogle className="w-5 h-5" />
+                  <span>{t('landing.authChooser.continueGoogle')}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleUsernameLogin}
+                  className="btn-secondary flex-1 text-base px-6 py-3.5 flex items-center justify-center gap-2 border border-border"
+                  data-testid="button-chooser-username"
+                >
+                  <KeyRound className="w-5 h-5" />
+                  <span>{t('landing.authChooser.continueUsername')}</span>
+                </button>
+              </div>
               {isInstallable && !isInstalled && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.3 }}
+                  className="mt-1 flex justify-center md:justify-start"
                 >
                   <button
                     onClick={install}
@@ -158,16 +190,6 @@ export default function Landing() {
                   </button>
                 </motion.div>
               )}
-            </div>
-            <div className="mt-3 text-center md:text-left">
-              <button
-                type="button"
-                onClick={handleUsernameLogin}
-                className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
-                data-testid="button-username-login"
-              >
-                {t('landing.usernameLogin')}
-              </button>
             </div>
           </motion.div>
 
@@ -489,6 +511,7 @@ export default function Landing() {
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
         <p data-testid="text-footer-copyright">© {new Date().getFullYear()} {t('app.name')}. {t('app.tagline')}</p>
       </footer>
+
     </div>
   );
 }

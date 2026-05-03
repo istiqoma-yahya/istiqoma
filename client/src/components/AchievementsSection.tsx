@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -34,8 +35,6 @@ type BadgesSnapshot = {
   latestEarned: { badgeId: string; tier: number; earnedAt: string } | null;
 };
 
-const TIER_NAMES = ["", "Bronze", "Silver", "Gold", "Platinum"];
-
 const TIER_BG_CLASSES = [
   "",
   "bg-amber-700/20 text-amber-700 dark:text-amber-300 border-amber-700/30",
@@ -69,6 +68,17 @@ function tierProgress(b: BadgeProgress) {
   return { current: lower, next: upper, percent: Math.round((localValue / span) * 100) };
 }
 
+function useBadgeI18n() {
+  const { t } = useTranslation();
+  const tName = (b: BadgeProgress) =>
+    t(`achievements.badges.${b.badgeId}.name`, { defaultValue: b.name });
+  const tDesc = (b: BadgeProgress) =>
+    t(`achievements.badges.${b.badgeId}.description`, { defaultValue: b.description });
+  const tTier = (tier: number) =>
+    t(`achievements.tiers.${tier}`, { defaultValue: "" });
+  return { t, tName, tDesc, tTier };
+}
+
 function BadgeCell({
   badge,
   onClick,
@@ -76,10 +86,10 @@ function BadgeCell({
   badge: BadgeProgress;
   onClick: () => void;
 }) {
+  const { tName, tDesc, tTier } = useBadgeI18n();
   const Icon = getIcon(badge.icon);
   const earned = badge.earnedTier > 0;
   const { percent, next } = tierProgress(badge);
-  const maxThreshold = badge.thresholds[badge.thresholds.length - 1] ?? 0;
   const atMax = earned && badge.earnedTier >= badge.thresholds.length;
   return (
     <button
@@ -105,17 +115,17 @@ function BadgeCell({
         className="line-clamp-2 text-xs font-medium leading-tight"
         data-testid={`text-badge-name-${badge.badgeId}`}
       >
-        {badge.name}
+        {tName(badge)}
       </p>
       <p
         className="line-clamp-2 text-[10px] leading-snug opacity-80"
         data-testid={`text-badge-description-${badge.badgeId}`}
       >
-        {badge.description}
+        {tDesc(badge)}
       </p>
       {earned && (
         <span className="text-[10px] font-semibold uppercase tracking-wide">
-          {TIER_NAMES[badge.earnedTier]}
+          {tTier(badge.earnedTier)}
         </span>
       )}
       <span
@@ -135,6 +145,7 @@ export function AchievementsSection() {
   const [selected, setSelected] = useState<BadgeProgress | null>(null);
   const { toast } = useToast();
   const seenLatestRef = useRef<string | null>(null);
+  const { t, tName, tDesc, tTier } = useBadgeI18n();
 
   const { data, isLoading, isError } = useQuery<BadgesSnapshot>({
     queryKey: ["/api/badges"],
@@ -187,20 +198,25 @@ export function AchievementsSection() {
     const toShow = fresh.slice(0, 3);
     for (const e of toShow) {
       toast({
-        title: `🏆 ${e.badge.name}`,
-        description: `${TIER_NAMES[e.tier]} tier — ${e.badge.description}`,
+        title: `🏆 ${tName(e.badge)}`,
+        description: t("achievements.newBadgeTierDesc", {
+          tier: tTier(e.tier),
+          description: tDesc(e.badge),
+        }),
       });
     }
     if (fresh.length > toShow.length) {
       toast({
-        title: "Lencana baru",
-        description: `+${fresh.length - toShow.length} lencana lain terbuka`,
+        title: t("achievements.newBadgesToastTitle"),
+        description: t("achievements.newBadgesToastDesc", {
+          count: fresh.length - toShow.length,
+        }),
       });
     }
 
     fresh.forEach((e) => seen.add(e.key));
     window.localStorage.setItem(storageKey, JSON.stringify(Array.from(seen)));
-  }, [data, toast]);
+  }, [data, toast, t, tName, tDesc, tTier]);
 
   return (
     <Card className="p-5" data-testid="card-achievements">
@@ -210,10 +226,10 @@ export function AchievementsSection() {
             className="text-base font-semibold"
             data-testid="text-achievements-heading"
           >
-            Achievements
+            {t("achievements.heading")}
           </h2>
           <p className="text-xs text-muted-foreground">
-            Lencana untuk perjalanan ibadahmu
+            {t("achievements.subheading")}
           </p>
         </div>
         {data && (
@@ -232,7 +248,7 @@ export function AchievementsSection() {
                   const Icon = getIcon(latestBadge.icon);
                   return <Icon className="h-3.5 w-3.5" />;
                 })()}
-                <span className="max-w-[100px] truncate">{latestBadge.name}</span>
+                <span className="max-w-[100px] truncate">{tName(latestBadge)}</span>
               </button>
             )}
             <div
@@ -251,7 +267,7 @@ export function AchievementsSection() {
         </div>
       ) : isError ? (
         <p className="py-6 text-center text-sm text-muted-foreground">
-          Gagal memuat lencana. Coba muat ulang halaman.
+          {t("achievements.loadError")}
         </p>
       ) : (
         <div className="space-y-5">
@@ -260,7 +276,7 @@ export function AchievementsSection() {
               className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
               data-testid="text-achievements-milestone-heading"
             >
-              Milestone
+              {t("achievements.milestone")}
             </h3>
             <div
               className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4"
@@ -280,7 +296,7 @@ export function AchievementsSection() {
               className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
               data-testid="text-achievements-behavior-heading"
             >
-              Behavior
+              {t("achievements.behavior")}
             </h3>
             <div
               className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4"
@@ -308,6 +324,7 @@ export function AchievementsSection() {
 }
 
 function AchievementDetail({ badge }: { badge: BadgeProgress }) {
+  const { t, tName, tDesc, tTier } = useBadgeI18n();
   const Icon = getIcon(badge.icon);
   const { percent, next } = tierProgress(badge);
   const earned = badge.earnedTier > 0;
@@ -326,12 +343,12 @@ function AchievementDetail({ badge }: { badge: BadgeProgress }) {
           </div>
           <div>
             <DialogTitle data-testid="text-achievement-detail-name">
-              {badge.name}
+              {tName(badge)}
             </DialogTitle>
             <DialogDescription>
               {earned
-                ? `${TIER_NAMES[badge.earnedTier]} tier earned`
-                : "Belum diraih"}
+                ? t("achievements.tierEarned", { tier: tTier(badge.earnedTier) })
+                : t("achievements.notEarnedYet")}
             </DialogDescription>
           </div>
         </div>
@@ -340,12 +357,12 @@ function AchievementDetail({ badge }: { badge: BadgeProgress }) {
         className="text-sm text-muted-foreground"
         data-testid="text-achievement-detail-description"
       >
-        {badge.description}
+        {tDesc(badge)}
       </p>
 
       <div className="space-y-3">
         <div className="flex items-baseline justify-between text-sm">
-          <span className="text-muted-foreground">Progress</span>
+          <span className="text-muted-foreground">{t("achievements.progress")}</span>
           <span className="font-medium" data-testid="text-achievement-detail-progress">
             {badge.value.toLocaleString()}
             {badge.thresholds.length > 0 && (
@@ -357,12 +374,18 @@ function AchievementDetail({ badge }: { badge: BadgeProgress }) {
         <Progress value={percent} />
         {!earned ? (
           <p className="text-xs text-muted-foreground">
-            Selangkah lagi: {next.toLocaleString()} {badge.unit}
+            {t("achievements.oneStepAway", {
+              value: next.toLocaleString(),
+              unit: badge.unit,
+            })}
           </p>
         ) : (
           badge.earnedTier < badge.thresholds.length && (
             <p className="text-xs text-muted-foreground">
-              Tier berikutnya: {next.toLocaleString()} {badge.unit}
+              {t("achievements.nextTier", {
+                value: next.toLocaleString(),
+                unit: badge.unit,
+              })}
             </p>
           )
         )}
@@ -373,14 +396,16 @@ function AchievementDetail({ badge }: { badge: BadgeProgress }) {
           className="text-xs text-muted-foreground"
           data-testid={`text-achievement-detail-earned-at-${badge.badgeId}`}
         >
-          Earned on {new Date(badge.earnedAt[1]).toLocaleDateString()}
+          {t("achievements.earnedOn", {
+            date: new Date(badge.earnedAt[1]).toLocaleDateString(),
+          })}
         </p>
       )}
 
       {badge.thresholds.length > 1 && (
         <div className="space-y-2">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Tier
+            {t("achievements.tierLabel")}
           </h4>
           <ul className="space-y-1 text-sm">
             {badge.thresholds.map((threshold, idx) => {
@@ -397,14 +422,14 @@ function AchievementDetail({ badge }: { badge: BadgeProgress }) {
                   data-testid={`row-achievement-tier-${badge.badgeId}-${tier}`}
                 >
                   <span className="font-medium">
-                    {TIER_NAMES[tier]} · {threshold.toLocaleString()} {badge.unit}
+                    {tTier(tier)} · {threshold.toLocaleString()} {badge.unit}
                   </span>
                   <span className="text-xs">
                     {isEarned && at
                       ? new Date(at).toLocaleDateString()
                       : isEarned
-                        ? "Earned"
-                        : "Locked"}
+                        ? t("achievements.earned")
+                        : t("achievements.locked")}
                   </span>
                 </li>
               );

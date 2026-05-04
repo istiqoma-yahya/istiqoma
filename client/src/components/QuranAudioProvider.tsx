@@ -108,8 +108,33 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
   const blobUrlRef = useRef<string | null>(null);
   const loadedUrlRef = useRef<string | null>(null);
 
+  const ayahBlobCacheRef = useRef<Map<string, string>>(new Map());
+
+  const clearAyahBlobCache = () => {
+    for (const blobUrl of ayahBlobCacheRef.current.values()) {
+      URL.revokeObjectURL(blobUrl);
+    }
+    ayahBlobCacheRef.current.clear();
+  };
+
+  const isAyahCachedBlob = (url: string): boolean => {
+    for (const blobUrl of ayahBlobCacheRef.current.values()) {
+      if (blobUrl === url) return true;
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    return () => {
+      clearAyahBlobCache();
+    };
+  }, []);
+
   useEffect(() => {
     if (readingState?.preferredReciterId) {
+      if (readingState.preferredReciterId !== reciterIdRef.current) {
+        clearAyahBlobCache();
+      }
       setReciterIdState(readingState.preferredReciterId);
     }
   }, [readingState?.preferredReciterId]);
@@ -327,7 +352,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
         setDownloadProgress(null);
 
-        if (prevBlob) URL.revokeObjectURL(prevBlob);
+        if (prevBlob && !isAyahCachedBlob(prevBlob)) URL.revokeObjectURL(prevBlob);
       } catch (err) {
         if ((err as { name?: string })?.name === "AbortError") return;
         setIsLoading(false);
@@ -366,6 +391,43 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
   const playAyah = async (s: PlayingSurah, verseNumber: number) => {
     const a = audioRef.current;
     if (!a) return;
+
+    const cacheKey = `${reciterIdRef.current}:${s.surahNumber}:${verseNumber}`;
+    const cachedBlobUrl = ayahBlobCacheRef.current.get(cacheKey);
+
+    if (cachedBlobUrl) {
+      downloadAbortRef.current?.abort();
+
+      setCurrent(s);
+      setCurrentAyah(verseNumber);
+      currentAyahRef.current = verseNumber;
+      setPlaybackMode('ayah');
+      playbackModeRef.current = 'ayah';
+      verseTimingsRef.current = [];
+
+      const prevBlob = blobUrlRef.current;
+      if (prevBlob && !isAyahCachedBlob(prevBlob)) {
+        URL.revokeObjectURL(prevBlob);
+      }
+
+      blobUrlRef.current = cachedBlobUrl;
+      loadedUrlRef.current = null;
+
+      a.src = cachedBlobUrl;
+      a.currentTime = 0;
+      setPosition(0);
+      setDuration(0);
+      setIsPlaying(false);
+      setIsLoading(false);
+      setDownloadProgress(null);
+
+      try {
+        await a.play();
+      } catch {
+        setIsPlaying(false);
+      }
+      return;
+    }
 
     downloadAbortRef.current?.abort();
     const ac = new AbortController();
@@ -420,6 +482,8 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
       const blob = new Blob(chunks as BlobPart[], { type: res.headers.get("Content-Type") || "audio/mpeg" });
       const blobUrl = URL.createObjectURL(blob);
 
+      ayahBlobCacheRef.current.set(cacheKey, blobUrl);
+
       const prevBlob = blobUrlRef.current;
       blobUrlRef.current = blobUrl;
       loadedUrlRef.current = url;
@@ -436,7 +500,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
       setDownloadProgress(null);
 
-      if (prevBlob) URL.revokeObjectURL(prevBlob);
+      if (prevBlob && !isAyahCachedBlob(prevBlob)) URL.revokeObjectURL(prevBlob);
     } catch (err) {
       if ((err as { name?: string })?.name === "AbortError") return;
       setIsLoading(false);
@@ -498,7 +562,9 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
       a.load();
     }
     if (blobUrlRef.current) {
-      URL.revokeObjectURL(blobUrlRef.current);
+      if (!isAyahCachedBlob(blobUrlRef.current)) {
+        URL.revokeObjectURL(blobUrlRef.current);
+      }
       blobUrlRef.current = null;
     }
     loadedUrlRef.current = null;
@@ -526,6 +592,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
   const setReciterId = (id: number) => {
     setReciterIdState(id);
     downloadAbortRef.current?.abort();
+    clearAyahBlobCache();
     loadedUrlRef.current = null;
     setCurrentAyah(null);
     currentAyahRef.current = null;

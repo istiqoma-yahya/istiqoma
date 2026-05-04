@@ -94,7 +94,7 @@ export default function QuranSurahPage() {
   const removeMemorization = useRemoveMemorization();
   const updateReadingState = useUpdateReadingState();
   const { toast } = useToast();
-  const { playSurah, playAyah, current } = useQuranAudio();
+  const { playSurah, playAyah, current, currentAyah, isPlaying, isLoading } = useQuranAudio();
 
   const verseRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const [topVerse, setTopVerse] = useState<number | null>(null);
@@ -166,6 +166,21 @@ export default function QuranSurahPage() {
     const el = verseRefs.current.get(initialVerse);
     if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "center" }));
   }, [initialVerse, verses]);
+
+  useEffect(() => {
+    if (
+      currentAyah == null ||
+      !(isPlaying || isLoading) ||
+      current?.surahNumber !== surahId
+    )
+      return;
+    const el = verseRefs.current.get(currentAyah);
+    if (el) {
+      requestAnimationFrame(() =>
+        el.scrollIntoView({ block: "center", behavior: "smooth" }),
+      );
+    }
+  }, [currentAyah, isPlaying, isLoading, current?.surahNumber, surahId]);
 
   // Reset memorization-mode session state when navigating to another surah
   // and revoke any in-memory object URLs so recordings don't leak.
@@ -468,6 +483,10 @@ export default function QuranSurahPage() {
                 // the in-memory map changes. ref reads bypass the dep system.
                 void recordingsVersion;
                 const showFull = mode === "full" || isPeeking;
+                const isActiveAyah =
+                  (isPlaying || isLoading) &&
+                  current?.surahNumber === surahId &&
+                  currentAyah === v.verse_number;
                 return (
                   <div
                     key={v.id}
@@ -477,6 +496,12 @@ export default function QuranSurahPage() {
                     }}
                     data-verse-num={v.verse_number}
                     data-testid={`verse-${v.verse_number}`}
+                    data-playing={isActiveAyah ? "true" : "false"}
+                    className={
+                      isActiveAyah
+                        ? "rounded-lg ring-2 ring-emerald-500/40 bg-emerald-500/5 p-3 transition-all duration-300"
+                        : "p-3 transition-all duration-300"
+                    }
                   >
                     <div className="flex items-center justify-between mb-3 gap-2">
                       <div className="flex items-center gap-2">

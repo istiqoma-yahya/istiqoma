@@ -176,9 +176,17 @@ export default function QuranSurahPage() {
       return;
     const el = verseRefs.current.get(currentAyah);
     if (el) {
-      requestAnimationFrame(() =>
-        el.scrollIntoView({ block: "center", behavior: "smooth" }),
-      );
+      requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect();
+        const headerHeight = 56;
+        const usableHeight = window.innerHeight - headerHeight;
+        const targetY = headerHeight + usableHeight * 0.2;
+        const scrollTop = window.scrollY + rect.top - targetY;
+        window.scrollTo({
+          top: Math.max(0, scrollTop),
+          behavior: "smooth",
+        });
+      });
     }
   }, [currentAyah, isPlaying, isLoading, current?.surahNumber, surahId]);
 

@@ -15,7 +15,6 @@ import {
 } from "@/lib/quranApi";
 import type { QuranArabicFont, QuranArabicFontSize, QuranArabicLineHeight, QuranBookmark, QuranMemorization, QuranReadingState } from "@shared/schema";
 
-const STALE_5_MIN = 5 * 60 * 1000;
 const STALE_24_HR = 24 * 60 * 60 * 1000;
 
 // Static reference data: chapters list never changes and reciters change
@@ -67,7 +66,8 @@ export function useChapterAudio(reciterId: number | null, chapterId: number | nu
     queryKey: ["quran", "audio", reciterId, chapterId],
     queryFn: () => fetchChapterAudio(reciterId as number, chapterId as number),
     enabled: reciterId != null && chapterId != null,
-    staleTime: STALE_5_MIN,
+    staleTime: Infinity,
+    gcTime: STALE_24_HR,
   });
 }
 

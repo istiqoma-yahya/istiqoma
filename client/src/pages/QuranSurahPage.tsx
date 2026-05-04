@@ -94,7 +94,7 @@ export default function QuranSurahPage() {
   const removeMemorization = useRemoveMemorization();
   const updateReadingState = useUpdateReadingState();
   const { toast } = useToast();
-  const { playSurah, current } = useQuranAudio();
+  const { playSurah, playAyah, current } = useQuranAudio();
 
   const verseRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const [topVerse, setTopVerse] = useState<number | null>(null);
@@ -228,6 +228,18 @@ export default function QuranSurahPage() {
       surahName: chapter.name_simple,
       surahArabic: chapter.name_arabic,
     });
+  };
+
+  const handlePlayAyah = (verseNumber: number) => {
+    if (!chapter) return;
+    playAyah(
+      {
+        surahNumber: chapter.id,
+        surahName: chapter.name_simple,
+        surahArabic: chapter.name_arabic,
+      },
+      verseNumber,
+    );
   };
 
   const getDisplayMode = (verseNumber: number): DisplayMode => {
@@ -375,7 +387,7 @@ export default function QuranSurahPage() {
             size="icon"
             variant="ghost"
             onClick={handlePlay}
-            disabled={!chapter || current?.surahNumber === chapter?.id}
+            disabled={!chapter}
             data-testid="button-play-surah"
             aria-label="Play surah"
           >
@@ -505,9 +517,9 @@ export default function QuranSurahPage() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={handlePlay}
-                          data-testid={`button-play-from-${v.verse_number}`}
-                          aria-label="Play from this verse"
+                          onClick={() => handlePlayAyah(v.verse_number)}
+                          data-testid={`button-play-ayah-${v.verse_number}`}
+                          aria-label={`Play ayah ${v.verse_number}`}
                         >
                           <Play className="w-4 h-4" />
                         </Button>

@@ -25,6 +25,7 @@ export function QuranNowPlayingSheet({
   const { t } = useTranslation();
   const {
     current,
+    currentAyah,
     isPlaying,
     isLoading,
     position,
@@ -67,6 +68,14 @@ export function QuranNowPlayingSheet({
               <div className="text-2xl font-semibold" data-testid="text-now-playing-name">
                 {current.surahName}
               </div>
+              {currentAyah != null && (
+                <div
+                  className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mt-1"
+                  data-testid="text-now-playing-ayah"
+                >
+                  Ayah {currentAyah}
+                </div>
+              )}
               <div className="font-arabic text-arabic mt-2 text-muted-foreground">
                 {current.surahArabic}
               </div>

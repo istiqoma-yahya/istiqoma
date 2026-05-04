@@ -22,6 +22,7 @@ function fmtBytes(bytes: number) {
 export function QuranMiniPlayer() {
   const {
     current,
+    currentAyah,
     isPlaying,
     isLoading,
     position,
@@ -60,7 +61,9 @@ export function QuranMiniPlayer() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium truncate" data-testid="text-mini-surah-name">
-                    {current.surahName}
+                    {currentAyah != null
+                      ? `${current.surahName} · Ayah ${currentAyah}`
+                      : current.surahName}
                   </div>
                   {downloadProgress ? (
                     <div

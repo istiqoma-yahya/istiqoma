@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useChapterAudio, useReciters, useReadingState, useUpdateReadingState } from "@/hooks/use-quran";
-import { DEFAULT_RECITER_ID } from "@/lib/quranApi";
+import { DEFAULT_RECITER_ID, fetchVerseAudioUrl } from "@/lib/quranApi";
 import { useAuth } from "@/hooks/use-auth";
 
 // One-and-only-one HTMLAudioElement for the whole app. Keeping the
@@ -21,6 +21,7 @@ export type DownloadProgress = {
 
 type AudioContextValue = {
   current: PlayingSurah | null;
+  currentAyah: number | null;
   isPlaying: boolean;
   isLoading: boolean;
   duration: number;
@@ -30,6 +31,7 @@ type AudioContextValue = {
   downloadProgress: DownloadProgress | null;
   setReciterId: (id: number) => void;
   playSurah: (s: PlayingSurah) => void;
+  playAyah: (s: PlayingSurah, verseNumber: number) => void;
   toggle: () => void;
   seekBy: (seconds: number) => void;
   seekTo: (seconds: number) => void;
@@ -51,12 +53,22 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [current, setCurrent] = useState<PlayingSurah | null>(null);
+  const [currentAyah, setCurrentAyah] = useState<number | null>(null);
   const [reciterId, setReciterIdState] = useState<number>(DEFAULT_RECITER_ID);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState<DownloadProgress | null>(null);
+
+  // Ref mirror of currentAyah for use inside async closures and callbacks
+  // without stale closure issues.
+  const currentAyahRef = useRef<number | null>(null);
+  currentAyahRef.current = currentAyah;
+
+  // Ref mirror of reciterId so async playAyah picks up the latest value.
+  const reciterIdRef = useRef<number>(DEFAULT_RECITER_ID);
+  reciterIdRef.current = reciterId;
 
   // Track in-flight downloads so we can abort them when the user
   // switches reciter/surah mid-download. We also keep the last blob URL
@@ -74,8 +86,13 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     }
   }, [readingState?.preferredReciterId]);
 
+  // Only use the reactive chapter-audio hook when in surah (not ayah) mode.
+  // When currentAyah is set we fetch the URL imperatively inside playAyah.
   const surahNumber = current?.surahNumber ?? null;
-  const { data: audioFile } = useChapterAudio(current ? reciterId : null, surahNumber);
+  const { data: audioFile } = useChapterAudio(
+    current && currentAyah === null ? reciterId : null,
+    surahNumber,
+  );
 
   const reciterName = useMemo(() => {
     const r = reciters?.find((r) => r.id === reciterId);
@@ -107,6 +124,10 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     const onEnded = () => {
       setIsPlaying(false);
       setPosition(0);
+      // When a single ayah finishes, stop completely (don't auto-advance).
+      if (currentAyahRef.current !== null) {
+        stopRef.current?.();
+      }
     };
     const onLoaded = () => {
       setDuration(a.duration || 0);
@@ -139,6 +160,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
   // letting <audio> stream the URL directly) gives us byte-level
   // progress for the UI _and_ lets the service worker cache the full
   // file so re-opens are instant / work offline.
+  // This effect only runs in surah mode (audioFile is null in ayah mode).
   useEffect(() => {
     const a = audioRef.current;
     const url = audioFile?.audio_url;
@@ -230,7 +252,112 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
   }, [audioFile?.audio_url, current]);
 
   const playSurah = (s: PlayingSurah) => {
+    const a = audioRef.current;
+    const isSameSurah = current?.surahNumber === s.surahNumber && currentAyahRef.current === null;
+
+    if (isSameSurah && a && loadedUrlRef.current) {
+      // The full surah is already loaded — just restart from the beginning.
+      a.currentTime = 0;
+      a.play().catch(() => {});
+      return;
+    }
+
+    // Switching to a different surah or leaving ayah mode: clear ayah state
+    // and let the surah download effect take over.
+    downloadAbortRef.current?.abort();
+    setCurrentAyah(null);
+    // Force the surah download effect to re-run even if the surah hasn't
+    // changed (e.g. user was in ayah mode and now wants the full surah).
+    loadedUrlRef.current = null;
     setCurrent(s);
+  };
+
+  // Imperative ayah playback. Fetches the verse-level audio URL from the
+  // quran.com recitations API, downloads it with progress tracking (same
+  // pattern as surah playback), and plays it through the shared element.
+  // When the ayah ends, the onEnded handler calls stop() so everything
+  // clears automatically.
+  const playAyah = async (s: PlayingSurah, verseNumber: number) => {
+    const a = audioRef.current;
+    if (!a) return;
+
+    // Abort any ongoing surah or previous ayah download.
+    downloadAbortRef.current?.abort();
+    const ac = new AbortController();
+    downloadAbortRef.current = ac;
+
+    // Switch to ayah mode. Setting currentAyah causes useChapterAudio to
+    // receive null for reciterId, so the surah-download effect won't fire.
+    setCurrent(s);
+    setCurrentAyah(verseNumber);
+    currentAyahRef.current = verseNumber;
+
+    // Silence whatever was playing before.
+    a.pause();
+    a.removeAttribute("src");
+    a.load();
+    setIsPlaying(false);
+    setPosition(0);
+    setDuration(0);
+    setIsLoading(true);
+    setDownloadProgress({ loaded: 0, total: 0 });
+    loadedUrlRef.current = null;
+
+    try {
+      const url = await fetchVerseAudioUrl(reciterIdRef.current, s.surahNumber, verseNumber);
+      if (ac.signal.aborted) return;
+
+      const res = await fetch(url, { signal: ac.signal, credentials: "omit" });
+      if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+      const totalHeader = res.headers.get("Content-Length");
+      const total = totalHeader ? Number(totalHeader) : 0;
+
+      const reader = res.body.getReader();
+      const chunks: Uint8Array[] = [];
+      let loaded = 0;
+      let lastEmit = 0;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) {
+          chunks.push(value);
+          loaded += value.byteLength;
+          const now = performance.now();
+          if (now - lastEmit > 100) {
+            lastEmit = now;
+            setDownloadProgress({ loaded, total });
+          }
+        }
+      }
+      if (ac.signal.aborted) return;
+
+      const blob = new Blob(chunks as BlobPart[], { type: res.headers.get("Content-Type") || "audio/mpeg" });
+      const blobUrl = URL.createObjectURL(blob);
+
+      const prevBlob = blobUrlRef.current;
+      blobUrlRef.current = blobUrl;
+      loadedUrlRef.current = url;
+
+      a.src = blobUrl;
+      a.currentTime = 0;
+      setDownloadProgress({ loaded, total: total || loaded });
+
+      try {
+        await a.play();
+      } catch {
+        setIsPlaying(false);
+      }
+      setIsLoading(false);
+      setDownloadProgress(null);
+
+      if (prevBlob) URL.revokeObjectURL(prevBlob);
+    } catch (err) {
+      if ((err as { name?: string })?.name === "AbortError") return;
+      setIsLoading(false);
+      setDownloadProgress(null);
+      setIsPlaying(false);
+    }
   };
 
   const toggle = () => {
@@ -266,6 +393,8 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     }
     loadedUrlRef.current = null;
     setCurrent(null);
+    setCurrentAyah(null);
+    currentAyahRef.current = null;
     setIsPlaying(false);
     setPosition(0);
     setDuration(0);
@@ -281,6 +410,8 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     // new reciter on next render.
     downloadAbortRef.current?.abort();
     loadedUrlRef.current = null;
+    setCurrentAyah(null);
+    currentAyahRef.current = null;
     const a = audioRef.current;
     if (a) {
       a.removeAttribute("src");
@@ -291,6 +422,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AudioContextValue>(() => ({
     current,
+    currentAyah,
     isPlaying,
     isLoading,
     duration,
@@ -300,11 +432,12 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     downloadProgress,
     setReciterId,
     playSurah,
+    playAyah,
     toggle,
     seekBy,
     seekTo,
     stop,
-  }), [current, isPlaying, isLoading, duration, position, reciterId, reciterName, downloadProgress]);
+  }), [current, currentAyah, isPlaying, isLoading, duration, position, reciterId, reciterName, downloadProgress]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

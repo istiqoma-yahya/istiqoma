@@ -111,6 +111,56 @@ export async function fetchChapterAudio(
   return data.audio_file ?? null;
 }
 
+export type VerseAudioFile = {
+  verse_key: string; // "1:1"
+  url: string;       // relative path, needs prefix
+};
+
+const VERSE_AUDIO_CDN = "https://audio.qurancdn.com/";
+
+type VerseAudioPage = {
+  audio_files: VerseAudioFile[];
+  meta?: {
+    pagination?: {
+      per_page: number;
+      current_page: number;
+      next_page: number | null;
+      total_pages: number;
+      total_count: number;
+    };
+  };
+};
+
+export async function fetchVerseAudioUrl(
+  reciterId: number,
+  chapterId: number,
+  verseNumber: number,
+): Promise<string> {
+  const targetKey = `${chapterId}:${verseNumber}`;
+
+  // Request per_page=300 to cover the largest surah in one shot (286 verses).
+  // If the API enforces a lower server-side limit it will return a next_page,
+  // so we keep paginating until we find the target verse or run out of pages.
+  let page = 1;
+  while (true) {
+    const data = await fetchJson<VerseAudioPage>(
+      `/recitations/${reciterId}/by_chapter/${chapterId}?per_page=300&page=${page}`,
+    );
+
+    const file = data.audio_files.find((f) => f.verse_key === targetKey);
+    if (file) {
+      const url = file.url.startsWith("http") ? file.url : `${VERSE_AUDIO_CDN}${file.url}`;
+      return url;
+    }
+
+    const nextPage = data.meta?.pagination?.next_page;
+    if (!nextPage || data.audio_files.length === 0) {
+      throw new Error(`No audio found for ${chapterId}:${verseNumber}`);
+    }
+    page = nextPage;
+  }
+}
+
 // Curated set of widely-known reciters surfaced first in the picker.
 // The full list from the API is also shown below this set, but having
 // recognizable names at the top means most users never have to scroll.

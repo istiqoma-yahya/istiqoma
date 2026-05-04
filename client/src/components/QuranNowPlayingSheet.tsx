@@ -136,7 +136,10 @@ export function QuranNowPlayingSheet({
                 data-testid="button-rewind"
                 aria-label="Rewind 10 seconds"
               >
-                <RotateCcw className="w-7 h-7" />
+                <span className="relative inline-flex items-center justify-center">
+                  <RotateCcw className="w-7 h-7" />
+                  <span className="absolute text-[8px] font-bold leading-none">10</span>
+                </span>
               </Button>
               <Button
                 size="icon"
@@ -160,7 +163,10 @@ export function QuranNowPlayingSheet({
                 data-testid="button-fast-forward"
                 aria-label="Fast forward 10 seconds"
               >
-                <RotateCw className="w-7 h-7" />
+                <span className="relative inline-flex items-center justify-center">
+                  <RotateCw className="w-7 h-7" />
+                  <span className="absolute text-[8px] font-bold leading-none">10</span>
+                </span>
               </Button>
             </div>
 

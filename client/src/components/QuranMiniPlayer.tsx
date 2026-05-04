@@ -91,7 +91,10 @@ export function QuranMiniPlayer() {
                 data-testid="button-quran-rewind-10"
                 aria-label="Rewind 10 seconds"
               >
-                <RotateCcw className="w-4 h-4" />
+                <span className="relative inline-flex items-center justify-center">
+                  <RotateCcw className="w-4 h-4" />
+                  <span className="absolute text-[6px] font-bold leading-none">10</span>
+                </span>
               </Button>
               <Button
                 size="icon"
@@ -115,7 +118,10 @@ export function QuranMiniPlayer() {
                 data-testid="button-quran-forward-10"
                 aria-label="Forward 10 seconds"
               >
-                <RotateCw className="w-4 h-4" />
+                <span className="relative inline-flex items-center justify-center">
+                  <RotateCw className="w-4 h-4" />
+                  <span className="absolute text-[6px] font-bold leading-none">10</span>
+                </span>
               </Button>
               <Button
                 size="icon"

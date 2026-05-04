@@ -99,6 +99,13 @@ export default function QuranSurahPage() {
   const verseRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const [topVerse, setTopVerse] = useState<number | null>(null);
 
+  const autoScrollPausedRef = useRef(false);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pausedAtAyahRef = useRef<number | null>(null);
+  const isProgrammaticScrollRef = useRef(false);
+  const latestAyahRef = useRef(currentAyah);
+  latestAyahRef.current = currentAyah;
+
   // ─── Memorization mode state ─────────────────────────────────
   const [memMode, setMemMode] = useState(initialMemMode);
   // Per-verse display mode. Falls back to DEFAULT_MEM_DISPLAY when absent.
@@ -168,14 +175,70 @@ export default function QuranSurahPage() {
   }, [initialVerse, verses]);
 
   useEffect(() => {
+    const RESUME_DELAY = 3000;
+    const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", " ", "Home", "End"]);
+
+    const pauseAutoScroll = () => {
+      if (!(isPlaying || isLoading) || current?.surahNumber !== surahId) return;
+      autoScrollPausedRef.current = true;
+      pausedAtAyahRef.current = latestAyahRef.current;
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+      resumeTimerRef.current = setTimeout(() => {
+        autoScrollPausedRef.current = false;
+        pausedAtAyahRef.current = null;
+      }, RESUME_DELAY);
+    };
+
+    const onScroll = () => {
+      if (isProgrammaticScrollRef.current) return;
+      pauseAutoScroll();
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (SCROLL_KEYS.has(e.key)) pauseAutoScroll();
+    };
+
+    window.addEventListener("wheel", pauseAutoScroll, { passive: true });
+    window.addEventListener("touchmove", pauseAutoScroll, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("keydown", onKeyDown, { passive: true });
+
+    return () => {
+      window.removeEventListener("wheel", pauseAutoScroll);
+      window.removeEventListener("touchmove", pauseAutoScroll);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("keydown", onKeyDown);
+      if (resumeTimerRef.current) {
+        clearTimeout(resumeTimerRef.current);
+        resumeTimerRef.current = null;
+      }
+      autoScrollPausedRef.current = false;
+      pausedAtAyahRef.current = null;
+    };
+  }, [isPlaying, isLoading, current?.surahNumber, surahId]);
+
+  useEffect(() => {
     if (
       currentAyah == null ||
       !(isPlaying || isLoading) ||
       current?.surahNumber !== surahId
     )
       return;
+    if (autoScrollPausedRef.current) {
+      if (pausedAtAyahRef.current !== null && currentAyah !== pausedAtAyahRef.current) {
+        autoScrollPausedRef.current = false;
+        pausedAtAyahRef.current = null;
+        if (resumeTimerRef.current) {
+          clearTimeout(resumeTimerRef.current);
+          resumeTimerRef.current = null;
+        }
+      } else {
+        return;
+      }
+    }
     const el = verseRefs.current.get(currentAyah);
     if (el) {
+      isProgrammaticScrollRef.current = true;
       requestAnimationFrame(() => {
         const rect = el.getBoundingClientRect();
         const headerHeight = 56;
@@ -186,6 +249,9 @@ export default function QuranSurahPage() {
           top: Math.max(0, scrollTop),
           behavior: "smooth",
         });
+        setTimeout(() => {
+          isProgrammaticScrollRef.current = false;
+        }, 1000);
       });
     }
   }, [currentAyah, isPlaying, isLoading, current?.surahNumber, surahId]);

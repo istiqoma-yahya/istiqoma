@@ -79,6 +79,11 @@ export default function QuranSurahPage() {
     return v ? parseInt(v, 10) : null;
   }, []);
 
+  const initialMemMode = useMemo(() => {
+    const url = new URL(window.location.href);
+    return url.searchParams.get("mode") === "memorize";
+  }, []);
+
   const { data: chapter, isLoading: chapterLoading } = useChapter(surahId);
   const { data: verses, isLoading: versesLoading } = useVerses(surahId);
   const { data: bookmarks } = useBookmarks();
@@ -95,7 +100,7 @@ export default function QuranSurahPage() {
   const [topVerse, setTopVerse] = useState<number | null>(null);
 
   // ─── Memorization mode state ─────────────────────────────────
-  const [memMode, setMemMode] = useState(false);
+  const [memMode, setMemMode] = useState(initialMemMode);
   // Per-verse display mode. Falls back to DEFAULT_MEM_DISPLAY when absent.
   const [verseDisplay, setVerseDisplay] = useState<Map<number, DisplayMode>>(new Map());
   // Verses the user has temporarily peeked. Cleared when display mode changes.

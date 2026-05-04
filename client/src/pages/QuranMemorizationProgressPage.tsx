@@ -107,7 +107,7 @@ export default function QuranMemorizationProgressPage() {
                   <Card
                     key={c.id}
                     className="p-3 cursor-pointer hover-elevate active-elevate-2"
-                    onClick={() => navigate(`/quran/${c.id}`)}
+                    onClick={() => navigate(`/quran/${c.id}?mode=memorize`)}
                     data-testid={`card-surah-progress-${c.id}`}
                   >
                     <div className="flex items-center gap-3">

@@ -1138,5 +1138,144 @@
     "unsavedChanges": "Unsaved changes",
     "notCompletedYet": "You haven't finished onboarding yet.",
     "startOnboardingCta": "Start onboarding"
+  },
+  "tour": {
+    "steps": {
+      "dashboard": {
+        "title": "Dashboard & Today's Progress",
+        "description": "See all your worship goals for today at a glance. Your progress ring shows how much you've already completed."
+      },
+      "recordDeed": {
+        "title": "Record a Good Deed",
+        "description": "Log any act of worship in seconds — pick a category, describe it, and save. Tap \"Save Deed\" to try it!"
+      },
+      "dzikir": {
+        "title": "Dzikir Counter",
+        "description": "Tap the glowing circle to count your dhikr. Try tapping 3 times to see it in action!"
+      },
+      "sholat": {
+        "title": "Sholat Tracking",
+        "description": "Track your 5 daily prayers and mark them complete. Tap \"Mark done\" on Fajr to try it."
+      },
+      "targets": {
+        "title": "Spiritual Targets",
+        "description": "Set recurring goals for your worship — daily Quran pages, dzikir counts, weekly sadaqah, and more."
+      },
+      "quran": {
+        "title": "Quran Journey",
+        "description": "Read, listen, and track your Quran progress. Pick up exactly where you left off, with bookmarks and memorization tools."
+      },
+      "progress": {
+        "title": "Progress & Streaks",
+        "description": "Watch your spiritual journey unfold — streaks, weekly heatmaps, and charts to keep you motivated day after day."
+      },
+      "final": {
+        "title": "Ready to Begin?",
+        "description": "Join thousands of Muslims growing spiritually every day. It's free forever."
+      }
+    },
+    "actions": {
+      "next": "Next →",
+      "saveDeed": "Save Deed",
+      "tapToCount": "Tap to count",
+      "markFajrDone": "Mark Fajr done",
+      "openSurah": "Open a Surah",
+      "signUpFree": "Sign Up Free"
+    },
+    "nav": {
+      "home": "Home",
+      "dzikir": "Dzikir",
+      "sholat": "Sholat",
+      "quran": "Quran"
+    },
+    "dashboardScreen": {
+      "todaysProgress": "Today's Progress",
+      "hijriDate": "3 Muharram 1447",
+      "fajrPrayer": "Fajr Prayer",
+      "completedAt": "Completed at 5:12 AM",
+      "readSurah": "Read Surah Al-Kahf",
+      "target20mins": "Target: 20 mins",
+      "giveSadaqah": "Give Sadaqah",
+      "dailyGoal": "Daily goal",
+      "currentStreak": "Current Streak",
+      "streakDays": "12 days",
+      "streakPts": "+40 pts",
+      "recordGoodDeed": "Record a Good Deed"
+    },
+    "recordDeedScreen": {
+      "title": "Record Good Deed",
+      "subtitle": "Log your worship & good acts",
+      "category": "CATEGORY",
+      "description": "DESCRIPTION",
+      "points": "POINTS",
+      "sampleDesc": "Fajr prayer, 2 rakaat, in congregation",
+      "deedRecorded": "Deed recorded! +5 points earned.",
+      "saveDeedPts": "Save Deed (+5 pts)",
+      "catSholat": "Sholat",
+      "catDzikir": "Dzikir",
+      "catSedekah": "Sedekah",
+      "catQuran": "Quran"
+    },
+    "dzikirScreen": {
+      "title": "Dzikir Counter",
+      "tapToCount": "Tap to count",
+      "reset": "Reset",
+      "save": "Save (+{{count}})"
+    },
+    "sholatScreen": {
+      "title": "Prayer Times",
+      "location": "Jakarta · Today",
+      "nextPrayer": "Next: Dhuhr in 2h 14m",
+      "markDone": "Mark done",
+      "done": "Done"
+    },
+    "targetsScreen": {
+      "title": "Spiritual Goals",
+      "readQuran": "Read Quran",
+      "readQuranSub": "Daily · 2 pages",
+      "subhanallah33": "Subhanallah 33×",
+      "dailyDzikir": "Daily dzikir",
+      "sedekahFridays": "Sedekah Fridays",
+      "weekly": "Weekly"
+    },
+    "quranScreen": {
+      "title": "Al-Quran",
+      "continueReading": "Continue Reading",
+      "currentPosition": "Al-Kahf · Verse 12",
+      "bookmarks": "Bookmarks",
+      "memorize": "Memorize",
+      "verses": "{{count}} verses"
+    },
+    "progressScreen": {
+      "title": "My Progress",
+      "thisMonth": "This Month",
+      "goodDeeds": "good deeds",
+      "streak": "Streak",
+      "days": "days",
+      "thisWeek": "This Week",
+      "deedsPerDay": "Deeds per Day",
+      "weekDays": ["M", "T", "W", "T", "F", "S", "S"]
+    },
+    "finalScreen": {
+      "title": "Start Your Journey",
+      "subtitle": "Join thousands of Muslims growing spiritually every day.",
+      "continueGoogle": "Continue with Google",
+      "useUsername": "Use Username & PIN",
+      "freeForever": "Free forever · No credit card needed"
+    },
+    "coachmark": {
+      "stepOf": "Step {{current}} of {{total}}",
+      "interactHint": "Interact with the highlighted element"
+    },
+    "topBar": {
+      "exitTour": "Exit tour",
+      "ariaLabel": "Interactive product tour",
+      "tryOrSkip": "Try it in the screen, or click Continue to skip",
+      "continue": "Continue",
+      "skip": "Skip",
+      "goToStep": "Go to step {{step}}: {{title}}",
+      "previousStep": "Previous step",
+      "nextStep": "Next step"
+    }
   }
 }

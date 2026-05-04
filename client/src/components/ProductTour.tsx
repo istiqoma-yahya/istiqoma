@@ -1,4 +1,5 @@
-import { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   X,
@@ -40,71 +41,15 @@ interface StepDef {
   interactionAdvances: boolean;
 }
 
-const STEPS: StepDef[] = [
-  {
-    id: "dashboard",
-    title: "Dashboard & Today's Progress",
-    description: "See all your worship goals for today at a glance. Your progress ring shows how much you've already completed.",
-    coachmarkSide: "right",
-    actionLabel: "Next →",
-    interactionAdvances: false,
-  },
-  {
-    id: "record-deed",
-    title: "Record a Good Deed",
-    description: "Log any act of worship in seconds — pick a category, describe it, and save. Tap \"Save Deed\" to try it!",
-    coachmarkSide: "right",
-    actionLabel: "Save Deed",
-    interactionAdvances: true,
-  },
-  {
-    id: "dzikir",
-    title: "Dzikir Counter",
-    description: "Tap the glowing circle to count your dhikr. Try tapping 3 times to see it in action!",
-    coachmarkSide: "right",
-    actionLabel: "Tap to count",
-    interactionAdvances: true,
-  },
-  {
-    id: "sholat",
-    title: "Sholat Tracking",
-    description: "Track your 5 daily prayers and mark them complete. Tap \"Mark done\" on Fajr to try it.",
-    coachmarkSide: "right",
-    actionLabel: "Mark Fajr done",
-    interactionAdvances: true,
-  },
-  {
-    id: "targets",
-    title: "Spiritual Targets",
-    description: "Set recurring goals for your worship — daily Quran pages, dzikir counts, weekly sadaqah, and more.",
-    coachmarkSide: "right",
-    actionLabel: "Next →",
-    interactionAdvances: false,
-  },
-  {
-    id: "quran",
-    title: "Quran Journey",
-    description: "Read, listen, and track your Quran progress. Pick up exactly where you left off, with bookmarks and memorization tools.",
-    coachmarkSide: "right",
-    actionLabel: "Open a Surah",
-    interactionAdvances: true,
-  },
-  {
-    id: "progress",
-    title: "Progress & Streaks",
-    description: "Watch your spiritual journey unfold — streaks, weekly heatmaps, and charts to keep you motivated day after day.",
-    coachmarkSide: "right",
-    actionLabel: "Next →",
-    interactionAdvances: false,
-  },
-  {
-    id: "final",
-    title: "Ready to Begin?",
-    description: "Join thousands of Muslims growing spiritually every day. It's free forever.",
-    coachmarkSide: "bottom",
-    actionLabel: "Sign Up Free",
-    interactionAdvances: false,
-  },
+const STEP_CONFIGS = [
+  { id: "dashboard", stepKey: "dashboard", actionKey: "next", coachmarkSide: "right" as const, interactionAdvances: false },
+  { id: "record-deed", stepKey: "recordDeed", actionKey: "saveDeed", coachmarkSide: "right" as const, interactionAdvances: true },
+  { id: "dzikir", stepKey: "dzikir", actionKey: "tapToCount", coachmarkSide: "right" as const, interactionAdvances: true },
+  { id: "sholat", stepKey: "sholat", actionKey: "markFajrDone", coachmarkSide: "right" as const, interactionAdvances: true },
+  { id: "targets", stepKey: "targets", actionKey: "next", coachmarkSide: "right" as const, interactionAdvances: false },
+  { id: "quran", stepKey: "quran", actionKey: "openSurah", coachmarkSide: "right" as const, interactionAdvances: true },
+  { id: "progress", stepKey: "progress", actionKey: "next", coachmarkSide: "right" as const, interactionAdvances: false },
+  { id: "final", stepKey: "final", actionKey: "signUpFree", coachmarkSide: "bottom" as const, interactionAdvances: false },
 ];
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -112,11 +57,12 @@ const STEPS: StepDef[] = [
 // ──────────────────────────────────────────────────────────────────────────────
 
 function MockBottomNav({ active }: { active: string }) {
+  const { t } = useTranslation();
   const tabs = [
-    { id: "home", icon: Home, label: "Home" },
-    { id: "dzikir", icon: Circle, label: "Dzikir" },
-    { id: "sholat", icon: Compass, label: "Sholat" },
-    { id: "quran", icon: BookOpen, label: "Quran" },
+    { id: "home", icon: Home, label: t("tour.nav.home") },
+    { id: "dzikir", icon: Circle, label: t("tour.nav.dzikir") },
+    { id: "sholat", icon: Compass, label: t("tour.nav.sholat") },
+    { id: "quran", icon: BookOpen, label: t("tour.nav.quran") },
   ];
   return (
     <div className="border-t border-border bg-background/90">
@@ -142,12 +88,13 @@ function MockBottomNav({ active }: { active: string }) {
 // ──────────────────────────────────────────────────────────────────────────────
 
 function DashboardScreen() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col h-full">
       <div className="px-3 pt-2 pb-1 flex items-center justify-between flex-shrink-0">
         <div>
-          <p className="text-[8px] font-medium text-muted-foreground uppercase tracking-wide">Today's Progress</p>
-          <p className="text-xs font-bold">3 Muharram 1447</p>
+          <p className="text-[8px] font-medium text-muted-foreground uppercase tracking-wide">{t("tour.dashboardScreen.todaysProgress")}</p>
+          <p className="text-xs font-bold">{t("tour.dashboardScreen.hijriDate")}</p>
         </div>
         <div
           data-tour-highlight
@@ -164,9 +111,9 @@ function DashboardScreen() {
 
       <div className="px-2 flex-1 overflow-hidden space-y-0.5">
         {[
-          { label: "Fajr Prayer", sub: "Completed at 5:12 AM", done: true, icon: Moon },
-          { label: "Read Surah Al-Kahf", sub: "Target: 20 mins", done: false, icon: BookOpen },
-          { label: "Give Sadaqah", sub: "Daily goal", done: false, icon: HandCoins },
+          { label: t("tour.dashboardScreen.fajrPrayer"), sub: t("tour.dashboardScreen.completedAt"), done: true, icon: Moon },
+          { label: t("tour.dashboardScreen.readSurah"), sub: t("tour.dashboardScreen.target20mins"), done: false, icon: BookOpen },
+          { label: t("tour.dashboardScreen.giveSadaqah"), sub: t("tour.dashboardScreen.dailyGoal"), done: false, icon: HandCoins },
         ].map(({ label, sub, done, icon: Icon }, i) => (
           <div key={i} className="flex items-center gap-2 p-2 rounded-lg">
             <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 ${done ? "bg-emerald-500 text-white" : "border border-border"}`}>
@@ -186,18 +133,18 @@ function DashboardScreen() {
               <Flame className="w-3.5 h-3.5 text-amber-400" />
             </div>
             <div>
-              <p className="text-[7px] font-medium text-slate-300">Current Streak</p>
-              <p className="text-[10px] font-semibold">12 days</p>
+              <p className="text-[7px] font-medium text-slate-300">{t("tour.dashboardScreen.currentStreak")}</p>
+              <p className="text-[10px] font-semibold">{t("tour.dashboardScreen.streakDays")}</p>
             </div>
           </div>
-          <div className="text-[7px] text-slate-400 bg-white/5 px-1.5 py-0.5 rounded">+40 pts</div>
+          <div className="text-[7px] text-slate-400 bg-white/5 px-1.5 py-0.5 rounded">{t("tour.dashboardScreen.streakPts")}</div>
         </div>
       </div>
 
       <div className="px-2 pb-1.5 flex-shrink-0">
         <button className="w-full btn-primary text-[9px] py-1.5 flex items-center justify-center gap-1">
           <Plus className="w-3 h-3" />
-          Record a Good Deed
+          {t("tour.dashboardScreen.recordGoodDeed")}
         </button>
       </div>
 
@@ -207,41 +154,48 @@ function DashboardScreen() {
 }
 
 function RecordDeedScreen({ deedRecorded, onRecord }: { deedRecorded: boolean; onRecord: () => void }) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState("Sholat");
+  const categories = [
+    { key: "Sholat", label: t("tour.recordDeedScreen.catSholat") },
+    { key: "Dzikir", label: t("tour.recordDeedScreen.catDzikir") },
+    { key: "Sedekah", label: t("tour.recordDeedScreen.catSedekah") },
+    { key: "Quran", label: t("tour.recordDeedScreen.catQuran") },
+  ];
   return (
     <div className="flex flex-col h-full">
       <div className="px-3 pt-2 pb-1 flex-shrink-0">
-        <h3 className="text-xs font-bold">Record Good Deed</h3>
-        <p className="text-[8px] text-muted-foreground">Log your worship & good acts</p>
+        <h3 className="text-xs font-bold">{t("tour.recordDeedScreen.title")}</h3>
+        <p className="text-[8px] text-muted-foreground">{t("tour.recordDeedScreen.subtitle")}</p>
       </div>
 
       <div className="px-2 space-y-2 flex-1 overflow-hidden">
         <div>
-          <p className="text-[8px] font-medium text-muted-foreground mb-1">CATEGORY</p>
+          <p className="text-[8px] font-medium text-muted-foreground mb-1">{t("tour.recordDeedScreen.category")}</p>
           <div className="flex flex-wrap gap-1">
-            {["Sholat", "Dzikir", "Sedekah", "Quran"].map((cat) => (
+            {categories.map(({ key, label }) => (
               <button
-                key={cat}
-                onClick={() => setSelected(cat)}
+                key={key}
+                onClick={() => setSelected(key)}
                 className={`text-[8px] px-2 py-0.5 rounded-full border transition-all ${
-                  selected === cat ? "bg-emerald-500 text-white border-emerald-500" : "border-border text-muted-foreground"
+                  selected === key ? "bg-emerald-500 text-white border-emerald-500" : "border-border text-muted-foreground"
                 }`}
               >
-                {cat}
+                {label}
               </button>
             ))}
           </div>
         </div>
 
         <div>
-          <p className="text-[8px] font-medium text-muted-foreground mb-1">DESCRIPTION</p>
+          <p className="text-[8px] font-medium text-muted-foreground mb-1">{t("tour.recordDeedScreen.description")}</p>
           <div className="bg-muted border border-border rounded-lg p-2 text-[9px]">
-            Fajr prayer, 2 rakaat, in congregation
+            {t("tour.recordDeedScreen.sampleDesc")}
           </div>
         </div>
 
         <div>
-          <p className="text-[8px] font-medium text-muted-foreground mb-1">POINTS</p>
+          <p className="text-[8px] font-medium text-muted-foreground mb-1">{t("tour.recordDeedScreen.points")}</p>
           <div className="flex gap-1">
             {[1, 3, 5, 10].map((pt) => (
               <div key={pt} className={`flex-1 text-center py-0.5 rounded-md border text-[9px] font-bold ${pt === 5 ? "bg-emerald-500/10 border-emerald-500 text-emerald-500" : "border-border text-muted-foreground"}`}>
@@ -254,7 +208,7 @@ function RecordDeedScreen({ deedRecorded, onRecord }: { deedRecorded: boolean; o
         {deedRecorded ? (
           <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-2">
             <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-            <p className="text-[9px] text-emerald-600 dark:text-emerald-400 font-medium">Deed recorded! +5 points earned.</p>
+            <p className="text-[9px] text-emerald-600 dark:text-emerald-400 font-medium">{t("tour.recordDeedScreen.deedRecorded")}</p>
           </div>
         ) : (
           <button
@@ -263,7 +217,7 @@ function RecordDeedScreen({ deedRecorded, onRecord }: { deedRecorded: boolean; o
             className="w-full btn-primary text-[9px] py-1.5"
             data-testid="tour-button-record-deed"
           >
-            Save Deed (+5 pts)
+            {t("tour.recordDeedScreen.saveDeedPts")}
           </button>
         )}
       </div>
@@ -274,17 +228,18 @@ function RecordDeedScreen({ deedRecorded, onRecord }: { deedRecorded: boolean; o
 }
 
 function DzikirScreen({ count, onTap }: { count: number; onTap: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col h-full">
       <div className="px-3 pt-2 pb-1 flex-shrink-0">
-        <h1 className="text-xs font-bold">Dzikir Counter</h1>
+        <h1 className="text-xs font-bold">{t("tour.dzikirScreen.title")}</h1>
       </div>
 
       <div className="px-2 mb-2 flex-shrink-0">
         <div className="flex items-center gap-1 bg-muted rounded-full p-1">
-          {["Subhanallah", "Alhamdulillah", "Allahu Akbar"].map((t, i) => (
-            <div key={t} className={`flex-1 text-center text-[7px] py-0.5 rounded-full ${i === 0 ? "bg-emerald-500 text-white" : "text-muted-foreground"}`}>
-              {t}
+          {["Subhanallah", "Alhamdulillah", "Allahu Akbar"].map((txt, i) => (
+            <div key={txt} className={`flex-1 text-center text-[7px] py-0.5 rounded-full ${i === 0 ? "bg-emerald-500 text-white" : "text-muted-foreground"}`}>
+              {txt}
             </div>
           ))}
         </div>
@@ -300,7 +255,7 @@ function DzikirScreen({ count, onTap }: { count: number; onTap: () => void }) {
           <span className="text-4xl font-bold text-emerald-500">{count}</span>
         </button>
 
-        <p className="text-[8px] text-muted-foreground">Tap to count</p>
+        <p className="text-[8px] text-muted-foreground">{t("tour.dzikirScreen.tapToCount")}</p>
 
         {count > 0 && (
           <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="text-[8px] text-emerald-500 font-medium">
@@ -310,10 +265,10 @@ function DzikirScreen({ count, onTap }: { count: number; onTap: () => void }) {
 
         <div className="flex gap-2 mt-1">
           <button className="text-[8px] text-muted-foreground border border-border rounded-lg px-2.5 py-0.5 flex items-center gap-1">
-            <RotateCcw className="w-2.5 h-2.5" /> Reset
+            <RotateCcw className="w-2.5 h-2.5" /> {t("tour.dzikirScreen.reset")}
           </button>
           <button className={`text-[8px] rounded-lg px-2.5 py-0.5 transition-all ${count > 0 ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"}`}>
-            Save (+{count})
+            {t("tour.dzikirScreen.save", { count })}
           </button>
         </div>
       </div>
@@ -324,24 +279,25 @@ function DzikirScreen({ count, onTap }: { count: number; onTap: () => void }) {
 }
 
 function SholatScreen({ fajrDone, onMarkFajr }: { fajrDone: boolean; onMarkFajr: () => void }) {
+  const { t } = useTranslation();
   const prayers = [
-    { key: "fajr", name: "Fajr", time: "05:10", icon: Sunrise, highlight: true },
-    { key: "dhuhr", name: "Dhuhr", time: "12:15", icon: Sun, highlight: false },
-    { key: "asr", name: "Asr", time: "15:30", icon: Sun, highlight: false },
-    { key: "maghrib", name: "Maghrib", time: "18:02", icon: Sunset, highlight: false },
-    { key: "isha", name: "Isha", time: "19:17", icon: Moon, highlight: false },
+    { key: "fajr", name: t("qibla.prayers.fajr"), time: "05:10", icon: Sunrise, highlight: true },
+    { key: "dhuhr", name: t("qibla.prayers.dhuhr"), time: "12:15", icon: Sun, highlight: false },
+    { key: "asr", name: t("qibla.prayers.asr"), time: "15:30", icon: Sun, highlight: false },
+    { key: "maghrib", name: t("qibla.prayers.maghrib"), time: "18:02", icon: Sunset, highlight: false },
+    { key: "isha", name: t("qibla.prayers.isha"), time: "19:17", icon: Moon, highlight: false },
   ];
 
   return (
     <div className="flex flex-col h-full">
       <div className="px-3 pt-2 pb-1 flex items-center gap-1.5 flex-shrink-0">
         <Moon className="w-3.5 h-3.5 text-emerald-500" />
-        <h1 className="text-xs font-bold">Prayer Times</h1>
+        <h1 className="text-xs font-bold">{t("tour.sholatScreen.title")}</h1>
       </div>
 
       <div className="px-2 mb-1.5 text-center flex-shrink-0">
-        <p className="text-[7px] text-muted-foreground">Jakarta · Today</p>
-        <p className="text-[8px] font-medium">Next: Dhuhr in 2h 14m</p>
+        <p className="text-[7px] text-muted-foreground">{t("tour.sholatScreen.location")}</p>
+        <p className="text-[8px] font-medium">{t("tour.sholatScreen.nextPrayer")}</p>
       </div>
 
       <div className="px-2 space-y-1 flex-1 overflow-hidden">
@@ -365,7 +321,7 @@ function SholatScreen({ fajrDone, onMarkFajr }: { fajrDone: boolean; onMarkFajr:
                 }`}
                 data-testid={key === "fajr" ? "tour-button-mark-fajr" : undefined}
               >
-                {isDone ? <><Check className="w-2.5 h-2.5" />Done</> : "Mark done"}
+                {isDone ? <><Check className="w-2.5 h-2.5" />{t("tour.sholatScreen.done")}</> : t("tour.sholatScreen.markDone")}
               </button>
             </div>
           );
@@ -378,10 +334,11 @@ function SholatScreen({ fajrDone, onMarkFajr }: { fajrDone: boolean; onMarkFajr:
 }
 
 function TargetsScreen() {
+  const { t } = useTranslation();
   const targets = [
-    { title: "Read Quran", sub: "Daily · 2 pages", pct: 65, cat: "Quran", catColor: "text-blue-500 bg-blue-500/10" },
-    { title: "Subhanallah 33×", sub: "Daily dzikir", pct: 42, cat: "Dzikir", catColor: "text-emerald-500 bg-emerald-500/10" },
-    { title: "Sedekah Fridays", sub: "Weekly", pct: 100, cat: "Sedekah", catColor: "text-amber-500 bg-amber-500/10" },
+    { title: t("tour.targetsScreen.readQuran"), sub: t("tour.targetsScreen.readQuranSub"), pct: 65, cat: t("tour.nav.quran"), catColor: "text-blue-500 bg-blue-500/10" },
+    { title: t("tour.targetsScreen.subhanallah33"), sub: t("tour.targetsScreen.dailyDzikir"), pct: 42, cat: t("tour.nav.dzikir"), catColor: "text-emerald-500 bg-emerald-500/10" },
+    { title: t("tour.targetsScreen.sedekahFridays"), sub: t("tour.targetsScreen.weekly"), pct: 100, cat: t("tour.recordDeedScreen.catSedekah"), catColor: "text-amber-500 bg-amber-500/10" },
   ];
 
   return (
@@ -389,7 +346,7 @@ function TargetsScreen() {
       <div className="px-3 pt-2 pb-1 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-1.5">
           <Target className="w-3.5 h-3.5 text-emerald-500" />
-          <h1 className="text-xs font-bold">Spiritual Goals</h1>
+          <h1 className="text-xs font-bold">{t("tour.targetsScreen.title")}</h1>
         </div>
         <button className="w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center">
           <Plus className="w-3 h-3" />
@@ -426,6 +383,7 @@ function TargetsScreen() {
 }
 
 function QuranScreen({ onTapSurah }: { onTapSurah: () => void }) {
+  const { t } = useTranslation();
   const surahs = [
     { id: 1, name: "Al-Fatihah", arabic: "الفاتحة", verses: 7, highlight: true },
     { id: 2, name: "Al-Baqarah", arabic: "البقرة", verses: 286, highlight: false },
@@ -436,21 +394,21 @@ function QuranScreen({ onTapSurah }: { onTapSurah: () => void }) {
     <div className="flex flex-col h-full">
       <div className="px-3 pt-2 pb-1 flex items-center gap-1.5 flex-shrink-0">
         <BookOpen className="w-3.5 h-3.5 text-emerald-500" />
-        <h1 className="text-xs font-bold">Al-Quran</h1>
+        <h1 className="text-xs font-bold">{t("tour.quranScreen.title")}</h1>
       </div>
 
       <div className="px-2 mb-1.5 flex-shrink-0">
         <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-1.5 flex items-center justify-between">
           <div>
-            <p className="text-[7px] text-muted-foreground uppercase tracking-wide">Continue Reading</p>
-            <p className="text-[9px] font-semibold">Al-Kahf · Verse 12</p>
+            <p className="text-[7px] text-muted-foreground uppercase tracking-wide">{t("tour.quranScreen.continueReading")}</p>
+            <p className="text-[9px] font-semibold">{t("tour.quranScreen.currentPosition")}</p>
           </div>
           <BookOpen className="w-3.5 h-3.5 text-emerald-500" />
         </div>
       </div>
 
       <div className="px-2 flex gap-1.5 mb-1.5 flex-shrink-0">
-        {[{ icon: Bookmark, label: "Bookmarks", count: 3 }, { icon: GraduationCap, label: "Memorize", count: 1 }].map(({ icon: Icon, label, count }) => (
+        {[{ icon: Bookmark, label: t("tour.quranScreen.bookmarks"), count: 3 }, { icon: GraduationCap, label: t("tour.quranScreen.memorize"), count: 1 }].map(({ icon: Icon, label, count }) => (
           <button key={label} className="flex-1 border border-border rounded-lg py-1.5 flex flex-col items-center gap-0.5">
             <Icon className="w-3 h-3 text-emerald-500" />
             <span className="text-[7px]">{label}</span>
@@ -475,7 +433,7 @@ function QuranScreen({ onTapSurah }: { onTapSurah: () => void }) {
             </div>
             <div className="flex-1">
               <p className="text-[9px] font-medium">{name}</p>
-              <p className="text-[7px] text-muted-foreground">{verses} verses</p>
+              <p className="text-[7px] text-muted-foreground">{t("tour.quranScreen.verses", { count: verses })}</p>
             </div>
             <div className="text-sm text-muted-foreground">{arabic}</div>
           </div>
@@ -488,54 +446,56 @@ function QuranScreen({ onTapSurah }: { onTapSurah: () => void }) {
 }
 
 function ProgressScreen() {
+  const { t } = useTranslation();
   const bars = [60, 80, 40, 100, 90, 70, 50];
   const weekHeatmap = [true, true, false, true, true, true, false];
+  const weekDays = t("tour.progressScreen.weekDays", { returnObjects: true }) as string[];
 
   return (
     <div className="flex flex-col h-full">
       <div className="px-3 pt-2 pb-1 flex items-center gap-1.5 flex-shrink-0">
         <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
-        <h1 className="text-xs font-bold">My Progress</h1>
+        <h1 className="text-xs font-bold">{t("tour.progressScreen.title")}</h1>
       </div>
 
       <div className="px-2 grid grid-cols-2 gap-1.5 mb-1.5 flex-shrink-0">
         <div className="bg-card border border-border rounded-xl p-2">
-          <p className="text-[7px] text-muted-foreground">This Month</p>
+          <p className="text-[7px] text-muted-foreground">{t("tour.progressScreen.thisMonth")}</p>
           <p className="text-base font-bold text-emerald-500">47</p>
-          <p className="text-[7px] text-muted-foreground">good deeds</p>
+          <p className="text-[7px] text-muted-foreground">{t("tour.progressScreen.goodDeeds")}</p>
         </div>
         <div
           data-tour-highlight
           className="bg-card border border-border rounded-xl p-2"
         >
-          <p className="text-[7px] text-muted-foreground">Streak</p>
+          <p className="text-[7px] text-muted-foreground">{t("tour.progressScreen.streak")}</p>
           <div className="flex items-center gap-1">
             <Flame className="w-3.5 h-3.5 text-amber-400" />
             <p className="text-base font-bold text-amber-500">12</p>
           </div>
-          <p className="text-[7px] text-muted-foreground">days</p>
+          <p className="text-[7px] text-muted-foreground">{t("tour.progressScreen.days")}</p>
         </div>
       </div>
 
       <div className="mx-2 p-2 bg-card border border-border rounded-xl mb-1.5 flex-shrink-0">
-        <p className="text-[7px] font-medium mb-1">This Week</p>
+        <p className="text-[7px] font-medium mb-1">{t("tour.progressScreen.thisWeek")}</p>
         <div className="flex gap-1.5 items-end">
           {weekHeatmap.map((active, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
               <div className={`w-full h-5 rounded-sm ${active ? "bg-emerald-500" : "bg-muted"}`} />
-              <span className="text-[6px] text-muted-foreground">{["M","T","W","T","F","S","S"][i]}</span>
+              <span className="text-[6px] text-muted-foreground">{weekDays[i]}</span>
             </div>
           ))}
         </div>
       </div>
 
       <div className="mx-2 p-2 bg-card border border-border rounded-xl flex-shrink-0">
-        <p className="text-[7px] font-medium mb-1">Deeds per Day</p>
+        <p className="text-[7px] font-medium mb-1">{t("tour.progressScreen.deedsPerDay")}</p>
         <div className="flex gap-0.5 items-end h-10">
           {bars.map((h, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
               <div className="w-full rounded-t-sm bg-emerald-500" style={{ height: `${(h / 100) * 32}px` }} />
-              <span className="text-[5px] text-muted-foreground">{["M","T","W","T","F","S","S"][i]}</span>
+              <span className="text-[5px] text-muted-foreground">{weekDays[i]}</span>
             </div>
           ))}
         </div>
@@ -547,6 +507,7 @@ function ProgressScreen() {
 }
 
 function FinalScreen({ onSignUp }: { onSignUp: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col h-full items-center justify-center px-4 text-center">
       <motion.div
@@ -558,9 +519,9 @@ function FinalScreen({ onSignUp }: { onSignUp: () => void }) {
         <Flame className="w-7 h-7 text-emerald-500" />
       </motion.div>
 
-      <h3 className="text-sm font-bold mb-1.5">Start Your Journey</h3>
+      <h3 className="text-sm font-bold mb-1.5">{t("tour.finalScreen.title")}</h3>
       <p className="text-[9px] text-muted-foreground mb-4 max-w-[180px]">
-        Join thousands of Muslims growing spiritually every day.
+        {t("tour.finalScreen.subtitle")}
       </p>
 
       <div className="space-y-2 w-full">
@@ -571,7 +532,7 @@ function FinalScreen({ onSignUp }: { onSignUp: () => void }) {
           data-testid="tour-button-signup-google"
         >
           <SiGoogle className="w-3 h-3" />
-          Continue with Google
+          {t("tour.finalScreen.continueGoogle")}
         </button>
         <button
           onClick={onSignUp}
@@ -579,11 +540,11 @@ function FinalScreen({ onSignUp }: { onSignUp: () => void }) {
           data-testid="tour-button-signup-username"
         >
           <KeyRound className="w-3 h-3" />
-          Use Username & PIN
+          {t("tour.finalScreen.useUsername")}
         </button>
       </div>
 
-      <p className="text-[7px] text-muted-foreground mt-3">Free forever · No credit card needed</p>
+      <p className="text-[7px] text-muted-foreground mt-3">{t("tour.finalScreen.freeForever")}</p>
     </div>
   );
 }
@@ -658,6 +619,7 @@ interface CoachmarkCardProps {
 }
 
 function CoachmarkCard({ step, stepIndex, totalSteps, interactionDone, onAction, side }: CoachmarkCardProps) {
+  const { t } = useTranslation();
   const canAct = interactionDone || !step.interactionAdvances;
 
   return (
@@ -680,7 +642,7 @@ function CoachmarkCard({ step, stepIndex, totalSteps, interactionDone, onAction,
       )}
 
       <p className="text-[9px] font-semibold text-emerald-500 uppercase tracking-wider mb-1">
-        Step {stepIndex + 1} of {totalSteps}
+        {t("tour.coachmark.stepOf", { current: stepIndex + 1, total: totalSteps })}
       </p>
       <h4 className="text-sm font-bold mb-1.5">{step.title}</h4>
       <p className="text-xs text-muted-foreground leading-relaxed mb-3">{step.description}</p>
@@ -688,7 +650,7 @@ function CoachmarkCard({ step, stepIndex, totalSteps, interactionDone, onAction,
       {step.interactionAdvances && !interactionDone && (
         <div className="flex items-center gap-1.5 text-[9px] text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-lg px-2 py-1.5 mb-2.5">
           <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse flex-shrink-0" />
-          Interact with the highlighted element
+          {t("tour.coachmark.interactHint")}
         </div>
       )}
 
@@ -697,7 +659,7 @@ function CoachmarkCard({ step, stepIndex, totalSteps, interactionDone, onAction,
         className="w-full text-xs py-2 rounded-xl font-semibold transition-all bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-500/30"
         data-testid={`tour-coachmark-action-${step.id}`}
       >
-        {step.id === "final" ? "Sign Up Free" : interactionDone ? "Next →" : step.actionLabel}
+        {step.id === "final" ? t("tour.actions.signUpFree") : interactionDone ? t("tour.actions.next") : step.actionLabel}
       </button>
     </motion.div>
   );
@@ -712,13 +674,23 @@ interface ProductTourProps {
 }
 
 export function ProductTour({ onClose }: ProductTourProps) {
+  const { t } = useTranslation();
+
+  const STEPS: StepDef[] = useMemo(() => STEP_CONFIGS.map(cfg => ({
+    id: cfg.id,
+    title: t(`tour.steps.${cfg.stepKey}.title`),
+    description: t(`tour.steps.${cfg.stepKey}.description`),
+    coachmarkSide: cfg.coachmarkSide,
+    actionLabel: t(`tour.actions.${cfg.actionKey}`),
+    interactionAdvances: cfg.interactionAdvances,
+  })), [t]);
+
   const [currentStep, setCurrentStep] = useState(0);
   const [dzikirCount, setDzikirCount] = useState(0);
   const [deedRecorded, setDeedRecorded] = useState(false);
   const [fajrDone, setFajrDone] = useState(false);
   const [surahTapped, setSurahTapped] = useState(false);
 
-  // Highlight bounds measured from the device frame
   const screenRef = useRef<HTMLDivElement>(null);
   const [highlightBounds, setHighlightBounds] = useState<HighlightBounds | null>(null);
 
@@ -735,12 +707,11 @@ export function ProductTour({ onClose }: ProductTourProps) {
       if (s.id === "quran") return surahTapped;
       return false;
     },
-    [dzikirCount, deedRecorded, fajrDone, surahTapped]
+    [dzikirCount, deedRecorded, fajrDone, surahTapped, STEPS]
   );
 
   const canAdvance = interactionDoneForStep(currentStep);
 
-  // Measure the highlighted element's position within the screen area
   const measureHighlight = useCallback(() => {
     const screenEl = screenRef.current;
     if (!screenEl) return;
@@ -760,12 +731,10 @@ export function ProductTour({ onClose }: ProductTourProps) {
   }, []);
 
   useLayoutEffect(() => {
-    // Run after the Framer Motion screen transition (0.3s) settles
     const id = setTimeout(measureHighlight, 360);
     return () => clearTimeout(id);
   }, [currentStep, dzikirCount, deedRecorded, fajrDone, surahTapped, measureHighlight]);
 
-  // Re-measure on resize / orientation change so the spotlight stays aligned
   useEffect(() => {
     const onResize = () => measureHighlight();
     window.addEventListener("resize", onResize);
@@ -809,11 +778,10 @@ export function ProductTour({ onClose }: ProductTourProps) {
     setTimeout(goNext, 500);
   }, [goNext]);
 
-  // Auto-advance dzikir after 3 taps
   useEffect(() => {
     if (step.id === "dzikir" && dzikirCount >= 3) {
-      const t = setTimeout(goNext, 700);
-      return () => clearTimeout(t);
+      const timer = setTimeout(goNext, 700);
+      return () => clearTimeout(timer);
     }
   }, [dzikirCount, step.id, goNext]);
 
@@ -824,15 +792,12 @@ export function ProductTour({ onClose }: ProductTourProps) {
       if (el) (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
-    // For interaction steps, trigger the interaction if not done, then advance.
     if (step.id === "record-deed" && !deedRecorded) { handleRecordDeed(); return; }
     if (step.id === "sholat" && !fajrDone) { handleMarkFajr(); return; }
     if (step.id === "quran" && !surahTapped) { handleSurahTap(); return; }
-    // dzikir: just advance even if not tapped enough yet
     goNext();
   }, [step.id, deedRecorded, fajrDone, surahTapped, handleRecordDeed, handleMarkFajr, handleSurahTap, goNext, onClose]);
 
-  // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -843,7 +808,6 @@ export function ProductTour({ onClose }: ProductTourProps) {
     return () => window.removeEventListener("keydown", handler);
   }, [onClose, goNext, goPrev]);
 
-  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
@@ -871,7 +835,7 @@ export function ProductTour({ onClose }: ProductTourProps) {
       className="fixed inset-0 z-[200] bg-background/97 backdrop-blur-md flex flex-col"
       role="dialog"
       aria-modal="true"
-      aria-label="Interactive product tour"
+      aria-label={t("tour.topBar.ariaLabel")}
     >
       {/* ── Top Bar ── */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border bg-background/80 backdrop-blur-sm flex-shrink-0">
@@ -881,7 +845,7 @@ export function ProductTour({ onClose }: ProductTourProps) {
           data-testid="tour-button-exit"
         >
           <X className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Exit tour</span>
+          <span className="hidden sm:inline">{t("tour.topBar.exitTour")}</span>
         </button>
 
         {/* Progress dots */}
@@ -895,7 +859,7 @@ export function ProductTour({ onClose }: ProductTourProps) {
                 i < currentStep ? "w-2 h-2 bg-emerald-500/60 hover:bg-emerald-500" :
                 "w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"
               }`}
-              aria-label={`Go to step ${i + 1}: ${s.title}`}
+              aria-label={t("tour.topBar.goToStep", { step: i + 1, title: s.title })}
               data-testid={`tour-dot-${i}`}
             />
           ))}
@@ -908,7 +872,7 @@ export function ProductTour({ onClose }: ProductTourProps) {
               onClick={goPrev}
               disabled={currentStep === 0}
               className="w-7 h-7 rounded-full border border-border flex items-center justify-center hover:bg-muted disabled:opacity-30 transition-all"
-              aria-label="Previous step"
+              aria-label={t("tour.topBar.previousStep")}
               data-testid="tour-button-prev"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
@@ -916,7 +880,7 @@ export function ProductTour({ onClose }: ProductTourProps) {
             <button
               onClick={goNext}
               className="w-7 h-7 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-all"
-              aria-label="Next step"
+              aria-label={t("tour.topBar.nextStep")}
               data-testid="tour-button-next"
             >
               <ChevronRight className="w-3.5 h-3.5" />
@@ -936,11 +900,6 @@ export function ProductTour({ onClose }: ProductTourProps) {
 
       {/* ── Main Content Area ── */}
       <div className="flex-1 flex items-center justify-center p-3 sm:p-6 overflow-hidden">
-        {/*
-          Single unified layout: flex-col on mobile, flex-row on desktop.
-          We use ONE device frame with a single screenRef so measurements
-          are always taken from the actually-visible DOM element.
-        */}
         <div className="flex flex-col md:flex-row items-center gap-5 md:gap-8 w-full max-w-5xl">
 
           {/* Left info panel — desktop only */}
@@ -955,7 +914,7 @@ export function ProductTour({ onClose }: ProductTourProps) {
             >
               <div>
                 <p className="text-emerald-500 text-xs font-semibold uppercase tracking-wider mb-2">
-                  Step {currentStep + 1} of {STEPS.length}
+                  {t("tour.coachmark.stepOf", { current: currentStep + 1, total: STEPS.length })}
                 </p>
                 <h2 className="text-2xl font-bold font-display mb-3">{step.title}</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
@@ -964,7 +923,7 @@ export function ProductTour({ onClose }: ProductTourProps) {
               {step.interactionAdvances && !canAdvance && (
                 <div className="flex items-center gap-2 text-xs text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2">
                   <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse flex-shrink-0" />
-                  Try it in the screen, or click Continue to skip
+                  {t("tour.topBar.tryOrSkip")}
                 </div>
               )}
 
@@ -974,7 +933,7 @@ export function ProductTour({ onClose }: ProductTourProps) {
                   className="btn-primary flex items-center gap-2 self-start"
                   data-testid="tour-desktop-next"
                 >
-                  {canAdvance ? "Continue" : "Skip"} <ArrowRight className="w-4 h-4" />
+                  {canAdvance ? t("tour.topBar.continue") : t("tour.topBar.skip")} <ArrowRight className="w-4 h-4" />
                 </button>
               )}
               {isLast && (
@@ -987,7 +946,7 @@ export function ProductTour({ onClose }: ProductTourProps) {
                   className="btn-primary flex items-center gap-2 self-start"
                   data-testid="tour-desktop-signup"
                 >
-                  Sign Up Free <ArrowRight className="w-4 h-4" />
+                  {t("tour.actions.signUpFree")} <ArrowRight className="w-4 h-4" />
                 </button>
               )}
             </motion.div>

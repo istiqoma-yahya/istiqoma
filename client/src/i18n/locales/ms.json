@@ -1139,5 +1139,144 @@
     "unsavedChanges": "Perubahan belum disimpan",
     "notCompletedYet": "Anda belum menyelesaikan onboarding.",
     "startOnboardingCta": "Mulakan onboarding"
+  },
+  "tour": {
+    "steps": {
+      "dashboard": {
+        "title": "Papan Pemuka & Progres Hari Ini",
+        "description": "Lihat semua sasaran ibadah anda hari ini sekilas pandang. Cincin progres menunjukkan berapa banyak yang telah anda selesaikan."
+      },
+      "recordDeed": {
+        "title": "Rekod Amal Baik",
+        "description": "Rekod sebarang ibadah dalam beberapa saat — pilih kategori, tuliskan penerangan, dan simpan. Ketik \"Simpan Amal\" untuk mencuba!"
+      },
+      "dzikir": {
+        "title": "Kaunter Zikir",
+        "description": "Ketik bulatan bercahaya untuk mengira zikir anda. Cuba ketik 3 kali untuk melihat cara ia berfungsi!"
+      },
+      "sholat": {
+        "title": "Penjejakan Solat",
+        "description": "Jejaki 5 solat harian anda dan tandakan yang telah selesai. Ketik \"Tanda selesai\" pada Subuh untuk mencuba."
+      },
+      "targets": {
+        "title": "Sasaran Rohani",
+        "description": "Tetapkan matlamat berulang untuk ibadah anda — halaman Quran harian, kiraan zikir, sedekah mingguan, dan banyak lagi."
+      },
+      "quran": {
+        "title": "Perjalanan Quran",
+        "description": "Baca, dengar, dan jejaki progres Quran anda. Sambung dari tempat terakhir, dengan tanda buku dan alat hafazan."
+      },
+      "progress": {
+        "title": "Progres & Streak",
+        "description": "Saksikan perjalanan rohani anda berkembang — streak, heatmap mingguan, dan carta untuk memotivasikan anda setiap hari."
+      },
+      "final": {
+        "title": "Bersedia untuk Bermula?",
+        "description": "Sertai ribuan Muslim yang berkembang secara rohani setiap hari. Percuma selama-lamanya."
+      }
+    },
+    "actions": {
+      "next": "Seterusnya →",
+      "saveDeed": "Simpan Amal",
+      "tapToCount": "Ketik untuk mengira",
+      "markFajrDone": "Tanda Subuh selesai",
+      "openSurah": "Buka Surah",
+      "signUpFree": "Daftar Percuma"
+    },
+    "nav": {
+      "home": "Utama",
+      "dzikir": "Zikir",
+      "sholat": "Solat",
+      "quran": "Quran"
+    },
+    "dashboardScreen": {
+      "todaysProgress": "Progres Hari Ini",
+      "hijriDate": "3 Muharram 1447",
+      "fajrPrayer": "Solat Subuh",
+      "completedAt": "Selesai pukul 5:12 pagi",
+      "readSurah": "Baca Surah Al-Kahf",
+      "target20mins": "Sasaran: 20 minit",
+      "giveSadaqah": "Beri Sedekah",
+      "dailyGoal": "Matlamat harian",
+      "currentStreak": "Streak Semasa",
+      "streakDays": "12 hari",
+      "streakPts": "+40 mata",
+      "recordGoodDeed": "Rekod Amal Baik"
+    },
+    "recordDeedScreen": {
+      "title": "Rekod Amal Baik",
+      "subtitle": "Rekod ibadah & amalan baik anda",
+      "category": "KATEGORI",
+      "description": "PENERANGAN",
+      "points": "MATA",
+      "sampleDesc": "Solat Subuh, 2 rakaat, berjemaah",
+      "deedRecorded": "Amal direkod! +5 mata diperoleh.",
+      "saveDeedPts": "Simpan Amal (+5 mata)",
+      "catSholat": "Solat",
+      "catDzikir": "Zikir",
+      "catSedekah": "Sedekah",
+      "catQuran": "Quran"
+    },
+    "dzikirScreen": {
+      "title": "Kaunter Zikir",
+      "tapToCount": "Ketik untuk mengira",
+      "reset": "Set Semula",
+      "save": "Simpan (+{{count}})"
+    },
+    "sholatScreen": {
+      "title": "Waktu Solat",
+      "location": "Jakarta · Hari Ini",
+      "nextPrayer": "Seterusnya: Zohor dalam 2j 14m",
+      "markDone": "Tanda selesai",
+      "done": "Selesai"
+    },
+    "targetsScreen": {
+      "title": "Sasaran Rohani",
+      "readQuran": "Baca Quran",
+      "readQuranSub": "Harian · 2 halaman",
+      "subhanallah33": "Subhanallah 33×",
+      "dailyDzikir": "Zikir harian",
+      "sedekahFridays": "Sedekah Jumaat",
+      "weekly": "Mingguan"
+    },
+    "quranScreen": {
+      "title": "Al-Quran",
+      "continueReading": "Sambung Membaca",
+      "currentPosition": "Al-Kahf · Ayat 12",
+      "bookmarks": "Tanda Buku",
+      "memorize": "Hafazan",
+      "verses": "{{count}} ayat"
+    },
+    "progressScreen": {
+      "title": "Kemajuan Saya",
+      "thisMonth": "Bulan Ini",
+      "goodDeeds": "amal baik",
+      "streak": "Streak",
+      "days": "hari",
+      "thisWeek": "Minggu Ini",
+      "deedsPerDay": "Amal per Hari",
+      "weekDays": ["I", "S", "R", "K", "J", "S", "A"]
+    },
+    "finalScreen": {
+      "title": "Mulakan Perjalanan Anda",
+      "subtitle": "Sertai ribuan Muslim yang berkembang secara rohani setiap hari.",
+      "continueGoogle": "Teruskan dengan Google",
+      "useUsername": "Guna Nama Pengguna & PIN",
+      "freeForever": "Percuma selama-lamanya · Tanpa kad kredit"
+    },
+    "coachmark": {
+      "stepOf": "Langkah {{current}} daripada {{total}}",
+      "interactHint": "Berinteraksi dengan elemen yang diserlahkan"
+    },
+    "topBar": {
+      "exitTour": "Keluar lawatan",
+      "ariaLabel": "Lawatan produk interaktif",
+      "tryOrSkip": "Cuba di skrin, atau klik Teruskan untuk langkau",
+      "continue": "Teruskan",
+      "skip": "Langkau",
+      "goToStep": "Ke langkah {{step}}: {{title}}",
+      "previousStep": "Langkah sebelumnya",
+      "nextStep": "Langkah seterusnya"
+    }
   }
 }

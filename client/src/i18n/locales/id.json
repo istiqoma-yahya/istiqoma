@@ -39,7 +39,9 @@
     "totalMemorized": "Total dihafal",
     "surahsStarted": "{{started}} dari {{total}} surah dimulai",
     "autoAdvance": "Putar otomatis",
-    "autoAdvanceHint": "Putar ayat berikutnya secara otomatis"
+    "autoAdvanceHint": "Putar ayat berikutnya secara otomatis",
+    "continuousPlay": "Putar berkelanjutan",
+    "continuousPlayHint": "Lanjutkan ke surah berikutnya secara otomatis"
   },
   "nav": {
     "home": "Beranda",

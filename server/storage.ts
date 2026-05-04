@@ -1289,6 +1289,7 @@ export class DatabaseStorage implements IStorage {
     if (data.arabicFontSize !== undefined) set.arabicFontSize = data.arabicFontSize;
     if (data.arabicLineHeight !== undefined) set.arabicLineHeight = data.arabicLineHeight;
     if (data.autoAdvanceAyah !== undefined) set.autoAdvanceAyah = data.autoAdvanceAyah;
+    if (data.continuousPlay !== undefined) set.continuousPlay = data.continuousPlay;
 
     const [row] = await db
       .insert(quranReadingState)
@@ -1301,6 +1302,7 @@ export class DatabaseStorage implements IStorage {
         ...(data.arabicFontSize !== undefined ? { arabicFontSize: data.arabicFontSize } : {}),
         ...(data.arabicLineHeight !== undefined ? { arabicLineHeight: data.arabicLineHeight } : {}),
         ...(data.autoAdvanceAyah !== undefined ? { autoAdvanceAyah: data.autoAdvanceAyah } : {}),
+        ...(data.continuousPlay !== undefined ? { continuousPlay: data.continuousPlay } : {}),
         updatedAt: now,
       })
       .onConflictDoUpdate({

@@ -161,6 +161,7 @@ export function useUpdateReadingState() {
       arabicFontSize?: QuranArabicFontSize;
       arabicLineHeight?: QuranArabicLineHeight;
       autoAdvanceAyah?: boolean;
+      continuousPlay?: boolean;
     }) => {
       const res = await apiRequest("PUT", "/api/quran/reading-state", input);
       return res.json();

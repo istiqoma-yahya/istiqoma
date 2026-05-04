@@ -39,6 +39,8 @@ export function QuranNowPlayingSheet({
     downloadProgress,
     autoAdvance,
     setAutoAdvance,
+    continuousPlay,
+    setContinuousPlay,
   } = useQuranAudio();
   const pct = downloadProgress && downloadProgress.total > 0
     ? Math.min(100, Math.round((downloadProgress.loaded / downloadProgress.total) * 100))
@@ -187,6 +189,23 @@ export function QuranNowPlayingSheet({
                 onCheckedChange={setAutoAdvance}
                 data-testid="switch-auto-advance"
                 aria-label={t("quranMenu.autoAdvance")}
+              />
+            </div>
+
+            <div className="flex items-center justify-between px-1 mb-4">
+              <div>
+                <div className="text-sm font-medium" data-testid="text-continuous-play-label">
+                  {t("quranMenu.continuousPlay")}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {t("quranMenu.continuousPlayHint")}
+                </div>
+              </div>
+              <Switch
+                checked={continuousPlay}
+                onCheckedChange={setContinuousPlay}
+                data-testid="switch-continuous-play"
+                aria-label={t("quranMenu.continuousPlay")}
               />
             </div>
 

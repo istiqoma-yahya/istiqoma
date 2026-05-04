@@ -48,7 +48,9 @@
     "totalMemorized": "Total memorized",
     "surahsStarted": "{{started}} of {{total}} surahs started",
     "autoAdvance": "Auto-advance",
-    "autoAdvanceHint": "Play next ayah automatically"
+    "autoAdvanceHint": "Play next ayah automatically",
+    "continuousPlay": "Continuous play",
+    "continuousPlayHint": "Continue into the next surah automatically"
   },
   "landing": {
     "title": "A better you.",

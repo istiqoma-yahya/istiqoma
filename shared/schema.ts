@@ -592,6 +592,7 @@ export const quranReadingState = pgTable("quran_reading_state", {
   arabicFontSize: text("arabic_font_size", { enum: QURAN_ARABIC_FONT_SIZES }).notNull().default(DEFAULT_QURAN_ARABIC_FONT_SIZE),
   arabicLineHeight: text("arabic_line_height", { enum: QURAN_ARABIC_LINE_HEIGHTS }).notNull().default(DEFAULT_QURAN_ARABIC_LINE_HEIGHT),
   autoAdvanceAyah: boolean("auto_advance_ayah").notNull().default(false),
+  continuousPlay: boolean("continuous_play").notNull().default(false),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
@@ -648,6 +649,7 @@ export const upsertQuranReadingStateSchema = z.object({
   arabicFontSize: z.enum(QURAN_ARABIC_FONT_SIZES).optional(),
   arabicLineHeight: z.enum(QURAN_ARABIC_LINE_HEIGHTS).optional(),
   autoAdvanceAyah: z.boolean().optional(),
+  continuousPlay: z.boolean().optional(),
 });
 
 export type QuranBookmark = typeof quranBookmarks.$inferSelect;

@@ -39,7 +39,9 @@
     "totalMemorized": "Jumlah dihafaz",
     "surahsStarted": "{{started}} daripada {{total}} surah dimulakan",
     "autoAdvance": "Main seterusnya",
-    "autoAdvanceHint": "Main ayat seterusnya secara automatik"
+    "autoAdvanceHint": "Main ayat seterusnya secara automatik",
+    "continuousPlay": "Main berterusan",
+    "continuousPlayHint": "Teruskan ke surah seterusnya secara automatik"
   },
   "nav": {
     "home": "Utama",

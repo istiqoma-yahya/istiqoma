@@ -101,6 +101,9 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
   const currentRef = useRef<PlayingSurah | null>(null);
   currentRef.current = current;
 
+  const updateReadingStateRef = useRef(updateReadingState);
+  updateReadingStateRef.current = updateReadingState;
+
   const downloadAbortRef = useRef<AbortController | null>(null);
   const blobUrlRef = useRef<string | null>(null);
   const loadedUrlRef = useRef<string | null>(null);
@@ -167,6 +170,10 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
                 surahName: chapter.name_simple,
                 surahArabic: chapter.name_arabic,
                 versesCount: chapter.verses_count,
+              });
+              updateReadingStateRef.current.mutate({
+                lastSurahNumber: chapter.id,
+                lastVerseNumber: 1,
               });
             } catch {
               stopRef.current?.();
@@ -454,6 +461,10 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
         versesCount: chapter.verses_count,
       };
       playAyahRef.current?.(nextSurah, 1);
+      updateReadingStateRef.current.mutate({
+        lastSurahNumber: chapter.id,
+        lastVerseNumber: 1,
+      });
     } catch {
       stopRef.current?.();
     }

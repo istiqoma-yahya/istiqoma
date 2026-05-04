@@ -37,7 +37,9 @@
     "micPermissionDenied": "Kebenaran mikrofon ditolak",
     "memorizationProgress": "Kemajuan Hafazan",
     "totalMemorized": "Jumlah dihafaz",
-    "surahsStarted": "{{started}} daripada {{total}} surah dimulakan"
+    "surahsStarted": "{{started}} daripada {{total}} surah dimulakan",
+    "autoAdvance": "Main seterusnya",
+    "autoAdvanceHint": "Main ayat seterusnya secara automatik"
   },
   "nav": {
     "home": "Utama",

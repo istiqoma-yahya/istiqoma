@@ -227,6 +227,7 @@ export default function QuranSurahPage() {
       surahNumber: chapter.id,
       surahName: chapter.name_simple,
       surahArabic: chapter.name_arabic,
+      versesCount: chapter.verses_count,
     });
   };
 
@@ -237,6 +238,7 @@ export default function QuranSurahPage() {
         surahNumber: chapter.id,
         surahName: chapter.name_simple,
         surahArabic: chapter.name_arabic,
+        versesCount: chapter.verses_count,
       },
       verseNumber,
     );

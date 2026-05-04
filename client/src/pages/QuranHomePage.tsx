@@ -156,6 +156,7 @@ export default function QuranHomePage() {
                         surahNumber: c.id,
                         surahName: c.name_simple,
                         surahArabic: c.name_arabic,
+                        versesCount: c.verses_count,
                       });
                     }}
                     data-testid={`button-play-surah-${c.id}`}

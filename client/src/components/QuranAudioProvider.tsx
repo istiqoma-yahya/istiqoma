@@ -12,6 +12,7 @@ type PlayingSurah = {
   surahNumber: number;
   surahName: string;
   surahArabic: string;
+  versesCount: number;
 };
 
 export type DownloadProgress = {
@@ -29,6 +30,8 @@ type AudioContextValue = {
   reciterId: number;
   reciterName: string | null;
   downloadProgress: DownloadProgress | null;
+  autoAdvance: boolean;
+  setAutoAdvance: (v: boolean) => void;
   setReciterId: (id: number) => void;
   playSurah: (s: PlayingSurah) => void;
   playAyah: (s: PlayingSurah, verseNumber: number) => void;
@@ -60,15 +63,27 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
   const [position, setPosition] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState<DownloadProgress | null>(null);
+  const [autoAdvance, setAutoAdvanceState] = useState<boolean>(() => {
+    try { return localStorage.getItem("quran_auto_advance") === "true"; } catch { return false; }
+  });
 
-  // Ref mirror of currentAyah for use inside async closures and callbacks
-  // without stale closure issues.
+  const setAutoAdvance = (v: boolean) => {
+    setAutoAdvanceState(v);
+    try { localStorage.setItem("quran_auto_advance", String(v)); } catch {}
+    updateReadingState.mutate({ autoAdvanceAyah: v });
+  };
+
   const currentAyahRef = useRef<number | null>(null);
   currentAyahRef.current = currentAyah;
 
-  // Ref mirror of reciterId so async playAyah picks up the latest value.
   const reciterIdRef = useRef<number>(DEFAULT_RECITER_ID);
   reciterIdRef.current = reciterId;
+
+  const autoAdvanceRef = useRef(autoAdvance);
+  autoAdvanceRef.current = autoAdvance;
+
+  const currentRef = useRef<PlayingSurah | null>(null);
+  currentRef.current = current;
 
   // Track in-flight downloads so we can abort them when the user
   // switches reciter/surah mid-download. We also keep the last blob URL
@@ -85,6 +100,12 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
       setReciterIdState(readingState.preferredReciterId);
     }
   }, [readingState?.preferredReciterId]);
+
+  useEffect(() => {
+    if (readingState?.autoAdvanceAyah !== undefined) {
+      setAutoAdvanceState(readingState.autoAdvanceAyah);
+    }
+  }, [readingState?.autoAdvanceAyah]);
 
   // Only use the reactive chapter-audio hook when in surah (not ayah) mode.
   // When currentAyah is set we fetch the URL imperatively inside playAyah.
@@ -124,9 +145,14 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     const onEnded = () => {
       setIsPlaying(false);
       setPosition(0);
-      // When a single ayah finishes, stop completely (don't auto-advance).
       if (currentAyahRef.current !== null) {
-        stopRef.current?.();
+        const s = currentRef.current;
+        const ayah = currentAyahRef.current;
+        if (autoAdvanceRef.current && s && ayah < s.versesCount) {
+          playAyahRef.current?.(s, ayah + 1);
+        } else {
+          stopRef.current?.();
+        }
       }
     };
     const onLoaded = () => {
@@ -403,6 +429,8 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
   };
   const stopRef = useRef(stop);
   stopRef.current = stop;
+  const playAyahRef = useRef(playAyah);
+  playAyahRef.current = playAyah;
 
   const setReciterId = (id: number) => {
     setReciterIdState(id);
@@ -430,6 +458,8 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     reciterId,
     reciterName,
     downloadProgress,
+    autoAdvance,
+    setAutoAdvance,
     setReciterId,
     playSurah,
     playAyah,
@@ -437,7 +467,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     seekBy,
     seekTo,
     stop,
-  }), [current, currentAyah, isPlaying, isLoading, duration, position, reciterId, reciterName, downloadProgress]);
+  }), [current, currentAyah, isPlaying, isLoading, duration, position, reciterId, reciterName, downloadProgress, autoAdvance]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -37,7 +37,9 @@
     "micPermissionDenied": "Izin mikrofon ditolak",
     "memorizationProgress": "Progres Hafalan",
     "totalMemorized": "Total dihafal",
-    "surahsStarted": "{{started}} dari {{total}} surah dimulai"
+    "surahsStarted": "{{started}} dari {{total}} surah dimulai",
+    "autoAdvance": "Putar otomatis",
+    "autoAdvanceHint": "Putar ayat berikutnya secara otomatis"
   },
   "nav": {
     "home": "Beranda",

@@ -46,7 +46,9 @@
     "micPermissionDenied": "Microphone permission denied",
     "memorizationProgress": "Memorization Progress",
     "totalMemorized": "Total memorized",
-    "surahsStarted": "{{started}} of {{total}} surahs started"
+    "surahsStarted": "{{started}} of {{total}} surahs started",
+    "autoAdvance": "Auto-advance",
+    "autoAdvanceHint": "Play next ayah automatically"
   },
   "landing": {
     "title": "A better you.",

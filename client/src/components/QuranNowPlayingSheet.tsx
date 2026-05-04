@@ -3,6 +3,7 @@ import { Play, Pause, RotateCcw, RotateCw, Loader2 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { useQuranAudio } from "./QuranAudioProvider";
 import { useReciters } from "@/hooks/use-quran";
 import { FEATURED_RECITER_IDS } from "@/lib/quranApi";
@@ -36,6 +37,8 @@ export function QuranNowPlayingSheet({
     seekBy,
     seekTo,
     downloadProgress,
+    autoAdvance,
+    setAutoAdvance,
   } = useQuranAudio();
   const pct = downloadProgress && downloadProgress.total > 0
     ? Math.min(100, Math.round((downloadProgress.loaded / downloadProgress.total) * 100))
@@ -168,6 +171,23 @@ export function QuranNowPlayingSheet({
                   <span className="absolute text-[8px] font-bold leading-none">10</span>
                 </span>
               </Button>
+            </div>
+
+            <div className="flex items-center justify-between px-1 mb-4">
+              <div>
+                <div className="text-sm font-medium" data-testid="text-auto-advance-label">
+                  {t("quranMenu.autoAdvance")}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {t("quranMenu.autoAdvanceHint")}
+                </div>
+              </div>
+              <Switch
+                checked={autoAdvance}
+                onCheckedChange={setAutoAdvance}
+                data-testid="switch-auto-advance"
+                aria-label={t("quranMenu.autoAdvance")}
+              />
             </div>
 
             <div className="border-t border-border pt-4 pb-8">

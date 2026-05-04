@@ -34,6 +34,7 @@ The backend handles Replit Auth integration, CRUD operations for deeds, categori
 - Public Qur'an content (chapters, verses, audio) is fetched directly from `https://api.quran.com/api/v4` from the browser (no server proxy).
 - Personal data (verse bookmarks, last-read position, preferred reciter) is persisted via own backend in `quran_bookmarks` and `quran_reading_state` tables.
 - Surah-level audio uses a single shared `<audio>` element via `QuranAudioProvider`, which powers a Spotify-style mini player and a full-screen Now Playing sheet with reciter picker.
+- Full-surah playback tracks the currently-recited ayah using verse timing data from the quran.com API (`?segments=true` on the `chapter_recitations` endpoint). The `timeupdate` event compares the playback position against `timestamp_from`/`timestamp_to` boundaries to highlight and auto-scroll to the active verse. A `playbackMode` state (`'surah'` | `'ayah'`) distinguishes full-surah from per-verse playback so the two modes don't interfere.
 
 ### API Contract & Mobile Readiness
 - A typed API contract (`shared/routes.ts`) defines all endpoints with Zod schemas for input/output.

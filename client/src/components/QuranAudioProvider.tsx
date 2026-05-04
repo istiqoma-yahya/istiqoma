@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useChapterAudio, useReciters, useReadingState, useUpdateReadingState } from "@/hooks/use-quran";
-import { DEFAULT_RECITER_ID, fetchVerseAudioUrl, fetchChapter } from "@/lib/quranApi";
+import { DEFAULT_RECITER_ID, fetchVerseAudioUrl, fetchChapter, type VerseTiming } from "@/lib/quranApi";
 import { useAuth } from "@/hooks/use-auth";
 
 type PlayingSurah = {
@@ -67,6 +67,8 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     try { return localStorage.getItem("quran_continuous_play") === "true"; } catch { return false; }
   });
 
+  const [playbackMode, setPlaybackMode] = useState<'surah' | 'ayah' | null>(null);
+
   const setAutoAdvance = (v: boolean) => {
     setAutoAdvanceState(v);
     try { localStorage.setItem("quran_auto_advance", String(v)); } catch {}
@@ -90,6 +92,11 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
 
   const continuousPlayRef = useRef(continuousPlay);
   continuousPlayRef.current = continuousPlay;
+
+  const playbackModeRef = useRef<'surah' | 'ayah' | null>(null);
+  playbackModeRef.current = playbackMode;
+
+  const verseTimingsRef = useRef<VerseTiming[]>([]);
 
   const currentRef = useRef<PlayingSurah | null>(null);
   currentRef.current = current;
@@ -118,7 +125,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
 
   const surahNumber = current?.surahNumber ?? null;
   const { data: audioFile } = useChapterAudio(
-    current && currentAyah === null ? reciterId : null,
+    current && playbackMode === 'surah' ? reciterId : null,
     surahNumber,
   );
 
@@ -126,6 +133,10 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     const r = reciters?.find((r) => r.id === reciterId);
     return r ? r.reciter_name : null;
   }, [reciters, reciterId]);
+
+  useEffect(() => {
+    verseTimingsRef.current = audioFile?.verse_timings ?? [];
+  }, [audioFile?.verse_timings]);
 
   const wasAuthedRef = useRef(false);
   useEffect(() => {
@@ -145,6 +156,27 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     const onEnded = () => {
       setIsPlaying(false);
       setPosition(0);
+      if (playbackModeRef.current === 'surah') {
+        const s = currentRef.current;
+        if (continuousPlayRef.current && s && s.surahNumber < 114) {
+          (async () => {
+            try {
+              const chapter = await fetchChapter(s.surahNumber + 1);
+              playSurahRef.current?.({
+                surahNumber: chapter.id,
+                surahName: chapter.name_simple,
+                surahArabic: chapter.name_arabic,
+                versesCount: chapter.verses_count,
+              });
+            } catch {
+              stopRef.current?.();
+            }
+          })();
+        } else {
+          stopRef.current?.();
+        }
+        return;
+      }
       if (currentAyahRef.current !== null) {
         const s = currentRef.current;
         const ayah = currentAyahRef.current;
@@ -158,10 +190,50 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
       }
     };
     const onLoaded = () => {
-      setDuration(a.duration || 0);
+      const dur = a.duration || 0;
+      setDuration(dur);
       setIsLoading(false);
+      if (playbackModeRef.current === 'surah' && verseTimingsRef.current.length === 0 && dur > 0) {
+        const s = currentRef.current;
+        if (s && s.versesCount > 0) {
+          const durMs = dur * 1000;
+          const perVerse = durMs / s.versesCount;
+          const fallback: VerseTiming[] = [];
+          for (let i = 1; i <= s.versesCount; i++) {
+            fallback.push({
+              verse_key: `${s.surahNumber}:${i}`,
+              timestamp_from: (i - 1) * perVerse,
+              timestamp_to: i * perVerse,
+            });
+          }
+          verseTimingsRef.current = fallback;
+        }
+      }
     };
-    const onTime = () => setPosition(a.currentTime || 0);
+    const onTime = () => {
+      const ct = a.currentTime || 0;
+      setPosition(ct);
+      if (playbackModeRef.current === 'surah' && verseTimingsRef.current.length > 0) {
+        const posMs = ct * 1000;
+        let foundVerse: number | null = null;
+        for (const t of verseTimingsRef.current) {
+          if (posMs >= t.timestamp_from) {
+            const parts = t.verse_key.split(':');
+            if (parts.length === 2) {
+              const num = parseInt(parts[1], 10);
+              if (!isNaN(num)) foundVerse = num;
+            }
+            if (posMs < t.timestamp_to) break;
+          } else {
+            break;
+          }
+        }
+        if (foundVerse !== null && foundVerse !== currentAyahRef.current) {
+          setCurrentAyah(foundVerse);
+          currentAyahRef.current = foundVerse;
+        }
+      }
+    };
     const onWaiting = () => setIsLoading(true);
     const onPlaying = () => setIsLoading(false);
     a.addEventListener("play", onPlay);
@@ -264,9 +336,11 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
 
   const playSurah = (s: PlayingSurah) => {
     const a = audioRef.current;
-    const isSameSurah = current?.surahNumber === s.surahNumber && currentAyahRef.current === null;
+    const isSameSurah = current?.surahNumber === s.surahNumber && playbackModeRef.current === 'surah';
 
     if (isSameSurah && a && loadedUrlRef.current) {
+      setCurrentAyah(null);
+      currentAyahRef.current = null;
       a.currentTime = 0;
       a.play().catch(() => {});
       return;
@@ -274,6 +348,10 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
 
     downloadAbortRef.current?.abort();
     setCurrentAyah(null);
+    currentAyahRef.current = null;
+    setPlaybackMode('surah');
+    playbackModeRef.current = 'surah';
+    verseTimingsRef.current = [];
     loadedUrlRef.current = null;
     setCurrent(s);
   };
@@ -289,6 +367,9 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     setCurrent(s);
     setCurrentAyah(verseNumber);
     currentAyahRef.current = verseNumber;
+    setPlaybackMode('ayah');
+    playbackModeRef.current = 'ayah';
+    verseTimingsRef.current = [];
 
     a.pause();
     a.removeAttribute("src");
@@ -418,11 +499,16 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     setDuration(0);
     setDownloadProgress(null);
     setIsLoading(false);
+    setPlaybackMode(null);
+    playbackModeRef.current = null;
+    verseTimingsRef.current = [];
   };
   const stopRef = useRef(stop);
   stopRef.current = stop;
   const playAyahRef = useRef(playAyah);
   playAyahRef.current = playAyah;
+  const playSurahRef = useRef(playSurah);
+  playSurahRef.current = playSurah;
   const advanceToNextSurahRef = useRef(advanceToNextSurah);
   advanceToNextSurahRef.current = advanceToNextSurah;
 
@@ -432,6 +518,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     loadedUrlRef.current = null;
     setCurrentAyah(null);
     currentAyahRef.current = null;
+    verseTimingsRef.current = [];
     const a = audioRef.current;
     if (a) {
       a.removeAttribute("src");

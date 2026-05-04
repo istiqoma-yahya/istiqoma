@@ -32,10 +32,17 @@ export type Reciter = {
   translated_name?: { name: string; language_name: string };
 };
 
+export type VerseTiming = {
+  verse_key: string;
+  timestamp_from: number;
+  timestamp_to: number;
+};
+
 export type ChapterAudio = {
   id: number;
   chapter_id: number;
   audio_url: string;
+  verse_timings?: VerseTiming[];
 };
 
 // Translation IDs on quran.com that we expose to the user. We only pick
@@ -101,14 +108,28 @@ export async function fetchReciters(): Promise<Reciter[]> {
   return data.recitations;
 }
 
+type ChapterAudioResponse = {
+  id: number;
+  chapter_id: number;
+  audio_url: string;
+  timestamps?: VerseTiming[];
+};
+
 export async function fetchChapterAudio(
   reciterId: number,
   chapterId: number,
 ): Promise<ChapterAudio | null> {
-  const data = await fetchJson<{ audio_file: ChapterAudio }>(
-    `/chapter_recitations/${reciterId}/${chapterId}`,
+  const data = await fetchJson<{ audio_file: ChapterAudioResponse }>(
+    `/chapter_recitations/${reciterId}/${chapterId}?segments=true`,
   );
-  return data.audio_file ?? null;
+  const af = data.audio_file;
+  if (!af) return null;
+  return {
+    id: af.id,
+    chapter_id: af.chapter_id,
+    audio_url: af.audio_url,
+    verse_timings: af.timestamps,
+  };
 }
 
 export type VerseAudioFile = {

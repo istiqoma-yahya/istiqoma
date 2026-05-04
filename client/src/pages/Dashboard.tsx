@@ -7,6 +7,7 @@ import { DeedCard } from "@/components/DeedCard";
 import { OnboardingHintCard } from "@/components/OnboardingHintCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { CampaignBanner } from "@/components/CampaignBanner";
 import { Loader2, LogOut, User, Settings, Plus, Target, ChevronRight, BarChart3, Bell, BookOpenCheck, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -153,6 +154,8 @@ export default function Dashboard() {
         </div>
 
         <OnboardingHintCard />
+
+        <CampaignBanner />
 
         <StatsOverview deeds={sortedDeeds} />
 

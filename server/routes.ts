@@ -1681,6 +1681,16 @@ function registerAdminCampaignRoutes(app: Express) {
     },
   );
 
+  app.get("/api/campaigns/active", async (_req, res) => {
+    try {
+      const rows = await storage.listActiveCampaigns();
+      res.json(rows);
+    } catch (err) {
+      console.error("Failed to fetch active campaigns:", err);
+      res.json([]);
+    }
+  });
+
   app.get("/api/admin/campaigns", isAuthenticated, isAdmin, async (_req, res) => {
     const rows = await storage.listCampaigns();
     res.json(rows);

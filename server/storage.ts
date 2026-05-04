@@ -154,6 +154,9 @@ export interface IStorage {
     total: number;
   }>;
 
+  // Public: Active Campaigns
+  listActiveCampaigns(): Promise<Campaign[]>;
+
   // Admin: Campaigns
   listCampaigns(): Promise<Campaign[]>;
   getCampaign(id: number): Promise<Campaign | null>;
@@ -1824,6 +1827,16 @@ export class DatabaseStorage implements IStorage {
     }));
     const me = row.me ? { rank: Number(row.me.rank), level: Number(row.me.level), totalCorrect: Number(row.me.total_correct) } : null;
     return { entries, me, total: Number(row.total ?? 0) };
+  }
+
+  // ─── Public: Active Campaigns ─────────────────────────────────
+  async listActiveCampaigns(): Promise<Campaign[]> {
+    const today = format(new Date(), "yyyy-MM-dd");
+    return await db
+      .select()
+      .from(campaigns)
+      .where(and(lte(campaigns.startDate, today), gte(campaigns.endDate, today)))
+      .orderBy(desc(campaigns.createdAt));
   }
 
   // ─── Admin: Campaigns ────────────────────────────────────────

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, Pause, X, ChevronUp, Loader2, Rewind, FastForward } from "lucide-react";
+import { Play, Pause, X, ChevronUp, Loader2, RotateCcw, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useQuranAudio } from "./QuranAudioProvider";
@@ -88,7 +88,7 @@ export function QuranMiniPlayer() {
                 data-testid="button-quran-rewind-10"
                 aria-label="Rewind 10 seconds"
               >
-                <Rewind className="w-4 h-4" />
+                <RotateCcw className="w-4 h-4" />
               </Button>
               <Button
                 size="icon"
@@ -112,7 +112,7 @@ export function QuranMiniPlayer() {
                 data-testid="button-quran-forward-10"
                 aria-label="Forward 10 seconds"
               >
-                <FastForward className="w-4 h-4" />
+                <RotateCw className="w-4 h-4" />
               </Button>
               <Button
                 size="icon"

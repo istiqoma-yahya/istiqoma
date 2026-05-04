@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Play, Pause, Rewind, FastForward, Loader2 } from "lucide-react";
+import { Play, Pause, RotateCcw, RotateCw, Loader2 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -127,7 +127,7 @@ export function QuranNowPlayingSheet({
                 data-testid="button-rewind"
                 aria-label="Rewind 10 seconds"
               >
-                <Rewind className="w-7 h-7" />
+                <RotateCcw className="w-7 h-7" />
               </Button>
               <Button
                 size="icon"
@@ -151,7 +151,7 @@ export function QuranNowPlayingSheet({
                 data-testid="button-fast-forward"
                 aria-label="Fast forward 10 seconds"
               >
-                <FastForward className="w-7 h-7" />
+                <RotateCw className="w-7 h-7" />
               </Button>
             </div>
 

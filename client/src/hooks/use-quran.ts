@@ -121,8 +121,11 @@ export function useMemorizations(surahNumber?: number) {
         surahNumber !== undefined
           ? `/api/quran/memorizations?surah=${surahNumber}`
           : "/api/quran/memorizations";
-      const res = await fetch(url, { credentials: "include" });
-      if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+      // Route through `apiRequest` so a 401 here triggers the centralized
+      // session-expired recovery flow (see queryClient.ts), matching the
+      // other authenticated data hooks. The default fetcher can't be used
+      // because it would join the surahNumber as a path segment.
+      const res = await apiRequest("GET", url);
       return res.json();
     },
   });

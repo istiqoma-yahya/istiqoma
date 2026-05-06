@@ -9,9 +9,8 @@ export function useTargetFolders() {
   return useQuery<TargetFolder[]>({
     queryKey: [api.targetFolders.list.path],
     queryFn: async () => {
-      const res = await fetch(api.targetFolders.list.path, { credentials: "include" });
-      if (res.status === 401) return [];
-      if (!res.ok) throw new Error("Failed to fetch folders");
+      // Centralized 401 → session-expired redirect (instead of empty list).
+      const res = await apiRequest("GET", api.targetFolders.list.path);
       return await res.json();
     },
   });

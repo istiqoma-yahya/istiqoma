@@ -3,6 +3,7 @@ import { api, type CreateCategoryRequest, type CategoryResponse } from "@shared/
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { apiRequest } from "@/lib/queryClient";
 
 export function useCategoryName() {
   const { t } = useTranslation();
@@ -20,9 +21,8 @@ export function useCategories() {
   return useQuery({
     queryKey: [api.categories.list.path],
     queryFn: async () => {
-      const res = await fetch(api.categories.list.path, { credentials: "include" });
-      if (res.status === 401) return [];
-      if (!res.ok) throw new Error("Failed to fetch categories");
+      // Centralized 401 → session-expired redirect (instead of empty list).
+      const res = await apiRequest("GET", api.categories.list.path);
       return api.categories.list.responses[200].parse(await res.json());
     },
   });

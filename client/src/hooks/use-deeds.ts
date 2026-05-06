@@ -5,18 +5,21 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { celebrateBadges } from "@/lib/badge-celebration";
+import { apiRequest } from "@/lib/queryClient";
 
 type CreateDeedRequest = InsertDeed;
 
 export function useDeeds() {
-  const { toast } = useToast();
-
   return useQuery({
     queryKey: [api.deeds.list.path],
     queryFn: async () => {
-      const res = await fetch(api.deeds.list.path, { credentials: "include" });
-      if (res.status === 401) return null; 
-      if (!res.ok) throw new Error("Failed to fetch deeds");
+      // Route through `apiRequest` so a 401 here triggers the centralized
+      // session-expired recovery flow (silent retry → toast → redirect to
+      // /api/login?returnTo=…) instead of silently rendering "no deeds".
+      // React Query's default behavior keeps the previously-cached deeds
+      // visible while the redirect happens, so the user never sees their
+      // history wink out of existence on auth loss.
+      const res = await apiRequest("GET", api.deeds.list.path);
       return api.deeds.list.responses[200].parse(await res.json());
     },
   });
@@ -43,9 +46,6 @@ export function useCreateDeed() {
         if (res.status === 400) {
           const error = errorSchemas.validation.parse(await res.json());
           throw new Error(error.message);
-        }
-        if (res.status === 401) {
-          throw new Error("Unauthorized");
         }
         throw new Error("Failed to create deed");
       }

@@ -44,12 +44,18 @@ const getOidcConfig = memoize(
   { maxAge: 3600 * 1000 }
 );
 
-export const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 1 week
+// Rolling session lifetime. `rolling: true` + `resave: true` make this a
+// sliding window — every authenticated request resets the clock, so a user
+// who keeps opening the app effectively stays signed in indefinitely. The
+// 90-day window only matters as the "back from vacation" tolerance for an
+// idle user. Username + PIN sessions never expire from OIDC token death,
+// so this is the only TTL that governs them.
+export const SESSION_TTL_MS = 90 * 24 * 60 * 60 * 1000; // 90 days
 
 // Session options shared between the production `getSession()` (which uses
 // connect-pg-simple) and tests (which inject a memorystore). `rolling: true`
-// + `resave: true` together implement "7 days of inactivity" rather than a
-// hard 7-day cap from initial login.
+// + `resave: true` together implement "90 days of inactivity" rather than a
+// hard 90-day cap from initial login.
 export function buildSessionOptions(store: session.Store): session.SessionOptions {
   return {
     secret: process.env.SESSION_SECRET!,
@@ -78,6 +84,22 @@ export function getSession() {
     tableName: "sessions",
   });
   return session(buildSessionOptions(sessionStore));
+}
+
+// Same-origin path validation for `?returnTo=`. Reject anything that would
+// let an attacker redirect a freshly-signed-in user off-site (full URLs,
+// protocol-relative `//evil.com`, backslash tricks, control chars). The
+// path must start with a single `/` and not point back at auth endpoints.
+export function isSafeReturnTo(value: string): boolean {
+  if (typeof value !== "string") return false;
+  if (value.length === 0 || value.length > 512) return false;
+  if (!value.startsWith("/")) return false;
+  if (value.startsWith("//") || value.startsWith("/\\")) return false;
+  if (/[\x00-\x1f]/.test(value)) return false;
+  if (value.startsWith("/api/login") || value.startsWith("/api/logout")) {
+    return false;
+  }
+  return true;
 }
 
 function updateUserSession(
@@ -227,6 +249,14 @@ export async function setupAuth(app: Express) {
     } else {
       delete sess.authFailureRedirect;
       delete sess.returnTo;
+      // Honor a same-origin `?returnTo=/path` so the silent re-auth flow
+      // (queryClient detects 401 → /api/login?returnTo=<current>) lands
+      // the user back where they were instead of dumping them on "/".
+      const rt =
+        typeof req.query.returnTo === "string" ? req.query.returnTo : undefined;
+      if (rt && isSafeReturnTo(rt)) {
+        sess.returnTo = rt;
+      }
     }
 
     const authOptions: AuthenticateOptions = {
@@ -437,20 +467,22 @@ export function createIsAuthenticated(
     return next();
   } catch (error) {
     if (isInvalidGrantError(error)) {
-      // Refresh token is genuinely invalid/expired/revoked. Tear down the
-      // session cleanly so the next request hits the normal login flow
-      // instead of getting stuck retrying with a dead token.
+      // Refresh token is genuinely invalid/expired/revoked. We DON'T
+      // destroy the session here anymore — the session cookie is the
+      // only thing that lets the client run the silent re-auth flow
+      // (queryClient sees 401 → redirects to /api/login?returnTo=…).
+      // Once the user finishes /api/callback, passport overwrites the
+      // user object on the same session, so no orphaned data lingers.
+      // We do still respond 401 (and refuse to authorize this request)
+      // so the client knows it needs to re-auth, but we keep the
+      // session cookie alive so the round-trip is seamless.
       const e = error as { error?: string; status?: number };
       logAuthFailure(req, "refresh_invalid_grant", {
         oauthError: e.error,
         status: e.status,
+        method: req.method,
       });
-      req.logout(() => {
-        req.session?.destroy?.(() => {
-          res.status(401).json({ message: "Unauthorized" });
-        });
-      });
-      return;
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     // Transient failure (network error, 5xx, timeout, etc). Don't punish

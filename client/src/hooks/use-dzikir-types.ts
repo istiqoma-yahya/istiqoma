@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { CustomDzikirType } from "@shared/schema";
 import { resolveDzikirTypeLabel } from "@/lib/targets";
+import { apiRequest } from "@/lib/queryClient";
 
 const QUERY_KEY = "/api/dzikir-types";
 
@@ -9,9 +10,8 @@ export function useCustomDzikirTypes() {
   return useQuery<CustomDzikirType[]>({
     queryKey: [QUERY_KEY],
     queryFn: async () => {
-      const res = await fetch(QUERY_KEY, { credentials: "include" });
-      if (res.status === 401) return [];
-      if (!res.ok) throw new Error("Failed to fetch custom dzikir types");
+      // Centralized 401 → session-expired redirect (instead of empty list).
+      const res = await apiRequest("GET", QUERY_KEY);
       return res.json();
     },
   });

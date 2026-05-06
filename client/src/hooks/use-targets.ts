@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import type { NewlyEarnedBadge } from "@shared/schema";
 import { celebrateBadges } from "@/lib/badge-celebration";
+import { apiRequest } from "@/lib/queryClient";
 
 const TIER_NAMES = ["", "Bronze", "Silver", "Gold", "Platinum"];
 
@@ -31,9 +32,10 @@ export function useTargets() {
   return useQuery({
     queryKey: [api.targets.list.path],
     queryFn: async () => {
-      const res = await fetch(api.targets.list.path, { credentials: "include" });
-      if (res.status === 401) return [];
-      if (!res.ok) throw new Error("Failed to fetch targets");
+      // Route through `apiRequest` so a 401 triggers the centralized
+      // session-expired flow (silent retry → toast → redirect with returnTo)
+      // instead of replacing the user's targets list with `[]`.
+      const res = await apiRequest("GET", api.targets.list.path);
       return api.targets.list.responses[200].parse(await res.json());
     },
   });
@@ -47,9 +49,7 @@ export function useTargetsWithProgress() {
       const url = tz
         ? `${api.targets.listWithProgress.path}?timezone=${encodeURIComponent(tz)}`
         : api.targets.listWithProgress.path;
-      const res = await fetch(url, { credentials: "include" });
-      if (res.status === 401) return [];
-      if (!res.ok) throw new Error("Failed to fetch targets with progress");
+      const res = await apiRequest("GET", url);
       return await res.json();
     },
   });
@@ -192,9 +192,10 @@ export function useTargetHistory(targetId: number | null) {
       const base = buildUrl(api.targets.history.path, { id: targetId });
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const url = `${base}?timezone=${encodeURIComponent(timezone)}`;
-      const res = await fetch(url, { credentials: "include" });
-      if (res.status === 401) return { history: [], currentStreak: 0 };
-      if (!res.ok) throw new Error("Failed to fetch target history");
+      // Same rationale as `useTargets`: route through `apiRequest` so a 401
+      // here surfaces the session-expired recovery flow instead of silently
+      // erasing the user's history view.
+      const res = await apiRequest("GET", url);
       return await res.json();
     },
     enabled: !!targetId,

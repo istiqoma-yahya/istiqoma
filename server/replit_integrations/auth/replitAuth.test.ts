@@ -1,11 +1,16 @@
 // Run with: npx tsx --test server/replit_integrations/auth/replitAuth.test.ts
 //
-// These tests lock in two subtle sign-in behaviors (see task #91):
+// These tests lock in the sign-in / session behaviors that matter to users:
 //   1. The session cookie rolls forward on every authenticated request, so an
-//      active user gets "7 days of inactivity" rather than a hard 7-day cap.
+//      active user gets "90 days of inactivity" (task #173) rather than a hard
+//      cap. Idle users get a generous grace window before being prompted again.
 //   2. A transient failure from the OIDC token endpoint does NOT log the user
-//      out, while a genuine `invalid_grant` does (cleanly destroying the
-//      session and returning 401).
+//      out (we still serve cached reads and only block writes).
+//   3. A genuine `invalid_grant` returns 401 but PRESERVES the session cookie
+//      (task #173) so the client-side recovery flow can silently re-auth via
+//      `/api/login?returnTo=...` and overwrite the user on the same session
+//      without losing in-flight UI state.
+//   4. `isSafeReturnTo` rejects off-site / open-redirect / auth-loop targets.
 
 process.env.SESSION_SECRET ??= "test-secret-not-used-anywhere-real";
 process.env.DATABASE_URL ??= "postgres://test:test@localhost:5432/test";
@@ -22,8 +27,36 @@ import { AddressInfo } from "node:net";
 import {
   buildSessionOptions,
   createIsAuthenticated,
+  isSafeReturnTo,
   type IsAuthenticatedDeps,
 } from "./replitAuth";
+
+// ── (d) returnTo validation (task #173) ──────────────────────────────────
+
+test("isSafeReturnTo accepts same-origin paths", () => {
+  assert.equal(isSafeReturnTo("/"), true);
+  assert.equal(isSafeReturnTo("/dashboard"), true);
+  assert.equal(isSafeReturnTo("/targets/42"), true);
+  assert.equal(isSafeReturnTo("/quran/2?reciter=mishary#v3"), true);
+});
+
+test("isSafeReturnTo rejects off-site / unsafe values", () => {
+  assert.equal(isSafeReturnTo(""), false);
+  assert.equal(isSafeReturnTo("dashboard"), false, "must be absolute path");
+  assert.equal(isSafeReturnTo("//evil.com/x"), false, "protocol-relative");
+  assert.equal(isSafeReturnTo("/\\evil.com"), false, "backslash trick");
+  assert.equal(isSafeReturnTo("https://evil.com/x"), false, "full URL");
+  assert.equal(isSafeReturnTo("/api/login"), false, "auth loop");
+  assert.equal(isSafeReturnTo("/api/login?x=1"), false, "auth loop w/ qs");
+  assert.equal(isSafeReturnTo("/api/logout"), false, "logout loop");
+  assert.equal(
+    isSafeReturnTo("/foo\nbar"),
+    false,
+    "control chars (header injection)",
+  );
+  assert.equal(isSafeReturnTo("/" + "a".repeat(600)), false, "too long");
+  assert.equal(isSafeReturnTo(undefined as any), false);
+});
 
 // ---- helpers ----------------------------------------------------------------
 
@@ -306,7 +339,13 @@ test("transient failure on a write method returns 401 but keeps the session inta
   assert.equal(req.session.destroyed, false);
 });
 
-test("invalid_grant from token endpoint destroys the session and returns 401", async () => {
+test("invalid_grant returns 401 but PRESERVES the session for silent re-auth", async () => {
+  // Task #173: the old behavior tore down the session on a single
+  // invalid_grant, which then made the React Query 401 recovery flow
+  // (which redirects to /api/login?returnTo=…) lose the session cookie
+  // it needs to round-trip back to the right place. We now keep the
+  // session cookie alive — the next /api/callback will simply overwrite
+  // the user on the same session.
   const user = {
     claims: { sub: "user-1" },
     expires_at: Math.floor(Date.now() / 1000) - 60,
@@ -317,8 +356,6 @@ test("invalid_grant from token endpoint destroys the session and returns 401", a
   const deps: IsAuthenticatedDeps = {
     refreshTokens: async () => {
       attempts++;
-      // Canonical OAuth "this refresh token is no longer valid" signal,
-      // shaped like an openid-client ResponseBodyError.
       throw Object.assign(new Error("invalid_grant"), {
         error: "invalid_grant",
         status: 400,
@@ -334,8 +371,6 @@ test("invalid_grant from token endpoint destroys the session and returns 401", a
   });
 
   await handler(req, res, next);
-  // Wait a tick because the handler completes the response inside nested
-  // callbacks (req.logout -> req.session.destroy -> res.status().json()).
   await new Promise((r) => setImmediate(r));
 
   assert.equal(
@@ -344,10 +379,42 @@ test("invalid_grant from token endpoint destroys the session and returns 401", a
     "invalid_grant must NOT be retried (it's a definitive rejection)",
   );
   assert.equal(nextWasCalled(), false, "must not fall through to next()");
-  assert.equal(req.loggedOut, true, "req.logout must be called");
-  assert.equal(req.session.destroyed, true, "session must be destroyed");
+  assert.equal(
+    req.loggedOut,
+    false,
+    "session must NOT be torn down — client needs the cookie for re-auth",
+  );
+  assert.equal(req.session.destroyed, false);
   assert.equal(res.statusCode, 401);
   assert.deepEqual(res.body, { message: "Unauthorized" });
+});
+
+test("invalid_grant on a write method also preserves the session", async () => {
+  const user = {
+    claims: { sub: "user-1" },
+    expires_at: Math.floor(Date.now() / 1000) - 60,
+    refresh_token: "rt-revoked",
+  };
+  const deps: IsAuthenticatedDeps = {
+    refreshTokens: async () => {
+      throw Object.assign(new Error("invalid_grant"), {
+        error: "invalid_grant",
+        status: 400,
+      });
+    },
+    refreshTimeoutMs: 1000,
+  };
+  const handler = createIsAuthenticated(deps);
+  const { req, res, next, nextWasCalled } = makeReqRes({
+    user,
+    method: "POST",
+  });
+  await handler(req, res, next);
+  await new Promise((r) => setImmediate(r));
+  assert.equal(nextWasCalled(), false);
+  assert.equal(res.statusCode, 401);
+  assert.equal(req.loggedOut, false);
+  assert.equal(req.session.destroyed, false);
 });
 
 test("happy path: still-valid access token short-circuits without calling refresh", async () => {

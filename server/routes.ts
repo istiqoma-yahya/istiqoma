@@ -5,7 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, registerUsernameAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
-import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS, insertCampaignSchema, updateCampaignSchema, type NewlyEarnedBadge } from "@shared/schema";
+import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS, insertCampaignSchema, updateCampaignSchema, type NewlyEarnedBadge, type PushSubscription } from "@shared/schema";
 import {
   checkRateLimit,
   generateRecommendations,
@@ -785,12 +785,19 @@ export async function registerRoutes(
     });
   });
 
+  // Strip push subscription secrets and location from API responses so they
+  // are never included in logs or exposed beyond what the client already sent.
+  function sanitizePushSubscription(sub: PushSubscription) {
+    const { endpoint: _e, p256dh: _p, auth: _a, latitude: _lat, longitude: _lon, ...safe } = sub;
+    return safe;
+  }
+
   app.post(api.push.subscribe.path, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const input = api.push.subscribe.input.parse(req.body);
       const subscription = await storage.savePushSubscription(userId, input);
-      res.status(201).json({ success: true, subscription });
+      res.status(201).json({ success: true, subscription: sanitizePushSubscription(subscription) });
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
@@ -811,7 +818,7 @@ export async function registerRoutes(
       if (!subscription) {
         return res.status(404).json({ message: "No subscription found" });
       }
-      res.json({ success: true, subscription });
+      res.json({ success: true, subscription: sanitizePushSubscription(subscription) });
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({

@@ -450,7 +450,17 @@ export const api = {
       responses: {
         201: z.object({
           success: z.boolean(),
-          subscription: z.custom<typeof pushSubscriptions.$inferSelect>(),
+          subscription: z.object({
+            id: z.number(),
+            userId: z.string(),
+            dailyReminder: z.boolean(),
+            reminderTime: z.string(),
+            timezone: z.string(),
+            targetAlerts: z.boolean(),
+            sholatReminder: z.boolean(),
+            notificationSound: z.string(),
+            createdAt: z.date().nullable(),
+          }),
         }),
         400: errorSchemas.validation,
         401: errorSchemas.unauthorized,
@@ -472,7 +482,17 @@ export const api = {
       responses: {
         200: z.object({
           success: z.boolean(),
-          subscription: z.custom<typeof pushSubscriptions.$inferSelect>(),
+          subscription: z.object({
+            id: z.number(),
+            userId: z.string(),
+            dailyReminder: z.boolean(),
+            reminderTime: z.string(),
+            timezone: z.string(),
+            targetAlerts: z.boolean(),
+            sholatReminder: z.boolean(),
+            notificationSound: z.string(),
+            createdAt: z.date().nullable(),
+          }),
         }),
         401: errorSchemas.unauthorized,
         404: errorSchemas.notFound,

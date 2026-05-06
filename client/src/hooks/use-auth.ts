@@ -23,7 +23,16 @@ async function fetchUser(): Promise<User | null> {
 }
 
 async function logout(): Promise<void> {
-  window.location.href = "/api/logout";
+  const res = await fetch("/api/logout", {
+    method: "POST",
+    credentials: "include",
+  });
+  if (res.ok) {
+    const data = await res.json().catch(() => ({}));
+    window.location.href = (data as { location?: string }).location ?? "/";
+  } else {
+    window.location.href = "/";
+  }
 }
 
 export function useAuth() {

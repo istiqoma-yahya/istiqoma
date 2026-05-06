@@ -15,6 +15,7 @@ import connectPg from "connect-pg-simple";
 import { authStorage } from "./storage";
 import { storage } from "../../storage";
 import { pool } from "../../db";
+import { csrfOriginCheck } from "./csrfProtection";
 
 const DEFAULT_CATEGORIES = [
   "Dzikir",
@@ -252,7 +253,7 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
 
-  app.get("/api/logout", buildLogoutHandler(config));
+  app.post("/api/logout", csrfOriginCheck(), buildLogoutHandler(config));
 }
 
 // Exported so tests can exercise the username-vs-Replit branching without
@@ -270,15 +271,14 @@ export function buildLogoutHandler(
     const isReplitSession = hasAccessToken(req.user);
     req.logout(() => {
       if (isReplitSession) {
-        res.redirect(
-          client.buildEndSessionUrl(config, {
-            client_id: process.env.REPL_ID!,
-            post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-          }).href,
-        );
+        const location = client.buildEndSessionUrl(config, {
+          client_id: process.env.REPL_ID!,
+          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+        }).href;
+        res.json({ location });
       } else {
         req.session?.destroy?.(() => {
-          res.redirect("/");
+          res.json({ location: "/" });
         });
       }
     });

@@ -10,6 +10,7 @@ import { hashPin, verifyPin } from "./pinHash";
 import { generateRecoveryCode } from "./recoveryCode";
 import { storage } from "../../storage";
 import { isAuthenticated } from "./replitAuth";
+import { csrfOriginCheck } from "./csrfProtection";
 
 const DEFAULT_CATEGORIES = [
   "Dzikir",
@@ -84,7 +85,9 @@ function establishSession(
 }
 
 export function registerUsernameAuthRoutes(app: Express): void {
-  app.post("/api/auth/username/signup", async (req, res) => {
+  const csrf = csrfOriginCheck();
+
+  app.post("/api/auth/username/signup", csrf, async (req, res) => {
     const parsed = usernameSignupSchema.safeParse(req.body);
     if (!parsed.success) {
       const first = parsed.error.issues[0];
@@ -133,7 +136,7 @@ export function registerUsernameAuthRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/auth/username/signin", async (req, res) => {
+  app.post("/api/auth/username/signin", csrf, async (req, res) => {
     const parsed = usernameSigninSchema.safeParse(req.body);
     if (!parsed.success) {
       const first = parsed.error.issues[0];
@@ -209,7 +212,7 @@ export function registerUsernameAuthRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/auth/username/forgot-pin", async (req, res) => {
+  app.post("/api/auth/username/forgot-pin", csrf, async (req, res) => {
     const parsed = forgotPinSchema.safeParse(req.body);
     if (!parsed.success) {
       const first = parsed.error.issues[0];
@@ -296,6 +299,7 @@ export function registerUsernameAuthRoutes(app: Express): void {
 
   app.post(
     "/api/auth/username/change-pin",
+    csrf,
     isAuthenticated,
     async (req: any, res) => {
       const userId = req.user?.claims?.sub as string | undefined;

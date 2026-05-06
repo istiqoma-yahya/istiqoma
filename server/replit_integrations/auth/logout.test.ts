@@ -46,23 +46,24 @@ function appWith(user: unknown) {
     };
     next();
   });
-  app.get("/api/logout", buildLogoutHandler({} as any));
+  app.post("/api/logout", buildLogoutHandler({} as any));
   return {
     app,
     state: () => ({ sessionDestroyed, loggedOut }),
   };
 }
 
-test("/api/logout (username session): logs out, destroys session, redirects to /", async () => {
+test("/api/logout (username session): logs out, destroys session, returns { location: '/' }", async () => {
   const harness = appWith({
     claims: { sub: "u1" },
     authProvider: "username",
   });
   const { url, close } = await start(harness.app);
   try {
-    const res = await fetch(`${url}/api/logout`, { redirect: "manual" });
-    assert.equal(res.status, 302);
-    assert.equal(res.headers.get("location"), "/");
+    const res = await fetch(`${url}/api/logout`, { method: "POST" });
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.location, "/");
     const s = harness.state();
     assert.equal(s.loggedOut, true);
     assert.equal(s.sessionDestroyed, true);
@@ -71,15 +72,16 @@ test("/api/logout (username session): logs out, destroys session, redirects to /
   }
 });
 
-test("/api/logout (no user at all): treated as a non-OIDC session, redirects to /", async () => {
+test("/api/logout (no user at all): treated as a non-OIDC session, returns { location: '/' }", async () => {
   // Defensive: if a logged-out request somehow hits /api/logout, the
   // username-session branch still applies (no access_token present).
   const harness = appWith(undefined);
   const { url, close } = await start(harness.app);
   try {
-    const res = await fetch(`${url}/api/logout`, { redirect: "manual" });
-    assert.equal(res.status, 302);
-    assert.equal(res.headers.get("location"), "/");
+    const res = await fetch(`${url}/api/logout`, { method: "POST" });
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.location, "/");
     const s = harness.state();
     assert.equal(s.loggedOut, true);
     assert.equal(s.sessionDestroyed, true);

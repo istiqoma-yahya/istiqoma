@@ -893,10 +893,15 @@ export class DatabaseStorage implements IStorage {
   async updatePushSubscriptionSettings(userId: string, settings: Partial<InsertPushSubscription>): Promise<PushSubscription | null> {
     const existing = await this.getPushSubscription(userId);
     if (!existing) return null;
+
+    const sanitized = { ...settings };
+    if ("timezone" in sanitized) {
+      sanitized.timezone = validateTimezone(sanitized.timezone) ?? existing.timezone ?? null;
+    }
     
     const [updated] = await db
       .update(pushSubscriptions)
-      .set(settings)
+      .set(sanitized)
       .where(eq(pushSubscriptions.userId, userId))
       .returning();
     return updated;

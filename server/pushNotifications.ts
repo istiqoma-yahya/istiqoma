@@ -61,7 +61,13 @@ export async function sendDailyReminders(): Promise<void> {
     if (!subscription.dailyReminder) continue;
     
     const userTimezone = subscription.timezone || "Asia/Jakarta";
-    const nowInUserTz = toZonedTime(nowUtc, userTimezone);
+    let nowInUserTz: Date;
+    try {
+      nowInUserTz = toZonedTime(nowUtc, userTimezone);
+    } catch {
+      console.error(`sendDailyReminders: invalid timezone "${userTimezone}" for user ${subscription.userId}, skipping`);
+      continue;
+    }
     const currentHour = nowInUserTz.getHours();
     const currentMinute = nowInUserTz.getMinutes();
     
@@ -120,7 +126,13 @@ export async function sendTargetReminders(): Promise<void> {
     if (!subscription.targetAlerts) continue;
 
     const userTimezone = subscription.timezone || "Asia/Jakarta";
-    const nowInUserTz = toZonedTime(nowUtc, userTimezone);
+    let nowInUserTz: Date;
+    try {
+      nowInUserTz = toZonedTime(nowUtc, userTimezone);
+    } catch {
+      console.error(`sendTargetReminders: invalid timezone "${userTimezone}" for user ${subscription.userId}, skipping`);
+      continue;
+    }
     const currentHour = nowInUserTz.getHours();
     const currentMinute = nowInUserTz.getMinutes();
     const currentTotalMinutes = currentHour * 60 + currentMinute;

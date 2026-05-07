@@ -38,6 +38,7 @@
     "tapToReveal": "Tap to reveal verse",
     "markMemorized": "Mark as memorized",
     "unmarkMemorized": "Unmark memorized",
+    "memorizationSaveFailed": "Couldn't save memorization. Please try again.",
     "memorized": "Memorized",
     "record": "Record",
     "stopRecording": "Stop recording",

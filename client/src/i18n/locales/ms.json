@@ -29,6 +29,7 @@
     "tapToReveal": "Ketik untuk tunjuk ayat",
     "markMemorized": "Tandakan dah hafal",
     "unmarkMemorized": "Buang tanda hafal",
+    "memorizationSaveFailed": "Gagal menyimpan hafalan. Sila cuba lagi.",
     "memorized": "Sudah hafal",
     "record": "Rakam",
     "stopRecording": "Berhenti rakam",

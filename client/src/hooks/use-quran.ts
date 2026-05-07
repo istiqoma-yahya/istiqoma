@@ -131,13 +131,105 @@ export function useMemorizations(surahNumber?: number) {
   });
 }
 
+// Apply an optimistic mutation across every cached memorization list
+// (the unfiltered list and any per-surah filtered lists). The mutator
+// must be idempotent — it's applied once on optimistic patch, and the
+// inverse is applied on rollback. We deliberately do per-verse
+// add/remove rather than snapshot-and-restore so that overlapping
+// mutations on different (or even the same) verses don't clobber each
+// other: a failed earlier mutation only reverses its own effect, never
+// a successful later mutation's effect.
+function patchMemorizationCaches(
+  surahNumber: number,
+  mutator: (prev: QuranMemorization[]) => QuranMemorization[],
+) {
+  const entries = queryClient.getQueriesData<QuranMemorization[]>({
+    queryKey: ["/api/quran/memorizations"],
+  });
+  for (const [key, data] of entries) {
+    if (!data) continue;
+    // Only touch the unfiltered cache and the cache filtered to this
+    // exact surah. Otherwise we'd inject a surah-A verse into a cached
+    // surah-B query until the next refetch.
+    const filterSurah = Array.isArray(key) && key.length > 1 ? key[1] : undefined;
+    if (filterSurah !== undefined && filterSurah !== surahNumber) continue;
+    queryClient.setQueryData<QuranMemorization[]>(key, mutator(data));
+  }
+}
+
+function readMemorizationCache(surahNumber: number): QuranMemorization[] {
+  // Prefer the per-surah cache (it's the authoritative view for the
+  // current page); fall back to the unfiltered cache if only that one
+  // exists. Used to determine wasPresent for deterministic rollback.
+  const entries = queryClient.getQueriesData<QuranMemorization[]>({
+    queryKey: ["/api/quran/memorizations"],
+  });
+  let unfiltered: QuranMemorization[] | undefined;
+  for (const [key, data] of entries) {
+    if (!data) continue;
+    const filterSurah = Array.isArray(key) && key.length > 1 ? key[1] : undefined;
+    if (filterSurah === surahNumber) return data;
+    if (filterSurah === undefined) unfiltered = data;
+  }
+  return unfiltered ?? [];
+}
+
+function addToCache(surahNumber: number, verseNumber: number) {
+  patchMemorizationCaches(surahNumber, (prev) => {
+    if (
+      prev.some(
+        (m) => m.surahNumber === surahNumber && m.verseNumber === verseNumber,
+      )
+    ) {
+      return prev;
+    }
+    const optimistic: QuranMemorization = {
+      id: -Date.now(),
+      userId: "",
+      surahNumber,
+      verseNumber,
+      createdAt: new Date(),
+    };
+    return [...prev, optimistic];
+  });
+}
+
+function removeFromCache(surahNumber: number, verseNumber: number) {
+  patchMemorizationCaches(surahNumber, (prev) =>
+    prev.filter(
+      (m) => !(m.surahNumber === surahNumber && m.verseNumber === verseNumber),
+    ),
+  );
+}
+
 export function useAddMemorization() {
   return useMutation({
     mutationFn: async (input: { surahNumber: number; verseNumber: number }) => {
       const res = await apiRequest("POST", "/api/quran/memorizations", input);
       return res.json();
     },
-    onSuccess: () => {
+    onMutate: async ({ surahNumber, verseNumber }) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/quran/memorizations"] });
+      const wasPresent = readMemorizationCache(surahNumber).some(
+        (m) => m.surahNumber === surahNumber && m.verseNumber === verseNumber,
+      );
+      addToCache(surahNumber, verseNumber);
+      return { wasPresent };
+    },
+    onError: (_err, { surahNumber, verseNumber }, context) => {
+      // Only undo what we did. If the verse was already present in cache
+      // before this mutation (e.g. another in-flight add already added
+      // it), don't remove it — that would clobber the other mutation.
+      if (context && !context.wasPresent) {
+        removeFromCache(surahNumber, verseNumber);
+      }
+    },
+    // Reconcile with server state once any inflight mutations on this
+    // key have settled. React Query coalesces invalidations so this is
+    // a cheap eventual-consistency safety net; the optimistic patch
+    // already matches the expected server state, so the refetch
+    // typically produces no visible change.
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quran/memorizations"] });
     },
   });
@@ -148,7 +240,22 @@ export function useRemoveMemorization() {
     mutationFn: async ({ surahNumber, verseNumber }: { surahNumber: number; verseNumber: number }) => {
       await apiRequest("DELETE", `/api/quran/memorizations/${surahNumber}/${verseNumber}`);
     },
-    onSuccess: () => {
+    onMutate: async ({ surahNumber, verseNumber }) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/quran/memorizations"] });
+      const wasPresent = readMemorizationCache(surahNumber).some(
+        (m) => m.surahNumber === surahNumber && m.verseNumber === verseNumber,
+      );
+      removeFromCache(surahNumber, verseNumber);
+      return { wasPresent };
+    },
+    onError: (_err, { surahNumber, verseNumber }, context) => {
+      // Only restore if we actually removed something. Avoids re-adding
+      // a verse that a concurrent remove had already taken out.
+      if (context && context.wasPresent) {
+        addToCache(surahNumber, verseNumber);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quran/memorizations"] });
     },
   });

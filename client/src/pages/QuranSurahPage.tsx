@@ -303,10 +303,22 @@ export default function QuranSurahPage() {
 
   const handleToggleMemorized = (verseNumber: number) => {
     if (!surahId) return;
+    const onError = () => {
+      toast({
+        title: t("quranMenu.memorizationSaveFailed"),
+        variant: "destructive",
+      });
+    };
     if (memorizedSet.has(verseNumber)) {
-      removeMemorization.mutate({ surahNumber: surahId, verseNumber });
+      removeMemorization.mutate(
+        { surahNumber: surahId, verseNumber },
+        { onError },
+      );
     } else {
-      addMemorization.mutate({ surahNumber: surahId, verseNumber });
+      addMemorization.mutate(
+        { surahNumber: surahId, verseNumber },
+        { onError },
+      );
     }
   };
 

@@ -1413,19 +1413,30 @@ export async function registerRoutes(
       const userId = req.user.claims.sub;
       const row = await storage.addQuranMemorization(userId, input);
 
-      // Award deed points the first time this verse is ever memorized.
-      // Dedup is anchored on the persistent `quran_memorization_awards`
-      // ledger (NOT on `quran_memorizations`) so a user can't farm points
-      // by repeatedly unmarking and re-marking the same verse — once the
-      // award row exists, it stays even if memorization is later removed.
-      const alreadyAwarded = await storage.hasQuranMemorizationAward(
-        userId,
-        input.surahNumber,
-        input.verseNumber,
-      );
-      if (!alreadyAwarded) {
-        const points = calculatePoints({ category: "Hafalan Quran", quantity: 1 });
+      // Respond immediately so the tap feels instant. The first-time
+      // deed/award side-channel and badge re-evaluation are deferred to a
+      // background task that runs after the response is sent. All the
+      // existing correctness guarantees (idempotent ledger insert,
+      // race-loss rollback of the duplicate deed, non-fatal error logging)
+      // are preserved — they're just not on the request critical path.
+      res.status(201).json(row);
+
+      setImmediate(async () => {
         try {
+          // Award deed points the first time this verse is ever memorized.
+          // Dedup is anchored on the persistent `quran_memorization_awards`
+          // ledger (NOT on `quran_memorizations`) so a user can't farm
+          // points by repeatedly unmarking and re-marking the same verse —
+          // once the award row exists, it stays even if memorization is
+          // later removed.
+          const alreadyAwarded = await storage.hasQuranMemorizationAward(
+            userId,
+            input.surahNumber,
+            input.verseNumber,
+          );
+          if (alreadyAwarded) return;
+
+          const points = calculatePoints({ category: "Hafalan Quran", quantity: 1 });
           const deed = await storage.createDeed(userId, {
             description: `Memorized Surah ${input.surahNumber}:${input.verseNumber}`,
             category: "Hafalan Quran",
@@ -1445,21 +1456,19 @@ export async function registerRoutes(
           );
           if (!inserted) {
             await storage.deleteDeed(deed.id, userId);
-          } else {
-            try {
-              await evaluateBadgesForUser(userId);
-            } catch (e) {
-              console.error("Badge evaluation failed (memorization award)", e);
-            }
+            return;
+          }
+          try {
+            await evaluateBadgesForUser(userId);
+          } catch (e) {
+            console.error("Badge evaluation failed (memorization award)", e);
           }
         } catch (e) {
-          // Don't fail the memorization tap if the deed-award side-channel
-          // hits a transient error — the verse is still marked memorized.
+          // Non-fatal: the verse is already marked memorized; we just
+          // failed to credit the deed/badge side-channel.
           console.error("Failed to award memorization deed", e);
         }
-      }
-
-      res.status(201).json(row);
+      });
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({

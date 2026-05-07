@@ -81,7 +81,7 @@ export function calculatePoints(input: CalculatePointsInput): number {
   }
 
   if (categoryLower === "hafalan quran") {
-    return 50 * quantity;
+    return 5 * quantity;
   }
 
   if (categoryLower === "shodaqoh" || categoryLower === "sedekah" || categoryLower === "sodaqoh") {

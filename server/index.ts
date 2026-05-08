@@ -25,13 +25,19 @@ declare module "http" {
   }
 }
 
-app.use(
-  express.json({
-    verify: (req, _res, buf) => {
-      req.rawBody = buf;
-    },
-  }),
-);
+const globalJsonParser = express.json({
+  verify: (req, _res, buf) => {
+    req.rawBody = buf;
+  },
+});
+
+app.use((req, res, next) => {
+  const normalizedPath = req.path.replace(/\/+$/, "");
+  if (req.method === "POST" && normalizedPath === "/api/deeds/voice-transcribe") {
+    return next();
+  }
+  return globalJsonParser(req, res, next);
+});
 
 app.use(express.urlencoded({ extended: false }));
 

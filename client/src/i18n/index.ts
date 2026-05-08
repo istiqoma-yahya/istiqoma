@@ -13,6 +13,8 @@ const resources = {
 };
 
 const LANG_STORAGE_KEY = 'i18nextLng';
+export const LANG_USER_CHOSEN_KEY = 'i18n_user_chosen';
+const LANG_GEO_RESOLVED_KEY = 'i18n_geo_resolved';
 
 function mapCountryToLanguage(countryCode: string): string {
   if (countryCode === 'ID') return 'id';
@@ -21,8 +23,10 @@ function mapCountryToLanguage(countryCode: string): string {
 }
 
 async function applyGeoLanguage() {
-  const saved = localStorage.getItem(LANG_STORAGE_KEY);
-  if (saved) return;
+  // Skip if the user has manually picked a language.
+  if (localStorage.getItem(LANG_USER_CHOSEN_KEY)) return;
+  // Skip if we've already done a successful geo-lookup on a previous visit.
+  if (localStorage.getItem(LANG_GEO_RESOLVED_KEY)) return;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 3000);
@@ -32,7 +36,9 @@ async function applyGeoLanguage() {
     if (!res.ok) return;
     const data = await res.json();
     const lang = mapCountryToLanguage(data.country_code ?? '');
-    i18n.changeLanguage(lang);
+    await i18n.changeLanguage(lang);
+    localStorage.setItem(LANG_STORAGE_KEY, lang);
+    localStorage.setItem(LANG_GEO_RESOLVED_KEY, '1');
   } catch {
     // silently fall back to English
   } finally {
@@ -51,7 +57,6 @@ i18n
     },
     detection: {
       order: ['localStorage'],
-      caches: ['localStorage'],
     },
   })
   .then(() => applyGeoLanguage());

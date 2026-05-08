@@ -7,6 +7,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { LANG_USER_CHOSEN_KEY } from '@/i18n';
+
+const LANG_STORAGE_KEY = 'i18nextLng';
 
 const languages = [
   { code: 'en', name: 'English', flag: 'EN' },
@@ -19,6 +22,12 @@ export function LanguageSwitcher() {
 
   const currentLang = languages.find(l => l.code === i18n.language) || languages[0];
 
+  function handleLanguageChange(code: string) {
+    localStorage.setItem(LANG_USER_CHOSEN_KEY, '1');
+    localStorage.setItem(LANG_STORAGE_KEY, code);
+    i18n.changeLanguage(code);
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -30,7 +39,7 @@ export function LanguageSwitcher() {
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => i18n.changeLanguage(lang.code)}
+            onClick={() => handleLanguageChange(lang.code)}
             className={`cursor-pointer ${i18n.language === lang.code ? 'bg-accent' : ''}`}
             data-testid={`menu-language-${lang.code}`}
           >

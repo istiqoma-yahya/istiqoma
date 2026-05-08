@@ -1280,5 +1280,9 @@
       "previousStep": "Previous step",
       "nextStep": "Next step"
     }
+  },
+  "target": {
+    "doneBadge": "done",
+    "pendingBadge": "pending"
   }
 }

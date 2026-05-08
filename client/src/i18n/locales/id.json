@@ -1281,5 +1281,9 @@
       "previousStep": "Langkah sebelumnya",
       "nextStep": "Langkah berikutnya"
     }
+  },
+  "target": {
+    "doneBadge": "selesai",
+    "pendingBadge": "belum"
   }
 }

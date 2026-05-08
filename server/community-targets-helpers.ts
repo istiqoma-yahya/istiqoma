@@ -15,6 +15,32 @@ import type {
 
 const TZ = "Asia/Jakarta";
 
+function periodBoundsInTz(
+  period: string,
+  now: Date,
+  tz: string,
+): { start: Date; end: Date } {
+  const nowInTz = toZonedTime(now, tz);
+  switch (period) {
+    case "weekly":
+      return {
+        start: fromZonedTime(startOfWeek(nowInTz, { weekStartsOn: 1 }), tz),
+        end: fromZonedTime(endOfWeek(nowInTz, { weekStartsOn: 1 }), tz),
+      };
+    case "monthly":
+      return {
+        start: fromZonedTime(startOfMonth(nowInTz), tz),
+        end: fromZonedTime(endOfMonth(nowInTz), tz),
+      };
+    case "daily":
+    default:
+      return {
+        start: fromZonedTime(startOfDay(nowInTz), tz),
+        end: fromZonedTime(endOfDay(nowInTz), tz),
+      };
+  }
+}
+
 const FASTING_CATEGORY_VARIANTS = [
   "puasa",
   "fasting",
@@ -35,26 +61,9 @@ export function matchesFastingCategories(cat1: string, cat2: string): boolean {
 export function getCommunityPeriodBounds(
   period: string,
   now: Date = new Date(),
+  tz: string = TZ,
 ): { start: Date; end: Date } {
-  const nowInTz = toZonedTime(now, TZ);
-  switch (period) {
-    case "weekly":
-      return {
-        start: fromZonedTime(startOfWeek(nowInTz, { weekStartsOn: 1 }), TZ),
-        end: fromZonedTime(endOfWeek(nowInTz, { weekStartsOn: 1 }), TZ),
-      };
-    case "monthly":
-      return {
-        start: fromZonedTime(startOfMonth(nowInTz), TZ),
-        end: fromZonedTime(endOfMonth(nowInTz), TZ),
-      };
-    case "daily":
-    default:
-      return {
-        start: fromZonedTime(startOfDay(nowInTz), TZ),
-        end: fromZonedTime(endOfDay(nowInTz), TZ),
-      };
-  }
+  return periodBoundsInTz(period, now, tz);
 }
 
 export function deedMatchesCommunityTarget(
@@ -99,21 +108,41 @@ export function computeCommunityTargetLeaderboard(
   members: LeaderboardMember[],
   periodDeeds: Deed[],
   currentUserId: string,
-  options: { limit?: number; offset?: number; now?: Date } = {},
+  options: {
+    limit?: number;
+    offset?: number;
+    now?: Date;
+    memberTimezones?: Map<string, string>;
+  } = {},
 ): { entries: CommunityTargetLeaderboardEntry[]; total: number } {
   if (members.length === 0) return { entries: [], total: 0 };
 
-  // Defense in depth: even if callers pre-filter deeds by the SQL window, the
-  // helper independently enforces the Asia/Jakarta period bounds so scoring
-  // is provably restricted to the current period.
-  const { start, end } = getCommunityPeriodBounds(target.period, options.now);
-  const startMs = start.getTime();
-  const endMs = end.getTime();
+  const now = options.now ?? new Date();
+
+  // Defense in depth: even if callers pre-filter deeds by the SQL union
+  // window, the helper independently enforces each member's local period
+  // bounds so scoring is provably restricted to that member's current period.
+  // Members without a known timezone fall back to Asia/Jakarta.
+  const boundsCache = new Map<string, { startMs: number; endMs: number }>();
+  const memberBounds = new Map<string, { startMs: number; endMs: number }>();
+  for (const m of members) {
+    const tz = options.memberTimezones?.get(m.userId) ?? TZ;
+    let bounds = boundsCache.get(tz);
+    if (!bounds) {
+      const { start, end } = periodBoundsInTz(target.period, now, tz);
+      bounds = { startMs: start.getTime(), endMs: end.getTime() };
+      boundsCache.set(tz, bounds);
+    }
+    memberBounds.set(m.userId, bounds);
+  }
 
   const progressMap = new Map<string, number>();
   for (const deed of periodDeeds) {
     const created = deed.createdAt instanceof Date ? deed.createdAt.getTime() : NaN;
-    if (!Number.isFinite(created) || created < startMs || created > endMs) continue;
+    if (!Number.isFinite(created)) continue;
+    const bounds = memberBounds.get(deed.userId);
+    if (!bounds) continue;
+    if (created < bounds.startMs || created > bounds.endMs) continue;
     if (!deedMatchesCommunityTarget(deed, target)) continue;
     const prev = progressMap.get(deed.userId) ?? 0;
     progressMap.set(deed.userId, prev + (deed.quantity || 1));

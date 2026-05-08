@@ -305,6 +305,148 @@ describe("computeCommunityTargetLeaderboard", () => {
     expect(entries.find((e) => e.userId === "bob")?.username).toBe("bobby");
   });
 
+  it("uses each member's local timezone for the period window", () => {
+    // NOW = 2026-05-08T06:00:00Z
+    //   Asia/Jakarta (+07): 2026-05-08 13:00 — mid-day Friday
+    //   Europe/London (+01 BST): 2026-05-08 07:00 — early Friday
+    //
+    // A deed at 2026-05-07T20:00:00Z is:
+    //   - in Jakarta: 2026-05-08 03:00 → today (counts for jakartaUser)
+    //   - in London:  2026-05-07 21:00 → yesterday (must NOT count for londonUser)
+    //
+    // A deed at 2026-05-07T23:30:00Z is:
+    //   - in Jakarta: 2026-05-08 06:30 → today (counts for jakartaUser)
+    //   - in London:  2026-05-08 00:30 → today (counts for londonUser)
+    const target = makeTarget({ period: "daily", targetValue: 100 });
+    const members = [
+      makeMember("jakartaUser", new Date("2026-05-01")),
+      makeMember("londonUser", new Date("2026-05-01")),
+    ];
+    const memberTimezones = new Map<string, string>([
+      ["jakartaUser", "Asia/Jakarta"],
+      ["londonUser", "Europe/London"],
+    ]);
+    const earlyJakartaToday = new Date("2026-05-07T20:00:00Z");
+    const sharedToday = new Date("2026-05-07T23:30:00Z");
+    const deeds: Deed[] = [
+      makeDeed({ id: 1, userId: "jakartaUser", quantity: 5, createdAt: earlyJakartaToday }),
+      makeDeed({ id: 2, userId: "jakartaUser", quantity: 7, createdAt: sharedToday }),
+      makeDeed({ id: 3, userId: "londonUser", quantity: 9, createdAt: earlyJakartaToday }),
+      makeDeed({ id: 4, userId: "londonUser", quantity: 11, createdAt: sharedToday }),
+    ];
+    const { entries } = computeCommunityTargetLeaderboard(
+      target,
+      members,
+      deeds,
+      "jakartaUser",
+      { now: NOW, memberTimezones },
+    );
+    const jakarta = entries.find((e) => e.userId === "jakartaUser");
+    const london = entries.find((e) => e.userId === "londonUser");
+    expect(jakarta?.progress).toBe(12);
+    expect(london?.progress).toBe(11);
+  });
+
+  it("uses each member's local timezone for the weekly window (Sunday boundary)", () => {
+    // NOW = 2026-05-08T06:00:00Z (Friday)
+    // Honolulu (-10): 2026-05-07 20:00 — Thursday in Honolulu (current week
+    //   started Mon 2026-05-04 in Honolulu, so anything before
+    //   2026-05-04 00:00 -10 == 2026-05-04T10:00:00Z is "last week").
+    // Jakarta (+07):  2026-05-08 13:00 — Friday in Jakarta (current week
+    //   started Mon 2026-05-04 00:00 +07 == 2026-05-03T17:00:00Z, so a deed
+    //   on 2026-05-04T05:00:00Z is "this week").
+    //
+    // Pick a deed at 2026-05-04T05:00:00Z (Mon 12:00 +07 in Jakarta == Sun
+    // 19:00 -10 in Honolulu, before Honolulu's Monday start).
+    const target = makeTarget({ period: "weekly", targetValue: 100 });
+    const members = [
+      makeMember("jakartaUser", new Date("2026-05-01")),
+      makeMember("honoluluUser", new Date("2026-05-01")),
+    ];
+    const memberTimezones = new Map<string, string>([
+      ["jakartaUser", "Asia/Jakarta"],
+      ["honoluluUser", "Pacific/Honolulu"],
+    ]);
+    const earlyJakartaThisWeek = new Date("2026-05-04T05:00:00Z");
+    const deeds: Deed[] = [
+      makeDeed({ id: 1, userId: "jakartaUser", quantity: 5, createdAt: earlyJakartaThisWeek }),
+      makeDeed({ id: 2, userId: "honoluluUser", quantity: 9, createdAt: earlyJakartaThisWeek }),
+    ];
+    const { entries } = computeCommunityTargetLeaderboard(
+      target,
+      members,
+      deeds,
+      "jakartaUser",
+      { now: NOW, memberTimezones },
+    );
+    expect(entries.find((e) => e.userId === "jakartaUser")?.progress).toBe(5);
+    expect(entries.find((e) => e.userId === "honoluluUser")?.progress).toBe(0);
+  });
+
+  it("uses each member's local timezone for the monthly window", () => {
+    // Pick "now" near a month boundary so Jakarta and Honolulu disagree
+    // about the current month.
+    // NOW_MONTH = 2026-06-01T03:00:00Z
+    //   Jakarta (+07):  2026-06-01 10:00 — June (this month starts
+    //     2026-05-31T17:00:00Z)
+    //   Honolulu (-10): 2026-05-31 17:00 — May (this month starts
+    //     2026-05-01T10:00:00Z, ends 2026-06-01 00:00 -10 ==
+    //     2026-06-01T10:00:00Z)
+    //
+    // A deed at 2026-05-31T18:00:00Z is:
+    //   - in Jakarta: 2026-06-01 01:00 → June (this month for Jakarta)
+    //   - in Honolulu: 2026-05-31 08:00 → May (this month for Honolulu)
+    // So both should count.
+    //
+    // A deed at 2026-05-15T12:00:00Z is:
+    //   - in Jakarta: 2026-05-15 19:00 → May (last month for Jakarta, must
+    //     NOT count)
+    //   - in Honolulu: 2026-05-15 02:00 → May (this month for Honolulu,
+    //     must count)
+    const NOW_MONTH = new Date("2026-06-01T03:00:00Z");
+    const target = makeTarget({ period: "monthly", targetValue: 100 });
+    const members = [
+      makeMember("jakartaUser", new Date("2026-01-01")),
+      makeMember("honoluluUser", new Date("2026-01-01")),
+    ];
+    const memberTimezones = new Map<string, string>([
+      ["jakartaUser", "Asia/Jakarta"],
+      ["honoluluUser", "Pacific/Honolulu"],
+    ]);
+    const overlap = new Date("2026-05-31T18:00:00Z");
+    const midMay = new Date("2026-05-15T12:00:00Z");
+    const deeds: Deed[] = [
+      makeDeed({ id: 1, userId: "jakartaUser", quantity: 3, createdAt: overlap }),
+      makeDeed({ id: 2, userId: "jakartaUser", quantity: 7, createdAt: midMay }),
+      makeDeed({ id: 3, userId: "honoluluUser", quantity: 4, createdAt: overlap }),
+      makeDeed({ id: 4, userId: "honoluluUser", quantity: 11, createdAt: midMay }),
+    ];
+    const { entries } = computeCommunityTargetLeaderboard(
+      target,
+      members,
+      deeds,
+      "jakartaUser",
+      { now: NOW_MONTH, memberTimezones },
+    );
+    expect(entries.find((e) => e.userId === "jakartaUser")?.progress).toBe(3);
+    expect(entries.find((e) => e.userId === "honoluluUser")?.progress).toBe(15);
+  });
+
+  it("falls back to Asia/Jakarta when a member has no timezone in the map", () => {
+    const target = makeTarget({ period: "daily", targetValue: 100 });
+    const members = [makeMember("alice", memberJoin)];
+    // Deed inside Jakarta's "today" but not provided in memberTimezones map.
+    const deeds: Deed[] = [makeDeed({ userId: "alice", quantity: 4, createdAt: IN_WINDOW })];
+    const { entries } = computeCommunityTargetLeaderboard(
+      target,
+      members,
+      deeds,
+      "alice",
+      { now: NOW, memberTimezones: new Map() },
+    );
+    expect(entries[0].progress).toBe(4);
+  });
+
   it("applies limit and offset over the ranked list", () => {
     const target = makeTarget({ targetValue: 100 });
     const members = [

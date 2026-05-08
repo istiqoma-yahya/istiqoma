@@ -2154,10 +2154,41 @@ export class DatabaseStorage implements IStorage {
 
     // Resolve "now" once so the SQL window and the helper's defense-in-depth
     // window agree at period boundaries (avoids a 1-tick skew if a request
-    // spans midnight in Asia/Jakarta).
+    // spans midnight in any member's local timezone).
     const now = new Date();
-    const { start, end } = getCommunityPeriodBoundsHelper(target.period, now);
     const memberIds = members.map((m) => m.userId);
+
+    // Resolve each member's timezone (push-subscription tz, falling back to
+    // Asia/Jakarta) so each member's leaderboard window follows their own
+    // local day/week/month boundaries. Batched in a single SQL call to avoid
+    // N+1 queries for large groups. This intentionally inlines the same
+    // logic as `resolveUserTimezone` (push-sub tz → validateTimezone →
+    // DEFAULT_TIMEZONE) for batching; keep these two paths in sync if
+    // `resolveUserTimezone` ever changes its fallback rules.
+    const subs = await db
+      .select({ userId: pushSubscriptions.userId, timezone: pushSubscriptions.timezone })
+      .from(pushSubscriptions)
+      .where(inArray(pushSubscriptions.userId, memberIds));
+    const subTzByUser = new Map<string, string | null>();
+    for (const s of subs) subTzByUser.set(s.userId, s.timezone);
+
+    const memberTimezones = new Map<string, string>();
+    for (const id of memberIds) {
+      const tz = validateTimezone(subTzByUser.get(id) ?? undefined) ?? DEFAULT_TIMEZONE;
+      memberTimezones.set(id, tz);
+    }
+
+    // Compute each member's own period window, then take the union
+    // [min(start) … max(end)] for the SQL fetch. The helper re-applies each
+    // member's individual window in JS so cross-tz overlap can't leak.
+    let unionStart: Date | null = null;
+    let unionEnd: Date | null = null;
+    for (const id of memberIds) {
+      const tz = memberTimezones.get(id)!;
+      const { start, end } = getCommunityPeriodBoundsHelper(target.period, now, tz);
+      if (!unionStart || start < unionStart) unionStart = start;
+      if (!unionEnd || end > unionEnd) unionEnd = end;
+    }
 
     const periodDeeds = await db
       .select()
@@ -2165,8 +2196,8 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           inArray(deeds.userId, memberIds),
-          gte(deeds.createdAt, start),
-          lte(deeds.createdAt, end),
+          gte(deeds.createdAt, unionStart!),
+          lte(deeds.createdAt, unionEnd!),
         ),
       );
 
@@ -2175,7 +2206,7 @@ export class DatabaseStorage implements IStorage {
       members as LeaderboardMember[],
       periodDeeds,
       currentUserId,
-      { ...options, now },
+      { ...options, now, memberTimezones },
     );
   }
 }

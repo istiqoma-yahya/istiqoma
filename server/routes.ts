@@ -5,7 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, registerUsernameAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
-import { deeds, insertCustomDzikirTypeSchema, insertCommunityTargetSchema, insertUserOnboardingSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS, insertCampaignSchema, updateCampaignSchema, type NewlyEarnedBadge, type PushSubscription } from "@shared/schema";
+import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS, insertCampaignSchema, updateCampaignSchema, type NewlyEarnedBadge, type PushSubscription } from "@shared/schema";
 import {
   checkRateLimit,
   generateRecommendations,
@@ -18,6 +18,7 @@ import { registerVoiceTranscribeRoute } from "./voiceTranscribe";
 import { calculatePoints } from "./calculatePoints";
 import { evaluateBadgesForUser } from "./badges";
 import { registerMemorizationRoutes } from "./memorization-router";
+import { registerCommunityTargetRoutes } from "./community-targets-router";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
 import { format } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -1720,107 +1721,5 @@ function registerAdminCampaignRoutes(app: Express) {
   });
 
   // ─── Community Targets ───────────────────────────────────────
-  app.get(api.communityTargets.list.path, isAuthenticated, async (req: any, res) => {
-    const userId = req.user.claims.sub;
-    const items = await storage.listCommunityTargets(userId);
-    const masked = items.map((it) => ({ ...it, creatorEmail: maskEmail(it.creatorEmail) }));
-    res.json(masked);
-  });
-
-  app.get(api.communityTargets.get.path, isAuthenticated, async (req: any, res) => {
-    const userId = req.user.claims.sub;
-    const id = parseInt(req.params.id, 10);
-    if (!Number.isFinite(id)) return res.status(400).json({ message: "Invalid ID" });
-    const item = await storage.getCommunityTarget(id, userId);
-    if (!item) return res.status(404).json({ message: "Community target not found" });
-    res.json({ ...item, creatorEmail: maskEmail(item.creatorEmail) });
-  });
-
-  app.post(api.communityTargets.create.path, isAuthenticated, async (req: any, res) => {
-    try {
-      const input = insertCommunityTargetSchema.parse(req.body);
-      const userId = req.user.claims.sub;
-      const row = await storage.createCommunityTarget(userId, input);
-      res.status(201).json(row);
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ message: err.errors[0].message, field: err.errors[0].path.join(".") });
-      }
-      throw err;
-    }
-  });
-
-  app.patch(api.communityTargets.update.path, isAuthenticated, async (req: any, res) => {
-    try {
-      const input = insertCommunityTargetSchema.parse(req.body);
-      const userId = req.user.claims.sub;
-      const id = parseInt(req.params.id, 10);
-      if (!Number.isFinite(id)) return res.status(400).json({ message: "Invalid ID" });
-      const row = await storage.updateCommunityTarget(id, userId, input);
-      if (!row) return res.status(404).json({ message: "Community target not found" });
-      res.json(row);
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ message: err.errors[0].message, field: err.errors[0].path.join(".") });
-      }
-      const status = getErrorStatus(err);
-      if (status) return res.status(status).json({ message: getErrorMessage(err) });
-      throw err;
-    }
-  });
-
-  app.delete(api.communityTargets.delete.path, isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const id = parseInt(req.params.id, 10);
-      if (!Number.isFinite(id)) return res.status(400).json({ message: "Invalid ID" });
-      const ok = await storage.deleteCommunityTarget(id, userId);
-      if (!ok) return res.status(404).json({ message: "Community target not found" });
-      res.status(204).send();
-    } catch (err) {
-      const status = getErrorStatus(err);
-      if (status) return res.status(status).json({ message: getErrorMessage(err) });
-      throw err;
-    }
-  });
-
-  app.post(api.communityTargets.join.path, isAuthenticated, async (req: any, res) => {
-    const userId = req.user.claims.sub;
-    const id = parseInt(req.params.id, 10);
-    if (!Number.isFinite(id)) return res.status(400).json({ message: "Invalid ID" });
-    const member = await storage.joinCommunityTarget(id, userId);
-    if (!member) return res.status(404).json({ message: "Community target not found" });
-    res.json(member);
-  });
-
-  app.delete(api.communityTargets.leave.path, isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const id = parseInt(req.params.id, 10);
-      if (!Number.isFinite(id)) return res.status(400).json({ message: "Invalid ID" });
-      const ok = await storage.leaveCommunityTarget(id, userId);
-      if (!ok) return res.status(404).json({ message: "Community target not found" });
-      res.status(204).send();
-    } catch (err) {
-      const status = getErrorStatus(err);
-      if (status) return res.status(status).json({ message: getErrorMessage(err) });
-      throw err;
-    }
-  });
-
-  app.get(api.communityTargets.leaderboard.path, isAuthenticated, async (req: any, res) => {
-    const userId = req.user.claims.sub;
-    const id = parseInt(req.params.id, 10);
-    if (!Number.isFinite(id)) return res.status(400).json({ message: "Invalid ID" });
-    const limit = Math.min(Math.max(parseInt(String(req.query.limit ?? "50"), 10) || 50, 1), 100);
-    const offset = Math.max(parseInt(String(req.query.offset ?? "0"), 10) || 0, 0);
-    const board = await storage.getCommunityTargetLeaderboard(id, userId, { limit, offset });
-    if (board === null) return res.status(404).json({ message: "Community target not found" });
-    if (board === "forbidden") return res.status(403).json({ message: "Members only" });
-    const masked = {
-      entries: board.entries.map((e) => ({ ...e, email: maskEmail(e.email) })),
-      total: board.total,
-    };
-    res.json(masked);
-  });
+  registerCommunityTargetRoutes(app, storage, isAuthenticated);
 }

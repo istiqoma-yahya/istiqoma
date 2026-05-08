@@ -1,5 +1,6 @@
 import { db } from "./db";
 export { db };
+import { computeCommunityTargetLeaderboard, getCommunityPeriodBounds as getCommunityPeriodBoundsHelper, type LeaderboardMember } from "./community-targets-helpers";
 import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, quizQuestions, userQuizProgress, quizAttempts, campaigns, communityTargets, communityTargetMembers, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization, type QuizState, type QuizActiveAttempt, type QuizAnswerResult, type QuizLeaderboardEntry, type Campaign, type InsertCampaign, type UpdateCampaign, type CommunityTarget, type InsertCommunityTarget, type CommunityTargetMember, type CommunityTargetListItem, type CommunityTargetLeaderboardEntry } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte, isNull, inArray } from "drizzle-orm";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from "date-fns";
@@ -1889,41 +1890,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ─── Community Targets ───────────────────────────────────────
-  // Resolve the current period window in a single shared timezone so
-  // all members compete on the same boundaries.
-  private getCommunityPeriodBounds(period: "daily" | "weekly" | "monthly"): { start: Date; end: Date } {
-    const tz = DEFAULT_TIMEZONE;
-    const nowInTz = toZonedTime(new Date(), tz);
-    switch (period) {
-      case "weekly":
-        return {
-          start: fromZonedTime(startOfWeek(nowInTz, { weekStartsOn: 1 }), tz),
-          end: fromZonedTime(endOfWeek(nowInTz, { weekStartsOn: 1 }), tz),
-        };
-      case "monthly":
-        return {
-          start: fromZonedTime(startOfMonth(nowInTz), tz),
-          end: fromZonedTime(endOfMonth(nowInTz), tz),
-        };
-      case "daily":
-      default:
-        return {
-          start: fromZonedTime(startOfDay(nowInTz), tz),
-          end: fromZonedTime(endOfDay(nowInTz), tz),
-        };
-    }
-  }
-
-  private deedMatchesCommunityTarget(deed: Deed, t: CommunityTarget): boolean {
-    const matchesCategory = matchesFastingCategories(deed.category, t.category) || deed.category === t.category;
-    const matchesDzikirType = !t.dzikirType || deed.dzikirType === t.dzikirType;
-    const matchesSholatType = !t.sholatType || deed.sholatType === t.sholatType;
-    const matchesFastingType = !t.fastingType || deed.fastingType === t.fastingType;
-    const matchesQuranUnit = !t.quranUnit || deed.quranUnit === t.quranUnit;
-    const matchesSedekahType = !t.sedekahType || deed.sedekahType === t.sedekahType;
-    const matchesCustomUnit = !t.customUnit || deed.customUnit === t.customUnit || !deed.customUnit;
-    return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesCustomUnit;
-  }
 
   async listCommunityTargets(currentUserId: string): Promise<CommunityTargetListItem[]> {
     const rows = await db
@@ -2137,7 +2103,11 @@ export class DatabaseStorage implements IStorage {
 
     if (members.length === 0) return { entries: [], total: 0 };
 
-    const { start, end } = this.getCommunityPeriodBounds(target.period);
+    // Resolve "now" once so the SQL window and the helper's defense-in-depth
+    // window agree at period boundaries (avoids a 1-tick skew if a request
+    // spans midnight in Asia/Jakarta).
+    const now = new Date();
+    const { start, end } = getCommunityPeriodBoundsHelper(target.period, now);
     const memberIds = members.map((m) => m.userId);
 
     const periodDeeds = await db
@@ -2151,44 +2121,13 @@ export class DatabaseStorage implements IStorage {
         ),
       );
 
-    const progressMap = new Map<string, number>();
-    for (const deed of periodDeeds) {
-      if (!this.deedMatchesCommunityTarget(deed, target)) continue;
-      const prev = progressMap.get(deed.userId) ?? 0;
-      progressMap.set(deed.userId, prev + (deed.quantity || 1));
-    }
-
-    const entries = members.map((m) => {
-      const progress = progressMap.get(m.userId) ?? 0;
-      const percent = target.targetValue > 0
-        ? Math.min(100, Math.round((progress / target.targetValue) * 100))
-        : 0;
-      const composedName =
-        [m.firstName, m.lastName].filter(Boolean).join(" ").trim() ||
-        m.username ||
-        null;
-      return {
-        userId: m.userId,
-        username: composedName,
-        email: m.email,
-        profileImageUrl: m.profileImageUrl,
-        progress,
-        percent,
-        joinedAt: (m.joinedAt ?? new Date()).toISOString(),
-        isCurrentUser: m.userId === currentUserId,
-      };
-    });
-
-    // Sort: progress desc, then earliest joinedAt asc (tie-break).
-    entries.sort((a, b) => {
-      if (b.progress !== a.progress) return b.progress - a.progress;
-      return a.joinedAt.localeCompare(b.joinedAt);
-    });
-
-    const ranked = entries.map((e, i) => ({ ...e, rank: i + 1 }));
-    const limit = Math.min(Math.max(options.limit ?? 50, 1), 100);
-    const offset = Math.max(options.offset ?? 0, 0);
-    return { entries: ranked.slice(offset, offset + limit), total: ranked.length };
+    return computeCommunityTargetLeaderboard(
+      target,
+      members as LeaderboardMember[],
+      periodDeeds,
+      currentUserId,
+      { ...options, now },
+    );
   }
 }
 

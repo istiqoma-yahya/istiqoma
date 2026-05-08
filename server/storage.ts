@@ -1926,7 +1926,7 @@ export class DatabaseStorage implements IStorage {
     const total = Number(totalRow?.total ?? 0);
 
     const participantCountSubq = db
-      .select({ ctId: communityTargetMembers.communityTargetId, cnt: sql<number>`count(*)::int` })
+      .select({ ctId: communityTargetMembers.communityTargetId, cnt: sql<number>`count(*)::int`.as("cnt") })
       .from(communityTargetMembers)
       .groupBy(communityTargetMembers.communityTargetId)
       .as("member_counts");

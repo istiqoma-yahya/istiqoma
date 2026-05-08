@@ -54,6 +54,7 @@ export function useCreateDeed() {
     onSuccess: (deed) => {
       queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
       queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/targets/progress"] });
       // Surface celebratory toasts + animation for newly-earned badge tiers.
       const newlyEarned = deed.newlyEarnedBadges;
       if (newlyEarned && newlyEarned.length > 0) {
@@ -117,6 +118,7 @@ export function useDeleteDeed() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
       queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/targets/progress"] });
       toast({
         title: "Deed Deleted",
         description: "The deed has been removed from your history.",
@@ -161,6 +163,7 @@ export function useUpdateDeed() {
     onSuccess: (deed) => {
       queryClient.invalidateQueries({ queryKey: [api.deeds.list.path] });
       queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/targets/progress"] });
       const newlyEarned = deed.newlyEarnedBadges;
       if (newlyEarned && newlyEarned.length > 0) {
         const tierLabels = ["", "Bronze", "Silver", "Gold", "Platinum"];

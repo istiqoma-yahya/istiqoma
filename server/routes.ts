@@ -17,6 +17,7 @@ import { checkVoiceParseRateLimit, parseVoiceDeed } from "./voiceParse";
 import { registerVoiceTranscribeRoute } from "./voiceTranscribe";
 import { calculatePoints } from "./calculatePoints";
 import { evaluateBadgesForUser } from "./badges";
+import { registerMemorizationRoutes } from "./memorization-router";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
 import { format } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -1407,89 +1408,7 @@ export async function registerRoutes(
     res.json(rows);
   });
 
-  app.post(api.quran.addMemorization.path, isAuthenticated, async (req: any, res) => {
-    try {
-      const input = api.quran.addMemorization.input.parse(req.body);
-      const userId = req.user.claims.sub;
-      const row = await storage.addQuranMemorization(userId, input);
-
-      // Respond immediately so the tap feels instant. The first-time
-      // deed/award side-channel and badge re-evaluation are deferred to a
-      // background task that runs after the response is sent. All the
-      // existing correctness guarantees (idempotent ledger insert,
-      // race-loss rollback of the duplicate deed, non-fatal error logging)
-      // are preserved — they're just not on the request critical path.
-      res.status(201).json(row);
-
-      setImmediate(async () => {
-        try {
-          // Award deed points the first time this verse is ever memorized.
-          // Dedup is anchored on the persistent `quran_memorization_awards`
-          // ledger (NOT on `quran_memorizations`) so a user can't farm
-          // points by repeatedly unmarking and re-marking the same verse —
-          // once the award row exists, it stays even if memorization is
-          // later removed.
-          const alreadyAwarded = await storage.hasQuranMemorizationAward(
-            userId,
-            input.surahNumber,
-            input.verseNumber,
-          );
-          if (alreadyAwarded) return;
-
-          const points = calculatePoints({ category: "Hafalan Quran", quantity: 1 });
-          const deed = await storage.createDeed(userId, {
-            description: `Memorized Surah ${input.surahNumber}:${input.verseNumber}`,
-            category: "Hafalan Quran",
-            points,
-            quantity: 1,
-            deedType: "good",
-          });
-          // Race-safe: a concurrent second request might have inserted the
-          // award row first. In that case `recordQuranMemorizationAward`
-          // returns false and we roll back this duplicate deed so we don't
-          // double-credit the user.
-          const inserted = await storage.recordQuranMemorizationAward(
-            userId,
-            input.surahNumber,
-            input.verseNumber,
-            deed.id,
-          );
-          if (!inserted) {
-            await storage.deleteDeed(deed.id, userId);
-            return;
-          }
-          try {
-            await evaluateBadgesForUser(userId);
-          } catch (e) {
-            console.error("Badge evaluation failed (memorization award)", e);
-          }
-        } catch (e) {
-          // Non-fatal: the verse is already marked memorized; we just
-          // failed to credit the deed/badge side-channel.
-          console.error("Failed to award memorization deed", e);
-        }
-      });
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({
-          message: err.errors[0].message,
-          field: err.errors[0].path.join("."),
-        });
-      }
-      throw err;
-    }
-  });
-
-  app.delete(api.quran.removeMemorization.path, isAuthenticated, async (req: any, res) => {
-    const userId = req.user.claims.sub;
-    const surah = parseInt(req.params.surah, 10);
-    const verse = parseInt(req.params.verse, 10);
-    if (isNaN(surah) || isNaN(verse)) {
-      return res.status(400).json({ message: "Invalid surah or verse" });
-    }
-    await storage.removeQuranMemorization(userId, surah, verse);
-    res.status(204).send();
-  });
+  registerMemorizationRoutes(app, storage, isAuthenticated, evaluateBadgesForUser);
 
   // ─── Quiz ────────────────────────────────────────────────────
   // Islamic quiz progression. Independent of deeds/points: users

@@ -83,14 +83,14 @@ export function useCreateDeed() {
       }
       if (!newlyEarned || newlyEarned.length === 0) {
         toast({
-          title: "Deed Recorded",
-          description: "Your deed has been successfully tracked.",
+          title: t("deeds.recorded"),
+          description: t("deeds.recordedDesc"),
         });
       }
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -101,6 +101,7 @@ export function useCreateDeed() {
 export function useDeleteDeed() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (id: number) => {
@@ -120,13 +121,13 @@ export function useDeleteDeed() {
       queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
       queryClient.invalidateQueries({ queryKey: ["/api/targets/progress"] });
       toast({
-        title: "Deed Deleted",
-        description: "The deed has been removed from your history.",
+        title: t("deeds.deleted"),
+        description: t("deeds.deletedDesc"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -137,6 +138,7 @@ export function useDeleteDeed() {
 export function useUpdateDeed() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: CreateDeedRequest }) => {
@@ -166,24 +168,24 @@ export function useUpdateDeed() {
       queryClient.invalidateQueries({ queryKey: ["/api/targets/progress"] });
       const newlyEarned = deed.newlyEarnedBadges;
       if (newlyEarned && newlyEarned.length > 0) {
-        const tierLabels = ["", "Bronze", "Silver", "Gold", "Platinum"];
         for (const b of newlyEarned) {
+          const tierLabel = t(`achievements.tiers.${b.tier}` as any, "");
           toast({
-            title: "Badge unlocked!",
-            description: `${b.name} • ${tierLabels[b.tier] ?? `Tier ${b.tier}`}`,
+            title: t("achievements.celebrationTitle"),
+            description: `${b.name} • ${tierLabel || `Tier ${b.tier}`}`,
           });
         }
         celebrateBadges(newlyEarned);
       } else {
         toast({
-          title: "Deed Updated",
-          description: "Your deed has been successfully updated.",
+          title: t("deeds.updated"),
+          description: t("deeds.updatedDesc"),
         });
       }
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });

@@ -2,22 +2,26 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl } from "@shared/routes";
 import { type InsertTarget, type TargetWithProgress, type TargetHistory } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import type { NewlyEarnedBadge } from "@shared/schema";
 import { celebrateBadges } from "@/lib/badge-celebration";
 import { apiRequest } from "@/lib/queryClient";
 
-const TIER_NAMES = ["", "Bronze", "Silver", "Gold", "Platinum"];
-
 function toastNewlyEarned(
   badges: NewlyEarnedBadge[] | undefined,
   toast: ReturnType<typeof useToast>["toast"],
+  t: ReturnType<typeof useTranslation>["t"],
 ) {
   if (!Array.isArray(badges) || badges.length === 0) return;
   for (const b of badges) {
+    const tierLabel = t(`achievements.tiers.${b.tier}` as any, "");
+    const desc = tierLabel
+      ? t("achievements.tierEarned", { tier: tierLabel }) + (b.description ? ` — ${b.description}` : "")
+      : b.description ?? "";
     toast({
       title: `🏆 ${b.name}`,
-      description: `${TIER_NAMES[b.tier] ?? ""} tier earned${b.description ? ` — ${b.description}` : ""}`,
+      description: desc,
     });
   }
   celebrateBadges(badges);
@@ -58,6 +62,7 @@ export function useTargetsWithProgress() {
 export function useCreateTarget() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (data: InsertTarget) => {
@@ -86,14 +91,14 @@ export function useCreateTarget() {
       queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
       queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
       toast({
-        title: "Target Created",
-        description: "Your spiritual goal has been set successfully.",
+        title: t("targets.targetCreated"),
+        description: t("targets.targetCreatedDesc"),
       });
-      toastNewlyEarned(data.newlyEarnedBadges, toast);
+      toastNewlyEarned(data.newlyEarnedBadges, toast, t);
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -104,6 +109,7 @@ export function useCreateTarget() {
 export function useUpdateTarget() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: InsertTarget }) => {
@@ -134,14 +140,14 @@ export function useUpdateTarget() {
       queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
       queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
       toast({
-        title: "Target Updated",
-        description: "Your spiritual goal has been updated successfully.",
+        title: t("targets.targetUpdated"),
+        description: t("targets.targetUpdatedDesc"),
       });
-      toastNewlyEarned(data.newlyEarnedBadges, toast);
+      toastNewlyEarned(data.newlyEarnedBadges, toast, t);
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -152,6 +158,7 @@ export function useUpdateTarget() {
 export function useDeleteTarget() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (id: number) => {
@@ -170,13 +177,13 @@ export function useDeleteTarget() {
       queryClient.invalidateQueries({ queryKey: [api.targets.list.path] });
       queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
       toast({
-        title: "Target Deleted",
-        description: "The spiritual goal has been removed.",
+        title: t("targets.targetDeleted"),
+        description: t("targets.targetDeletedDesc"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -205,6 +212,7 @@ export function useTargetHistory(targetId: number | null) {
 export function useUpdateTargetProgress() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async ({ id, progress }: { id: number; progress: number }) => {
@@ -228,11 +236,11 @@ export function useUpdateTargetProgress() {
       queryClient.invalidateQueries({ queryKey: [api.targets.list.path] });
       queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
       queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
-      toastNewlyEarned(data.newlyEarnedBadges, toast);
+      toastNewlyEarned(data.newlyEarnedBadges, toast, t);
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -243,6 +251,7 @@ export function useUpdateTargetProgress() {
 export function useCompleteTarget() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (id: number) => {
@@ -265,14 +274,14 @@ export function useCompleteTarget() {
       queryClient.invalidateQueries({ queryKey: [api.targets.listWithProgress.path] });
       queryClient.invalidateQueries({ queryKey: ["/api/badges"] });
       toast({
-        title: "Target Completed",
-        description: "Congratulations on achieving your goal!",
+        title: t("targets.targetCompleted"),
+        description: t("targets.targetCompletedDesc"),
       });
-      toastNewlyEarned(data.newlyEarnedBadges, toast);
+      toastNewlyEarned(data.newlyEarnedBadges, toast, t);
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });

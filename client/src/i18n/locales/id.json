@@ -196,7 +196,13 @@
     "customCategories": "Kategori Kustom",
     "noCustom": "Belum ada kategori kustom",
     "deleteConfirm": "Hapus kategori ini?",
-    "protectedCategory": "Kategori ini dilindungi dan tidak dapat diedit atau dihapus"
+    "protectedCategory": "Kategori ini dilindungi dan tidak dapat diedit atau dihapus",
+    "created": "Kategori Dibuat",
+    "createdDesc": "Kategorimu berhasil dibuat.",
+    "deleted": "Kategori Dihapus",
+    "deletedDesc": "Kategori telah dihapus.",
+    "updated": "Kategori Diperbarui",
+    "updatedDesc": "Kategori berhasil diperbarui."
   },
   "categoryNames": {
     "Dzikir": "Dzikir",
@@ -503,7 +509,11 @@
     "folderCreated": "Folder dibuat",
     "folderRenamed": "Nama folder diperbarui",
     "folderDeleted": "Folder dihapus",
-    "targetMoved": "Target dipindahkan"
+    "targetMoved": "Target dipindahkan",
+    "targetDeleted": "Target Dihapus",
+    "targetDeletedDesc": "Target telah dihapus.",
+    "targetCompleted": "Target Selesai",
+    "targetCompletedDesc": "Selamat telah mencapai tujuanmu!"
   },
   "user": {
     "profile": "Profil",
@@ -528,7 +538,9 @@
     "allSubCategories": "Semua Jenis",
     "confirm": "Konfirmasi",
     "next": "Berikutnya",
-    "previous": "Sebelumnya"
+    "previous": "Sebelumnya",
+    "sessionExpired": "Masuk kembali…",
+    "sessionExpiredDesc": "Sesimu telah berakhir. Menghubungkan kembali."
   },
   "sholat": {
     "selectType": "Pilih Jenis Sholat",
@@ -1520,5 +1532,13 @@
     "noResults": "Tidak ada target yang cocok",
     "noResultsDesc": "Coba ubah filter atau kata kunci pencarianmu.",
     "pageOf": "Halaman {{current}} dari {{total}}"
+  },
+  "deeds": {
+    "recorded": "Amal Tercatat",
+    "recordedDesc": "Amalmu berhasil dicatat.",
+    "deleted": "Amal Dihapus",
+    "deletedDesc": "Amal telah dihapus dari riwayatmu.",
+    "updated": "Amal Diperbarui",
+    "updatedDesc": "Amalmu berhasil diperbarui."
   }
 }

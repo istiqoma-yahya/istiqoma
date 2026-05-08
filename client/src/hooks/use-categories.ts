@@ -31,6 +31,7 @@ export function useCategories() {
 export function useCreateCategory() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (data: CreateCategoryRequest) => {
@@ -53,13 +54,13 @@ export function useCreateCategory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.categories.list.path] });
       toast({
-        title: "Category Created",
-        description: "Your category has been created successfully.",
+        title: t("categories.created"),
+        description: t("categories.createdDesc"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -70,6 +71,7 @@ export function useCreateCategory() {
 export function useDeleteCategory() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (id: number) => {
@@ -87,13 +89,13 @@ export function useDeleteCategory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.categories.list.path] });
       toast({
-        title: "Category Deleted",
-        description: "The category has been removed.",
+        title: t("categories.deleted"),
+        description: t("categories.deletedDesc"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -104,6 +106,7 @@ export function useDeleteCategory() {
 export function useUpdateCategory() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async ({ id, name }: { id: number; name: string }) => {
@@ -122,13 +125,13 @@ export function useUpdateCategory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.categories.list.path] });
       toast({
-        title: "Category Updated",
-        description: "The category has been updated successfully.",
+        title: t("categories.updated"),
+        description: t("categories.updatedDesc"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -139,6 +142,7 @@ export function useUpdateCategory() {
 export function useReorderCategories() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (orderedIds: number[]) => {
@@ -159,7 +163,7 @@ export function useReorderCategories() {
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });

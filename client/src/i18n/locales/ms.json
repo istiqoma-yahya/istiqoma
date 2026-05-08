@@ -196,7 +196,13 @@
     "customCategories": "Kategori Tersuai",
     "noCustom": "Tiada kategori tersuai lagi",
     "deleteConfirm": "Padam kategori ini?",
-    "protectedCategory": "Kategori ini dilindungi dan tidak boleh diedit atau dipadam"
+    "protectedCategory": "Kategori ini dilindungi dan tidak boleh diedit atau dipadam",
+    "created": "Kategori Dicipta",
+    "createdDesc": "Kategori anda berjaya dicipta.",
+    "deleted": "Kategori Dipadam",
+    "deletedDesc": "Kategori telah dipadam.",
+    "updated": "Kategori Dikemas Kini",
+    "updatedDesc": "Kategori berjaya dikemas kini."
   },
   "categoryNames": {
     "Dzikir": "Zikir",
@@ -503,7 +509,11 @@
     "folderCreated": "Folder dicipta",
     "folderRenamed": "Nama folder dikemaskini",
     "folderDeleted": "Folder dipadam",
-    "targetMoved": "Sasaran dialihkan"
+    "targetMoved": "Sasaran dialihkan",
+    "targetDeleted": "Sasaran Dipadam",
+    "targetDeletedDesc": "Sasaran telah dipadam.",
+    "targetCompleted": "Sasaran Selesai",
+    "targetCompletedDesc": "Tahniah kerana mencapai matlamat anda!"
   },
   "user": {
     "profile": "Profil",
@@ -528,7 +538,9 @@
     "allSubCategories": "Semua Jenis",
     "confirm": "Sahkan",
     "next": "Seterusnya",
-    "previous": "Sebelumnya"
+    "previous": "Sebelumnya",
+    "sessionExpired": "Log masuk semula…",
+    "sessionExpiredDesc": "Sesi anda telah tamat. Menyambung semula."
   },
   "sholat": {
     "selectType": "Pilih Jenis Solat",
@@ -1520,5 +1532,13 @@
     "noResults": "Tiada sasaran yang sepadan",
     "noResultsDesc": "Cuba ubah penapis atau kata kunci carian anda.",
     "pageOf": "Halaman {{current}} daripada {{total}}"
+  },
+  "deeds": {
+    "recorded": "Amalan Dicatat",
+    "recordedDesc": "Amalan anda berjaya dicatatkan.",
+    "deleted": "Amalan Dipadam",
+    "deletedDesc": "Amalan telah dipadam daripada sejarah anda.",
+    "updated": "Amalan Dikemas Kini",
+    "updatedDesc": "Amalan anda berjaya dikemas kini."
   }
 }

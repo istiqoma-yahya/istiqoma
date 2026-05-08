@@ -1,5 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
+import i18next from "i18next";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -60,8 +61,8 @@ function triggerSessionExpiredRedirect(): void {
   }
   try {
     toast({
-      title: "Signing you back in…",
-      description: "Your session expired. Reconnecting now.",
+      title: i18next.t("common.sessionExpired"),
+      description: i18next.t("common.sessionExpiredDesc"),
     });
   } catch {
     // toast can fail before <Toaster /> mounts; ignore — the redirect

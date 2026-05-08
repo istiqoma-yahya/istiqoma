@@ -10,17 +10,11 @@ import {
 } from "./replit_integrations/audio/client";
 import { checkVoiceParseRateLimit } from "./voiceParse";
 
-// 10 MB cap on inbound audio (base64 expansion in JSON requires headroom).
+// 10 MB cap on inbound audio. Now received as raw bytes (no base64 inflation),
+// so the body limit is the same as the audio limit.
 const MAX_AUDIO_BYTES = 10 * 1024 * 1024;
-const JSON_BODY_LIMIT = "15mb";
 
-const voiceTranscribeRequestSchema = z.object({
-  audioBase64: z
-    .string()
-    .min(1, "audioBase64 is required")
-    .max(((MAX_AUDIO_BYTES * 4) / 3) | 0, "Audio is too long. Please record a shorter clip."),
-  mimeType: z.string().min(1).max(200).optional(),
-});
+const mimeTypeSchema = z.string().min(1).max(200).optional();
 
 // OpenAI's audio.transcriptions endpoint natively supports these container
 // formats — we don't need ffmpeg for any of them. Mapping detected format →
@@ -52,12 +46,21 @@ function extFromMime(mime: string | undefined): { ext: string; mime: string } | 
 }
 
 export function registerVoiceTranscribeRoute(app: Express): void {
-  const jsonParser = express.json({ limit: JSON_BODY_LIMIT });
+  // Accept the audio bytes directly as the request body (any content type:
+  // audio/webm, audio/mp4, audio/ogg, etc.). This avoids JSON-encoding the
+  // audio as base64, which both inflates the payload by ~33% and pushes it
+  // through body parsers / proxies that have stricter JSON limits than raw
+  // body limits. The client-declared MIME type is passed via the standard
+  // Content-Type header.
+  const rawParser = express.raw({
+    type: () => true,
+    limit: MAX_AUDIO_BYTES,
+  });
 
   app.post(
     "/api/deeds/voice-transcribe",
     isAuthenticated,
-    jsonParser,
+    rawParser,
     async (req: any, res: Response) => {
       try {
         const userId = req.user.claims.sub;
@@ -70,14 +73,9 @@ export function registerVoiceTranscribeRoute(app: Express): void {
           });
         }
 
-        const input = voiceTranscribeRequestSchema.parse(req.body);
-
-        let audioBuffer: Buffer;
-        try {
-          audioBuffer = Buffer.from(input.audioBase64, "base64");
-        } catch {
-          return res.status(400).json({ message: "Invalid audio data." });
-        }
+        const audioBuffer: Buffer = Buffer.isBuffer(req.body)
+          ? req.body
+          : Buffer.alloc(0);
         if (audioBuffer.length === 0) {
           return res.status(400).json({ message: "Empty audio." });
         }
@@ -87,15 +85,22 @@ export function registerVoiceTranscribeRoute(app: Express): void {
             .json({ message: "Audio is too long. Please record a shorter clip." });
         }
 
+        const mimeTypeParse = mimeTypeSchema.safeParse(
+          typeof req.headers["content-type"] === "string"
+            ? req.headers["content-type"]
+            : undefined,
+        );
+        const declaredMime = mimeTypeParse.success ? mimeTypeParse.data : undefined;
+
         // Resolve container format. Prefer magic-byte detection; fall back to
-        // the client-declared mimeType (some browsers emit headerless chunks).
-        // OpenAI's transcription endpoint natively accepts wav/mp3/webm/mp4/
-        // ogg, so no ffmpeg conversion is needed in the common path.
+        // the client-declared Content-Type (some browsers emit headerless
+        // chunks). OpenAI's transcription endpoint natively accepts wav/mp3/
+        // webm/mp4/ogg, so no ffmpeg conversion is needed in the common path.
         const detected = detectAudioFormat(audioBuffer);
         let target =
           detected !== "unknown"
             ? FORMAT_TO_EXT[detected]
-            : extFromMime(input.mimeType) ?? FORMAT_TO_EXT.webm;
+            : extFromMime(declaredMime) ?? FORMAT_TO_EXT.webm;
 
         let transcript: string;
         try {

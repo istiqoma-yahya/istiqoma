@@ -91,19 +91,6 @@ function hasMediaRecorderSupport(): boolean {
   );
 }
 
-function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const s = String(reader.result || "");
-      const i = s.indexOf(",");
-      resolve(i >= 0 ? s.slice(i + 1) : s);
-    };
-    reader.onerror = () => reject(reader.error || new Error("read failed"));
-    reader.readAsDataURL(blob);
-  });
-}
-
 export default function VoiceCaptureDeedPage() {
   const { t, i18n } = useTranslation();
   const [, navigate] = useLocation();
@@ -487,11 +474,23 @@ export default function VoiceCaptureDeedPage() {
   async function transcribeAndSubmit(audioBlob: Blob) {
     setPhase("transcribing");
     try {
-      const audioBase64 = await blobToBase64(audioBlob);
-      const res = await apiRequest("POST", "/api/deeds/voice-transcribe", {
-        audioBase64,
-        mimeType: audioBlob.type || undefined,
+      // Send the raw audio bytes as the request body (Content-Type =
+      // recorder MIME). Posting binary directly avoids base64-in-JSON
+      // inflation (~33%) and the JSON-body size limits enforced by both
+      // express's parser and the dev-preview proxy, which were rejecting
+      // perfectly short clips with a generic 413 / "too long" error.
+      const res = await fetch("/api/deeds/voice-transcribe", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": audioBlob.type || "application/octet-stream",
+        },
+        body: audioBlob,
       });
+      if (!res.ok) {
+        const text = (await res.text()) || res.statusText;
+        throw new Error(`${res.status}: ${text}`);
+      }
       const data = (await res.json()) as { transcript: string };
       const finalText = (data.transcript || "").trim();
       if (!finalText) {

@@ -1,6 +1,6 @@
 import { db } from "./db";
 export { db };
-import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, quizQuestions, userQuizProgress, quizAttempts, campaigns, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization, type QuizState, type QuizActiveAttempt, type QuizAnswerResult, type QuizLeaderboardEntry, type Campaign, type InsertCampaign, type UpdateCampaign } from "@shared/schema";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, quizQuestions, userQuizProgress, quizAttempts, campaigns, communityTargets, communityTargetMembers, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization, type QuizState, type QuizActiveAttempt, type QuizAnswerResult, type QuizLeaderboardEntry, type Campaign, type InsertCampaign, type UpdateCampaign, type CommunityTarget, type InsertCommunityTarget, type CommunityTargetMember, type CommunityTargetListItem, type CommunityTargetLeaderboardEntry } from "@shared/schema";
 import { eq, desc, and, asc, sql, gte, lte, isNull, inArray } from "drizzle-orm";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -1886,6 +1886,309 @@ export class DatabaseStorage implements IStorage {
   async deleteCampaign(id: number): Promise<boolean> {
     const result = await db.delete(campaigns).where(eq(campaigns.id, id)).returning({ id: campaigns.id });
     return result.length > 0;
+  }
+
+  // ─── Community Targets ───────────────────────────────────────
+  // Resolve the current period window in a single shared timezone so
+  // all members compete on the same boundaries.
+  private getCommunityPeriodBounds(period: "daily" | "weekly" | "monthly"): { start: Date; end: Date } {
+    const tz = DEFAULT_TIMEZONE;
+    const nowInTz = toZonedTime(new Date(), tz);
+    switch (period) {
+      case "weekly":
+        return {
+          start: fromZonedTime(startOfWeek(nowInTz, { weekStartsOn: 1 }), tz),
+          end: fromZonedTime(endOfWeek(nowInTz, { weekStartsOn: 1 }), tz),
+        };
+      case "monthly":
+        return {
+          start: fromZonedTime(startOfMonth(nowInTz), tz),
+          end: fromZonedTime(endOfMonth(nowInTz), tz),
+        };
+      case "daily":
+      default:
+        return {
+          start: fromZonedTime(startOfDay(nowInTz), tz),
+          end: fromZonedTime(endOfDay(nowInTz), tz),
+        };
+    }
+  }
+
+  private deedMatchesCommunityTarget(deed: Deed, t: CommunityTarget): boolean {
+    const matchesCategory = matchesFastingCategories(deed.category, t.category) || deed.category === t.category;
+    const matchesDzikirType = !t.dzikirType || deed.dzikirType === t.dzikirType;
+    const matchesSholatType = !t.sholatType || deed.sholatType === t.sholatType;
+    const matchesFastingType = !t.fastingType || deed.fastingType === t.fastingType;
+    const matchesQuranUnit = !t.quranUnit || deed.quranUnit === t.quranUnit;
+    const matchesSedekahType = !t.sedekahType || deed.sedekahType === t.sedekahType;
+    const matchesCustomUnit = !t.customUnit || deed.customUnit === t.customUnit || !deed.customUnit;
+    return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesCustomUnit;
+  }
+
+  async listCommunityTargets(currentUserId: string): Promise<CommunityTargetListItem[]> {
+    const rows = await db
+      .select({
+        target: communityTargets,
+        creatorEmail: users.email,
+        creatorFirstName: users.firstName,
+        creatorLastName: users.lastName,
+        creatorUsername: users.username,
+      })
+      .from(communityTargets)
+      .leftJoin(users, eq(users.id, communityTargets.creatorId))
+      .where(eq(communityTargets.isActive, true))
+      .orderBy(desc(communityTargets.createdAt));
+
+    if (rows.length === 0) return [];
+    const ids = rows.map((r) => r.target.id);
+
+    const memberCounts = await db
+      .select({
+        ctId: communityTargetMembers.communityTargetId,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(communityTargetMembers)
+      .where(inArray(communityTargetMembers.communityTargetId, ids))
+      .groupBy(communityTargetMembers.communityTargetId);
+
+    const myMemberships = await db
+      .select({ ctId: communityTargetMembers.communityTargetId })
+      .from(communityTargetMembers)
+      .where(
+        and(
+          inArray(communityTargetMembers.communityTargetId, ids),
+          eq(communityTargetMembers.userId, currentUserId),
+        ),
+      );
+
+    const countMap = new Map(memberCounts.map((c) => [c.ctId, Number(c.count)]));
+    const memberSet = new Set(myMemberships.map((m) => m.ctId));
+
+    return rows.map((r) => {
+      const composedName =
+        [r.creatorFirstName, r.creatorLastName].filter(Boolean).join(" ").trim() ||
+        r.creatorUsername ||
+        null;
+      return {
+        ...r.target,
+        creatorName: composedName,
+        creatorEmail: r.creatorEmail,
+        participantCount: countMap.get(r.target.id) ?? 0,
+        isMember: memberSet.has(r.target.id) || r.target.creatorId === currentUserId,
+        isCreator: r.target.creatorId === currentUserId,
+      };
+    });
+  }
+
+  async getCommunityTarget(id: number, currentUserId: string): Promise<CommunityTargetListItem | null> {
+    const [row] = await db
+      .select({
+        target: communityTargets,
+        creatorEmail: users.email,
+        creatorFirstName: users.firstName,
+        creatorLastName: users.lastName,
+        creatorUsername: users.username,
+      })
+      .from(communityTargets)
+      .leftJoin(users, eq(users.id, communityTargets.creatorId))
+      .where(eq(communityTargets.id, id))
+      .limit(1);
+    if (!row) return null;
+
+    const [{ count } = { count: 0 }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(communityTargetMembers)
+      .where(eq(communityTargetMembers.communityTargetId, id));
+
+    const [mine] = await db
+      .select({ id: communityTargetMembers.id })
+      .from(communityTargetMembers)
+      .where(
+        and(
+          eq(communityTargetMembers.communityTargetId, id),
+          eq(communityTargetMembers.userId, currentUserId),
+        ),
+      )
+      .limit(1);
+
+    const composedName =
+      [row.creatorFirstName, row.creatorLastName].filter(Boolean).join(" ").trim() ||
+      row.creatorUsername ||
+      null;
+
+    return {
+      ...row.target,
+      creatorName: composedName,
+      creatorEmail: row.creatorEmail,
+      participantCount: Number(count ?? 0),
+      isMember: !!mine || row.target.creatorId === currentUserId,
+      isCreator: row.target.creatorId === currentUserId,
+    };
+  }
+
+  async createCommunityTarget(creatorId: string, data: InsertCommunityTarget): Promise<CommunityTarget> {
+    const [row] = await db
+      .insert(communityTargets)
+      .values({ ...data, creatorId })
+      .returning();
+    // Auto-add creator as the first member.
+    await db
+      .insert(communityTargetMembers)
+      .values({ communityTargetId: row.id, userId: creatorId })
+      .onConflictDoNothing();
+    return row;
+  }
+
+  async updateCommunityTarget(id: number, creatorId: string, data: InsertCommunityTarget): Promise<CommunityTarget | null> {
+    const [existing] = await db.select().from(communityTargets).where(eq(communityTargets.id, id)).limit(1);
+    if (!existing) return null;
+    if (existing.creatorId !== creatorId) {
+      const err = new Error("Only the creator can edit this community target") as Error & { status?: number };
+      err.status = 403;
+      throw err;
+    }
+    const [row] = await db
+      .update(communityTargets)
+      .set(data)
+      .where(eq(communityTargets.id, id))
+      .returning();
+    return row ?? null;
+  }
+
+  async deleteCommunityTarget(id: number, creatorId: string): Promise<boolean> {
+    const [existing] = await db.select().from(communityTargets).where(eq(communityTargets.id, id)).limit(1);
+    if (!existing) return false;
+    if (existing.creatorId !== creatorId) {
+      const err = new Error("Only the creator can delete this community target") as Error & { status?: number };
+      err.status = 403;
+      throw err;
+    }
+    await db.delete(communityTargets).where(eq(communityTargets.id, id));
+    return true;
+  }
+
+  async joinCommunityTarget(id: number, userId: string): Promise<CommunityTargetMember | null> {
+    const [existing] = await db.select().from(communityTargets).where(eq(communityTargets.id, id)).limit(1);
+    if (!existing) return null;
+    const [row] = await db
+      .insert(communityTargetMembers)
+      .values({ communityTargetId: id, userId })
+      .onConflictDoNothing()
+      .returning();
+    if (row) return row;
+    const [already] = await db
+      .select()
+      .from(communityTargetMembers)
+      .where(and(eq(communityTargetMembers.communityTargetId, id), eq(communityTargetMembers.userId, userId)))
+      .limit(1);
+    return already ?? null;
+  }
+
+  async leaveCommunityTarget(id: number, userId: string): Promise<boolean> {
+    const [existing] = await db.select().from(communityTargets).where(eq(communityTargets.id, id)).limit(1);
+    if (!existing) return false;
+    if (existing.creatorId === userId) {
+      const err = new Error("Creator cannot leave their own community target") as Error & { status?: number };
+      err.status = 400;
+      throw err;
+    }
+    await db
+      .delete(communityTargetMembers)
+      .where(and(eq(communityTargetMembers.communityTargetId, id), eq(communityTargetMembers.userId, userId)));
+    return true;
+  }
+
+  async getCommunityTargetLeaderboard(
+    id: number,
+    currentUserId: string,
+    options: { limit?: number; offset?: number } = {},
+  ): Promise<{ entries: CommunityTargetLeaderboardEntry[]; total: number } | null | "forbidden"> {
+    const [target] = await db.select().from(communityTargets).where(eq(communityTargets.id, id)).limit(1);
+    if (!target) return null;
+
+    // Members-only: must be the creator or a joined member to view rankings.
+    const [membership] = await db
+      .select({ id: communityTargetMembers.id })
+      .from(communityTargetMembers)
+      .where(
+        and(
+          eq(communityTargetMembers.communityTargetId, id),
+          eq(communityTargetMembers.userId, currentUserId),
+        ),
+      )
+      .limit(1);
+    if (!membership && target.creatorId !== currentUserId) {
+      return "forbidden";
+    }
+
+    const members = await db
+      .select({
+        userId: communityTargetMembers.userId,
+        joinedAt: communityTargetMembers.joinedAt,
+        username: users.username,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+      })
+      .from(communityTargetMembers)
+      .leftJoin(users, eq(users.id, communityTargetMembers.userId))
+      .where(eq(communityTargetMembers.communityTargetId, id));
+
+    if (members.length === 0) return { entries: [], total: 0 };
+
+    const { start, end } = this.getCommunityPeriodBounds(target.period);
+    const memberIds = members.map((m) => m.userId);
+
+    const periodDeeds = await db
+      .select()
+      .from(deeds)
+      .where(
+        and(
+          inArray(deeds.userId, memberIds),
+          gte(deeds.createdAt, start),
+          lte(deeds.createdAt, end),
+        ),
+      );
+
+    const progressMap = new Map<string, number>();
+    for (const deed of periodDeeds) {
+      if (!this.deedMatchesCommunityTarget(deed, target)) continue;
+      const prev = progressMap.get(deed.userId) ?? 0;
+      progressMap.set(deed.userId, prev + (deed.quantity || 1));
+    }
+
+    const entries = members.map((m) => {
+      const progress = progressMap.get(m.userId) ?? 0;
+      const percent = target.targetValue > 0
+        ? Math.min(100, Math.round((progress / target.targetValue) * 100))
+        : 0;
+      const composedName =
+        [m.firstName, m.lastName].filter(Boolean).join(" ").trim() ||
+        m.username ||
+        null;
+      return {
+        userId: m.userId,
+        username: composedName,
+        email: m.email,
+        profileImageUrl: m.profileImageUrl,
+        progress,
+        percent,
+        joinedAt: (m.joinedAt ?? new Date()).toISOString(),
+        isCurrentUser: m.userId === currentUserId,
+      };
+    });
+
+    // Sort: progress desc, then earliest joinedAt asc (tie-break).
+    entries.sort((a, b) => {
+      if (b.progress !== a.progress) return b.progress - a.progress;
+      return a.joinedAt.localeCompare(b.joinedAt);
+    });
+
+    const ranked = entries.map((e, i) => ({ ...e, rank: i + 1 }));
+    const limit = Math.min(Math.max(options.limit ?? 50, 1), 100);
+    const offset = Math.max(options.offset ?? 0, 0);
+    return { entries: ranked.slice(offset, offset + limit), total: ranked.length };
   }
 }
 

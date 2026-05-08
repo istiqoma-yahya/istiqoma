@@ -346,6 +346,81 @@ export const insertTargetSchema = createInsertSchema(targets).pick({
   intentionWhere: z.string().max(120).optional().nullable(),
 });
 
+export const communityTargets = pgTable("community_targets", {
+  id: serial("id").primaryKey(),
+  creatorId: varchar("creator_id").notNull().references(() => users.id),
+  name: text("name").notNull(),
+  category: text("category").notNull(),
+  targetValue: integer("target_value").notNull(),
+  period: text("period", { enum: ["daily", "weekly", "monthly"] }).notNull(),
+  unitLabel: text("unit_label"),
+  dzikirType: text("dzikir_type"),
+  sholatType: text("sholat_type"),
+  fastingType: text("fasting_type"),
+  quranUnit: text("quran_unit"),
+  sedekahType: text("sedekah_type"),
+  customUnit: text("custom_unit"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const communityTargetMembers = pgTable("community_target_members", {
+  id: serial("id").primaryKey(),
+  communityTargetId: integer("community_target_id").notNull().references(() => communityTargets.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  joinedAt: timestamp("joined_at").defaultNow(),
+}, (table) => ({
+  uniqMember: uniqueIndex("uniq_community_target_member").on(table.communityTargetId, table.userId),
+}));
+
+export const insertCommunityTargetSchema = createInsertSchema(communityTargets).pick({
+  name: true,
+  category: true,
+  targetValue: true,
+  period: true,
+  unitLabel: true,
+  dzikirType: true,
+  sholatType: true,
+  fastingType: true,
+  quranUnit: true,
+  sedekahType: true,
+  customUnit: true,
+}).extend({
+  name: z.string().min(1, "Target name is required").max(120, "Target name is too long"),
+  category: z.string().min(1, "Category is required"),
+  targetValue: z.number().int().min(1, "Target value must be at least 1"),
+  period: z.enum(["daily", "weekly", "monthly"]),
+  unitLabel: z.string().max(40).optional().nullable(),
+  dzikirType: z.string().max(80).optional().nullable(),
+  sholatType: z.string().max(80).optional().nullable(),
+  fastingType: z.string().max(80).optional().nullable(),
+  quranUnit: z.enum(["ayat", "halaman", "surat", "juz"]).optional().nullable(),
+  sedekahType: z.enum(["uang", "hitungan"]).optional().nullable(),
+  customUnit: z.enum(["hitungan", "ayat", "halaman", "surat", "juz", "rakaat", "hari", "uang", "times", "days"]).optional().nullable(),
+});
+
+export type CommunityTarget = typeof communityTargets.$inferSelect;
+export type InsertCommunityTarget = z.infer<typeof insertCommunityTargetSchema>;
+export type CommunityTargetMember = typeof communityTargetMembers.$inferSelect;
+export type CommunityTargetListItem = CommunityTarget & {
+  creatorName: string | null;
+  creatorEmail: string | null;
+  participantCount: number;
+  isMember: boolean;
+  isCreator: boolean;
+};
+export type CommunityTargetLeaderboardEntry = {
+  rank: number;
+  userId: string;
+  username: string | null;
+  email: string | null;
+  profileImageUrl: string | null;
+  progress: number;
+  percent: number;
+  joinedAt: string;
+  isCurrentUser: boolean;
+};
+
 export const insertTargetHistorySchema = createInsertSchema(targetHistory).pick({
   targetId: true,
   userId: true,

@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
+import {
+  useCommunityTargets,
+  useJoinCommunityTarget,
+  useLeaveCommunityTarget,
+  useDeleteCommunityTarget,
+} from "@/hooks/use-community-targets";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Users, LogIn, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTargetsWithProgress, useDeleteTarget, useCompleteTarget, useUpdateTarget } from "@/hooks/use-targets";
 import {
@@ -553,6 +562,50 @@ export default function TargetsPage() {
     />
   );
 
+  const search = useSearch();
+  const initialTab = useMemo(() => {
+    const params = new URLSearchParams(search);
+    return params.get("tab") === "community" ? "community" : "personal";
+  }, [search]);
+  const [activeTab, setActiveTab] = useState<"personal" | "community">(initialTab);
+  useEffect(() => setActiveTab(initialTab), [initialTab]);
+
+  const { data: communityTargets = [], isLoading: communityLoading } = useCommunityTargets();
+  const joinCommunity = useJoinCommunityTarget();
+  const leaveCommunity = useLeaveCommunityTarget();
+  const deleteCommunity = useDeleteCommunityTarget();
+  const [deletingCommunityId, setDeletingCommunityId] = useState<number | null>(null);
+
+  const handleJoinCommunity = async (e: React.MouseEvent, ctId: number) => {
+    e.stopPropagation();
+    try {
+      await joinCommunity.mutateAsync(ctId);
+      toast({ title: t("community.joined"), description: t("community.joinedDesc") });
+    } catch (err) {
+      toast({ title: t("common.error"), description: err instanceof Error ? err.message : t("community.joinError"), variant: "destructive" });
+    }
+  };
+  const handleLeaveCommunity = async (e: React.MouseEvent, ctId: number) => {
+    e.stopPropagation();
+    try {
+      await leaveCommunity.mutateAsync(ctId);
+      toast({ title: t("community.left"), description: t("community.leftDesc") });
+    } catch (err) {
+      toast({ title: t("common.error"), description: err instanceof Error ? err.message : t("community.leaveError"), variant: "destructive" });
+    }
+  };
+  const handleDeleteCommunity = async () => {
+    if (deletingCommunityId == null) return;
+    const ctId = deletingCommunityId;
+    setDeletingCommunityId(null);
+    try {
+      await deleteCommunity.mutateAsync(ctId);
+      toast({ title: t("community.deleted") });
+    } catch (err) {
+      toast({ title: t("common.error"), description: err instanceof Error ? err.message : t("community.deleteError"), variant: "destructive" });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -564,6 +617,17 @@ export default function TargetsPage() {
         </div>
       </header>
       <div className="max-w-2xl mx-auto p-4">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "personal" | "community")}>
+          <TabsList className="grid w-full grid-cols-2 mb-4" data-testid="tabs-targets">
+            <TabsTrigger value="personal" data-testid="tab-personal">
+              {t("targets.title")}
+            </TabsTrigger>
+            <TabsTrigger value="community" data-testid="tab-community">
+              {t("community.tabLabel")}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="personal">
         <div className="flex flex-col gap-2 mb-4 mt-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">{t("targets.subtitle")}</p>
           <div className="flex flex-wrap gap-2">
@@ -712,7 +776,143 @@ export default function TargetsPage() {
             )}
           </div>
         )}
+          </TabsContent>
+
+          <TabsContent value="community">
+            <div className="flex flex-col gap-2 mb-4 mt-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">{t("community.subtitle")}</p>
+              <Button onClick={() => navigate("/community-targets/new")} data-testid="button-add-community-target">
+                <Plus className="w-4 h-4 mr-1" />
+                {t("community.create")}
+              </Button>
+            </div>
+
+            {communityLoading ? (
+              <Card className="p-6 text-center text-muted-foreground">{t("common.loading")}</Card>
+            ) : communityTargets.length === 0 ? (
+              <Card className="p-8 text-center">
+                <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-semibold text-lg mb-2" data-testid="text-no-community-targets">
+                  {t("community.empty")}
+                </h3>
+                <p className="text-muted-foreground mb-4">{t("community.emptyDesc")}</p>
+                <Button onClick={() => navigate("/community-targets/new")} data-testid="button-add-first-community-target">
+                  <Plus className="w-4 h-4 mr-1" />
+                  {t("community.createFirst")}
+                </Button>
+              </Card>
+            ) : (
+              <div className="space-y-3" data-testid="list-community-targets">
+                {communityTargets.map((ct) => {
+                  const period = ct.period === "weekly"
+                    ? t("targets.periodWeek")
+                    : ct.period === "monthly"
+                      ? t("targets.periodMonth")
+                      : t("targets.periodDay");
+                  const unitPart = ct.unitLabel ? ` ${ct.unitLabel}` : "";
+                  return (
+                    <Card
+                      key={ct.id}
+                      className="p-4 hover-elevate cursor-pointer"
+                      onClick={() => navigate(`/community-targets/${ct.id}`)}
+                      data-testid={`card-community-target-${ct.id}`}
+                    >
+                      <div className="flex items-start gap-2 mb-1">
+                        <h3 className="text-lg font-bold flex-1 min-w-0 break-words" data-testid={`text-community-target-name-${ct.id}`}>
+                          {ct.name}
+                        </h3>
+                        {ct.isCreator && (
+                          <Badge variant="secondary" data-testid={`badge-creator-${ct.id}`}>
+                            {t("community.yours")}
+                          </Badge>
+                        )}
+                        {ct.isMember && !ct.isCreator && (
+                          <Badge data-testid={`badge-joined-${ct.id}`}>{t("community.joined")}</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground" data-testid={`text-community-target-line-${ct.id}`}>
+                        {t("targets.targetLabel")} {ct.targetValue}{unitPart} {t("targets.perPeriod", { period })}
+                      </p>
+                      <p className="text-sm text-muted-foreground">{t("targets.categoryLabel")} {ct.category}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+                        <Users className="w-3 h-3" />
+                        <span data-testid={`text-community-participant-${ct.id}`}>
+                          {t("community.participantCount", { count: ct.participantCount })}
+                        </span>
+                      </div>
+                      {ct.creatorName && (
+                        <p className="text-xs text-muted-foreground mt-1" data-testid={`text-community-creator-${ct.id}`}>
+                          {t("community.createdBy", { name: ct.creatorName })}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+                        {ct.isCreator ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => { e.stopPropagation(); navigate(`/community-targets/${ct.id}/edit`); }}
+                              data-testid={`button-edit-community-${ct.id}`}
+                            >
+                              <Pencil className="w-3.5 h-3.5 mr-1" />
+                              {t("common.edit")}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => { e.stopPropagation(); setDeletingCommunityId(ct.id); }}
+                              data-testid={`button-delete-community-${ct.id}`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5 mr-1" />
+                              {t("common.delete")}
+                            </Button>
+                          </>
+                        ) : ct.isMember ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={leaveCommunity.isPending}
+                            onClick={(e) => handleLeaveCommunity(e, ct.id)}
+                            data-testid={`button-leave-community-${ct.id}`}
+                          >
+                            <LogOut className="w-3.5 h-3.5 mr-1" />
+                            {t("community.leave")}
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            disabled={joinCommunity.isPending}
+                            onClick={(e) => handleJoinCommunity(e, ct.id)}
+                            data-testid={`button-join-community-${ct.id}`}
+                          >
+                            <LogIn className="w-3.5 h-3.5 mr-1" />
+                            {t("community.join")}
+                          </Button>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
+
+      <AlertDialog open={deletingCommunityId !== null} onOpenChange={(open) => { if (!open) setDeletingCommunityId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("community.confirmDelete")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("community.confirmDeleteDesc")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete-community">{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteCommunity} data-testid="button-confirm-delete-community">
+              {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={!!deletingTarget} onOpenChange={(open) => !open && setDeletingTarget(null)}>
         <AlertDialogContent>

@@ -422,7 +422,6 @@
       "1month": "1 Bulan",
       "3months": "3 Bulan"
     },
-    "targetName": "Nama Sasaran",
     "targetNamePlaceholder": "contoh: Khatam Al-Quran, Lengkapkan 30 juz",
     "targetNameRequired": "Nama sasaran diperlukan",
     "saveTarget": "Simpan Sasaran",
@@ -663,7 +662,15 @@
   "streak": {
     "title": "Streak",
     "daysInARow": "hari berturut-turut",
-    "weekDays": ["Isn", "Sel", "Rab", "Kha", "Jum", "Sab", "Ahd"],
+    "weekDays": [
+      "Isn",
+      "Sel",
+      "Rab",
+      "Kha",
+      "Jum",
+      "Sab",
+      "Ahd"
+    ],
     "motivationalMessage": "Anda konsisten melakukan amalan baik hari ini. Teruskan istiqomah anda setiap hari!",
     "continue": "Teruskan",
     "noStreak": "Mulakan streak anda hari ini!",
@@ -773,19 +780,47 @@
       "headline": "Teman anda dalam<br>perjalanan menjadi <em>lebih baik</em>",
       "subtext": "Istiqoma ialah aplikasi yang membantu anda mencatat amal kebaikan harian — bukan sebagai kewajipan, tetapi sebagai cermin jiwa.",
       "features": {
-        "a": { "icon": "📿", "title": "Catat Amal Baik Spontan", "desc": "Tidak perlu sasaran. Cukup catat sebarang kebaikan kecil yang anda lakukan hari ini." },
-        "b": { "icon": "🌙", "title": "Renungan Hujung Hari", "desc": "Diingatkan dengan lembut pada waktu malam untuk merenungi hari yang berlalu." },
-        "c": { "icon": "📖", "title": "Lihat Perjalanan Anda", "desc": "Catatan amal anda menjadi kisah hidup anda sebagai seorang Muslim yang membesar." }
+        "a": {
+          "icon": "📿",
+          "title": "Catat Amal Baik Spontan",
+          "desc": "Tidak perlu sasaran. Cukup catat sebarang kebaikan kecil yang anda lakukan hari ini."
+        },
+        "b": {
+          "icon": "🌙",
+          "title": "Renungan Hujung Hari",
+          "desc": "Diingatkan dengan lembut pada waktu malam untuk merenungi hari yang berlalu."
+        },
+        "c": {
+          "icon": "📖",
+          "title": "Lihat Perjalanan Anda",
+          "desc": "Catatan amal anda menjadi kisah hidup anda sebagai seorang Muslim yang membesar."
+        }
       }
     },
     "s2": {
       "eyebrow": "Mengapa Istiqoma?",
       "headline": "Manfaat yang<br>akan anda <em>rasai</em>",
       "benefits": {
-        "a": { "icon": "🤲", "title": "Hati Lebih Tenang", "desc": "Kesedaran terhadap amal menjadikan hati lebih bersyukur" },
-        "b": { "icon": "🌱", "title": "Identiti Baharu", "desc": "Perlahan-lahan membina diri sebagai Muslim yang istiqomah" },
-        "c": { "icon": "✨", "title": "Ibadah Bermakna", "desc": "Setiap amal kecil terasa bermakna dan dicatat dengan indah" },
-        "d": { "icon": "📅", "title": "Konsistensi", "desc": "Dibantu untuk kekal konsisten tanpa rasa terbeban" }
+        "a": {
+          "icon": "🤲",
+          "title": "Hati Lebih Tenang",
+          "desc": "Kesedaran terhadap amal menjadikan hati lebih bersyukur"
+        },
+        "b": {
+          "icon": "🌱",
+          "title": "Identiti Baharu",
+          "desc": "Perlahan-lahan membina diri sebagai Muslim yang istiqomah"
+        },
+        "c": {
+          "icon": "✨",
+          "title": "Ibadah Bermakna",
+          "desc": "Setiap amal kecil terasa bermakna dan dicatat dengan indah"
+        },
+        "d": {
+          "icon": "📅",
+          "title": "Konsistensi",
+          "desc": "Dibantu untuk kekal konsisten tanpa rasa terbeban"
+        }
       },
       "hadithText": "\"Sesungguhnya amalan yang paling dicintai Allah ialah yang paling konsisten dilakukan.\"",
       "hadithSource": "— HR. Bukhari & Muslim"
@@ -841,11 +876,26 @@
       "question": "Saya ingin dikenali sebagai Muslim yang…",
       "hint": "Inilah identiti yang akan anda bina bersama Istiqoma",
       "options": {
-        "dekat-allah": { "label": "Dekat dengan Allah", "sublabel": "Ibadah terasa ringan, hati sentiasa terhubung" },
-        "bermanfaat": { "label": "Bermanfaat kepada sesama", "sublabel": "Kehadiran saya memberi impak nyata kepada orang sekeliling" },
-        "berilmu": { "label": "Berilmu dan bijaksana", "sublabel": "Terus belajar dan mengamalkan ilmu agama dengan baik" },
-        "istiqomah": { "label": "Istiqomah dan teguh pendirian", "sublabel": "Konsisten dalam kebaikan walaupun tiada yang melihat" },
-        "keluarga": { "label": "Teladan dalam keluarga", "sublabel": "Menjadi imam, ibu, atau anak yang membawa kebaikan" }
+        "dekat-allah": {
+          "label": "Dekat dengan Allah",
+          "sublabel": "Ibadah terasa ringan, hati sentiasa terhubung"
+        },
+        "bermanfaat": {
+          "label": "Bermanfaat kepada sesama",
+          "sublabel": "Kehadiran saya memberi impak nyata kepada orang sekeliling"
+        },
+        "berilmu": {
+          "label": "Berilmu dan bijaksana",
+          "sublabel": "Terus belajar dan mengamalkan ilmu agama dengan baik"
+        },
+        "istiqomah": {
+          "label": "Istiqomah dan teguh pendirian",
+          "sublabel": "Konsisten dalam kebaikan walaupun tiada yang melihat"
+        },
+        "keluarga": {
+          "label": "Teladan dalam keluarga",
+          "sublabel": "Menjadi imam, ibu, atau anak yang membawa kebaikan"
+        }
       }
     },
     "result": {
@@ -856,33 +906,50 @@
       "dekat-allah": {
         "name": "Muslim yang Dekat dengan Allah",
         "desc": "Anda merindui hubungan yang tulus dengan Allah. Setiap amal yang anda catat di Istiqoma adalah langkah nyata untuk mendekatkan diri kepada-Nya — satu kebaikan dalam satu masa.",
-        "tags": ["Hamba yang Rindu", "Hati yang Terhubung"]
+        "tags": [
+          "Hamba yang Rindu",
+          "Hati yang Terhubung"
+        ]
       },
       "bermanfaat": {
         "name": "Muslim yang Bermanfaat",
         "desc": "Anda percaya bahawa sebaik-baik manusia adalah yang paling bermanfaat. Istiqoma akan membantu anda melihat betapa banyak kebaikan yang telah anda taburkan.",
-        "tags": ["Pemberi Manfaat", "Hati yang Prihatin"]
+        "tags": [
+          "Pemberi Manfaat",
+          "Hati yang Prihatin"
+        ]
       },
       "berilmu": {
         "name": "Muslim yang Berilmu",
         "desc": "Anda memahami bahawa ilmu adalah cahaya. Istiqoma akan menemani anda mencatat setiap langkah perjalanan belajar dan amal anda — kerana ilmu tanpa amal bagaikan pohon tanpa buah.",
-        "tags": ["Pencari Ilmu", "Amal & Hikmah"]
+        "tags": [
+          "Pencari Ilmu",
+          "Amal & Hikmah"
+        ]
       },
       "istiqomah": {
         "name": "Muslim yang Istiqomah",
         "desc": "Istiqomah bukan tentang sempurna — tetapi tentang tidak berhenti. Dengan Istiqoma, anda akan melihat sendiri betapa konsistennya diri anda, walau pada hari yang terasa berat.",
-        "tags": ["Teguh Pendirian", "Konsisten Tanpa Henti"]
+        "tags": [
+          "Teguh Pendirian",
+          "Konsisten Tanpa Henti"
+        ]
       },
       "keluarga": {
         "name": "Teladan dalam Keluarga",
         "desc": "Kebaikan terbesar bermula dari rumah. Setiap amal yang anda tanam hari ini adalah warisan untuk orang yang paling anda sayangi.",
-        "tags": ["Pemimpin Keluarga", "Warisan Kebaikan"]
+        "tags": [
+          "Pemimpin Keluarga",
+          "Warisan Kebaikan"
+        ]
       }
     },
     "identityFallback": {
       "name": "Muslim yang Membesar",
       "desc": "Perjalanan anda bermula hari ini. Setiap langkah kecil yang anda ambil adalah bukti bahawa anda sedang membesar menjadi versi terbaik diri sendiri.",
-      "tags": ["Terus Membesar"]
+      "tags": [
+        "Terus Membesar"
+      ]
     },
     "contextTags": {
       "pemula": "Langkah Pertama",
@@ -1014,38 +1081,134 @@
     "shareText": "Saya baru sahaja membuka lencana {{tier}} {{name}} di Istiqoma! 🏆",
     "shareCopied": "Disalin ke papan keratan",
     "badges": {
-      "ahli-sholat": { "name": "Ahli Solat", "description": "Jumlah Solat Fardhu yang dicatatkan." },
-      "jamaah-devotee": { "name": "Jemaah Devotee", "description": "Solat Fardhu yang dilakukan berjemaah." },
-      "penjaga-sunnah": { "name": "Penjaga Sunnah", "description": "Jumlah Solat Sunnah yang dicatatkan." },
-      "pecinta-dzikir": { "name": "Pencinta Zikir", "description": "Jumlah kiraan zikir yang terkumpul." },
-      "sahabat-quran": { "name": "Sahabat Quran", "description": "Bacaan Quran setara ayat (juz × 600, halaman × 15, surah × 55)." },
-      "tangan-pemberi": { "name": "Tangan Pemberi", "description": "Jumlah sedekah yang dicatatkan." },
-      "penahan-hawa": { "name": "Penahan Hawa", "description": "Jumlah hari berpuasa yang dicatatkan." },
-      "pencari-ilmu": { "name": "Pencari Ilmu", "description": "Jumlah aktiviti Tolabul Ilmi yang dicatatkan." },
-      "birrul-walidayn": { "name": "Birrul Walidayn", "description": "Jumlah kebaikan untuk ibu bapa yang dicatatkan." },
-      "kolektor-poin": { "name": "Pengumpul Mata", "description": "Jumlah mata yang pernah dikumpul." },
-      "pencapai-target": { "name": "Pencapai Sasaran", "description": "Sasaran yang berjaya diselesaikan." },
-      "istiqomah-streak": { "name": "Istiqomah Streak", "description": "Streak harian terpanjang yang pernah diraih." },
-      "subuh-warrior": { "name": "Subuh Warrior", "description": "Catat Solat Subuh sebelum jam 6.00 pagi pada hari berbeza." },
-      "tahajjud-knight": { "name": "Tahajjud Knight", "description": "Catat Solat Tahajjud pada hari berbeza." },
-      "sleepless-soul": { "name": "Sleepless Soul", "description": "Catat ibadah antara jam 1.00–4.00 pagi pada hari berbeza." },
-      "full-house": { "name": "Full House", "description": "Lengkap 5 Solat Fardhu dalam satu hari." },
-      "triple-crown": { "name": "Triple Crown", "description": "Solat, Zikir, dan Baca Quran pada hari yang sama." },
-      "quest-explorer": { "name": "Quest Explorer", "description": "Selesaikan sasaran daripada kategori yang berbeza-beza." },
-      "comeback-kid": { "name": "Comeback Kid", "description": "Bangkit semula selepas streak ≥ 7 hari yang sempat terputus." },
-      "freeze-master": { "name": "Freeze Master", "description": "Streak Freezer berjaya menyelamatkan streak anda." },
-      "no-freeze-november": { "name": "No Freeze November", "description": "Streak 30 hari tanpa guna freezer langsung." },
-      "khatam-champion": { "name": "Juara Khatam", "description": "Bacaan Quran setara satu khatam penuh." },
-      "ramadhan-marathoner": { "name": "Maraton Ramadhan", "description": "Puasa Fardhu (Ramadhan) sepanjang bulan Ramadhan." },
-      "senin-kamis": { "name": "Isnin–Khamis", "description": "Puasa Sunnah pada hari Isnin atau Khamis." },
-      "ayyamul-bidh": { "name": "Ayyamul Bidh", "description": "Puasa Sunnah pada 13, 14, atau 15 haribulan (anggaran)." },
-      "diam-diam-bersedekah": { "name": "Diam-Diam Bersedekah", "description": "Sedekah pada 7 hari berbeza dalam satu bulan." },
-      "mistake-mechanic": { "name": "Mistake Mechanic", "description": "Membetulkan catatan amalan yang sudah dibuat." },
-      "midnight-logger": { "name": "Midnight Logger", "description": "Catat amalan untuk hari semalam (back-dated)." },
-      "goal-setter": { "name": "Goal Setter", "description": "Cipta sasaran pertama anda." },
-      "identity-found": { "name": "Identity Found", "description": "Selesaikan onboarding & pilih identiti spiritual anda." },
-      "big-spender": { "name": "Big Spender", "description": "Beli pakej Streak Freezer." },
-      "hari-raya-spirit": { "name": "Semangat Hari Raya", "description": "Catat amalan pada hari Aidilfitri atau Aidiladha." }
+      "ahli-sholat": {
+        "name": "Ahli Solat",
+        "description": "Jumlah Solat Fardhu yang dicatatkan."
+      },
+      "jamaah-devotee": {
+        "name": "Jemaah Devotee",
+        "description": "Solat Fardhu yang dilakukan berjemaah."
+      },
+      "penjaga-sunnah": {
+        "name": "Penjaga Sunnah",
+        "description": "Jumlah Solat Sunnah yang dicatatkan."
+      },
+      "pecinta-dzikir": {
+        "name": "Pencinta Zikir",
+        "description": "Jumlah kiraan zikir yang terkumpul."
+      },
+      "sahabat-quran": {
+        "name": "Sahabat Quran",
+        "description": "Bacaan Quran setara ayat (juz × 600, halaman × 15, surah × 55)."
+      },
+      "tangan-pemberi": {
+        "name": "Tangan Pemberi",
+        "description": "Jumlah sedekah yang dicatatkan."
+      },
+      "penahan-hawa": {
+        "name": "Penahan Hawa",
+        "description": "Jumlah hari berpuasa yang dicatatkan."
+      },
+      "pencari-ilmu": {
+        "name": "Pencari Ilmu",
+        "description": "Jumlah aktiviti Tolabul Ilmi yang dicatatkan."
+      },
+      "birrul-walidayn": {
+        "name": "Birrul Walidayn",
+        "description": "Jumlah kebaikan untuk ibu bapa yang dicatatkan."
+      },
+      "kolektor-poin": {
+        "name": "Pengumpul Mata",
+        "description": "Jumlah mata yang pernah dikumpul."
+      },
+      "pencapai-target": {
+        "name": "Pencapai Sasaran",
+        "description": "Sasaran yang berjaya diselesaikan."
+      },
+      "istiqomah-streak": {
+        "name": "Istiqomah Streak",
+        "description": "Streak harian terpanjang yang pernah diraih."
+      },
+      "subuh-warrior": {
+        "name": "Subuh Warrior",
+        "description": "Catat Solat Subuh sebelum jam 6.00 pagi pada hari berbeza."
+      },
+      "tahajjud-knight": {
+        "name": "Tahajjud Knight",
+        "description": "Catat Solat Tahajjud pada hari berbeza."
+      },
+      "sleepless-soul": {
+        "name": "Sleepless Soul",
+        "description": "Catat ibadah antara jam 1.00–4.00 pagi pada hari berbeza."
+      },
+      "full-house": {
+        "name": "Full House",
+        "description": "Lengkap 5 Solat Fardhu dalam satu hari."
+      },
+      "triple-crown": {
+        "name": "Triple Crown",
+        "description": "Solat, Zikir, dan Baca Quran pada hari yang sama."
+      },
+      "quest-explorer": {
+        "name": "Quest Explorer",
+        "description": "Selesaikan sasaran daripada kategori yang berbeza-beza."
+      },
+      "comeback-kid": {
+        "name": "Comeback Kid",
+        "description": "Bangkit semula selepas streak ≥ 7 hari yang sempat terputus."
+      },
+      "freeze-master": {
+        "name": "Freeze Master",
+        "description": "Streak Freezer berjaya menyelamatkan streak anda."
+      },
+      "no-freeze-november": {
+        "name": "No Freeze November",
+        "description": "Streak 30 hari tanpa guna freezer langsung."
+      },
+      "khatam-champion": {
+        "name": "Juara Khatam",
+        "description": "Bacaan Quran setara satu khatam penuh."
+      },
+      "ramadhan-marathoner": {
+        "name": "Maraton Ramadhan",
+        "description": "Puasa Fardhu (Ramadhan) sepanjang bulan Ramadhan."
+      },
+      "senin-kamis": {
+        "name": "Isnin–Khamis",
+        "description": "Puasa Sunnah pada hari Isnin atau Khamis."
+      },
+      "ayyamul-bidh": {
+        "name": "Ayyamul Bidh",
+        "description": "Puasa Sunnah pada 13, 14, atau 15 haribulan (anggaran)."
+      },
+      "diam-diam-bersedekah": {
+        "name": "Diam-Diam Bersedekah",
+        "description": "Sedekah pada 7 hari berbeza dalam satu bulan."
+      },
+      "mistake-mechanic": {
+        "name": "Mistake Mechanic",
+        "description": "Membetulkan catatan amalan yang sudah dibuat."
+      },
+      "midnight-logger": {
+        "name": "Midnight Logger",
+        "description": "Catat amalan untuk hari semalam (back-dated)."
+      },
+      "goal-setter": {
+        "name": "Goal Setter",
+        "description": "Cipta sasaran pertama anda."
+      },
+      "identity-found": {
+        "name": "Identity Found",
+        "description": "Selesaikan onboarding & pilih identiti spiritual anda."
+      },
+      "big-spender": {
+        "name": "Big Spender",
+        "description": "Beli pakej Streak Freezer."
+      },
+      "hari-raya-spirit": {
+        "name": "Semangat Hari Raya",
+        "description": "Catat amalan pada hari Aidilfitri atau Aidiladha."
+      }
     }
   },
   "leaderboard": {
@@ -1258,7 +1421,15 @@
       "days": "hari",
       "thisWeek": "Minggu Ini",
       "deedsPerDay": "Amal per Hari",
-      "weekDays": ["I", "S", "R", "K", "J", "S", "A"]
+      "weekDays": [
+        "I",
+        "S",
+        "R",
+        "K",
+        "J",
+        "S",
+        "A"
+      ]
     },
     "finalScreen": {
       "title": "Mulakan Perjalanan Anda",
@@ -1285,5 +1456,56 @@
   "target": {
     "doneBadge": "selesai",
     "pendingBadge": "belum"
+  },
+  "community": {
+    "tabLabel": "Komuniti",
+    "subtitle": "Sasaran kongsi yang anda dan orang lain usahakan bersama.",
+    "create": "Sasaran komuniti baharu",
+    "createFirst": "Cipta yang pertama",
+    "createTitle": "Sasaran komuniti baharu",
+    "createSubtitle": "Terbitkan sasaran supaya orang lain boleh sertai dan anda boleh lihat kemajuan mereka.",
+    "editTitle": "Sunting sasaran komuniti",
+    "namePlaceholder": "cth. Baca 1 juz Al-Quran setiap hari",
+    "unitLabelOptional": "Label unit (pilihan)",
+    "unitPlaceholder": "cth. ayat, muka surat, juz",
+    "empty": "Belum ada sasaran komuniti",
+    "emptyDesc": "Jadilah yang pertama menerbitkan sasaran komuniti.",
+    "yours": "Milik anda",
+    "joined": "Disertai",
+    "join": "Sertai sasaran",
+    "leave": "Keluar sasaran",
+    "joined_short": "Disertai",
+    "joinedDesc": "Anda kini sebahagian daripada sasaran komuniti ini.",
+    "left": "Keluar",
+    "leftDesc": "Anda telah keluar daripada sasaran komuniti ini.",
+    "joinError": "Tidak dapat menyertai sasaran ini.",
+    "leaveError": "Tidak dapat keluar daripada sasaran ini.",
+    "created": "Sasaran komuniti dicipta",
+    "createdDesc": "Orang lain kini boleh menyertai dan melihat papan kedudukan.",
+    "createError": "Tidak dapat mencipta sasaran komuniti.",
+    "updated": "Sasaran komuniti dikemas kini",
+    "updatedDesc": "Perubahan anda telah disimpan.",
+    "updateError": "Tidak dapat mengemas kini sasaran komuniti.",
+    "deleted": "Sasaran komuniti dipadam",
+    "deleteError": "Tidak dapat memadam sasaran komuniti.",
+    "notFound": "Sasaran komuniti ini tidak dijumpai.",
+    "onlyCreator": "Hanya pencipta boleh menyunting sasaran ini.",
+    "leaderboard": "Papan kedudukan",
+    "leaderboardScope": "Disusun mengikut kemajuan {{period}} ini.",
+    "noParticipants": "Belum ada peserta.",
+    "participantCount": "{{count}} peserta",
+    "createdBy": "Dicipta oleh {{name}}",
+    "youAreCreator": "Anda ialah pencipta sasaran ini.",
+    "confirmLeave": "Keluar daripada sasaran komuniti ini?",
+    "confirmLeaveDesc": "Anda boleh sertai semula nanti, tetapi kemajuan lama tidak akan dikira melainkan anda sertai semula.",
+    "confirmDelete": "Padam sasaran komuniti ini?",
+    "confirmDeleteDesc": "Ini akan membuang sasaran dan semua ahli. Tindakan ini tidak boleh dibuat asal.",
+    "shareToCommunity": "Kongsi dengan komuniti",
+    "shareToCommunityDesc": "Terbitkan sasaran ini ke komuniti supaya orang lain boleh sertai. Harian, mingguan, atau bulanan sahaja.",
+    "alsoSharedDesc": "Sasaran anda telah dicipta dan diterbitkan ke komuniti.",
+    "shareWarningTitle": "Sasaran dicipta, tetapi perkongsian gagal",
+    "shareWarningDesc": "Kami simpan sasaran peribadi anda, tetapi tidak dapat menerbitkannya ke komuniti.",
+    "membersOnly": "Sertai sasaran ini untuk melihat siapa yang menyertai.",
+    "showingTopN": "Menunjukkan {{shown}} daripada {{total}} peserta teratas."
   }
 }

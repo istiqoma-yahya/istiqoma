@@ -421,7 +421,6 @@
       "1month": "1 Month",
       "3months": "3 Months"
     },
-    "targetName": "Target Name",
     "targetNamePlaceholder": "e.g., Finish reading Quran, Complete 30 juz",
     "targetNameRequired": "Target name is required",
     "saveTarget": "Save Target",
@@ -662,7 +661,15 @@
   "streak": {
     "title": "Streak",
     "daysInARow": "days in a row",
-    "weekDays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "weekDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
     "motivationalMessage": "You are consistent in doing good deeds today. Keep it up being Istiqomah every single day!",
     "continue": "Continue",
     "noStreak": "Start your streak today!",
@@ -772,19 +779,47 @@
       "headline": "Your companion on<br>becoming <em>better</em>",
       "subtext": "Istiqoma is an app that helps you record your daily good deeds — not as an obligation, but as a mirror of the soul.",
       "features": {
-        "a": { "icon": "📿", "title": "Record Spontaneous Good Deeds", "desc": "No targets needed. Simply record any small kindness you do today." },
-        "b": { "icon": "🌙", "title": "End-of-Day Reflection", "desc": "Gently reminded in the evening to reflect on the day that has passed." },
-        "c": { "icon": "📖", "title": "See Your Journey", "desc": "Your record of deeds becomes the story of you growing as a Muslim." }
+        "a": {
+          "icon": "📿",
+          "title": "Record Spontaneous Good Deeds",
+          "desc": "No targets needed. Simply record any small kindness you do today."
+        },
+        "b": {
+          "icon": "🌙",
+          "title": "End-of-Day Reflection",
+          "desc": "Gently reminded in the evening to reflect on the day that has passed."
+        },
+        "c": {
+          "icon": "📖",
+          "title": "See Your Journey",
+          "desc": "Your record of deeds becomes the story of you growing as a Muslim."
+        }
       }
     },
     "s2": {
       "eyebrow": "Why Istiqoma?",
       "headline": "Benefits you<br>will <em>feel</em>",
       "benefits": {
-        "a": { "icon": "🤲", "title": "A Calmer Heart", "desc": "Awareness of your deeds makes your heart more grateful" },
-        "b": { "icon": "🌱", "title": "A New Identity", "desc": "Slowly build yourself as a Muslim who is istiqomah" },
-        "c": { "icon": "✨", "title": "Meaningful Worship", "desc": "Every small deed feels meaningful and beautifully recorded" },
-        "d": { "icon": "📅", "title": "Consistency", "desc": "Helped to stay consistent without feeling burdened" }
+        "a": {
+          "icon": "🤲",
+          "title": "A Calmer Heart",
+          "desc": "Awareness of your deeds makes your heart more grateful"
+        },
+        "b": {
+          "icon": "🌱",
+          "title": "A New Identity",
+          "desc": "Slowly build yourself as a Muslim who is istiqomah"
+        },
+        "c": {
+          "icon": "✨",
+          "title": "Meaningful Worship",
+          "desc": "Every small deed feels meaningful and beautifully recorded"
+        },
+        "d": {
+          "icon": "📅",
+          "title": "Consistency",
+          "desc": "Helped to stay consistent without feeling burdened"
+        }
       },
       "hadithText": "\"Verily, the most beloved deeds to Allah are the most consistent ones.\"",
       "hadithSource": "— Bukhari & Muslim"
@@ -840,11 +875,26 @@
       "question": "I want to be known as a Muslim who is…",
       "hint": "This is the identity you'll build together with Istiqoma",
       "options": {
-        "dekat-allah": { "label": "Close to Allah", "sublabel": "Worship feels light, the heart always connected" },
-        "bermanfaat": { "label": "Beneficial to others", "sublabel": "My presence brings real impact to those around me" },
-        "berilmu": { "label": "Knowledgeable and wise", "sublabel": "Always learning and practising the deen with excellence" },
-        "istiqomah": { "label": "Istiqomah and steadfast", "sublabel": "Consistent in good even when no one is watching" },
-        "keluarga": { "label": "An example in the family", "sublabel": "Being an imam, mother, or child who carries goodness" }
+        "dekat-allah": {
+          "label": "Close to Allah",
+          "sublabel": "Worship feels light, the heart always connected"
+        },
+        "bermanfaat": {
+          "label": "Beneficial to others",
+          "sublabel": "My presence brings real impact to those around me"
+        },
+        "berilmu": {
+          "label": "Knowledgeable and wise",
+          "sublabel": "Always learning and practising the deen with excellence"
+        },
+        "istiqomah": {
+          "label": "Istiqomah and steadfast",
+          "sublabel": "Consistent in good even when no one is watching"
+        },
+        "keluarga": {
+          "label": "An example in the family",
+          "sublabel": "Being an imam, mother, or child who carries goodness"
+        }
       }
     },
     "result": {
@@ -855,33 +905,50 @@
       "dekat-allah": {
         "name": "A Muslim Close to Allah",
         "desc": "You long for a sincere connection with Allah. Every deed you record in Istiqoma is a real step closer to Him — one kindness at a time.",
-        "tags": ["A Longing Servant", "A Connected Heart"]
+        "tags": [
+          "A Longing Servant",
+          "A Connected Heart"
+        ]
       },
       "bermanfaat": {
         "name": "A Beneficial Muslim",
         "desc": "You believe the best of people are those most beneficial to others. Istiqoma will help you see how much goodness you've already spread.",
-        "tags": ["Bringer of Benefit", "A Caring Heart"]
+        "tags": [
+          "Bringer of Benefit",
+          "A Caring Heart"
+        ]
       },
       "berilmu": {
         "name": "A Knowledgeable Muslim",
         "desc": "You understand that knowledge is light. Istiqoma will accompany you in recording every step of learning and practice — for knowledge without action is a tree without fruit.",
-        "tags": ["Seeker of Knowledge", "Action & Wisdom"]
+        "tags": [
+          "Seeker of Knowledge",
+          "Action & Wisdom"
+        ]
       },
       "istiqomah": {
         "name": "A Steadfast Muslim",
         "desc": "Istiqomah isn't about perfection — it's about not stopping. With Istiqoma, you'll see how consistent you really are, even on the heaviest days.",
-        "tags": ["Steadfast", "Consistent Without End"]
+        "tags": [
+          "Steadfast",
+          "Consistent Without End"
+        ]
       },
       "keluarga": {
         "name": "A Family Role Model",
         "desc": "The greatest goodness begins at home. Every deed you plant today is an inheritance for those you love most.",
-        "tags": ["Family Leader", "Legacy of Good"]
+        "tags": [
+          "Family Leader",
+          "Legacy of Good"
+        ]
       }
     },
     "identityFallback": {
       "name": "A Growing Muslim",
       "desc": "Your journey begins today. Every small step you take is proof that you are growing into the best version of yourself.",
-      "tags": ["Always Growing"]
+      "tags": [
+        "Always Growing"
+      ]
     },
     "contextTags": {
       "pemula": "First Steps",
@@ -1013,38 +1080,134 @@
     "shareText": "I just unlocked the {{tier}} {{name}} badge on Istiqoma! 🏆",
     "shareCopied": "Copied to clipboard",
     "badges": {
-      "ahli-sholat": { "name": "Prayer Devotee", "description": "Total Fardhu prayers logged." },
-      "jamaah-devotee": { "name": "Jamaah Devotee", "description": "Fardhu prayers performed in congregation." },
-      "penjaga-sunnah": { "name": "Sunnah Guardian", "description": "Total Sunnah prayers logged." },
-      "pecinta-dzikir": { "name": "Dzikir Lover", "description": "Total dzikir count accumulated." },
-      "sahabat-quran": { "name": "Quran Companion", "description": "Quran reading equivalent in verses (juz × 600, page × 15, surah × 55)." },
-      "tangan-pemberi": { "name": "Giving Hand", "description": "Total charity logged." },
-      "penahan-hawa": { "name": "Self-Restraint", "description": "Total fasting days logged." },
-      "pencari-ilmu": { "name": "Knowledge Seeker", "description": "Total Tolabul Ilmi activities logged." },
-      "birrul-walidayn": { "name": "Birrul Walidayn", "description": "Total acts of kindness toward parents logged." },
-      "kolektor-poin": { "name": "Point Collector", "description": "Total points ever earned." },
-      "pencapai-target": { "name": "Target Achiever", "description": "Targets successfully completed." },
-      "istiqomah-streak": { "name": "Istiqomah Streak", "description": "Longest daily streak ever achieved." },
-      "subuh-warrior": { "name": "Subuh Warrior", "description": "Log Subuh prayer before 6 AM on different days." },
-      "tahajjud-knight": { "name": "Tahajjud Knight", "description": "Log Tahajjud prayer on different days." },
-      "sleepless-soul": { "name": "Sleepless Soul", "description": "Log worship between 1–4 AM on different days." },
-      "full-house": { "name": "Full House", "description": "Complete all 5 Fardhu prayers in a single day." },
-      "triple-crown": { "name": "Triple Crown", "description": "Pray, dzikir, and read Quran on the same day." },
-      "quest-explorer": { "name": "Quest Explorer", "description": "Complete targets across different categories." },
-      "comeback-kid": { "name": "Comeback Kid", "description": "Bounce back after a streak of 7+ days was broken." },
-      "freeze-master": { "name": "Freeze Master", "description": "Streak Freezer successfully saved your streak." },
-      "no-freeze-november": { "name": "No Freeze November", "description": "30-day streak without using a single freezer." },
-      "khatam-champion": { "name": "Khatam Champion", "description": "Quran reading equivalent to one full khatam." },
-      "ramadhan-marathoner": { "name": "Ramadhan Marathoner", "description": "Fardhu fasting (Ramadhan) throughout the month of Ramadhan." },
-      "senin-kamis": { "name": "Monday–Thursday", "description": "Sunnah fasting on Mondays or Thursdays." },
-      "ayyamul-bidh": { "name": "Ayyamul Bidh", "description": "Sunnah fasting on the 13th, 14th, or 15th (approximate)." },
-      "diam-diam-bersedekah": { "name": "Quiet Charity", "description": "Give charity on 7 different days in a month." },
-      "mistake-mechanic": { "name": "Mistake Mechanic", "description": "Correct a deed entry you've already logged." },
-      "midnight-logger": { "name": "Midnight Logger", "description": "Log a deed for the previous day (back-dated)." },
-      "goal-setter": { "name": "Goal Setter", "description": "Create your first target." },
-      "identity-found": { "name": "Identity Found", "description": "Complete onboarding & pick your spiritual identity." },
-      "big-spender": { "name": "Big Spender", "description": "Purchase a Streak Freezer pack." },
-      "hari-raya-spirit": { "name": "Hari Raya Spirit", "description": "Log a deed on Eid al-Fitr or Eid al-Adha." }
+      "ahli-sholat": {
+        "name": "Prayer Devotee",
+        "description": "Total Fardhu prayers logged."
+      },
+      "jamaah-devotee": {
+        "name": "Jamaah Devotee",
+        "description": "Fardhu prayers performed in congregation."
+      },
+      "penjaga-sunnah": {
+        "name": "Sunnah Guardian",
+        "description": "Total Sunnah prayers logged."
+      },
+      "pecinta-dzikir": {
+        "name": "Dzikir Lover",
+        "description": "Total dzikir count accumulated."
+      },
+      "sahabat-quran": {
+        "name": "Quran Companion",
+        "description": "Quran reading equivalent in verses (juz × 600, page × 15, surah × 55)."
+      },
+      "tangan-pemberi": {
+        "name": "Giving Hand",
+        "description": "Total charity logged."
+      },
+      "penahan-hawa": {
+        "name": "Self-Restraint",
+        "description": "Total fasting days logged."
+      },
+      "pencari-ilmu": {
+        "name": "Knowledge Seeker",
+        "description": "Total Tolabul Ilmi activities logged."
+      },
+      "birrul-walidayn": {
+        "name": "Birrul Walidayn",
+        "description": "Total acts of kindness toward parents logged."
+      },
+      "kolektor-poin": {
+        "name": "Point Collector",
+        "description": "Total points ever earned."
+      },
+      "pencapai-target": {
+        "name": "Target Achiever",
+        "description": "Targets successfully completed."
+      },
+      "istiqomah-streak": {
+        "name": "Istiqomah Streak",
+        "description": "Longest daily streak ever achieved."
+      },
+      "subuh-warrior": {
+        "name": "Subuh Warrior",
+        "description": "Log Subuh prayer before 6 AM on different days."
+      },
+      "tahajjud-knight": {
+        "name": "Tahajjud Knight",
+        "description": "Log Tahajjud prayer on different days."
+      },
+      "sleepless-soul": {
+        "name": "Sleepless Soul",
+        "description": "Log worship between 1–4 AM on different days."
+      },
+      "full-house": {
+        "name": "Full House",
+        "description": "Complete all 5 Fardhu prayers in a single day."
+      },
+      "triple-crown": {
+        "name": "Triple Crown",
+        "description": "Pray, dzikir, and read Quran on the same day."
+      },
+      "quest-explorer": {
+        "name": "Quest Explorer",
+        "description": "Complete targets across different categories."
+      },
+      "comeback-kid": {
+        "name": "Comeback Kid",
+        "description": "Bounce back after a streak of 7+ days was broken."
+      },
+      "freeze-master": {
+        "name": "Freeze Master",
+        "description": "Streak Freezer successfully saved your streak."
+      },
+      "no-freeze-november": {
+        "name": "No Freeze November",
+        "description": "30-day streak without using a single freezer."
+      },
+      "khatam-champion": {
+        "name": "Khatam Champion",
+        "description": "Quran reading equivalent to one full khatam."
+      },
+      "ramadhan-marathoner": {
+        "name": "Ramadhan Marathoner",
+        "description": "Fardhu fasting (Ramadhan) throughout the month of Ramadhan."
+      },
+      "senin-kamis": {
+        "name": "Monday–Thursday",
+        "description": "Sunnah fasting on Mondays or Thursdays."
+      },
+      "ayyamul-bidh": {
+        "name": "Ayyamul Bidh",
+        "description": "Sunnah fasting on the 13th, 14th, or 15th (approximate)."
+      },
+      "diam-diam-bersedekah": {
+        "name": "Quiet Charity",
+        "description": "Give charity on 7 different days in a month."
+      },
+      "mistake-mechanic": {
+        "name": "Mistake Mechanic",
+        "description": "Correct a deed entry you've already logged."
+      },
+      "midnight-logger": {
+        "name": "Midnight Logger",
+        "description": "Log a deed for the previous day (back-dated)."
+      },
+      "goal-setter": {
+        "name": "Goal Setter",
+        "description": "Create your first target."
+      },
+      "identity-found": {
+        "name": "Identity Found",
+        "description": "Complete onboarding & pick your spiritual identity."
+      },
+      "big-spender": {
+        "name": "Big Spender",
+        "description": "Purchase a Streak Freezer pack."
+      },
+      "hari-raya-spirit": {
+        "name": "Hari Raya Spirit",
+        "description": "Log a deed on Eid al-Fitr or Eid al-Adha."
+      }
     }
   },
   "leaderboard": {
@@ -1257,7 +1420,15 @@
       "days": "days",
       "thisWeek": "This Week",
       "deedsPerDay": "Deeds per Day",
-      "weekDays": ["M", "T", "W", "T", "F", "S", "S"]
+      "weekDays": [
+        "M",
+        "T",
+        "W",
+        "T",
+        "F",
+        "S",
+        "S"
+      ]
     },
     "finalScreen": {
       "title": "Start Your Journey",
@@ -1284,5 +1455,56 @@
   "target": {
     "doneBadge": "done",
     "pendingBadge": "pending"
+  },
+  "community": {
+    "tabLabel": "Community",
+    "subtitle": "Shared targets you and others work on together.",
+    "create": "New community target",
+    "createFirst": "Create the first one",
+    "createTitle": "New community target",
+    "createSubtitle": "Publish a target so others can join and you can see who is making progress.",
+    "editTitle": "Edit community target",
+    "namePlaceholder": "e.g. Read 1 juz of Quran daily",
+    "unitLabelOptional": "Unit label (optional)",
+    "unitPlaceholder": "e.g. ayah, page, juz",
+    "empty": "No community targets yet",
+    "emptyDesc": "Be the first to publish a community target.",
+    "yours": "Yours",
+    "joined": "Joined",
+    "join": "Join target",
+    "leave": "Leave target",
+    "joined_short": "Joined",
+    "joinedDesc": "You are now part of this community target.",
+    "left": "Left",
+    "leftDesc": "You have left this community target.",
+    "joinError": "Could not join this target.",
+    "leaveError": "Could not leave this target.",
+    "created": "Community target created",
+    "createdDesc": "Others can now join and see the leaderboard.",
+    "createError": "Could not create the community target.",
+    "updated": "Community target updated",
+    "updatedDesc": "Your changes have been saved.",
+    "updateError": "Could not update the community target.",
+    "deleted": "Community target deleted",
+    "deleteError": "Could not delete the community target.",
+    "notFound": "This community target was not found.",
+    "onlyCreator": "Only the creator can edit this target.",
+    "leaderboard": "Leaderboard",
+    "leaderboardScope": "Ranked by progress this {{period}}.",
+    "noParticipants": "No participants yet.",
+    "participantCount": "{{count}} participants",
+    "createdBy": "Created by {{name}}",
+    "youAreCreator": "You are the creator of this target.",
+    "confirmLeave": "Leave this community target?",
+    "confirmLeaveDesc": "You can rejoin later, but your past progress will no longer be counted unless you rejoin.",
+    "confirmDelete": "Delete this community target?",
+    "confirmDeleteDesc": "This will remove the target and all members. This action cannot be undone.",
+    "shareToCommunity": "Share with community",
+    "shareToCommunityDesc": "Also publish this target to the community so others can join. Daily, weekly, or monthly only.",
+    "alsoSharedDesc": "Your target was created and published to the community.",
+    "shareWarningTitle": "Target created, but sharing failed",
+    "shareWarningDesc": "We saved your personal target, but couldn't publish it to the community.",
+    "membersOnly": "Join this target to see who is participating.",
+    "showingTopN": "Showing top {{shown}} of {{total}} participants."
   }
 }

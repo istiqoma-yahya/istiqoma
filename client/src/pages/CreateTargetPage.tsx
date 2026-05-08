@@ -1,14 +1,19 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useCreateTarget } from "@/hooks/use-targets";
+import { useCreateCommunityTarget } from "@/hooks/use-community-targets";
 import { useTranslation } from "react-i18next";
 import { TargetForm } from "@/components/TargetForm";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { RecommendationsEntryCard } from "@/components/RecommendationsEntryCard";
+import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { X } from "lucide-react";
 import { clearRecommendation, loadRecommendation } from "@/lib/recommendationStorage";
-import type { InsertTarget, TargetRecommendation } from "@shared/schema";
+import type { InsertTarget, InsertCommunityTarget, TargetRecommendation } from "@shared/schema";
 
 export default function CreateTargetPage() {
   const { t } = useTranslation();
@@ -16,6 +21,8 @@ export default function CreateTargetPage() {
   const search = useSearch();
   const { toast } = useToast();
   const createTarget = useCreateTarget();
+  const createCommunity = useCreateCommunityTarget();
+  const [shareToCommunity, setShareToCommunity] = useState(false);
 
   const params = useMemo(() => new URLSearchParams(search), [search]);
   const prefilledCategory = params.get("category") || undefined;
@@ -69,10 +76,45 @@ export default function CreateTargetPage() {
     return undefined;
   }, [recommendation, prefilledCategory]);
 
+  const canShareToCommunity = (period: string | undefined) =>
+    period === "daily" || period === "weekly" || period === "monthly";
+
   const handleSubmit = async (data: InsertTarget) => {
     try {
       await createTarget.mutateAsync(data);
       if (recommendationId) clearRecommendation(recommendationId);
+
+      if (shareToCommunity && canShareToCommunity(data.period ?? undefined)) {
+        try {
+          const payload: InsertCommunityTarget = {
+            name: data.name,
+            category: data.category,
+            targetValue: data.targetValue,
+            period: data.period as "daily" | "weekly" | "monthly",
+            unitLabel: null,
+            dzikirType: data.dzikirType ?? null,
+            sholatType: data.sholatType ?? null,
+            fastingType: data.fastingType ?? null,
+            quranUnit: data.quranUnit ?? null,
+            sedekahType: data.sedekahType ?? null,
+            customUnit: data.customUnit ?? null,
+          };
+          await createCommunity.mutateAsync(payload);
+          toast({
+            title: t("targets.targetCreated"),
+            description: t("community.alsoSharedDesc"),
+          });
+          navigate("/targets?tab=community");
+          return;
+        } catch (commErr) {
+          toast({
+            title: t("community.shareWarningTitle"),
+            description: t("community.shareWarningDesc"),
+            variant: "destructive",
+          });
+        }
+      }
+
       toast({
         title: t("targets.targetCreated"),
         description: t("targets.targetCreatedDesc"),
@@ -117,6 +159,28 @@ export default function CreateTargetPage() {
         </p>
 
         {!recommendation && <RecommendationsEntryCard surface="create-target" />}
+
+        <Card className="p-4 mb-6 flex items-start gap-3" data-testid="card-share-to-community">
+          <div className="mt-0.5 flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+            <Users className="w-4 h-4 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="share-to-community" className="font-medium cursor-pointer">
+                {t("community.shareToCommunity")}
+              </Label>
+              <Switch
+                id="share-to-community"
+                checked={shareToCommunity}
+                onCheckedChange={setShareToCommunity}
+                data-testid="switch-share-to-community"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {t("community.shareToCommunityDesc")}
+            </p>
+          </div>
+        </Card>
 
         <TargetForm
           key={recommendationId || prefilledCategory || "blank"}

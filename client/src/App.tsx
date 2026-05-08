@@ -18,6 +18,9 @@ import TargetsPage from "@/pages/TargetsPage";
 import CreateTargetPage from "@/pages/CreateTargetPage";
 import EditTargetPage from "@/pages/EditTargetPage";
 import TargetDetailPage from "@/pages/TargetDetailPage";
+import CreateCommunityTargetPage from "@/pages/CreateCommunityTargetPage";
+import EditCommunityTargetPage from "@/pages/EditCommunityTargetPage";
+import CommunityTargetDetailPage from "@/pages/CommunityTargetDetailPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import ProfilePage from "@/pages/ProfilePage";
 import LoginUsername from "@/pages/LoginUsername";
@@ -64,6 +67,9 @@ function Router() {
       <Route path="/targets/new" component={CreateTargetPage} />
       <Route path="/targets/:id" component={TargetDetailPage} />
       <Route path="/targets/:id/edit" component={EditTargetPage} />
+      <Route path="/community-targets/new" component={CreateCommunityTargetPage} />
+      <Route path="/community-targets/:id/edit" component={EditCommunityTargetPage} />
+      <Route path="/community-targets/:id" component={CommunityTargetDetailPage} />
       <Route path="/categories" component={CategoryManagement} />
       <Route path="/notifications" component={NotificationsPage} />
       <Route path="/profile" component={ProfilePage} />

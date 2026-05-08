@@ -32,6 +32,7 @@ interface TargetFormProps {
   onSubmit: (data: InsertTarget) => Promise<void>;
   onCancel: () => void;
   isSubmitting: boolean;
+  beforeActions?: React.ReactNode;
 }
 
 export function TargetForm({
@@ -41,6 +42,7 @@ export function TargetForm({
   onSubmit,
   onCancel,
   isSubmitting,
+  beforeActions,
 }: TargetFormProps) {
   const { t } = useTranslation();
   const { data: categories } = useCategories();
@@ -915,6 +917,8 @@ export function TargetForm({
             );
           }}
         />
+
+        {beforeActions}
 
         <div className="flex gap-3 pt-4">
           <Button

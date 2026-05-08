@@ -160,28 +160,6 @@ export default function CreateTargetPage() {
 
         {!recommendation && <RecommendationsEntryCard surface="create-target" />}
 
-        <Card className="p-4 mb-6 flex items-start gap-3" data-testid="card-share-to-community">
-          <div className="mt-0.5 flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-            <Users className="w-4 h-4 text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="share-to-community" className="font-medium cursor-pointer">
-                {t("community.shareToCommunity")}
-              </Label>
-              <Switch
-                id="share-to-community"
-                checked={shareToCommunity}
-                onCheckedChange={setShareToCommunity}
-                data-testid="switch-share-to-community"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {t("community.shareToCommunityDesc")}
-            </p>
-          </div>
-        </Card>
-
         <TargetForm
           key={recommendationId || prefilledCategory || "blank"}
           mode="create"
@@ -189,6 +167,29 @@ export default function CreateTargetPage() {
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           isSubmitting={createTarget.isPending}
+          beforeActions={
+            <Card className="p-4 flex items-start gap-3" data-testid="card-share-to-community">
+              <div className="mt-0.5 flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                <Users className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="share-to-community" className="font-medium cursor-pointer">
+                    {t("community.shareToCommunity")}
+                  </Label>
+                  <Switch
+                    id="share-to-community"
+                    checked={shareToCommunity}
+                    onCheckedChange={setShareToCommunity}
+                    data-testid="switch-share-to-community"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("community.shareToCommunityDesc")}
+                </p>
+              </div>
+            </Card>
+          }
         />
       </main>
 

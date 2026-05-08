@@ -366,6 +366,7 @@
   },
   "targets": {
     "title": "Targets",
+    "individualTabLabel": "Individual",
     "subtitle": "Set and track your spiritual goals",
     "addTarget": "Add Target",
     "addTargetSubtitle": "Create a new goal to track your spiritual progress",

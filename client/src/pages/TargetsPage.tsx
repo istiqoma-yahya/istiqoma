@@ -664,7 +664,7 @@ export default function TargetsPage() {
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "personal" | "community")}>
           <TabsList className="grid w-full grid-cols-2 mb-4" data-testid="tabs-targets">
             <TabsTrigger value="personal" data-testid="tab-personal">
-              {t("targets.title")}
+              {t("targets.individualTabLabel")}
             </TabsTrigger>
             <TabsTrigger value="community" data-testid="tab-community">
               {t("community.tabLabel")}

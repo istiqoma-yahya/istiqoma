@@ -366,6 +366,7 @@
   },
   "targets": {
     "title": "Target",
+    "individualTabLabel": "Individual",
     "subtitle": "Tetapkan dan lacak tujuan spiritualmu",
     "addTarget": "Tambah Target",
     "addTargetSubtitle": "Buat target baru untuk melacak kemajuan spiritualmu",

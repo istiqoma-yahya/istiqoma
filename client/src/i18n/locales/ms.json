@@ -525,7 +525,9 @@
     "filter": "Filter",
     "allCategories": "Semua Kategori",
     "allSubCategories": "Semua Jenis",
-    "confirm": "Sahkan"
+    "confirm": "Sahkan",
+    "next": "Seterusnya",
+    "previous": "Sebelumnya"
   },
   "sholat": {
     "selectType": "Pilih Jenis Solat",
@@ -1506,6 +1508,16 @@
     "shareWarningTitle": "Sasaran dicipta, tetapi perkongsian gagal",
     "shareWarningDesc": "Kami simpan sasaran peribadi anda, tetapi tidak dapat menerbitkannya ke komuniti.",
     "membersOnly": "Sertai sasaran ini untuk melihat siapa yang menyertai.",
-    "showingTopN": "Menunjukkan {{shown}} daripada {{total}} peserta teratas."
+    "showingTopN": "Menunjukkan {{shown}} daripada {{total}} peserta teratas.",
+    "searchPlaceholder": "Cari sasaran komuniti…",
+    "filterCategory": "Kategori",
+    "filterPeriod": "Tempoh",
+    "allCategories": "Semua kategori",
+    "allPeriods": "Semua tempoh",
+    "sortRecent": "Terbaru",
+    "sortPopular": "Paling popular",
+    "noResults": "Tiada sasaran yang sepadan",
+    "noResultsDesc": "Cuba ubah penapis atau kata kunci carian anda.",
+    "pageOf": "Halaman {{current}} daripada {{total}}"
   }
 }

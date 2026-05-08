@@ -10,11 +10,49 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
-export function useCommunityTargets() {
-  return useQuery<CommunityTargetListItem[]>({
-    queryKey: [api.communityTargets.list.path],
+export interface CommunityTargetListParams {
+  search?: string;
+  category?: string;
+  period?: string;
+  sort?: "recency" | "participants";
+  limit?: number;
+  offset?: number;
+}
+
+export function useCommunityTargetCategories() {
+  return useQuery<string[]>({
+    queryKey: [api.communityTargets.categories.path],
     queryFn: async () => {
-      const res = await apiRequest("GET", api.communityTargets.list.path);
+      const res = await apiRequest("GET", api.communityTargets.categories.path);
+      return await res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useCommunityTargets(params?: CommunityTargetListParams) {
+  const limit = params?.limit ?? 20;
+  const offset = params?.offset ?? 0;
+  return useQuery<{ items: CommunityTargetListItem[]; total: number }>({
+    queryKey: [
+      api.communityTargets.list.path,
+      params?.search ?? "",
+      params?.category ?? "",
+      params?.period ?? "",
+      params?.sort ?? "recency",
+      limit,
+      offset,
+    ],
+    queryFn: async () => {
+      const qs = new URLSearchParams();
+      if (params?.search) qs.set("search", params.search);
+      if (params?.category) qs.set("category", params.category);
+      if (params?.period) qs.set("period", params.period);
+      if (params?.sort) qs.set("sort", params.sort);
+      qs.set("limit", String(limit));
+      qs.set("offset", String(offset));
+      const url = `${api.communityTargets.list.path}?${qs.toString()}`;
+      const res = await apiRequest("GET", url);
       return await res.json();
     },
   });

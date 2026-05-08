@@ -524,7 +524,9 @@
     "filter": "Filter",
     "allCategories": "All Categories",
     "allSubCategories": "All Types",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "next": "Next",
+    "previous": "Previous"
   },
   "sholat": {
     "selectType": "Select Prayer Type",
@@ -1505,6 +1507,16 @@
     "shareWarningTitle": "Target created, but sharing failed",
     "shareWarningDesc": "We saved your personal target, but couldn't publish it to the community.",
     "membersOnly": "Join this target to see who is participating.",
-    "showingTopN": "Showing top {{shown}} of {{total}} participants."
+    "showingTopN": "Showing top {{shown}} of {{total}} participants.",
+    "searchPlaceholder": "Search community targets…",
+    "filterCategory": "Category",
+    "filterPeriod": "Period",
+    "allCategories": "All categories",
+    "allPeriods": "All periods",
+    "sortRecent": "Newest first",
+    "sortPopular": "Most popular",
+    "noResults": "No targets match your search",
+    "noResultsDesc": "Try adjusting your filters or search term.",
+    "pageOf": "Page {{current}} of {{total}}"
   }
 }

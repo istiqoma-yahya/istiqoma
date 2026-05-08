@@ -525,7 +525,9 @@
     "filter": "Filter",
     "allCategories": "Semua Kategori",
     "allSubCategories": "Semua Jenis",
-    "confirm": "Konfirmasi"
+    "confirm": "Konfirmasi",
+    "next": "Berikutnya",
+    "previous": "Sebelumnya"
   },
   "sholat": {
     "selectType": "Pilih Jenis Sholat",
@@ -1506,6 +1508,16 @@
     "shareWarningTitle": "Target dibuat, tapi gagal dibagikan",
     "shareWarningDesc": "Target pribadimu tersimpan, tapi kami tidak bisa mempublikasikannya ke komunitas.",
     "membersOnly": "Gabung target ini untuk melihat siapa saja yang ikut.",
-    "showingTopN": "Menampilkan {{shown}} dari {{total}} peserta teratas."
+    "showingTopN": "Menampilkan {{shown}} dari {{total}} peserta teratas.",
+    "searchPlaceholder": "Cari target komunitas…",
+    "filterCategory": "Kategori",
+    "filterPeriod": "Periode",
+    "allCategories": "Semua kategori",
+    "allPeriods": "Semua periode",
+    "sortRecent": "Terbaru",
+    "sortPopular": "Terpopuler",
+    "noResults": "Tidak ada target yang cocok",
+    "noResultsDesc": "Coba ubah filter atau kata kunci pencarianmu.",
+    "pageOf": "Halaman {{current}} dari {{total}}"
   }
 }

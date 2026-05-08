@@ -3,6 +3,7 @@ import { useLocation, useSearch } from "wouter";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   useCommunityTargets,
+  useCommunityTargetCategories,
   useJoinCommunityTarget,
   useLeaveCommunityTarget,
   useDeleteCommunityTarget,
@@ -35,6 +36,13 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -63,6 +71,7 @@ import { formatNumber } from "@/lib/utils";
 import {
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Folder,
   FolderOpen,
   FolderPlus,
@@ -70,8 +79,10 @@ import {
   Loader2,
   Pencil,
   Plus,
+  Search,
   Target,
   Trash2,
+  X,
 } from "lucide-react";
 import { format, isPast, type Locale } from "date-fns";
 import { RecommendationsEntryCard } from "@/components/RecommendationsEntryCard";
@@ -570,7 +581,40 @@ export default function TargetsPage() {
   const [activeTab, setActiveTab] = useState<"personal" | "community">(initialTab);
   useEffect(() => setActiveTab(initialTab), [initialTab]);
 
-  const { data: communityTargets = [], isLoading: communityLoading } = useCommunityTargets();
+  const { data: communityCategories = [] } = useCommunityTargetCategories();
+
+  const [communitySearch, setCommunitySearch] = useState("");
+  const [communityCategory, setCommunityCategory] = useState("all");
+  const [communityPeriod, setCommunityPeriod] = useState("all");
+  const [communitySort, setCommunitySort] = useState<"recency" | "participants">("recency");
+  const [communityPage, setCommunityPage] = useState(0);
+  const COMMUNITY_PAGE_SIZE = 20;
+
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(communitySearch);
+      setCommunityPage(0);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [communitySearch]);
+
+  const communityParams = useMemo(() => ({
+    search: debouncedSearch || undefined,
+    category: communityCategory !== "all" ? communityCategory : undefined,
+    period: communityPeriod !== "all" ? communityPeriod : undefined,
+    sort: communitySort,
+    limit: COMMUNITY_PAGE_SIZE,
+    offset: communityPage * COMMUNITY_PAGE_SIZE,
+  }), [debouncedSearch, communityCategory, communityPeriod, communitySort, communityPage]);
+
+  const { data: communityData, isLoading: communityLoading } = useCommunityTargets(communityParams);
+  const communityTargets = communityData?.items ?? [];
+  const communityTotal = communityData?.total ?? 0;
+  const communityTotalPages = Math.ceil(communityTotal / COMMUNITY_PAGE_SIZE);
+
+  const hasActiveFilters = debouncedSearch.length > 0 || communityCategory !== "all" || communityPeriod !== "all";
+
   const joinCommunity = useJoinCommunityTarget();
   const leaveCommunity = useLeaveCommunityTarget();
   const deleteCommunity = useDeleteCommunityTarget();
@@ -787,113 +831,204 @@ export default function TargetsPage() {
               </Button>
             </div>
 
+            {/* Search & Filter Controls */}
+            <div className="space-y-2 mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <Input
+                  className="pl-9 pr-9"
+                  placeholder={t("community.searchPlaceholder")}
+                  value={communitySearch}
+                  onChange={(e) => { setCommunitySearch(e.target.value); setCommunityPage(0); }}
+                  data-testid="input-community-search"
+                />
+                {communitySearch.length > 0 && (
+                  <button
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    onClick={() => { setCommunitySearch(""); setCommunityPage(0); }}
+                    data-testid="button-clear-community-search"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Select value={communityCategory} onValueChange={(v) => { setCommunityCategory(v); setCommunityPage(0); }}>
+                  <SelectTrigger className="w-40 h-9 text-sm" data-testid="select-community-category">
+                    <SelectValue placeholder={t("community.filterCategory")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("community.allCategories")}</SelectItem>
+                    {communityCategories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={communityPeriod} onValueChange={(v) => { setCommunityPeriod(v); setCommunityPage(0); }}>
+                  <SelectTrigger className="w-36 h-9 text-sm" data-testid="select-community-period">
+                    <SelectValue placeholder={t("community.filterPeriod")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("community.allPeriods")}</SelectItem>
+                    <SelectItem value="daily">{t("targets.periodDay")}</SelectItem>
+                    <SelectItem value="weekly">{t("targets.periodWeek")}</SelectItem>
+                    <SelectItem value="monthly">{t("targets.periodMonth")}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={communitySort} onValueChange={(v) => { setCommunitySort(v as "recency" | "participants"); setCommunityPage(0); }}>
+                  <SelectTrigger className="w-40 h-9 text-sm" data-testid="select-community-sort">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recency">{t("community.sortRecent")}</SelectItem>
+                    <SelectItem value="participants">{t("community.sortPopular")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             {communityLoading ? (
               <Card className="p-6 text-center text-muted-foreground">{t("common.loading")}</Card>
             ) : communityTargets.length === 0 ? (
               <Card className="p-8 text-center">
                 <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="font-semibold text-lg mb-2" data-testid="text-no-community-targets">
-                  {t("community.empty")}
+                  {hasActiveFilters ? t("community.noResults") : t("community.empty")}
                 </h3>
-                <p className="text-muted-foreground mb-4">{t("community.emptyDesc")}</p>
-                <Button onClick={() => navigate("/community-targets/new")} data-testid="button-add-first-community-target">
-                  <Plus className="w-4 h-4 mr-1" />
-                  {t("community.createFirst")}
-                </Button>
+                <p className="text-muted-foreground mb-4">
+                  {hasActiveFilters ? t("community.noResultsDesc") : t("community.emptyDesc")}
+                </p>
+                {!hasActiveFilters && (
+                  <Button onClick={() => navigate("/community-targets/new")} data-testid="button-add-first-community-target">
+                    <Plus className="w-4 h-4 mr-1" />
+                    {t("community.createFirst")}
+                  </Button>
+                )}
               </Card>
             ) : (
-              <div className="space-y-3" data-testid="list-community-targets">
-                {communityTargets.map((ct) => {
-                  const period = ct.period === "weekly"
-                    ? t("targets.periodWeek")
-                    : ct.period === "monthly"
-                      ? t("targets.periodMonth")
-                      : t("targets.periodDay");
-                  const unitPart = ct.unitLabel ? ` ${ct.unitLabel}` : "";
-                  return (
-                    <Card
-                      key={ct.id}
-                      className="p-4 hover-elevate cursor-pointer"
-                      onClick={() => navigate(`/community-targets/${ct.id}`)}
-                      data-testid={`card-community-target-${ct.id}`}
-                    >
-                      <div className="flex items-start gap-2 mb-1">
-                        <h3 className="text-lg font-bold flex-1 min-w-0 break-words" data-testid={`text-community-target-name-${ct.id}`}>
-                          {ct.name}
-                        </h3>
-                        {ct.isCreator && (
-                          <Badge variant="secondary" data-testid={`badge-creator-${ct.id}`}>
-                            {t("community.yours")}
-                          </Badge>
-                        )}
-                        {ct.isMember && !ct.isCreator && (
-                          <Badge data-testid={`badge-joined-${ct.id}`}>{t("community.joined")}</Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground" data-testid={`text-community-target-line-${ct.id}`}>
-                        {t("targets.targetLabel")} {ct.targetValue}{unitPart} {t("targets.perPeriod", { period })}
-                      </p>
-                      <p className="text-sm text-muted-foreground">{t("targets.categoryLabel")} {ct.category}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                        <Users className="w-3 h-3" />
-                        <span data-testid={`text-community-participant-${ct.id}`}>
-                          {t("community.participantCount", { count: ct.participantCount })}
-                        </span>
-                      </div>
-                      {ct.creatorName && (
-                        <p className="text-xs text-muted-foreground mt-1" data-testid={`text-community-creator-${ct.id}`}>
-                          {t("community.createdBy", { name: ct.creatorName })}
+              <>
+                <div className="space-y-3" data-testid="list-community-targets">
+                  {communityTargets.map((ct) => {
+                    const period = ct.period === "weekly"
+                      ? t("targets.periodWeek")
+                      : ct.period === "monthly"
+                        ? t("targets.periodMonth")
+                        : t("targets.periodDay");
+                    const unitPart = ct.unitLabel ? ` ${ct.unitLabel}` : "";
+                    return (
+                      <Card
+                        key={ct.id}
+                        className="p-4 hover-elevate cursor-pointer"
+                        onClick={() => navigate(`/community-targets/${ct.id}`)}
+                        data-testid={`card-community-target-${ct.id}`}
+                      >
+                        <div className="flex items-start gap-2 mb-1">
+                          <h3 className="text-lg font-bold flex-1 min-w-0 break-words" data-testid={`text-community-target-name-${ct.id}`}>
+                            {ct.name}
+                          </h3>
+                          {ct.isCreator && (
+                            <Badge variant="secondary" data-testid={`badge-creator-${ct.id}`}>
+                              {t("community.yours")}
+                            </Badge>
+                          )}
+                          {ct.isMember && !ct.isCreator && (
+                            <Badge data-testid={`badge-joined-${ct.id}`}>{t("community.joined")}</Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground" data-testid={`text-community-target-line-${ct.id}`}>
+                          {t("targets.targetLabel")} {ct.targetValue}{unitPart} {t("targets.perPeriod", { period })}
                         </p>
-                      )}
-                      <div className="flex flex-wrap gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
-                        {ct.isCreator ? (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={(e) => { e.stopPropagation(); navigate(`/community-targets/${ct.id}/edit`); }}
-                              data-testid={`button-edit-community-${ct.id}`}
-                            >
-                              <Pencil className="w-3.5 h-3.5 mr-1" />
-                              {t("common.edit")}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={(e) => { e.stopPropagation(); setDeletingCommunityId(ct.id); }}
-                              data-testid={`button-delete-community-${ct.id}`}
-                            >
-                              <Trash2 className="w-3.5 h-3.5 mr-1" />
-                              {t("common.delete")}
-                            </Button>
-                          </>
-                        ) : ct.isMember ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={leaveCommunity.isPending}
-                            onClick={(e) => handleLeaveCommunity(e, ct.id)}
-                            data-testid={`button-leave-community-${ct.id}`}
-                          >
-                            <LogOut className="w-3.5 h-3.5 mr-1" />
-                            {t("community.leave")}
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            disabled={joinCommunity.isPending}
-                            onClick={(e) => handleJoinCommunity(e, ct.id)}
-                            data-testid={`button-join-community-${ct.id}`}
-                          >
-                            <LogIn className="w-3.5 h-3.5 mr-1" />
-                            {t("community.join")}
-                          </Button>
+                        <p className="text-sm text-muted-foreground">{t("targets.categoryLabel")} {ct.category}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+                          <Users className="w-3 h-3" />
+                          <span data-testid={`text-community-participant-${ct.id}`}>
+                            {t("community.participantCount", { count: ct.participantCount })}
+                          </span>
+                        </div>
+                        {ct.creatorName && (
+                          <p className="text-xs text-muted-foreground mt-1" data-testid={`text-community-creator-${ct.id}`}>
+                            {t("community.createdBy", { name: ct.creatorName })}
+                          </p>
                         )}
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
+                        <div className="flex flex-wrap gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+                          {ct.isCreator ? (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => { e.stopPropagation(); navigate(`/community-targets/${ct.id}/edit`); }}
+                                data-testid={`button-edit-community-${ct.id}`}
+                              >
+                                <Pencil className="w-3.5 h-3.5 mr-1" />
+                                {t("common.edit")}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => { e.stopPropagation(); setDeletingCommunityId(ct.id); }}
+                                data-testid={`button-delete-community-${ct.id}`}
+                              >
+                                <Trash2 className="w-3.5 h-3.5 mr-1" />
+                                {t("common.delete")}
+                              </Button>
+                            </>
+                          ) : ct.isMember ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={leaveCommunity.isPending}
+                              onClick={(e) => handleLeaveCommunity(e, ct.id)}
+                              data-testid={`button-leave-community-${ct.id}`}
+                            >
+                              <LogOut className="w-3.5 h-3.5 mr-1" />
+                              {t("community.leave")}
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              disabled={joinCommunity.isPending}
+                              onClick={(e) => handleJoinCommunity(e, ct.id)}
+                              data-testid={`button-join-community-${ct.id}`}
+                            >
+                              <LogIn className="w-3.5 h-3.5 mr-1" />
+                              {t("community.join")}
+                            </Button>
+                          )}
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+
+                {/* Pagination */}
+                {communityTotalPages > 1 && (
+                  <div className="flex items-center justify-between mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={communityPage === 0}
+                      onClick={() => setCommunityPage((p) => Math.max(0, p - 1))}
+                      data-testid="button-community-prev"
+                    >
+                      <ChevronLeft className="w-4 h-4 mr-1" />
+                      {t("common.previous")}
+                    </Button>
+                    <span className="text-sm text-muted-foreground" data-testid="text-community-pagination">
+                      {t("community.pageOf", { current: communityPage + 1, total: communityTotalPages })}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={communityPage >= communityTotalPages - 1}
+                      onClick={() => setCommunityPage((p) => p + 1)}
+                      data-testid="button-community-next"
+                    >
+                      {t("common.next")}
+                      <ChevronDown className="w-4 h-4 ml-1 rotate-[-90deg]" />
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
         </Tabs>

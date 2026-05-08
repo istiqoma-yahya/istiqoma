@@ -616,7 +616,18 @@ export const api = {
       method: "GET" as const,
       path: "/api/community-targets",
       responses: {
-        200: z.array(z.custom<import("./schema").CommunityTargetListItem>()),
+        200: z.object({
+          items: z.array(z.custom<import("./schema").CommunityTargetListItem>()),
+          total: z.number().int(),
+        }),
+        401: errorSchemas.unauthorized,
+      },
+    },
+    categories: {
+      method: "GET" as const,
+      path: "/api/community-targets/categories",
+      responses: {
+        200: z.array(z.string()),
         401: errorSchemas.unauthorized,
       },
     },

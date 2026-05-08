@@ -21,7 +21,8 @@ let currentUserId = CREATOR;
 
 function makeStorage(): CommunityTargetStorage {
   return {
-    listCommunityTargets: vi.fn<[string], Promise<CommunityTargetListItem[]>>(),
+    listCommunityTargets: vi.fn<[string, object?], Promise<{ items: CommunityTargetListItem[]; total: number }>>(),
+    listCommunityTargetCategories: vi.fn<[], Promise<string[]>>(),
     getCommunityTarget: vi.fn<[number, string], Promise<CommunityTargetListItem | null>>(),
     createCommunityTarget: vi.fn<[string, InsertCommunityTarget], Promise<CommunityTarget>>(),
     updateCommunityTarget: vi.fn<[number, string, InsertCommunityTarget], Promise<CommunityTarget | null>>(),
@@ -348,5 +349,121 @@ describe("GET /api/community-targets/:id/leaderboard (members-only)", () => {
       limit: 100,
       offset: 0,
     });
+  });
+});
+
+describe("GET /api/community-targets (list with search/filter/sort/pagination)", () => {
+  const emptyResult = { items: [], total: 0 };
+
+  it("returns { items, total } with default limit=20 offset=0", async () => {
+    const storage = makeStorage();
+    vi.mocked(storage.listCommunityTargets).mockResolvedValue(emptyResult);
+
+    const res = await request(buildApp(storage))
+      .get("/api/community-targets")
+      .expect(200);
+
+    expect(res.body).toMatchObject({ items: [], total: 0 });
+    expect(storage.listCommunityTargets).toHaveBeenCalledWith(CREATOR, expect.objectContaining({ limit: 20, offset: 0 }));
+  });
+
+  it("forwards search query param to storage", async () => {
+    const storage = makeStorage();
+    vi.mocked(storage.listCommunityTargets).mockResolvedValue(emptyResult);
+
+    await request(buildApp(storage))
+      .get("/api/community-targets?search=Quran")
+      .expect(200);
+
+    expect(storage.listCommunityTargets).toHaveBeenCalledWith(CREATOR, expect.objectContaining({ search: "Quran" }));
+  });
+
+  it("forwards category and period filters to storage", async () => {
+    const storage = makeStorage();
+    vi.mocked(storage.listCommunityTargets).mockResolvedValue(emptyResult);
+
+    await request(buildApp(storage))
+      .get("/api/community-targets?category=Dzikir&period=daily")
+      .expect(200);
+
+    expect(storage.listCommunityTargets).toHaveBeenCalledWith(
+      CREATOR,
+      expect.objectContaining({ category: "Dzikir", period: "daily" }),
+    );
+  });
+
+  it("forwards sort=participants to storage", async () => {
+    const storage = makeStorage();
+    vi.mocked(storage.listCommunityTargets).mockResolvedValue(emptyResult);
+
+    await request(buildApp(storage))
+      .get("/api/community-targets?sort=participants")
+      .expect(200);
+
+    expect(storage.listCommunityTargets).toHaveBeenCalledWith(
+      CREATOR,
+      expect.objectContaining({ sort: "participants" }),
+    );
+  });
+
+  it("ignores unknown sort values (omits sort key)", async () => {
+    const storage = makeStorage();
+    vi.mocked(storage.listCommunityTargets).mockResolvedValue(emptyResult);
+
+    await request(buildApp(storage))
+      .get("/api/community-targets?sort=invalid")
+      .expect(200);
+
+    const callOpts = vi.mocked(storage.listCommunityTargets).mock.calls[0][1] as Record<string, unknown>;
+    expect(callOpts.sort).toBeUndefined();
+  });
+
+  it("clamps limit to 1-100 and coerces negative offset to 0", async () => {
+    const storage = makeStorage();
+    vi.mocked(storage.listCommunityTargets).mockResolvedValue(emptyResult);
+
+    await request(buildApp(storage))
+      .get("/api/community-targets?limit=999&offset=-10")
+      .expect(200);
+
+    expect(storage.listCommunityTargets).toHaveBeenCalledWith(
+      CREATOR,
+      expect.objectContaining({ limit: 100, offset: 0 }),
+    );
+  });
+
+  it("masks creator emails in response items", async () => {
+    const storage = makeStorage();
+    vi.mocked(storage.listCommunityTargets).mockResolvedValue({
+      items: [
+        {
+          id: 1, creatorId: CREATOR, name: "Test", category: "Dzikir",
+          targetValue: 10, period: "daily", unitLabel: null, dzikirType: null,
+          sholatType: null, fastingType: null, quranUnit: null, sedekahType: null,
+          customUnit: null, isActive: true, createdAt: new Date(),
+          creatorName: "Yusuf", creatorEmail: "yusuf@example.com",
+          participantCount: 3, isMember: true, isCreator: true,
+        } as CommunityTargetListItem,
+      ],
+      total: 1,
+    });
+
+    const res = await request(buildApp(storage)).get("/api/community-targets").expect(200);
+    expect(res.body.items[0].creatorEmail).toBe("y***@example.com");
+    expect(res.body.total).toBe(1);
+  });
+});
+
+describe("GET /api/community-targets/categories", () => {
+  it("returns distinct category list from storage", async () => {
+    const storage = makeStorage();
+    vi.mocked(storage.listCommunityTargetCategories).mockResolvedValue(["Dzikir", "Puasa", "Quran"]);
+
+    const res = await request(buildApp(storage))
+      .get("/api/community-targets/categories")
+      .expect(200);
+
+    expect(res.body).toEqual(["Dzikir", "Puasa", "Quran"]);
+    expect(storage.listCommunityTargetCategories).toHaveBeenCalled();
   });
 });

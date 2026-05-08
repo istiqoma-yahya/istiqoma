@@ -11,7 +11,18 @@ import type {
 } from "@shared/schema";
 
 export interface CommunityTargetStorage {
-  listCommunityTargets(currentUserId: string): Promise<CommunityTargetListItem[]>;
+  listCommunityTargets(
+    currentUserId: string,
+    opts?: {
+      search?: string;
+      category?: string;
+      period?: string;
+      sort?: "recency" | "participants";
+      limit?: number;
+      offset?: number;
+    },
+  ): Promise<{ items: CommunityTargetListItem[]; total: number }>;
+  listCommunityTargetCategories(): Promise<string[]>;
   getCommunityTarget(id: number, currentUserId: string): Promise<CommunityTargetListItem | null>;
   createCommunityTarget(creatorId: string, data: InsertCommunityTarget): Promise<CommunityTarget>;
   updateCommunityTarget(id: number, creatorId: string, data: InsertCommunityTarget): Promise<CommunityTarget | null>;
@@ -62,9 +73,24 @@ export function registerCommunityTargetRoutes(
 ): void {
   app.get(api.communityTargets.list.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
-    const items = await storage.listCommunityTargets(userId);
-    const masked = items.map((it) => ({ ...it, creatorEmail: maskEmail(it.creatorEmail) }));
+    const search = typeof req.query.search === "string" ? req.query.search : undefined;
+    const category = typeof req.query.category === "string" ? req.query.category : undefined;
+    const period = typeof req.query.period === "string" ? req.query.period : undefined;
+    const sortRaw = typeof req.query.sort === "string" ? req.query.sort : undefined;
+    const sort = sortRaw === "participants" || sortRaw === "recency" ? sortRaw : undefined;
+    const limit = req.query.limit !== undefined ? Math.min(Math.max(parseInt(String(req.query.limit), 10) || 20, 1), 100) : 20;
+    const offset = req.query.offset !== undefined ? Math.max(parseInt(String(req.query.offset), 10) || 0, 0) : 0;
+    const result = await storage.listCommunityTargets(userId, { search, category, period, sort, limit, offset });
+    const masked = {
+      items: result.items.map((it) => ({ ...it, creatorEmail: maskEmail(it.creatorEmail) })),
+      total: result.total,
+    };
     res.json(masked);
+  });
+
+  app.get(api.communityTargets.categories.path, isAuthenticated, async (_req, res) => {
+    const cats = await storage.listCommunityTargetCategories();
+    res.json(cats);
   });
 
   app.get(api.communityTargets.get.path, isAuthenticated, async (req: any, res) => {

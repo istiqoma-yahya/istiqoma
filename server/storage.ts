@@ -2,7 +2,7 @@ import { db } from "./db";
 export { db };
 import { computeCommunityTargetLeaderboard, getCommunityPeriodBounds as getCommunityPeriodBoundsHelper, type LeaderboardMember } from "./community-targets-helpers";
 import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, quizQuestions, userQuizProgress, quizAttempts, campaigns, communityTargets, communityTargetMembers, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization, type QuizState, type QuizActiveAttempt, type QuizAnswerResult, type QuizLeaderboardEntry, type Campaign, type InsertCampaign, type UpdateCampaign, type CommunityTarget, type InsertCommunityTarget, type CommunityTargetMember, type CommunityTargetListItem, type CommunityTargetLeaderboardEntry } from "@shared/schema";
-import { eq, desc, and, asc, sql, gte, lte, isNull, inArray } from "drizzle-orm";
+import { eq, desc, and, asc, sql, gte, lte, isNull, inArray, ilike, or, count } from "drizzle-orm";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 
@@ -1891,7 +1891,51 @@ export class DatabaseStorage implements IStorage {
 
   // ─── Community Targets ───────────────────────────────────────
 
-  async listCommunityTargets(currentUserId: string): Promise<CommunityTargetListItem[]> {
+  async listCommunityTargets(
+    currentUserId: string,
+    opts?: {
+      search?: string;
+      category?: string;
+      period?: string;
+      sort?: "recency" | "participants";
+      limit?: number;
+      offset?: number;
+    },
+  ): Promise<{ items: CommunityTargetListItem[]; total: number }> {
+    const pageSize = Math.min(Math.max(opts?.limit ?? 20, 1), 100);
+    const pageOffset = Math.max(opts?.offset ?? 0, 0);
+    const sortBy = opts?.sort ?? "recency";
+
+    const conditions = [eq(communityTargets.isActive, true)];
+    if (opts?.search && opts.search.trim().length > 0) {
+      conditions.push(ilike(communityTargets.name, `%${opts.search.trim()}%`));
+    }
+    if (opts?.category && opts.category.trim().length > 0) {
+      conditions.push(eq(communityTargets.category, opts.category.trim()));
+    }
+    if (opts?.period && ["daily", "weekly", "monthly"].includes(opts.period)) {
+      conditions.push(eq(communityTargets.period, opts.period as "daily" | "weekly" | "monthly"));
+    }
+
+    const whereClause = and(...conditions);
+
+    const [totalRow] = await db
+      .select({ total: sql<number>`count(*)::int` })
+      .from(communityTargets)
+      .where(whereClause);
+    const total = Number(totalRow?.total ?? 0);
+
+    const participantCountSubq = db
+      .select({ ctId: communityTargetMembers.communityTargetId, cnt: sql<number>`count(*)::int` })
+      .from(communityTargetMembers)
+      .groupBy(communityTargetMembers.communityTargetId)
+      .as("member_counts");
+
+    const orderExpr =
+      sortBy === "participants"
+        ? [desc(sql`coalesce(${participantCountSubq.cnt}, 0)`), desc(communityTargets.createdAt)]
+        : [desc(communityTargets.createdAt)];
+
     const rows = await db
       .select({
         target: communityTargets,
@@ -1899,23 +1943,18 @@ export class DatabaseStorage implements IStorage {
         creatorFirstName: users.firstName,
         creatorLastName: users.lastName,
         creatorUsername: users.username,
+        participantCount: sql<number>`coalesce(${participantCountSubq.cnt}, 0)::int`,
       })
       .from(communityTargets)
       .leftJoin(users, eq(users.id, communityTargets.creatorId))
-      .where(eq(communityTargets.isActive, true))
-      .orderBy(desc(communityTargets.createdAt));
+      .leftJoin(participantCountSubq, eq(participantCountSubq.ctId, communityTargets.id))
+      .where(whereClause)
+      .orderBy(...orderExpr)
+      .limit(pageSize)
+      .offset(pageOffset);
 
-    if (rows.length === 0) return [];
+    if (rows.length === 0) return { items: [], total };
     const ids = rows.map((r) => r.target.id);
-
-    const memberCounts = await db
-      .select({
-        ctId: communityTargetMembers.communityTargetId,
-        count: sql<number>`count(*)::int`,
-      })
-      .from(communityTargetMembers)
-      .where(inArray(communityTargetMembers.communityTargetId, ids))
-      .groupBy(communityTargetMembers.communityTargetId);
 
     const myMemberships = await db
       .select({ ctId: communityTargetMembers.communityTargetId })
@@ -1927,10 +1966,9 @@ export class DatabaseStorage implements IStorage {
         ),
       );
 
-    const countMap = new Map(memberCounts.map((c) => [c.ctId, Number(c.count)]));
     const memberSet = new Set(myMemberships.map((m) => m.ctId));
 
-    return rows.map((r) => {
+    const items = rows.map((r) => {
       const composedName =
         [r.creatorFirstName, r.creatorLastName].filter(Boolean).join(" ").trim() ||
         r.creatorUsername ||
@@ -1939,11 +1977,22 @@ export class DatabaseStorage implements IStorage {
         ...r.target,
         creatorName: composedName,
         creatorEmail: r.creatorEmail,
-        participantCount: countMap.get(r.target.id) ?? 0,
+        participantCount: Number(r.participantCount),
         isMember: memberSet.has(r.target.id) || r.target.creatorId === currentUserId,
         isCreator: r.target.creatorId === currentUserId,
       };
     });
+
+    return { items, total };
+  }
+
+  async listCommunityTargetCategories(): Promise<string[]> {
+    const rows = await db
+      .selectDistinct({ category: communityTargets.category })
+      .from(communityTargets)
+      .where(eq(communityTargets.isActive, true))
+      .orderBy(asc(communityTargets.category));
+    return rows.map((r) => r.category);
   }
 
   async getCommunityTarget(id: number, currentUserId: string): Promise<CommunityTargetListItem | null> {

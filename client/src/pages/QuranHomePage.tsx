@@ -99,17 +99,6 @@ export default function QuranHomePage() {
             <span className="text-sm">{t("quranMenu.memorize")}</span>
             <span className="text-xs text-muted-foreground">{memorizations?.length ?? 0}</span>
           </Button>
-          <Button
-            variant="outline"
-            className="h-auto py-4 flex flex-col items-center gap-1"
-            onClick={() => {
-              if (chapters?.[0]) navigate(`/quran/${chapters[0].id}`);
-            }}
-            data-testid="button-start-reading"
-          >
-            <BookOpen className="w-5 h-5 text-emerald-500" />
-            <span className="text-sm">{t("quranMenu.startReading")}</span>
-          </Button>
         </div>
 
         <div className="relative">

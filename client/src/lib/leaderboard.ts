@@ -15,11 +15,22 @@ export function getLeaderboardDisplayName(
   },
   fallback: string,
 ): string {
-  if (entry.username && entry.username.trim().length > 0) return entry.username;
+  if (entry.username && entry.username.trim().length > 0) {
+    return entry.isCurrentUser ? entry.username : maskUsername(entry.username);
+  }
   if (entry.email) {
     return maskEmailForDisplay(entry.email);
   }
   return fallback;
+}
+
+// Mask a username for display when the row belongs to another user.
+// Format: first char + "***" + last char.
+// Example: "yusuf" → "y***f". Single-char names become "x***".
+export function maskUsername(username: string): string {
+  const trimmed = username.trim();
+  if (trimmed.length <= 1) return `${trimmed}***`;
+  return `${trimmed[0]}***${trimmed[trimmed.length - 1]}`;
 }
 
 // Always render emails in masked form on the client, regardless of who

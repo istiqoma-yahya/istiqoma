@@ -346,10 +346,10 @@ export default function LeaderboardPage() {
                           className="text-sm font-semibold tabular-nums"
                           data-testid={`text-points-${entry.userId}`}
                         >
-                          {formatNumber(entry.points)}
+                          {isMe ? formatNumber(entry.points) : "•••"}
                         </p>
                         <p className="text-[10px] uppercase text-muted-foreground tracking-wide">
-                          {t("leaderboard.points")}
+                          {isMe ? t("leaderboard.points") : ""}
                         </p>
                       </div>
                     </div>

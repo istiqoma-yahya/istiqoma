@@ -65,7 +65,11 @@ export function buildSessionOptions(store: session.Store): session.SessionOption
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      // Always require HTTPS in production. Local development (and the
+      // Playwright runner started by `npm run dev`) talks to the server over
+      // plain HTTP, where a Secure cookie would be silently dropped by the
+      // browser, so we relax the flag when NODE_ENV !== "production".
+      secure: process.env.NODE_ENV === "production",
       maxAge: SESSION_TTL_MS,
     },
   };

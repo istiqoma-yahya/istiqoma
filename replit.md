@@ -68,6 +68,9 @@ Points are calculated by the backend based on category and quantity. This includ
 - **Scheduler**: 60-second polling for sending reminders.
 - **Notification Sound**: User-configurable sound preference (chime, double, ding, none) synthesized via Web Audio API.
 
+### End-to-end tests
+- Playwright specs live in `tests/e2e/` and run via `npm run test:e2e` (configured in `playwright.config.ts`). See `tests/README.md` for details, including how to point the runner at an already-running dev server with `PLAYWRIGHT_SKIP_WEBSERVER=1` and how the auth-required specs depend on an OIDC test mock provided by the agent's testing skill.
+
 ### Authentication
 - **Providers**:
   - Replit Auth (OpenID Connect) — primary, supports Google SSO.

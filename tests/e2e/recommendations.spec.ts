@@ -20,16 +20,21 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Target recommendations", () => {
-  test("empty Targets state -> recommendations -> preview -> use target -> form prefilled", async ({ page }) => {
-    // Auth — driven by the testReplitAuth helper / OIDC mock when running
-    // through the Replit testing skill. In a vanilla Playwright run, replace
-    // with whatever login flow the project provides. The Replit testReplitAuth
-    // mock sets up a fresh user (no targets), so the Targets page lands on
-    // its empty state.
-    await page.goto("/");
-    await page.getByTestId("button-login").click();
-    await page.waitForURL((url) => !url.pathname.startsWith("/login"));
+  // The first test asserts the empty Targets page state, so wipe any leftover
+  // targets from prior runs of the same persisted test user before each test.
+  test.beforeEach(async ({ request, baseURL }) => {
+    const headers = { Origin: baseURL ?? "" };
+    const list = await request.get("/api/targets", { headers });
+    if (!list.ok()) return;
+    const targets = (await list.json()) as Array<{ id: string }>;
+    for (const t of targets) {
+      await request.delete(`/api/targets/${t.id}`, { headers });
+    }
+  });
 
+  test("empty Targets state -> recommendations -> preview -> use target -> form prefilled", async ({ page }) => {
+    // Auth is provided by Playwright `storageState` (see
+    // `tests/e2e/global-setup.ts`).
     // 1. Empty Targets page surfaces the entry card and the open button.
     await page.goto("/targets");
     await expect(page.getByTestId("card-recommendations-entry-targets-empty")).toBeVisible();
@@ -71,10 +76,6 @@ test.describe("Target recommendations", () => {
   });
 
   test("each open of the sheet fetches a fresh batch (no result caching)", async ({ page }) => {
-    await page.goto("/");
-    await page.getByTestId("button-login").click();
-    await page.waitForURL((url) => !url.pathname.startsWith("/login"));
-
     await page.goto("/targets/new");
     await page.getByTestId("button-open-recommendations-create-target").click();
     await expect(page.getByTestId("list-recommendations")).toBeVisible({ timeout: 90_000 });

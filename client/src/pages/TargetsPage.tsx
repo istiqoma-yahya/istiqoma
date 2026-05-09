@@ -551,14 +551,6 @@ export default function TargetsPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-10 h-10 text-primary animate-spin" data-testid="loader-targets" />
-      </div>
-    );
-  }
-
   const renderTargetCard = (target: TargetWithProgress) => (
     <TargetCard
       key={target.id}
@@ -649,6 +641,14 @@ export default function TargetsPage() {
       toast({ title: t("common.error"), description: err instanceof Error ? err.message : t("community.deleteError"), variant: "destructive" });
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-10 h-10 text-primary animate-spin" data-testid="loader-targets" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">

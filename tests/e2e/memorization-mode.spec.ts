@@ -33,12 +33,11 @@ const SURAH_ID = 112; // Al-Ikhlas, 4 verses
 
 test.describe("Qur'an memorization mode", () => {
   test.beforeEach(async ({ page }) => {
-    // Auth — driven by the testReplitAuth helper / OIDC mock when running
-    // through the Replit testing skill.
-    await page.goto("/");
-    await page.getByTestId("button-login").click();
-    await page.waitForURL((url) => !url.pathname.startsWith("/login"));
-
+    // Auth is provided by Playwright `storageState` (see
+    // `tests/e2e/global-setup.ts`), which signs the test user in via the
+    // username + PIN endpoints before any test runs. When this spec runs
+    // through the Replit testing skill, the same flow is driven by
+    // `testReplitAuth: true` instead.
     await page.goto(`/quran/${SURAH_ID}`);
     await expect(page.getByTestId("text-surah-title")).toBeVisible();
     // Wait for at least one verse to render before we start interacting.

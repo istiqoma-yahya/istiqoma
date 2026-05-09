@@ -1040,6 +1040,18 @@ export function ProductTour({ onClose }: ProductTourProps) {
   const [deedRecorded, setDeedRecorded] = useState(false);
   const [fajrDone, setFajrDone] = useState(false);
   const [surahTapped, setSurahTapped] = useState(false);
+  const [isDesktopCoachmark, setIsDesktopCoachmark] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(min-width: 768px)").matches : true,
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktopCoachmark(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   const screenRef = useRef<HTMLDivElement>(null);
   const [highlightBounds, setHighlightBounds] = useState<HighlightBounds | null>(null);
@@ -1333,35 +1345,37 @@ export function ProductTour({ onClose }: ProductTourProps) {
             </div>
           </div>
 
-          {/* Right coachmark — desktop only */}
-          <div className="hidden md:block relative flex-1 max-w-[260px]">
-            <AnimatePresence mode="wait">
-              <CoachmarkCard
-                key={step.id}
-                step={step}
-                stepIndex={currentStep}
-                totalSteps={STEPS.length}
-                interactionDone={interactionDoneForStep(currentStep)}
-                onAction={handleCoachmarkAction}
-                side="right"
-              />
-            </AnimatePresence>
-          </div>
-
-          {/* Bottom coachmark — mobile only */}
-          <div className="md:hidden w-full max-w-sm">
-            <AnimatePresence mode="wait">
-              <CoachmarkCard
-                key={step.id}
-                step={step}
-                stepIndex={currentStep}
-                totalSteps={STEPS.length}
-                interactionDone={interactionDoneForStep(currentStep)}
-                onAction={handleCoachmarkAction}
-                side="bottom"
-              />
-            </AnimatePresence>
-          </div>
+          {isDesktopCoachmark ? (
+            /* Right coachmark — desktop only */
+            <div className="relative flex-1 max-w-[260px]">
+              <AnimatePresence mode="wait">
+                <CoachmarkCard
+                  key={step.id}
+                  step={step}
+                  stepIndex={currentStep}
+                  totalSteps={STEPS.length}
+                  interactionDone={interactionDoneForStep(currentStep)}
+                  onAction={handleCoachmarkAction}
+                  side="right"
+                />
+              </AnimatePresence>
+            </div>
+          ) : (
+            /* Bottom coachmark — mobile only */
+            <div className="w-full max-w-sm">
+              <AnimatePresence mode="wait">
+                <CoachmarkCard
+                  key={step.id}
+                  step={step}
+                  stepIndex={currentStep}
+                  totalSteps={STEPS.length}
+                  interactionDone={interactionDoneForStep(currentStep)}
+                  onAction={handleCoachmarkAction}
+                  side="bottom"
+                />
+              </AnimatePresence>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

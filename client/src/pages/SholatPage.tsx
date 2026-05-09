@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { PrayerListCard } from "@/components/shared/PrayerListCard";
 import {
   Compass,
   MapPin,
@@ -13,7 +14,6 @@ import {
   Sunrise,
   Sunset,
   Moon,
-  Check,
   CheckCheck,
   ChevronRight,
   ChevronLeft,
@@ -37,6 +37,7 @@ interface LocationState {
 }
 
 type PrayerKey = "fajr" | "dhuhr" | "asr" | "maghrib" | "isha";
+// Re-export of the same union from PrayerListCard kept local for ergonomics.
 
 function saveLocation(latitude: number, longitude: number, placeName?: string | null) {
   saveSharedLocation(latitude, longitude, placeName);
@@ -52,14 +53,6 @@ function formatDateKey(d: Date): string {
 function toMidnight(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
-
-const PRAYER_ICONS: Record<PrayerKey, typeof Sun> = {
-  fajr: Sunrise,
-  dhuhr: Sun,
-  asr: Sun,
-  maghrib: Sunset,
-  isha: Moon,
-};
 
 export default function SholatPage() {
   const { t, i18n } = useTranslation();
@@ -618,84 +611,27 @@ export default function SholatPage() {
               </div>
             )}
 
-            {/* Prayer list */}
-            <Card className="p-2 sm:p-3">
-              <div className="divide-y divide-border">
-                {prayerList.map((prayer) => {
-                  const isCurrent = isToday && currentPrayerKey === prayer.name;
-                  const isNext = isToday && !isCurrent && nextPrayerKey === prayer.name;
-                  const isDone = done[prayer.name];
-                  const locked = isPrayerLocked(prayer.time);
-                  const isWiggling = wigglingPrayer === prayer.name;
-                  const Icon = PRAYER_ICONS[prayer.name];
-                  return (
-                    <div
-                      key={prayer.name}
-                      className={`flex items-center gap-3 p-3 sm:p-4 rounded-lg transition-opacity ${
-                        isCurrent ? "bg-emerald-500/10" : ""
-                      } ${locked && !isDone ? "opacity-50" : ""}`}
-                      data-testid={`prayer-row-${prayer.name}`}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => togglePrayer(prayer.name, prayer.time)}
-                        aria-label={`${t(`qibla.prayers.${prayer.name}`)} - ${t("sholatPage.doneLabel")}`}
-                        aria-pressed={isDone}
-                        className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center border-2 transition-colors ${
-                          isDone
-                            ? "bg-emerald-500 border-emerald-500 text-white"
-                            : locked
-                            ? "border-muted-foreground/20 text-transparent"
-                            : "border-muted-foreground/40 text-transparent hover:border-emerald-500/60"
-                        } ${isWiggling ? "animate-wiggle" : ""}`}
-                        data-testid={`button-toggle-${prayer.name}`}
-                      >
-                        <Check className="w-5 h-5" />
-                      </button>
-
-                      <div className="flex-1 min-w-0 flex items-center gap-2">
-                        <Icon
-                          className={`w-4 h-4 shrink-0 ${
-                            isCurrent ? "text-emerald-500" : "text-muted-foreground"
-                          }`}
-                        />
-                        <span
-                          className={`font-medium truncate ${
-                            isDone ? "line-through text-muted-foreground" : ""
-                          } ${isCurrent ? "text-emerald-600 dark:text-emerald-400" : ""}`}
-                          data-testid={`text-prayer-name-${prayer.name}`}
-                        >
-                          {t(`qibla.prayers.${prayer.name}`)}
-                        </span>
-                        {isCurrent && (
-                          <span className="text-[10px] sm:text-xs bg-emerald-500 text-white px-2 py-0.5 rounded-full">
-                            {t("qibla.now")}
-                          </span>
-                        )}
-                        {isNext && timeUntilNextPrayer && (
-                          <span className="text-[10px] sm:text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full whitespace-nowrap">
-                            {t("sholatPage.in")} {timeUntilNextPrayer}
-                          </span>
-                        )}
-                      </div>
-
-                      <span
-                        className={`font-mono text-sm sm:text-base shrink-0 ${
-                          isCurrent
-                            ? "text-emerald-600 dark:text-emerald-400 font-bold"
-                            : isDone
-                            ? "text-muted-foreground"
-                            : "text-foreground"
-                        }`}
-                        data-testid={`text-prayer-time-${prayer.name}`}
-                      >
-                        {format(prayer.time, "HH:mm")}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </Card>
+            {/* Prayer list — shared <PrayerListCard /> used by ProductTour too. */}
+            <PrayerListCard
+              prayers={prayerList.map((prayer) => {
+                const isCurrent = isToday && currentPrayerKey === prayer.name;
+                const isNext = isToday && !isCurrent && nextPrayerKey === prayer.name;
+                return {
+                  name: prayer.name,
+                  time: prayer.time,
+                  isCurrent,
+                  isNext,
+                  isDone: done[prayer.name],
+                  locked: isPrayerLocked(prayer.time),
+                  isWiggling: wigglingPrayer === prayer.name,
+                };
+              })}
+              prayerLabel={(key) => t(`qibla.prayers.${key}`)}
+              doneAriaLabel={t("sholatPage.doneLabel")}
+              nowLabel={t("qibla.now")}
+              nextLabel={timeUntilNextPrayer ? `${t("sholatPage.in")} ${timeUntilNextPrayer}` : undefined}
+              onTogglePrayer={togglePrayer}
+            />
 
             {!isFutureDay && (
               <Button

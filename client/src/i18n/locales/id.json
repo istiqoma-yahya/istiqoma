@@ -1382,7 +1382,8 @@
       "currentStreak": "Streak Saat Ini",
       "streakDays": "12 hari",
       "streakPts": "+40 poin",
-      "recordGoodDeed": "Catat Amal Baik"
+      "recordGoodDeed": "Catat Amal Baik",
+      "leaderboard": "Papan Peringkat"
     },
     "recordDeedScreen": {
       "title": "Catat Amal Baik",
@@ -1426,7 +1427,13 @@
       "currentPosition": "Al-Kahf · Ayat 12",
       "bookmarks": "Penanda",
       "memorize": "Hafalan",
-      "verses": "{{count}} ayat"
+      "verses": "{{count}} ayat",
+      "surahs": {
+        "alFatihah": "Pembukaan",
+        "alBaqarah": "Sapi Betina",
+        "alKahf": "Gua",
+        "yaSin": "Ya Sin"
+      }
     },
     "progressScreen": {
       "title": "Progresku",

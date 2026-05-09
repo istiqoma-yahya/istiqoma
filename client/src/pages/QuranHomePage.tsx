@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
-import { Search, Bookmark, BookOpen, Play, GraduationCap } from "lucide-react";
+import { Search, Bookmark, BookOpen, GraduationCap } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { QuranMiniPlayer } from "@/components/QuranMiniPlayer";
+import { SurahListCard } from "@/components/shared/SurahListCard";
 import { useChapters, useReadingState, useBookmarks, useMemorizations } from "@/hooks/use-quran";
 import { useQuranAudio } from "@/components/QuranAudioProvider";
 
@@ -118,42 +119,24 @@ export default function QuranHomePage() {
                 <Skeleton key={i} className="h-16 w-full rounded-lg" />
               ))
             : filtered.map((c) => (
-                <Card
+                <SurahListCard
                   key={c.id}
-                  className="p-3 flex items-center gap-3 cursor-pointer hover-elevate active-elevate-2"
+                  id={c.id}
+                  nameSimple={c.name_simple}
+                  nameArabic={c.name_arabic}
+                  translatedName={c.translated_name.name}
+                  versesCount={c.verses_count}
+                  versesLabel={t("quranMenu.verses")}
                   onClick={() => navigate(`/quran/${c.id}`)}
-                  data-testid={`card-surah-${c.id}`}
-                >
-                  <div className="w-10 h-10 rounded-md bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-semibold shrink-0">
-                    {c.id}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate" data-testid={`text-surah-name-${c.id}`}>
-                      {c.name_simple}
-                    </div>
-                    <div className="text-xs text-muted-foreground truncate">
-                      {c.translated_name.name} · {c.verses_count} {t("quranMenu.verses")}
-                    </div>
-                  </div>
-                  <div className="text-2xl font-arabic shrink-0">{c.name_arabic}</div>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playSurah({
-                        surahNumber: c.id,
-                        surahName: c.name_simple,
-                        surahArabic: c.name_arabic,
-                        versesCount: c.verses_count,
-                      });
-                    }}
-                    data-testid={`button-play-surah-${c.id}`}
-                    aria-label={`Play ${c.name_simple}`}
-                  >
-                    <Play className="w-4 h-4" />
-                  </Button>
-                </Card>
+                  onPlay={() =>
+                    playSurah({
+                      surahNumber: c.id,
+                      surahName: c.name_simple,
+                      surahArabic: c.name_arabic,
+                      versesCount: c.verses_count,
+                    })
+                  }
+                />
               ))}
         </div>
       </main>

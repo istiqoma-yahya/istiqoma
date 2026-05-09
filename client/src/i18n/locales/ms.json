@@ -1382,7 +1382,8 @@
       "currentStreak": "Streak Semasa",
       "streakDays": "12 hari",
       "streakPts": "+40 mata",
-      "recordGoodDeed": "Rekod Amal Baik"
+      "recordGoodDeed": "Rekod Amal Baik",
+      "leaderboard": "Papan Pendahulu"
     },
     "recordDeedScreen": {
       "title": "Rekod Amal Baik",
@@ -1426,7 +1427,13 @@
       "currentPosition": "Al-Kahf · Ayat 12",
       "bookmarks": "Tanda Buku",
       "memorize": "Hafazan",
-      "verses": "{{count}} ayat"
+      "verses": "{{count}} ayat",
+      "surahs": {
+        "alFatihah": "Pembukaan",
+        "alBaqarah": "Lembu Betina",
+        "alKahf": "Gua",
+        "yaSin": "Ya Sin"
+      }
     },
     "progressScreen": {
       "title": "Kemajuan Saya",

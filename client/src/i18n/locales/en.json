@@ -1381,7 +1381,8 @@
       "currentStreak": "Current Streak",
       "streakDays": "12 days",
       "streakPts": "+40 pts",
-      "recordGoodDeed": "Record a Good Deed"
+      "recordGoodDeed": "Record a Good Deed",
+      "leaderboard": "Leaderboard"
     },
     "recordDeedScreen": {
       "title": "Record Good Deed",
@@ -1425,7 +1426,13 @@
       "currentPosition": "Al-Kahf · Verse 12",
       "bookmarks": "Bookmarks",
       "memorize": "Memorize",
-      "verses": "{{count}} verses"
+      "verses": "{{count}} verses",
+      "surahs": {
+        "alFatihah": "The Opening",
+        "alBaqarah": "The Cow",
+        "alKahf": "The Cave",
+        "yaSin": "Ya Sin"
+      }
     },
     "progressScreen": {
       "title": "My Progress",

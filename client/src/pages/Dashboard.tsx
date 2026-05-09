@@ -8,11 +8,9 @@ import { OnboardingHintCard } from "@/components/OnboardingHintCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { CampaignBanner } from "@/components/CampaignBanner";
-import { Loader2, LogOut, User, Settings, Plus, Target, ChevronRight, BarChart3, Bell, BookOpenCheck, Trophy } from "lucide-react";
+import { Loader2, LogOut, User, Settings, Plus, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
+import { DashboardNavLinks } from "@/components/shared/DashboardNavLinks";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -190,78 +188,11 @@ export default function Dashboard() {
 
         <StatsOverview deeds={sortedDeeds} />
 
-        <div className="mb-6 flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={() => navigate("/targets")}
-            className="w-full text-left touch-manipulation"
-            data-testid="link-home-targets"
-          >
-            <Card className="p-4 flex items-center gap-3 hover:border-emerald-500/50 hover:bg-muted/50 transition-colors active:scale-[0.99]">
-              <Target className="w-5 h-5 text-emerald-500" />
-              <span className="flex-1 font-medium">{t('nav.targets')}</span>
-              {(doneCount > 0 || pendingCount > 0) && (
-                <div className="flex items-center gap-1.5">
-                  {doneCount > 0 && (
-                    <Badge
-                      className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-xs"
-                      variant="outline"
-                      data-testid="badge-targets-done"
-                    >
-                      {doneCount} {t('target.doneBadge')}
-                    </Badge>
-                  )}
-                  {pendingCount > 0 && (
-                    <Badge
-                      className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 text-xs"
-                      variant="outline"
-                      data-testid="badge-targets-pending"
-                    >
-                      {pendingCount} {t('target.pendingBadge')}
-                    </Badge>
-                  )}
-                </div>
-              )}
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </Card>
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/progress")}
-            className="w-full text-left touch-manipulation"
-            data-testid="link-home-progress"
-          >
-            <Card className="p-4 flex items-center gap-3 hover:border-emerald-500/50 hover:bg-muted/50 transition-colors active:scale-[0.99]">
-              <BarChart3 className="w-5 h-5 text-emerald-500" />
-              <span className="flex-1 font-medium">{t('nav.progress')}</span>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </Card>
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/quiz")}
-            className="w-full text-left touch-manipulation"
-            data-testid="link-home-quiz"
-          >
-            <Card className="p-4 flex items-center gap-3 hover:border-emerald-500/50 hover:bg-muted/50 transition-colors active:scale-[0.99]">
-              <BookOpenCheck className="w-5 h-5 text-emerald-500" />
-              <span className="flex-1 font-medium">{t('nav.quiz')}</span>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </Card>
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/leaderboard")}
-            className="w-full text-left touch-manipulation"
-            data-testid="link-home-leaderboard"
-          >
-            <Card className="p-4 flex items-center gap-3 hover:border-emerald-500/50 hover:bg-muted/50 transition-colors active:scale-[0.99]">
-              <Trophy className="w-5 h-5 text-emerald-500" />
-              <span className="flex-1 font-medium">{t('leaderboard.title')}</span>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </Card>
-          </button>
-        </div>
+        <DashboardNavLinks
+          doneCount={doneCount}
+          pendingCount={pendingCount}
+          onNavigate={navigate}
+        />
 
         <div className="space-y-6">
           <h3 className="text-xl font-display font-bold flex items-center gap-2">

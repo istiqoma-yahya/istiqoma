@@ -78,7 +78,7 @@ export default function QuranHomePage() {
           </Card>
         )}
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <Button
             variant="outline"
             className="h-auto py-4 flex flex-col items-center gap-1"

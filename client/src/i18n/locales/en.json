@@ -66,6 +66,10 @@
       "continueGoogle": "Continue with Google",
       "continueUsername": "Continue with Username & PIN"
     },
+    "tour": {
+      "cta": "See it in action",
+      "subtitle": "Take a 2-min interactive tour"
+    },
     "featuresLabel": "Features",
     "featuresTitle": "Your Spiritual Companion",
     "featuresSubtitle": "A comprehensive suite of tools designed to help you balance worldly life with your spiritual obligations.",

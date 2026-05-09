@@ -312,8 +312,8 @@ export default function Landing() {
                   <Play className="w-3.5 h-3.5 ml-0.5" />
                 </div>
                 <div className="text-left">
-                  <span className="block font-semibold">See it in action</span>
-                  <span className="text-xs opacity-75">Take a 2-min interactive tour</span>
+                  <span className="block font-semibold">{t('landing.tour.cta')}</span>
+                  <span className="text-xs opacity-75">{t('landing.tour.subtitle')}</span>
                 </div>
                 <ArrowRight className="w-4 h-4 opacity-60" />
               </button>

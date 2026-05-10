@@ -139,6 +139,43 @@
     "noTargetsYet": "Tetapkan matlamat rohani untuk menjejaki progres anda secara automatik",
     "setupTargets": "Tetapkan Sasaran"
   },
+  "purposeQuotes": {
+    "dekat-allah": [
+      "\"Amalan yang paling disukai Allah adalah yang dilakukan secara berterusan, walaupun sedikit.\" — Sahih al-Bukhari",
+      "\"Sesiapa yang mendekatkan diri kepada-Ku sejengkal, Aku mendekatkan diri kepadanya sehasta.\" — Hadis Qudsi",
+      "\"Dan Dia bersama kamu di mana sahaja kamu berada.\" — QS. Al-Hadid: 4",
+      "\"Sesungguhnya bersama kesusahan ada kemudahan.\" — QS. Al-Insyirah: 6",
+      "\"Allah tidak membebani seseorang melainkan sesuai dengan kemampuannya.\" — QS. Al-Baqarah: 286"
+    ],
+    "bermanfaat": [
+      "\"Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia lain.\" — Al-Mu'jam al-Awsat",
+      "\"Sedekah tidak mengurangi harta, dan memaafkan hanya menambah kemuliaan.\" — Sahih Muslim",
+      "\"Ucapan yang baik adalah sedekah.\" — Sahih al-Bukhari",
+      "\"Lakukan kebaikan walaupun kecil — kerana anda tidak tahu amalan mana yang akan membawa anda ke syurga.\" — Sunan Ibn Majah",
+      "\"Sesiapa yang meringankan kesusahan seorang mukmin di dunia, Allah akan meringankan kesusahannya di hari kiamat.\" — Sahih Muslim"
+    ],
+    "berilmu": [
+      "\"Menuntut ilmu adalah kewajipan ke atas setiap Muslim.\" — Sunan Ibn Majah",
+      "\"Allah meninggikan darjat orang-orang yang beriman dan orang-orang yang diberi ilmu beberapa darjat.\" — QS. Al-Mujadilah: 11",
+      "\"Para ulama adalah pewaris para nabi.\" — Sunan Abu Dawud",
+      "\"Katakanlah: Ya Tuhanku, tambahkanlah ilmu kepadaku.\" — QS. Taha: 114",
+      "\"Sesiapa yang menempuh jalan untuk mencari ilmu, Allah akan mudahkan baginya jalan ke syurga.\" — Sahih Muslim"
+    ],
+    "istiqomah": [
+      "\"Sesungguhnya orang-orang yang berkata 'Tuhan kami adalah Allah' kemudian mereka istiqomah, malaikat akan turun kepada mereka.\" — QS. Fushshilat: 30",
+      "\"Amalan yang paling disukai Allah adalah yang dilakukan secara berterusan, walaupun sedikit.\" — Sahih al-Bukhari",
+      "\"Tetaplah istiqomah sebagaimana engkau diperintahkan.\" — QS. Hud: 112",
+      "\"Sesiapa yang bersabar, Allah akan menjadikannya sabar. Tiada pemberian yang lebih baik daripada kesabaran.\" — Sahih al-Bukhari",
+      "\"Amalan yang paling disukai Allah adalah yang dikerjakan secara berterusan walaupun sedikit.\" — Sahih Muslim"
+    ],
+    "keluarga": [
+      "\"Sebaik-baik kamu adalah yang terbaik terhadap keluarganya.\" — Sunan al-Tirmizi",
+      "\"Setiap kamu adalah pemimpin, dan setiap pemimpin bertanggungjawab terhadap yang dipimpinnya.\" — Sahih al-Bukhari",
+      "\"Keluargamu mempunyai hak ke atasmu.\" — Sahih al-Bukhari",
+      "\"Sesiapa yang beriman kepada Allah dan hari akhirat, hendaklah ia memuliakan jirannya.\" — Sahih al-Bukhari",
+      "\"Kasih sayang seorang bapa kepada anaknya lebih baik daripada sedekah satu sa'.\" — Sunan al-Tirmizi"
+    ]
+  },
   "stats": {
     "goodDeeds": "Amal Baik",
     "points": "mata",

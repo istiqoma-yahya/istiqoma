@@ -5,6 +5,7 @@ import { useDeeds } from "@/hooks/use-deeds";
 import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
 import { OnboardingHintCard } from "@/components/OnboardingHintCard";
+import { DailyPurposeQuoteCard, Q5_ICONS } from "@/components/DailyPurposeQuoteCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { CampaignBanner } from "@/components/CampaignBanner";
@@ -14,7 +15,7 @@ import { DashboardNavLinks } from "@/components/shared/DashboardNavLinks";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { type TargetWithProgress } from "@shared/schema";
+import { type TargetWithProgress, type UserOnboarding } from "@shared/schema";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +41,13 @@ export default function Dashboard() {
   const { data: targetsProgress } = useQuery<TargetWithProgress[]>({
     queryKey: ["/api/targets/progress"],
   });
+
+  const { data: onboarding } = useQuery<UserOnboarding | null>({
+    queryKey: ["/api/onboarding"],
+    enabled: !!user,
+  });
+
+  const identityKey = onboarding?.identityKey ?? null;
 
   const { doneCount, pendingCount } = (() => {
     if (!targetsProgress || targetsProgress.length === 0) return { doneCount: 0, pendingCount: 0 };
@@ -170,6 +178,11 @@ export default function Dashboard() {
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h2 className="text-3xl font-display font-bold mb-2">{t('dashboard.greeting')}</h2>
+            {identityKey ? (
+              <p className="text-emerald-600 dark:text-emerald-400 font-medium text-sm mb-1" data-testid="text-purpose-subtitle">
+                {`${Q5_ICONS[identityKey] ?? "✨"} ${t(`onboarding.q5.options.${identityKey}.label`)}`}
+              </p>
+            ) : null}
             <p className="text-muted-foreground">{t('dashboard.subtitle')}</p>
           </div>
           <button 
@@ -181,6 +194,8 @@ export default function Dashboard() {
             <span>{t('dashboard.recordDeed')}</span>
           </button>
         </div>
+
+        {identityKey && <DailyPurposeQuoteCard identityKey={identityKey} />}
 
         <OnboardingHintCard />
 

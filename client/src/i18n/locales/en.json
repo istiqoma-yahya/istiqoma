@@ -139,6 +139,43 @@
     "noTargetsYet": "Set spiritual goals to track your progress automatically",
     "setupTargets": "Set Up Targets"
   },
+  "purposeQuotes": {
+    "dekat-allah": [
+      "\"The most beloved of deeds to Allah are those done consistently, even if they are few.\" — Sahih al-Bukhari",
+      "\"Whoever draws near to Me by a hand's span, I draw near to him by an arm's length.\" — Hadith Qudsi",
+      "\"And He is with you wherever you are.\" — Quran 57:4",
+      "\"Verily, with hardship comes ease.\" — Quran 94:6",
+      "\"Allah does not burden a soul beyond that it can bear.\" — Quran 2:286"
+    ],
+    "bermanfaat": [
+      "\"The best of people are those most beneficial to people.\" — Al-Mu'jam al-Awsat",
+      "\"Charity does not decrease wealth, and forgiving others only adds to one's honour.\" — Sahih Muslim",
+      "\"A kind word is charity.\" — Sahih al-Bukhari",
+      "\"Do good deeds, even if they are small — for you do not know which deed will enter you into Paradise.\" — Ibn Majah",
+      "\"Whoever removes a worldly hardship from a believer, Allah will remove one of their hardships on the Day of Judgement.\" — Sahih Muslim"
+    ],
+    "berilmu": [
+      "\"Seeking knowledge is an obligation upon every Muslim.\" — Sunan Ibn Majah",
+      "\"Allah elevates those who believe among you and those given knowledge, in degrees.\" — Quran 58:11",
+      "\"The scholars are the heirs of the Prophets.\" — Sunan Abu Dawud",
+      "\"Say: My Lord, increase me in knowledge.\" — Quran 20:114",
+      "\"Whoever treads a path in search of knowledge, Allah makes easy for him a path to Paradise.\" — Sahih Muslim"
+    ],
+    "istiqomah": [
+      "\"Indeed, those who say 'Our Lord is Allah' and then remain steadfast — the angels descend upon them.\" — Quran 41:30",
+      "\"The most beloved deeds to Allah are those done consistently, even if small.\" — Sahih al-Bukhari",
+      "\"Be steadfast as you have been commanded.\" — Quran 11:112",
+      "\"Whoever is patient, Allah will make him patient. No one can be given a blessing better or greater than patience.\" — Sahih al-Bukhari",
+      "\"The deed most loved by Allah is the one done consistently, even if it is little.\" — Sahih Muslim"
+    ],
+    "keluarga": [
+      "\"The best of you are those who are best to their families.\" — Sunan al-Tirmidhi",
+      "\"Every one of you is a shepherd, and every one of you is responsible for his flock.\" — Sahih al-Bukhari",
+      "\"Your family has a right over you.\" — Sahih al-Bukhari",
+      "\"Whoever believes in Allah and the Last Day should treat his neighbour with generosity.\" — Sahih al-Bukhari",
+      "\"A father's kindness to his child is better than giving a sa' in charity.\" — Sunan al-Tirmidhi"
+    ]
+  },
   "stats": {
     "goodDeeds": "Good Deeds",
     "points": "points",

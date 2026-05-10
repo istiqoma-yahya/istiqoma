@@ -158,6 +158,30 @@ export default function PrivacyPage() {
             this information. You may withdraw consent at any time by deleting
             your account (see Section 8).
           </p>
+          <p>
+            <strong>How we collect consent:</strong> Before any religious data
+            is stored, every new user must actively check two boxes on a
+            dedicated consent screen:
+          </p>
+          <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+            <li>
+              "I consent to Istiqoma storing my religious practice data to power
+              app features."
+            </li>
+            <li>"I confirm I am 13 years of age or older."</li>
+          </ul>
+          <p>
+            The Continue button remains disabled until both boxes are ticked.
+            Existing users who signed up before this feature was introduced are
+            shown the same consent prompt on their next login and cannot access
+            the app until they confirm.
+          </p>
+          <p>
+            <strong>Age requirement:</strong> Istiqoma is not intended for users
+            under 13 years of age. Sign-up is blocked for anyone who does not
+            confirm they meet the minimum age requirement via the self-declaration
+            checkbox described above.
+          </p>
         </section>
 
         <section className="space-y-3">

@@ -4,6 +4,9 @@ import type { User as AuthUser } from "@shared/models/auth";
 export type User = AuthUser & {
   onboardingComplete?: boolean;
   authProvider?: "username" | "replit";
+  consentReligiousData?: boolean;
+  consentAgeConfirmed?: boolean;
+  consentedAt?: string | null;
 };
 
 async function fetchUser(): Promise<User | null> {

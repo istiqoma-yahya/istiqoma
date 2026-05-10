@@ -1600,5 +1600,24 @@
     "deletedDesc": "The deed has been removed from your history.",
     "updated": "Deed Updated",
     "updatedDesc": "Your deed has been successfully updated."
+  },
+  "consent": {
+    "title": "Data Privacy Consent",
+    "required": "Required before you can continue",
+    "body": "Istiqoma records your religious practice data to power its core features. Under GDPR (Article 9), this is classified as sensitive personal information, and we need your explicit consent before storing it.",
+    "dataTypes": {
+      "deeds": "Good deeds and worship logs",
+      "prayer": "Prayer completions and Sholat records",
+      "quran": "Qur'an reading, bookmarks, and memorization progress"
+    },
+    "gdprNote": "You may withdraw consent at any time by deleting your account. We will never sell or share your religious data with third parties.",
+    "checkboxReligious": "I consent to Istiqoma storing my religious practice data to power app features",
+    "checkboxAge": "I confirm I am 13 years of age or older",
+    "continue": "Continue",
+    "saveError": "Could not save your consent. Please try again.",
+    "privacyHint": "By continuing you accept our",
+    "privacyLink": "Privacy Policy",
+    "refuseHint": "Not ready to consent?",
+    "refuseLink": "Sign out"
   }
 }

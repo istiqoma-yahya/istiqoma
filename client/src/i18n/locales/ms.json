@@ -1601,5 +1601,24 @@
     "deletedDesc": "Amalan telah dipadam daripada sejarah anda.",
     "updated": "Amalan Dikemas Kini",
     "updatedDesc": "Amalan anda berjaya dikemas kini."
+  },
+  "consent": {
+    "title": "Persetujuan Privasi Data",
+    "required": "Diperlukan sebelum meneruskan",
+    "body": "Istiqoma merekod data amalan keagamaan anda untuk menjalankan ciri-ciri utamanya. Di bawah GDPR (Perkara 9), ini dikategorikan sebagai maklumat peribadi yang sensitif, dan kami memerlukan persetujuan eksplisit anda sebelum menyimpannya.",
+    "dataTypes": {
+      "deeds": "Rekod amalan baik dan ibadah",
+      "prayer": "Penyempurnaan solat dan rekod Solat Fardhu",
+      "quran": "Bacaan Al-Quran, tanda buku, dan kemajuan hafazan"
+    },
+    "gdprNote": "Anda boleh menarik balik persetujuan pada bila-bila masa dengan memadamkan akaun. Kami tidak akan menjual atau berkongsi data keagamaan anda dengan pihak ketiga.",
+    "checkboxReligious": "Saya bersetuju Istiqoma menyimpan data amalan keagamaan saya untuk menjalankan ciri-ciri aplikasi",
+    "checkboxAge": "Saya mengesahkan bahawa saya berusia 13 tahun atau lebih",
+    "continue": "Teruskan",
+    "saveError": "Gagal menyimpan persetujuan. Sila cuba lagi.",
+    "privacyHint": "Dengan meneruskan, anda menerima",
+    "privacyLink": "Dasar Privasi",
+    "refuseHint": "Belum bersedia untuk bersetuju?",
+    "refuseLink": "Log keluar"
   }
 }

@@ -20,8 +20,20 @@ import { evaluateBadgesForUser } from "./badges";
 import { registerMemorizationRoutes } from "./memorization-router";
 import { registerCommunityTargetRoutes } from "./community-targets-router";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
+import { users } from "@shared/models/auth";
+import { authStorage } from "./replit_integrations/auth";
 import { format } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
+
+async function requireConsent(req: any, res: any, next: any) {
+  const userId: string | undefined = req.user?.claims?.sub;
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
+  const dbUser = await authStorage.getUser(userId);
+  if (!dbUser?.consentReligiousData || !dbUser?.consentAgeConfirmed) {
+    return res.status(451).json({ message: "Consent required before storing religious data." });
+  }
+  next();
+}
 
 function getErrorStatus(err: unknown): number | undefined {
   if (
@@ -115,7 +127,7 @@ export async function registerRoutes(
     res.json(deeds);
   });
 
-  app.post(api.deeds.create.path, isAuthenticated, async (req: any, res) => {
+  app.post(api.deeds.create.path, isAuthenticated, requireConsent, async (req: any, res) => {
     try {
       const input = api.deeds.create.input.parse(req.body);
       const userId = req.user.claims.sub;
@@ -231,7 +243,7 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
-  app.patch(api.deeds.update.path, isAuthenticated, async (req: any, res) => {
+  app.patch(api.deeds.update.path, isAuthenticated, requireConsent, async (req: any, res) => {
     try {
       const input = api.deeds.update.input.parse(req.body);
       const userId = req.user.claims.sub;
@@ -279,7 +291,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post(api.deeds.voiceParse.path, isAuthenticated, async (req: any, res) => {
+  app.post(api.deeds.voiceParse.path, isAuthenticated, requireConsent, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const input = api.deeds.voiceParse.input.parse(req.body);
@@ -516,7 +528,7 @@ export async function registerRoutes(
     res.json(targetsWithProgress);
   });
 
-  app.post(api.targets.create.path, isAuthenticated, async (req: any, res) => {
+  app.post(api.targets.create.path, isAuthenticated, requireConsent, async (req: any, res) => {
     try {
       const input = api.targets.create.input.parse(req.body);
       const userId = req.user.claims.sub;
@@ -544,7 +556,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch(api.targets.update.path, isAuthenticated, async (req: any, res) => {
+  app.patch(api.targets.update.path, isAuthenticated, requireConsent, async (req: any, res) => {
     try {
       const input = api.targets.update.input.parse(req.body);
       const userId = req.user.claims.sub;
@@ -769,7 +781,7 @@ export async function registerRoutes(
     });
   });
 
-  app.patch(api.targets.updateProgress.path, isAuthenticated, async (req: any, res) => {
+  app.patch(api.targets.updateProgress.path, isAuthenticated, requireConsent, async (req: any, res) => {
     try {
       const { progress } = api.targets.updateProgress.input.parse(req.body);
       const userId = req.user.claims.sub;
@@ -797,7 +809,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post(api.targets.complete.path, isAuthenticated, async (req: any, res) => {
+  app.post(api.targets.complete.path, isAuthenticated, requireConsent, async (req: any, res) => {
     const userId = req.user.claims.sub;
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -1344,7 +1356,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post(api.onboarding.complete.path, isAuthenticated, async (req: any, res) => {
+  app.post(api.onboarding.complete.path, isAuthenticated, requireConsent, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       // Identity key is derived server-side from validated answers; any
@@ -1392,7 +1404,7 @@ export async function registerRoutes(
     res.json(rows);
   });
 
-  app.post(api.quran.addBookmark.path, isAuthenticated, async (req: any, res) => {
+  app.post(api.quran.addBookmark.path, isAuthenticated, requireConsent, async (req: any, res) => {
     try {
       const input = api.quran.addBookmark.input.parse(req.body);
       const userId = req.user.claims.sub;
@@ -1426,7 +1438,7 @@ export async function registerRoutes(
     res.json(row);
   });
 
-  app.put(api.quran.updateReadingState.path, isAuthenticated, async (req: any, res) => {
+  app.put(api.quran.updateReadingState.path, isAuthenticated, requireConsent, async (req: any, res) => {
     try {
       const input = api.quran.updateReadingState.input.parse(req.body);
       const userId = req.user.claims.sub;
@@ -1453,7 +1465,7 @@ export async function registerRoutes(
     res.json(rows);
   });
 
-  registerMemorizationRoutes(app, storage, isAuthenticated, evaluateBadgesForUser);
+  registerMemorizationRoutes(app, storage, isAuthenticated, evaluateBadgesForUser, requireConsent);
 
   // ─── Quiz ────────────────────────────────────────────────────
   // Islamic quiz progression. Independent of deeds/points: users
@@ -1765,6 +1777,26 @@ function registerAdminCampaignRoutes(app: Express) {
     const deleted = await storage.deleteCampaign(id);
     if (!deleted) return res.status(404).json({ message: "Campaign not found" });
     res.status(204).send();
+  });
+
+  // ─── Consent ─────────────────────────────────────────────────
+  app.post("/api/account/consent", isAuthenticated, async (req: any, res) => {
+    const schema = z.object({
+      consentReligiousData: z.literal(true),
+      consentAgeConfirmed: z.literal(true),
+    });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ message: "Both consent checkboxes must be checked." });
+    }
+    const userId = req.user.claims.sub;
+    await db.update(users).set({
+      consentReligiousData: true,
+      consentAgeConfirmed: true,
+      consentedAt: new Date(),
+      updatedAt: new Date(),
+    }).where(eq(users.id, userId));
+    res.json({ ok: true });
   });
 
   // ─── Account Management ──────────────────────────────────────

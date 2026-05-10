@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   jsonb,
@@ -37,6 +38,9 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   username: varchar("username"),
   phoneNumber: varchar("phone_number"),
+  consentReligiousData: boolean("consent_religious_data").default(false),
+  consentAgeConfirmed: boolean("consent_age_confirmed").default(false),
+  consentedAt: timestamp("consented_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [

@@ -19,10 +19,12 @@ export function registerMemorizationRoutes(
   storage: MemorizationStorage,
   isAuthenticated: RequestHandler,
   evaluateBadgesForUser: (userId: string) => Promise<void>,
+  requireConsent: RequestHandler,
 ): void {
   app.post(
     api.quran.addMemorization.path,
     isAuthenticated,
+    requireConsent,
     async (req: any, res) => {
       try {
         const input = api.quran.addMemorization.input.parse(req.body);

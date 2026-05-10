@@ -3,10 +3,11 @@ import { Loader2 } from "lucide-react";
 import Dashboard from "./Dashboard";
 import Landing from "./Landing";
 import OnboardingFlow from "./OnboardingFlow";
+import ConsentScreen from "@/components/ConsentScreen";
 import { BottomNavigation } from "@/components/BottomNavigation";
 
 export default function AuthWrapper() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
 
   if (isLoading) {
     return (
@@ -19,6 +20,16 @@ export default function AuthWrapper() {
   if (isAuthenticated) {
     if (user && !user.onboardingComplete) {
       return <OnboardingFlow />;
+    }
+    const hasConsented = user?.consentReligiousData && user?.consentAgeConfirmed;
+    if (!hasConsented) {
+      return (
+        <ConsentScreen
+          onConfirmed={() => {}}
+          onRefused={() => logout()}
+          asModal
+        />
+      );
     }
     return (
       <>

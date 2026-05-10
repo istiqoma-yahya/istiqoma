@@ -33,6 +33,9 @@ export function registerAuthRoutes(app: Express): void {
         ...displayUser,
         onboardingComplete: !!onboarding?.completed,
         authProvider,
+        consentReligiousData: displayUser.consentReligiousData ?? false,
+        consentAgeConfirmed: displayUser.consentAgeConfirmed ?? false,
+        consentedAt: displayUser.consentedAt ?? null,
       });
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -76,7 +79,13 @@ export function registerAuthRoutes(app: Express): void {
         return res.status(404).json({ message: "User not found" });
       }
       const onboarding = await storage.getUserOnboarding(userId);
-      res.json({ ...updated, onboardingComplete: !!onboarding?.completed });
+      res.json({
+        ...updated,
+        onboardingComplete: !!onboarding?.completed,
+        consentReligiousData: updated?.consentReligiousData ?? false,
+        consentAgeConfirmed: updated?.consentAgeConfirmed ?? false,
+        consentedAt: updated?.consentedAt ?? null,
+      });
     } catch (error) {
       console.error("Error updating profile:", error);
       res.status(500).json({ message: "Failed to update profile" });

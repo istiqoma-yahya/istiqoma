@@ -6,6 +6,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { Loader2 } from "lucide-react";
 import type { Q1, Q2, Q3, Q4, Q5 } from "@/lib/onboardingTypes";
 import type { User } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
+import ConsentScreen from "@/components/ConsentScreen";
 import "./onboarding.css";
 
 type Answers = {
@@ -16,7 +18,7 @@ type Answers = {
   q5?: Q5;
 };
 
-const SCREEN_KEYS = ["s0", "s1", "s2", "q1", "q2", "q3", "q4", "q5", "result"] as const;
+const SCREEN_KEYS = ["consent", "s0", "s1", "s2", "q1", "q2", "q3", "q4", "q5", "result"] as const;
 type ScreenKey = (typeof SCREEN_KEYS)[number];
 
 const Q1_OPTIONS: { value: Q1; iconKey: string }[] = [
@@ -71,6 +73,7 @@ const Q5_ICONS: Record<Q5, string> = {
 export default function OnboardingFlow() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { logout } = useAuth();
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({ q3: [] });
 
@@ -80,12 +83,13 @@ export default function OnboardingFlow() {
 
   const stepLabel = useMemo(() => {
     if (index === 0) return "";
-    if (index <= 2) return t("onboarding.intro");
-    if (index <= 7) return t("onboarding.quizCount", { current: index - 2, total: 5 });
+    if (index === 1) return "";
+    if (index <= 3) return t("onboarding.intro");
+    if (index <= 8) return t("onboarding.quizCount", { current: index - 3, total: 5 });
     return t("onboarding.done");
   }, [index, t]);
 
-  const showBack = index > 0 && index < total - 1;
+  const showBack = index > 1 && index < total - 1;
 
   const goNext = () => setIndex((i) => Math.min(total - 1, i + 1));
   const goBack = () => setIndex((i) => Math.max(0, i - 1));
@@ -127,7 +131,7 @@ export default function OnboardingFlow() {
     };
     const onTouchEnd = (e: TouchEvent) => {
       const diff = startX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 70 && diff < 0 && index > 0 && index < total - 1) {
+      if (Math.abs(diff) > 70 && diff < 0 && index > 1 && index < total - 1) {
         goBack();
       }
     };
@@ -152,6 +156,18 @@ export default function OnboardingFlow() {
     : (t("onboarding.identityFallback.tags", { returnObjects: true }) as string[]);
   const contextTag = answers.q1 ? t(`onboarding.contextTags.${answers.q1}`) : null;
   const tags = contextTag ? [...baseTags, contextTag] : [...baseTags];
+
+  if (screen === "consent") {
+    return (
+      <div className="onboarding-root" data-testid="onboarding-flow">
+        <div className="ob-glow-tl" />
+        <div className="ob-glow-br" />
+        <div className="ob-app" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <ConsentScreen onConfirmed={goNext} onRefused={() => logout()} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="onboarding-root" data-testid="onboarding-flow">

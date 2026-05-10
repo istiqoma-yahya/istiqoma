@@ -1,10 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ChevronRight, Loader2, Lock, Mail, Sparkles, User as UserIcon } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ChevronRight, Download, Loader2, Lock, Mail, Sparkles, Trash2, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,16 @@ import {
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { AchievementsSection } from "@/components/AchievementsSection";
@@ -45,6 +55,7 @@ export default function ProfilePage() {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
   const { user, isLoading, isAuthenticated } = useAuth();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const { data: onboarding } = useQuery<UserOnboarding | null>({
     queryKey: ["/api/onboarding"],
@@ -154,6 +165,29 @@ export default function ProfilePage() {
       });
     },
   });
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("DELETE", "/api/account");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.clear();
+      localStorage.setItem("accountDeleted", "1");
+      window.location.href = "/";
+    },
+    onError: (err: Error) => {
+      toast({
+        title: t("profile.dangerZone.deleteError"),
+        description: err.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleExportData = () => {
+    window.open("/api/account/export", "_blank");
+  };
 
   const emailEndsWithGmail = (user?.email ?? "").toLowerCase().endsWith("@gmail.com");
   const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(" ");
@@ -500,6 +534,42 @@ export default function ProfilePage() {
                 </div>
               </Card>
             )}
+
+            <Card className="p-5 border-destructive/40" data-testid="card-danger-zone">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 rounded-lg bg-destructive/10 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="w-4 h-4 text-destructive" />
+                </div>
+                <h2 className="text-base font-semibold text-destructive" data-testid="text-danger-zone-heading">
+                  {t("profile.dangerZone.heading")}
+                </h2>
+              </div>
+              <p className="text-xs text-muted-foreground mb-4">
+                {t("profile.dangerZone.description")}
+              </p>
+              <div className="flex flex-col gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleExportData}
+                  className="justify-start gap-2"
+                  data-testid="button-export-data"
+                >
+                  <Download className="w-4 h-4" />
+                  {t("profile.dangerZone.exportButton")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => setDeleteDialogOpen(true)}
+                  className="justify-start gap-2"
+                  data-testid="button-delete-account"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {t("profile.dangerZone.deleteButton")}
+                </Button>
+              </div>
+            </Card>
           </>
         )}
       </main>
@@ -515,6 +585,38 @@ export default function ProfilePage() {
           </a>
         </div>
       </footer>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent data-testid="dialog-delete-account">
+          <AlertDialogHeader>
+            <AlertDialogTitle data-testid="text-delete-dialog-title">
+              {t("profile.dangerZone.dialogTitle")}
+            </AlertDialogTitle>
+            <AlertDialogDescription data-testid="text-delete-dialog-desc">
+              {t("profile.dangerZone.dialogDescription")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={deleteAccountMutation.isPending}
+              data-testid="button-delete-cancel"
+            >
+              {t("profile.dangerZone.dialogCancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteAccountMutation.mutate()}
+              disabled={deleteAccountMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-delete-confirm"
+            >
+              {deleteAccountMutation.isPending ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : null}
+              {t("profile.dangerZone.dialogConfirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1767,6 +1767,29 @@ function registerAdminCampaignRoutes(app: Express) {
     res.status(204).send();
   });
 
+  // ─── Account Management ──────────────────────────────────────
+  app.get("/api/account/export", isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const data = await storage.exportAccountData(userId);
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="istiqoma-data-${new Date().toISOString().slice(0, 10)}.json"`,
+    );
+    res.json(data);
+  });
+
+  app.delete("/api/account", isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    await storage.deleteAccount(userId);
+    req.session.destroy((err: Error | null) => {
+      if (err) {
+        console.error("[account] session destroy failed after account deletion:", err);
+      }
+      res.status(200).json({ message: "Account deleted" });
+    });
+  });
+
   // ─── Community Targets ───────────────────────────────────────
   registerCommunityTargetRoutes(app, storage, isAuthenticated);
 }

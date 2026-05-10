@@ -11,6 +11,7 @@ import istiqomaHorizontalLogoDark from "@assets/Istiqoma_New_Horizontal_Logo_-_D
 import { useTheme } from "@/components/ThemeProvider";
 import { useInstallPWA } from "@/hooks/use-install-pwa";
 import { ProductTour } from "@/components/ProductTour";
+import { useToast } from "@/hooks/use-toast";
 
 declare global {
   interface Window {
@@ -24,10 +25,21 @@ declare global {
 export default function Landing() {
   const { t } = useTranslation();
   const { theme } = useTheme();
+  const { toast } = useToast();
   const logoSrc = theme === "dark" ? istiqomaHorizontalLogoDark : istiqomaHorizontalLogo;
   const [showSticky, setShowSticky] = useState(false);
   const [showTour, setShowTour] = useState(false);
   const { isInstallable, isInstalled, install } = useInstallPWA();
+
+  useEffect(() => {
+    if (localStorage.getItem("accountDeleted") === "1") {
+      localStorage.removeItem("accountDeleted");
+      toast({
+        title: t("profile.dangerZone.deleteSuccessTitle"),
+        description: t("profile.dangerZone.deleteSuccessDesc"),
+      });
+    }
+  }, []);
 
   const scrollToChooser = () => {
     const el = document.querySelector('[data-testid="auth-chooser"]');

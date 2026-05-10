@@ -1,7 +1,8 @@
 import { db } from "./db";
 export { db };
 import { computeCommunityTargetLeaderboard, getCommunityPeriodBounds as getCommunityPeriodBoundsHelper, type LeaderboardMember } from "./community-targets-helpers";
-import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, quizQuestions, userQuizProgress, quizAttempts, campaigns, communityTargets, communityTargetMembers, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization, type QuizState, type QuizActiveAttempt, type QuizAnswerResult, type QuizLeaderboardEntry, type Campaign, type InsertCampaign, type UpdateCampaign, type CommunityTarget, type InsertCommunityTarget, type CommunityTargetMember, type CommunityTargetListItem, type CommunityTargetLeaderboardEntry } from "@shared/schema";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, quizQuestions, userQuizProgress, quizAttempts, campaigns, communityTargets, communityTargetMembers, recommendationRateLimitCalls, voiceParseRateLimitCalls, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization, type QuizState, type QuizActiveAttempt, type QuizAnswerResult, type QuizLeaderboardEntry, type Campaign, type InsertCampaign, type UpdateCampaign, type CommunityTarget, type InsertCommunityTarget, type CommunityTargetMember, type CommunityTargetListItem, type CommunityTargetLeaderboardEntry } from "@shared/schema";
+import { userBadges } from "@shared/badges";
 import { eq, desc, and, asc, sql, gte, lte, isNull, inArray, ilike, or, count } from "drizzle-orm";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -200,6 +201,9 @@ export interface IStorage {
     me: { rank: number; level: number; totalCorrect: number } | null;
     total: number;
   }>;
+
+  deleteAccount(userId: string): Promise<void>;
+  exportAccountData(userId: string): Promise<Record<string, unknown>>;
 }
 
 export type LeaderboardEntry = {
@@ -2246,6 +2250,56 @@ export class DatabaseStorage implements IStorage {
       currentUserId,
       { ...options, now, memberTimezones },
     );
+  }
+
+  async deleteAccount(userId: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      await tx.delete(quizAttempts).where(eq(quizAttempts.userId, userId));
+      await tx.delete(userQuizProgress).where(eq(userQuizProgress.userId, userId));
+      await tx.delete(communityTargetMembers).where(eq(communityTargetMembers.userId, userId));
+      await tx.delete(communityTargets).where(eq(communityTargets.creatorId, userId));
+      await tx.delete(userBadges).where(eq(userBadges.userId, userId));
+      await tx.delete(quranMemorizationAwards).where(eq(quranMemorizationAwards.userId, userId));
+      await tx.delete(quranMemorizations).where(eq(quranMemorizations.userId, userId));
+      await tx.delete(quranBookmarks).where(eq(quranBookmarks.userId, userId));
+      await tx.delete(quranReadingState).where(eq(quranReadingState.userId, userId));
+      await tx.delete(targetHistory).where(eq(targetHistory.userId, userId));
+      await tx.delete(targets).where(eq(targets.userId, userId));
+      await tx.delete(targetFolders).where(eq(targetFolders.userId, userId));
+      await tx.delete(deeds).where(eq(deeds.userId, userId));
+      await tx.delete(categories).where(eq(categories.userId, userId));
+      await tx.delete(customDzikirTypes).where(eq(customDzikirTypes.userId, userId));
+      await tx.delete(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
+      await tx.delete(streakFreezes).where(eq(streakFreezes.userId, userId));
+      await tx.delete(pointPurchases).where(eq(pointPurchases.userId, userId));
+      await tx.delete(userStreakState).where(eq(userStreakState.userId, userId));
+      await tx.delete(recommendationRateLimitCalls).where(eq(recommendationRateLimitCalls.userId, userId));
+      await tx.delete(voiceParseRateLimitCalls).where(eq(voiceParseRateLimitCalls.userId, userId));
+      await tx.delete(userOnboarding).where(eq(userOnboarding.userId, userId));
+      await tx.execute(
+        sql`DELETE FROM sessions WHERE (sess #>> '{passport,user,claims,sub}') = ${userId} OR (sess #>> '{passport,user,id}') = ${userId}`,
+      );
+      await tx.delete(users).where(eq(users.id, userId));
+    });
+  }
+
+  async exportAccountData(userId: string): Promise<Record<string, unknown>> {
+    const [userDeeds, userCategories, userTargets, bookmarks, memorizations] =
+      await Promise.all([
+        db.select().from(deeds).where(eq(deeds.userId, userId)).orderBy(desc(deeds.createdAt)),
+        db.select().from(categories).where(eq(categories.userId, userId)),
+        db.select().from(targets).where(eq(targets.userId, userId)),
+        db.select().from(quranBookmarks).where(eq(quranBookmarks.userId, userId)),
+        db.select().from(quranMemorizations).where(eq(quranMemorizations.userId, userId)),
+      ]);
+    return {
+      exportedAt: new Date().toISOString(),
+      deeds: userDeeds,
+      categories: userCategories,
+      targets: userTargets,
+      quranBookmarks: bookmarks,
+      quranMemorizations: memorizations,
+    };
   }
 }
 

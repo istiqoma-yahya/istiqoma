@@ -1048,7 +1048,20 @@
     "changePinButton": "Update PIN",
     "changePinSuccess": "PIN updated",
     "changePinError": "Couldn't change your PIN",
-    "changePinWrongCurrent": "Current PIN is wrong"
+    "changePinWrongCurrent": "Current PIN is wrong",
+    "dangerZone": {
+      "heading": "Danger Zone",
+      "description": "These actions are permanent and cannot be undone. Please proceed with care.",
+      "exportButton": "Download my data",
+      "deleteButton": "Delete my account",
+      "dialogTitle": "Delete your account?",
+      "dialogDescription": "All your data — deeds, targets, bookmarks, memorizations, streaks, and settings — will be permanently deleted. This cannot be undone.",
+      "dialogCancel": "Cancel",
+      "dialogConfirm": "Yes, delete everything",
+      "deleteError": "Could not delete account",
+      "deleteSuccessTitle": "Account deleted",
+      "deleteSuccessDesc": "Your account and all data have been permanently removed."
+    }
   },
   "usernameAuth": {
     "pageTitle": "Sign in with username",

@@ -1049,7 +1049,20 @@
     "changePinButton": "Perbarui PIN",
     "changePinSuccess": "PIN diperbarui",
     "changePinError": "Gagal mengubah PIN",
-    "changePinWrongCurrent": "PIN saat ini salah"
+    "changePinWrongCurrent": "PIN saat ini salah",
+    "dangerZone": {
+      "heading": "Zona Berbahaya",
+      "description": "Tindakan ini bersifat permanen dan tidak dapat dibatalkan. Lanjutkan dengan hati-hati.",
+      "exportButton": "Unduh data saya",
+      "deleteButton": "Hapus akun saya",
+      "dialogTitle": "Hapus akunmu?",
+      "dialogDescription": "Semua datamu — amal, target, penanda, hafalan, streak, dan pengaturan — akan dihapus secara permanen. Tindakan ini tidak bisa dibatalkan.",
+      "dialogCancel": "Batal",
+      "dialogConfirm": "Ya, hapus semuanya",
+      "deleteError": "Gagal menghapus akun",
+      "deleteSuccessTitle": "Akun dihapus",
+      "deleteSuccessDesc": "Akun dan semua datamu telah dihapus secara permanen."
+    }
   },
   "usernameAuth": {
     "pageTitle": "Masuk dengan nama pengguna",

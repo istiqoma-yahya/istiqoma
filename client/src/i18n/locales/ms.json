@@ -1049,7 +1049,20 @@
     "changePinButton": "Kemas kini PIN",
     "changePinSuccess": "PIN dikemas kini",
     "changePinError": "Gagal menukar PIN",
-    "changePinWrongCurrent": "PIN semasa salah"
+    "changePinWrongCurrent": "PIN semasa salah",
+    "dangerZone": {
+      "heading": "Zon Bahaya",
+      "description": "Tindakan ini adalah kekal dan tidak boleh dibuat asal. Sila teruskan dengan berhati-hati.",
+      "exportButton": "Muat turun data saya",
+      "deleteButton": "Padam akaun saya",
+      "dialogTitle": "Padam akaun anda?",
+      "dialogDescription": "Semua data anda — amalan, sasaran, tanda buku, hafazan, streak, dan tetapan — akan dipadam secara kekal. Ini tidak boleh dibuat asal.",
+      "dialogCancel": "Batal",
+      "dialogConfirm": "Ya, padam semua",
+      "deleteError": "Gagal memadam akaun",
+      "deleteSuccessTitle": "Akaun dipadam",
+      "deleteSuccessDesc": "Akaun dan semua data anda telah dipadam secara kekal."
+    }
   },
   "usernameAuth": {
     "pageTitle": "Log masuk dengan nama pengguna",

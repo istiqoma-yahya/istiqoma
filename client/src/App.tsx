@@ -36,6 +36,8 @@ import QuranSurahPage from "@/pages/QuranSurahPage";
 import QuranBookmarksPage from "@/pages/QuranBookmarksPage";
 import QuranMemorizationProgressPage from "@/pages/QuranMemorizationProgressPage";
 import AdminCampaignsPage from "@/pages/AdminCampaignsPage";
+import PrivacyPage from "@/pages/PrivacyPage";
+import TermsPage from "@/pages/TermsPage";
 import { QuranAudioProvider } from "@/components/QuranAudioProvider";
 import { QuranFontProvider } from "@/components/QuranFontProvider";
 import { useDeeds } from "@/hooks/use-deeds";
@@ -89,6 +91,8 @@ function Router() {
       <Route path="/create-deed/voice" component={VoiceCaptureDeedPage} />
       <Route path="/edit-deed/:id" component={EditDeedRoute} />
       <Route path="/admin/campaigns" component={AdminCampaignsPage} />
+      <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/terms" component={TermsPage} />
       <Route component={NotFound} />
     </Switch>
   );

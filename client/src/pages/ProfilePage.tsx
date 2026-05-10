@@ -503,6 +503,18 @@ export default function ProfilePage() {
           </>
         )}
       </main>
+
+      <footer className="pb-24 pt-2 text-center text-xs text-muted-foreground">
+        <div className="flex items-center justify-center gap-4">
+          <a href="/privacy" className="hover:text-foreground transition-colors" data-testid="link-profile-privacy">
+            Privacy Policy
+          </a>
+          <span aria-hidden="true">·</span>
+          <a href="/terms" className="hover:text-foreground transition-colors" data-testid="link-profile-terms">
+            Terms of Service
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }

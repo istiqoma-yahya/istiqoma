@@ -540,6 +540,15 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
         <p data-testid="text-footer-copyright">© {new Date().getFullYear()} {t('app.name')}. {t('app.tagline')}</p>
+        <div className="flex items-center justify-center gap-4 mt-3">
+          <a href="/privacy" className="hover:text-foreground transition-colors" data-testid="link-privacy-policy">
+            Privacy Policy
+          </a>
+          <span aria-hidden="true">·</span>
+          <a href="/terms" className="hover:text-foreground transition-colors" data-testid="link-terms-of-service">
+            Terms of Service
+          </a>
+        </div>
       </footer>
 
       {/* Product Tour Overlay */}

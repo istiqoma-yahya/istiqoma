@@ -792,6 +792,12 @@ export const quizQuestions = pgTable("quiz_questions", {
   correctIndex: integer("correct_index").notNull(),
   explanation: text("explanation").notNull(),
   category: text("category"),
+  questionTextId: text("question_text_id"),
+  optionsId: text("options_id").array(),
+  explanationId: text("explanation_id"),
+  questionTextMs: text("question_text_ms"),
+  optionsMs: text("options_ms").array(),
+  explanationMs: text("explanation_ms"),
 }, (table) => ({
   byLevel: index("quiz_questions_level_idx").on(table.level),
 }));

@@ -26,11 +26,18 @@ function extractServerMessage(err: Error): string | null {
 }
 
 export default function QuizPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [, navigate] = useLocation();
+  const locale = i18n.language?.split("-")[0] ?? "en";
+  const localeParam = ["id", "ms"].includes(locale) ? locale : "en";
 
   const { data: state, isLoading, isError, error, refetch } = useQuery<QuizState>({
-    queryKey: ["/api/quiz/state"],
+    queryKey: ["/api/quiz/state", localeParam],
+    queryFn: async () => {
+      const res = await fetch(`/api/quiz/state?locale=${localeParam}`, { credentials: "include" });
+      if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+      return res.json();
+    },
   });
 
   const [attempt, setAttempt] = useState<QuizActiveAttempt | null>(null);
@@ -47,7 +54,7 @@ export default function QuizPage() {
 
   const startMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/quiz/start");
+      const res = await apiRequest("POST", `/api/quiz/start?locale=${localeParam}`);
       return (await res.json()) as QuizActiveAttempt;
     },
     onSuccess: (a) => {
@@ -61,7 +68,7 @@ export default function QuizPage() {
   const answerMutation = useMutation({
     mutationFn: async (optionIndex: number) => {
       if (!attempt) throw new Error("No attempt");
-      const res = await apiRequest("POST", "/api/quiz/answer", {
+      const res = await apiRequest("POST", `/api/quiz/answer?locale=${localeParam}`, {
         attemptId: attempt.attemptId,
         optionIndex,
       });
@@ -86,7 +93,7 @@ export default function QuizPage() {
       setLastResult(null);
       setSelected(null);
       setExplanationOpen(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/quiz/state"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/quiz/state", localeParam] });
       queryClient.invalidateQueries({ queryKey: ["/api/quiz/leaderboard"] });
     } else {
       setAttempt({ ...attempt, answers: newAnswers });

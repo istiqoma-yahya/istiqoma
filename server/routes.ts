@@ -54,6 +54,50 @@ function getErrorMessage(err: unknown): string {
   return "Internal Server Error";
 }
 
+const LOCALE_MAP: Record<string, string> = {
+  en: "en", "en-us": "en", "en-gb": "en", "en-au": "en",
+  id: "id", "id-id": "id",
+  ms: "ms", "ms-my": "ms", "ms-bn": "ms", "ms-sg": "ms",
+};
+
+/**
+ * Resolve quiz locale for a request.
+ * Priority: ?locale= query param > Accept-Language header > "en" fallback.
+ * Accepts exact codes (id, ms, en) and regional variants (id-ID, ms-MY, etc.).
+ */
+function resolveLocale(req: { query: { locale?: unknown }; headers: { "accept-language"?: string } }): string {
+  // 1. Explicit query param takes priority
+  const q = req.query.locale;
+  if (typeof q === "string") {
+    const mapped = LOCALE_MAP[q.toLowerCase()];
+    if (mapped) return mapped;
+  }
+
+  // 2. Parse Accept-Language header (e.g. "id-ID,id;q=0.9,en;q=0.8")
+  const header = req.headers["accept-language"];
+  if (header) {
+    const tags = header
+      .split(",")
+      .map((part) => {
+        const [tag, q] = part.trim().split(";q=");
+        return { tag: tag.trim(), q: q != null ? parseFloat(q) : 1 };
+      })
+      .filter((x) => Number.isFinite(x.q))
+      .sort((a, b) => b.q - a.q);
+
+    for (const { tag } of tags) {
+      const mapped = LOCALE_MAP[tag.toLowerCase()];
+      if (mapped) return mapped;
+      // Also try the base language tag (first segment)
+      const base = tag.split("-")[0].toLowerCase();
+      const baseMapped = LOCALE_MAP[base];
+      if (baseMapped) return baseMapped;
+    }
+  }
+
+  return "en";
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -1418,7 +1462,8 @@ export async function registerRoutes(
   app.get(api.quiz.state.path, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const state = await storage.getQuizState(userId);
+      const locale = resolveLocale(req);
+      const state = await storage.getQuizState(userId, locale);
       res.json(state);
     } catch (err) {
       const status = getErrorStatus(err) ?? 500;
@@ -1429,7 +1474,8 @@ export async function registerRoutes(
   app.post(api.quiz.start.path, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const attempt = await storage.startQuizAttempt(userId);
+      const locale = resolveLocale(req);
+      const attempt = await storage.startQuizAttempt(userId, locale);
       res.json(attempt);
     } catch (err) {
       const status = getErrorStatus(err) ?? 500;
@@ -1440,8 +1486,9 @@ export async function registerRoutes(
   app.post(api.quiz.answer.path, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      const locale = resolveLocale(req);
       const input = api.quiz.answer.input.parse(req.body);
-      const result = await storage.recordQuizAnswer(userId, input.attemptId, input.optionIndex);
+      const result = await storage.recordQuizAnswer(userId, input.attemptId, input.optionIndex, locale);
       res.json(result);
     } catch (err) {
       if (err instanceof z.ZodError) {

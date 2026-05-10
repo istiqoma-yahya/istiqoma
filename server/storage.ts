@@ -60,6 +60,32 @@ async function assertQuizBankNonEmpty(): Promise<void> {
   }
 }
 
+// ─── Locale helpers (quiz) ──────────────────────────────────
+// Pick the best available translation of a string given a locale code.
+// Falls back to the English source-of-truth if the localized column is null.
+function pickLocale(
+  locale: string,
+  en: string,
+  id: string | null | undefined,
+  ms: string | null | undefined,
+): string {
+  if (locale === "id" && id) return id;
+  if (locale === "ms" && ms) return ms;
+  return en;
+}
+
+// Same as pickLocale but for string arrays (options).
+function pickLocaleArray(
+  locale: string,
+  en: string[],
+  id: string[] | null | undefined,
+  ms: string[] | null | undefined,
+): string[] {
+  if (locale === "id" && id && id.length === en.length) return id;
+  if (locale === "ms" && ms && ms.length === en.length) return ms;
+  return en;
+}
+
 // Validate an IANA timezone string. Returns the string if valid, otherwise undefined.
 function validateTimezone(tz: unknown): string | undefined {
   if (!tz || typeof tz !== "string") return undefined;
@@ -1555,15 +1581,15 @@ export class DatabaseStorage implements IStorage {
   // (10 questions). The active attempt persists across reloads via the
   // `quiz_attempts.completed = false` flag so the user can resume where
   // they left off. Progress only advances on a perfect score.
-  async getQuizState(userId: string): Promise<QuizState> {
+  async getQuizState(userId: string, locale = "en"): Promise<QuizState> {
     try {
-      return await this.getQuizStateInner(userId);
+      return await this.getQuizStateInner(userId, locale);
     } catch (err) {
       throw translateQuizDbError(err);
     }
   }
 
-  private async getQuizStateInner(userId: string): Promise<QuizState> {
+  private async getQuizStateInner(userId: string, locale = "en"): Promise<QuizState> {
     await assertQuizBankNonEmpty();
     const [progress] = await db
       .select()
@@ -1581,7 +1607,7 @@ export class DatabaseStorage implements IStorage {
 
     let activeAttempt: QuizActiveAttempt | null = null;
     if (active) {
-      const questions = await this.loadAttemptQuestions(active.questionIds);
+      const questions = await this.loadAttemptQuestions(active.questionIds, locale);
       activeAttempt = {
         attemptId: active.id,
         level: active.level,
@@ -1593,28 +1619,40 @@ export class DatabaseStorage implements IStorage {
     return { currentLevel, totalCorrect, activeAttempt };
   }
 
-  private async loadAttemptQuestions(ids: number[]) {
+  private async loadAttemptQuestions(ids: number[], locale: string = "en") {
     if (!ids.length) return [];
     const rows = await db
-      .select({ id: quizQuestions.id, questionText: quizQuestions.questionText, options: quizQuestions.options })
+      .select({
+        id: quizQuestions.id,
+        questionText: quizQuestions.questionText,
+        options: quizQuestions.options,
+        questionTextId: quizQuestions.questionTextId,
+        optionsId: quizQuestions.optionsId,
+        questionTextMs: quizQuestions.questionTextMs,
+        optionsMs: quizQuestions.optionsMs,
+      })
       .from(quizQuestions)
       .where(inArray(quizQuestions.id, ids));
     const byId = new Map(rows.map((r) => [r.id, r]));
     return ids
       .map((id) => byId.get(id))
-      .filter((r): r is { id: number; questionText: string; options: string[] } => Boolean(r))
-      .map((r) => ({ id: r.id, questionText: r.questionText, options: r.options }));
+      .filter((r): r is NonNullable<ReturnType<typeof byId.get>> => Boolean(r))
+      .map((r) => ({
+        id: r.id,
+        questionText: pickLocale(locale, r.questionText, r.questionTextId, r.questionTextMs),
+        options: pickLocaleArray(locale, r.options, r.optionsId, r.optionsMs),
+      }));
   }
 
-  async startQuizAttempt(userId: string): Promise<QuizActiveAttempt> {
+  async startQuizAttempt(userId: string, locale = "en"): Promise<QuizActiveAttempt> {
     try {
-      return await this.startQuizAttemptInner(userId);
+      return await this.startQuizAttemptInner(userId, locale);
     } catch (err) {
       throw translateQuizDbError(err);
     }
   }
 
-  private async startQuizAttemptInner(userId: string): Promise<QuizActiveAttempt> {
+  private async startQuizAttemptInner(userId: string, locale = "en"): Promise<QuizActiveAttempt> {
     await assertQuizBankNonEmpty();
     // Reuse any in-progress attempt rather than creating a duplicate.
     const [existing] = await db
@@ -1624,7 +1662,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(quizAttempts.startedAt))
       .limit(1);
     if (existing) {
-      const questions = await this.loadAttemptQuestions(existing.questionIds);
+      const questions = await this.loadAttemptQuestions(existing.questionIds, locale);
       return {
         attemptId: existing.id,
         level: existing.level,
@@ -1668,7 +1706,7 @@ export class DatabaseStorage implements IStorage {
       .insert(quizAttempts)
       .values({ userId, level, questionIds: ids, answers: [] as number[] })
       .returning();
-    const questions = await this.loadAttemptQuestions(attempt.questionIds);
+    const questions = await this.loadAttemptQuestions(attempt.questionIds, locale);
     return {
       attemptId: attempt.id,
       level: attempt.level,
@@ -1677,15 +1715,15 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async recordQuizAnswer(userId: string, attemptId: number, optionIndex: number): Promise<QuizAnswerResult> {
+  async recordQuizAnswer(userId: string, attemptId: number, optionIndex: number, locale = "en"): Promise<QuizAnswerResult> {
     try {
-      return await this.recordQuizAnswerInner(userId, attemptId, optionIndex);
+      return await this.recordQuizAnswerInner(userId, attemptId, optionIndex, locale);
     } catch (err) {
       throw translateQuizDbError(err);
     }
   }
 
-  private async recordQuizAnswerInner(userId: string, attemptId: number, optionIndex: number): Promise<QuizAnswerResult> {
+  private async recordQuizAnswerInner(userId: string, attemptId: number, optionIndex: number, locale = "en"): Promise<QuizAnswerResult> {
     const [attempt] = await db
       .select()
       .from(quizAttempts)
@@ -1761,7 +1799,7 @@ export class DatabaseStorage implements IStorage {
     return {
       isCorrect,
       correctIndex: question.correctIndex,
-      explanation: question.explanation,
+      explanation: pickLocale(locale, question.explanation, question.explanationId, question.explanationMs),
       attemptComplete: isLast,
       allCorrect,
       newLevel,

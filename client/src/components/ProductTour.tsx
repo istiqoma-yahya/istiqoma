@@ -923,8 +923,39 @@ function SpotlightOverlay({ bounds }: { bounds: HighlightBounds }) {
   const spotW = width + SPOTLIGHT_PADDING * 2;
   const spotH = height + SPOTLIGHT_PADDING * 2;
 
+  // The dimming is created by four strips that surround the spotlight area
+  // without placing any element ON TOP of the highlighted button. This
+  // guarantees that elementFromPoint() (used by Playwright's actionability
+  // checks and real browsers) returns the highlighted element itself rather
+  // than an overlay div, so direct .click() events reach the button.
+  const DIM = "rgba(0,0,0,0.52)";
+  const strips = [
+    // top strip
+    { top: 0, left: 0, width: "100%", height: spotTop },
+    // bottom strip
+    { top: spotTop + spotH, left: 0, width: "100%", height: `calc(100% - ${spotTop + spotH}px)` },
+    // left strip (vertically between top and bottom strips)
+    { top: spotTop, left: 0, width: spotLeft, height: spotH },
+    // right strip
+    { top: spotTop, left: spotLeft + spotW, width: `calc(100% - ${spotLeft + spotW}px)`, height: spotH },
+  ] as const;
+
   return (
     <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden rounded-[28px]">
+      {/* Four dimming strips — none of them covers the spotlight area */}
+      {strips.map((s, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            background: DIM,
+            transition: "top 0.35s ease, left 0.35s ease, width 0.35s ease, height 0.35s ease",
+            ...s,
+          }}
+        />
+      ))}
+
+      {/* Green border frame around the spotlight */}
       <div
         style={{
           position: "absolute",
@@ -932,13 +963,14 @@ function SpotlightOverlay({ bounds }: { bounds: HighlightBounds }) {
           left: spotLeft,
           width: spotW,
           height: spotH,
-          boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.52)",
           borderRadius: 12,
           border: "2px solid rgba(52, 211, 153, 0.85)",
-          zIndex: 10,
           transition: "top 0.35s ease, left 0.35s ease, width 0.35s ease, height 0.35s ease",
+          pointerEvents: "none",
         }}
       />
+
+      {/* Pulsing glow ring */}
       <motion.div
         animate={{ scale: [1, 1.07, 1], opacity: [0.6, 0.2, 0.6] }}
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -950,7 +982,7 @@ function SpotlightOverlay({ bounds }: { bounds: HighlightBounds }) {
           height: spotH + 10,
           borderRadius: 16,
           border: "2px solid rgba(52, 211, 153, 0.5)",
-          zIndex: 9,
+          pointerEvents: "none",
         }}
       />
     </div>
@@ -1314,8 +1346,8 @@ export function ProductTour({ onClose }: ProductTourProps) {
           </AnimatePresence>
 
           {/* ── Single Device Frame (shared ref for accurate spotlight measurement) ── */}
-          <div className="relative flex-shrink-0">
-            <div className="relative w-full max-w-[320px] sm:max-w-[340px] aspect-[320/640] sm:aspect-[340/680] bg-card border-[10px] border-foreground/90 dark:border-foreground/80 rounded-[44px] shadow-2xl overflow-hidden">
+          <div className="relative flex-shrink-0 w-[320px] sm:w-[340px]">
+            <div className="relative w-full aspect-[320/640] sm:aspect-[340/680] max-h-[calc(100vh-120px)] bg-card border-[10px] border-foreground/90 dark:border-foreground/80 rounded-[44px] shadow-2xl overflow-hidden">
               {/* Notch */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-foreground/90 dark:bg-foreground/80 rounded-b-2xl z-20" />
               {/* Screen content — interactivity is preserved by default; only
@@ -1336,11 +1368,11 @@ export function ProductTour({ onClose }: ProductTourProps) {
                     className="h-full"
                   >
                     {renderScreen()}
+                    {highlightBounds && step.id !== "final" && (
+                      <SpotlightOverlay bounds={highlightBounds} />
+                    )}
                   </motion.div>
                 </AnimatePresence>
-                {highlightBounds && step.id !== "final" && (
-                  <SpotlightOverlay bounds={highlightBounds} />
-                )}
               </div>
             </div>
           </div>

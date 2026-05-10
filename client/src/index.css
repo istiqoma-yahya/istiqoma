@@ -128,6 +128,14 @@
   }
 }
 
+/* Product-tour spotlight: highlighted elements must sit above the SpotlightOverlay
+   (z-10) so that both real browser clicks and Playwright hit-tests reach the button
+   rather than the overlay div that covers the same coordinates. */
+[data-tour-highlight] {
+  position: relative;
+  z-index: 20;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

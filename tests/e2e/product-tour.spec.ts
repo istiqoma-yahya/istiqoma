@@ -89,17 +89,12 @@ async function expectSpotlightOnNonFinalStep(page: Page, stepId: string) {
 }
 
 async function walkThroughTour(page: Page) {
-  // The walkthrough is driven exclusively through each step's coachmark
-  // action button. This is the same React code path a real visitor hits
-  // (the coachmark button calls `handleCoachmarkAction`, which performs
-  // the right state mutation per step and then advances), but it sidesteps
-  // a Playwright pitfall in the simulated phone frame: the inner screen
-  // is `overflow-y-auto` and the SpotlightOverlay sits above it, so
-  // coordinate-based clicks can be misattributed to surrounding chrome.
-  // Driving via the coachmark keeps this spec focused on the end-to-end
-  // step transitions; the per-interaction mechanics (3 dzikir taps,
-  // counter increments, etc.) are exercised by the separate "interactive
-  // steps" test below.
+  // The walkthrough is driven through each step's coachmark action button.
+  // This is the same React code path a real visitor hits (the coachmark
+  // button calls `handleCoachmarkAction`, which performs the right state
+  // mutation per step and then advances). The per-interaction mechanics
+  // (3 dzikir taps, counter increments, etc.) are exercised by the
+  // separate "interactive steps" test below.
   for (const stepId of STEP_IDS) {
     const action = page.getByTestId(`tour-coachmark-action-${stepId}`);
     await expect(action).toBeVisible();
@@ -137,30 +132,50 @@ test.describe("Landing product tour", () => {
     await setTheme(page, "light");
     await openTour(page);
 
-    // Jump straight to the dzikir step via the progress dots and confirm
-    // that pure inactivity does NOT advance the tour. The coachmark
-    // surfaces a "tour.coachmark.interactHint" hint when the interaction
-    // is still pending — the action button label remains the step's
-    // interact label (e.g. "Tap to count") rather than "Next" until the
-    // interaction completes.
-    await page.getByTestId("tour-dot-2").click();
+    // ── Step 1 (record-deed): Save Deed button ──────────────────────────
+    // Jump to the record-deed step and click the highlighted Save Deed
+    // button directly inside the device frame spotlight.
+    await page.getByTestId("tour-dot-1").click();
+    const saveDeedBtn = page.getByTestId("tour-button-record-deed");
+    await expect(saveDeedBtn).toBeVisible();
+    await saveDeedBtn.click();
+    // handleRecordDeed auto-advances after 900 ms.
     const tapBtn = page.getByTestId("tour-button-dzikir-tap");
-    await expect(tapBtn).toBeVisible();
-    await expect(tapBtn).toContainText("0");
+    await expect(tapBtn).toBeVisible({ timeout: 3000 });
 
-    // The dzikir dot must remain the active step (index 2) — i.e. the
-    // tour did not auto-advance just because the coachmark mounted.
+    // ── Step 2 (dzikir): tap counter must reach 3 ───────────────────────
+    await expect(tapBtn).toContainText("0");
+    // Confirm that the tour does NOT auto-advance just because the step
+    // mounted — the interaction hint should still be visible after 750 ms.
     await page.waitForTimeout(750);
     await expect(tapBtn).toBeVisible();
 
-    // Tapping 3 times is the required interaction; after that the tour
-    // moves on to the sholat step on its own. `dispatchEvent('click')` is
-    // used for the same overflow/spotlight reason documented in
-    // `walkThroughTour`.
-    await tapBtn.dispatchEvent("click");
-    await tapBtn.dispatchEvent("click");
-    await tapBtn.dispatchEvent("click");
-    await expect(page.getByTestId("button-toggle-fajr")).toBeVisible();
+    // All three clicks use a real click() (the highlighted button sits at
+    // z-index: 20, above the SpotlightOverlay at z-10, so no synthetic
+    // dispatchEvent is required).
+    await tapBtn.click();
+    await tapBtn.click();
+    await tapBtn.click();
+    // auto-advances to sholat after 700 ms
+    const fajrToggle = page.getByTestId("button-toggle-fajr");
+    await expect(fajrToggle).toBeVisible({ timeout: 3000 });
+
+    // ── Step 3 (sholat): Fajr toggle ────────────────────────────────────
+    await fajrToggle.click();
+    // handleMarkFajr auto-advances after 700 ms; targets is non-interactive
+    // so its coachmark Next button becomes available immediately.
+    const targetsAction = page.getByTestId("tour-coachmark-action-targets");
+    await expect(targetsAction).toBeVisible({ timeout: 3000 });
+
+    // ── Step 4 → 5: targets (non-interactive) → quran ───────────────────
+    await targetsAction.click();
+    const surahCard = page.getByTestId("card-surah-1");
+    await expect(surahCard).toBeVisible({ timeout: 3000 });
+
+    // ── Step 5 (quran): tap highlighted surah card ───────────────────────
+    await surahCard.click();
+    // handleSurahTap auto-advances after 500 ms.
+    await expect(page.getByTestId("tour-coachmark-action-progress")).toBeVisible({ timeout: 3000 });
   });
 
   test("full walkthrough succeeds in light mode and final step scrolls auth chooser into view", async ({ page }) => {

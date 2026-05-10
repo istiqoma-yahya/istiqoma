@@ -1602,6 +1602,17 @@
     "updated": "Amal Diperbarui",
     "updatedDesc": "Amalmu berhasil diperbarui."
   },
+  "privacyBanner": {
+    "message": "Kami telah memperbarui Kebijakan Privasi kami.",
+    "viewLink": "Lihat perubahan →",
+    "dismiss": "Tutup"
+  },
+  "privacyContact": {
+    "heading": "Pertanyaan Privasi",
+    "body": "Untuk pertanyaan tentang data atau kebijakan privasi ini, hubungi kami di",
+    "email": "privacy@istiqoma.app",
+    "responseNote": "Kami merespons semua pertanyaan privasi dalam 30 hari."
+  },
   "consent": {
     "title": "Persetujuan Privasi Data",
     "required": "Diperlukan sebelum melanjutkan",

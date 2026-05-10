@@ -45,6 +45,7 @@ import NotFound from "@/pages/not-found";
 import { NotificationPrompt } from "@/components/NotificationPrompt";
 import { BadgeCelebration } from "@/components/BadgeCelebration";
 import { registerNotificationSoundListener, setupAudioUnlock } from "@/lib/sounds";
+import PrivacyBanner from "@/components/PrivacyBanner";
 
 function EditDeedRoute({ params }: { params: { id: string } }) {
   const { data: deeds } = useDeeds();
@@ -111,6 +112,7 @@ function App() {
           <QuranFontProvider>
             <QuranAudioProvider>
               <Toaster />
+              <PrivacyBanner />
               <Router />
               <BadgeCelebration />
               <NotificationPrompt />

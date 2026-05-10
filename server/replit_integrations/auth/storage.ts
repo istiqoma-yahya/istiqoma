@@ -59,6 +59,7 @@ export interface IAuthStorage {
     userId: string,
     pinHash: string,
   ): Promise<void>;
+  updatePrivacyVersionSeen(userId: string, version: string): Promise<void>;
 }
 
 class AuthStorage implements IAuthStorage {
@@ -288,6 +289,13 @@ class AuthStorage implements IAuthStorage {
         recoveryLockedUntil: null,
       })
       .where(eq(usernameLogins.userId, userId));
+  }
+
+  async updatePrivacyVersionSeen(userId: string, version: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ privacyVersionSeen: version, updatedAt: new Date() })
+      .where(eq(users.id, userId));
   }
 }
 

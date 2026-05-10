@@ -1779,6 +1779,18 @@ function registerAdminCampaignRoutes(app: Express) {
     res.status(204).send();
   });
 
+  // ─── Privacy Policy Acknowledgement ─────────────────────────
+  app.post("/api/account/privacy-ack", isAuthenticated, async (req: any, res) => {
+    const schema = z.object({ version: z.string().min(1) });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ message: "version is required" });
+    }
+    const userId = req.user.claims.sub;
+    await authStorage.updatePrivacyVersionSeen(userId, parsed.data.version);
+    res.json({ ok: true });
+  });
+
   // ─── Consent ─────────────────────────────────────────────────
   app.post("/api/account/consent", isAuthenticated, async (req: any, res) => {
     const schema = z.object({

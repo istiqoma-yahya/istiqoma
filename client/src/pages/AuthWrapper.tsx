@@ -5,7 +5,6 @@ import Landing from "./Landing";
 import OnboardingFlow from "./OnboardingFlow";
 import ConsentScreen from "@/components/ConsentScreen";
 import { BottomNavigation } from "@/components/BottomNavigation";
-
 export default function AuthWrapper() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
 

@@ -574,15 +574,35 @@ export default function ProfilePage() {
         )}
       </main>
 
-      <footer className="pb-24 pt-2 text-center text-xs text-muted-foreground">
-        <div className="flex items-center justify-center gap-4">
-          <a href="/privacy" className="hover:text-foreground transition-colors" data-testid="link-profile-privacy">
-            Privacy Policy
-          </a>
-          <span aria-hidden="true">·</span>
-          <a href="/terms" className="hover:text-foreground transition-colors" data-testid="link-profile-terms">
-            Terms of Service
-          </a>
+      <footer className="pb-24 pt-2 space-y-4">
+        <div
+          className="mx-4 rounded-lg border border-border bg-muted/40 p-4 space-y-1"
+          data-testid="section-profile-privacy-contact"
+        >
+          <p className="text-xs font-medium text-foreground">{t("privacyContact.heading")}</p>
+          <p className="text-xs text-muted-foreground">
+            {t("privacyContact.body")}{" "}
+            <a
+              href="mailto:privacy@istiqoma.app"
+              className="text-primary underline underline-offset-2"
+              data-testid="link-profile-privacy-email"
+            >
+              {t("privacyContact.email")}
+            </a>
+            .
+          </p>
+          <p className="text-xs text-muted-foreground">{t("privacyContact.responseNote")}</p>
+        </div>
+        <div className="text-center text-xs text-muted-foreground">
+          <div className="flex items-center justify-center gap-4">
+            <a href="/privacy" className="hover:text-foreground transition-colors" data-testid="link-profile-privacy">
+              Privacy Policy
+            </a>
+            <span aria-hidden="true">·</span>
+            <a href="/terms" className="hover:text-foreground transition-colors" data-testid="link-profile-terms">
+              Terms of Service
+            </a>
+          </div>
         </div>
       </footer>
 

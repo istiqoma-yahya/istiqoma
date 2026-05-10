@@ -36,6 +36,7 @@ export function registerAuthRoutes(app: Express): void {
         consentReligiousData: displayUser.consentReligiousData ?? false,
         consentAgeConfirmed: displayUser.consentAgeConfirmed ?? false,
         consentedAt: displayUser.consentedAt ?? null,
+        privacyVersionSeen: displayUser.privacyVersionSeen ?? null,
       });
     } catch (error) {
       console.error("Error fetching user:", error);

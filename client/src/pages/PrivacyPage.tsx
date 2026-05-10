@@ -1,8 +1,10 @@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
 export default function PrivacyPage() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -434,6 +436,27 @@ export default function PrivacyPage() {
               Terms of Service
             </Link>
             .
+          </p>
+        </div>
+
+        <div
+          className="rounded-lg border border-border bg-muted/40 p-5 space-y-2"
+          data-testid="section-privacy-contact"
+        >
+          <h2 className="text-base font-semibold text-foreground">{t("privacyContact.heading")}</h2>
+          <p className="text-sm text-muted-foreground">
+            {t("privacyContact.body")}{" "}
+            <a
+              href="mailto:privacy@istiqoma.app"
+              className="text-primary underline underline-offset-2 font-medium"
+              data-testid="link-privacy-email"
+            >
+              {t("privacyContact.email")}
+            </a>
+            .
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {t("privacyContact.responseNote")}
           </p>
         </div>
       </main>

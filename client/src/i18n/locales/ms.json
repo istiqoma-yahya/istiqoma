@@ -1602,6 +1602,17 @@
     "updated": "Amalan Dikemas Kini",
     "updatedDesc": "Amalan anda berjaya dikemas kini."
   },
+  "privacyBanner": {
+    "message": "Kami telah mengemas kini Dasar Privasi kami.",
+    "viewLink": "Lihat perubahan →",
+    "dismiss": "Tutup"
+  },
+  "privacyContact": {
+    "heading": "Pertanyaan Privasi",
+    "body": "Untuk pertanyaan tentang data atau dasar privasi ini, hubungi kami di",
+    "email": "privacy@istiqoma.app",
+    "responseNote": "Kami menjawab semua pertanyaan privasi dalam 30 hari."
+  },
   "consent": {
     "title": "Persetujuan Privasi Data",
     "required": "Diperlukan sebelum meneruskan",

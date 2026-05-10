@@ -1601,6 +1601,17 @@
     "updated": "Deed Updated",
     "updatedDesc": "Your deed has been successfully updated."
   },
+  "privacyBanner": {
+    "message": "We've updated our Privacy Policy.",
+    "viewLink": "View changes →",
+    "dismiss": "Dismiss"
+  },
+  "privacyContact": {
+    "heading": "Privacy Inquiries",
+    "body": "For questions about your data or this privacy policy, contact us at",
+    "email": "privacy@istiqoma.app",
+    "responseNote": "We respond to all privacy inquiries within 30 days."
+  },
   "consent": {
     "title": "Data Privacy Consent",
     "required": "Required before you can continue",

@@ -41,6 +41,7 @@ export const users = pgTable("users", {
   consentReligiousData: boolean("consent_religious_data").default(false),
   consentAgeConfirmed: boolean("consent_age_confirmed").default(false),
   consentedAt: timestamp("consented_at"),
+  privacyVersionSeen: varchar("privacy_version_seen"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [

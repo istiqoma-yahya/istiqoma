@@ -5,7 +5,7 @@ import { useDeeds } from "@/hooks/use-deeds";
 import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
 import { OnboardingHintCard } from "@/components/OnboardingHintCard";
-import { DailyPurposeQuoteCard, Q5_ICONS } from "@/components/DailyPurposeQuoteCard";
+import { DailyPurposeQuoteCard } from "@/components/DailyPurposeQuoteCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { CampaignBanner } from "@/components/CampaignBanner";
@@ -178,11 +178,6 @@ export default function Dashboard() {
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h2 className="text-3xl font-display font-bold mb-2">{t('dashboard.greeting')}</h2>
-            {identityKey ? (
-              <p className="text-emerald-600 dark:text-emerald-400 font-medium text-sm mb-1" data-testid="text-purpose-subtitle">
-                {`${Q5_ICONS[identityKey] ?? "✨"} ${t(`onboarding.q5.options.${identityKey}.label`)}`}
-              </p>
-            ) : null}
             <p className="text-muted-foreground">{t('dashboard.subtitle')}</p>
           </div>
           <button 

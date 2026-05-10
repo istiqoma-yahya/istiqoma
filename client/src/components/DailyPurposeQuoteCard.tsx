@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
-import { Quote } from "lucide-react";
+import { Quote, X } from "lucide-react";
 
 export const Q5_ICONS: Record<string, string> = {
   "dekat-allah": "🤲",
@@ -9,6 +10,8 @@ export const Q5_ICONS: Record<string, string> = {
   istiqomah: "🏔️",
   keluarga: "🏡",
 };
+
+const STORAGE_KEY = "quoteCardDismissed";
 
 function getDayOfYear(): number {
   const now = new Date();
@@ -24,16 +27,25 @@ interface DailyPurposeQuoteCardProps {
 
 export function DailyPurposeQuoteCard({ identityKey }: DailyPurposeQuoteCardProps) {
   const { t } = useTranslation();
+  const [dismissed, setDismissed] = useState<boolean>(
+    () => localStorage.getItem(STORAGE_KEY) === "true"
+  );
 
   const quotes = t(`purposeQuotes.${identityKey}`, { returnObjects: true }) as string[];
 
   if (!Array.isArray(quotes) || quotes.length === 0) return null;
+  if (dismissed) return null;
 
   const dayOfYear = getDayOfYear();
   const quote = quotes[dayOfYear % quotes.length];
 
   const emoji = Q5_ICONS[identityKey] ?? "✨";
   const label = t(`onboarding.q5.options.${identityKey}.label`);
+
+  function handleDismiss() {
+    localStorage.setItem(STORAGE_KEY, "true");
+    setDismissed(true);
+  }
 
   return (
     <Card
@@ -55,6 +67,14 @@ export function DailyPurposeQuoteCard({ identityKey }: DailyPurposeQuoteCardProp
             </span>
           </div>
         </div>
+        <button
+          onClick={handleDismiss}
+          className="flex-shrink-0 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+          aria-label="Dismiss quote card"
+          data-testid="button-dismiss-quote-card"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
     </Card>
   );

@@ -31,7 +31,7 @@ export function GenderPromptCard() {
 
   return (
     <div
-      className="relative rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 mb-4"
+      className="relative rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 mb-6"
       data-testid="card-gender-prompt"
     >
       <button

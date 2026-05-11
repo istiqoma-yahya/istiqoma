@@ -209,7 +209,7 @@ export default function Dashboard() {
           onNavigate={navigate}
         />
 
-        <div className="space-y-3 mb-4">
+        <div className="space-y-3 mb-6">
           <h3 className="text-xl font-display font-bold">{t('dashboard.others')}</h3>
           <CampaignBanner />
         </div>

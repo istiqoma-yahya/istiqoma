@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { Search, Bookmark, BookOpen, GraduationCap } from "lucide-react";
@@ -13,6 +13,12 @@ import { SurahListCard } from "@/components/shared/SurahListCard";
 import { useChapters, useReadingState, useBookmarks, useMemorizations } from "@/hooks/use-quran";
 import { useQuranAudio } from "@/components/QuranAudioProvider";
 
+// Persist the chapter list scroll position across in-app navigations
+// (e.g. user opens a surah, then taps back). Module-level so it survives
+// the page component unmounting. Reset on full page reload, which is what
+// we want — only in-app back navigation should restore scroll.
+let savedScrollY: number | null = null;
+
 export default function QuranHomePage() {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
@@ -22,6 +28,56 @@ export default function QuranHomePage() {
   const { data: bookmarks } = useBookmarks();
   const { data: memorizations } = useMemorizations();
   const { playSurah } = useQuranAudio();
+  const didRestoreScrollRef = useRef(false);
+  const searchInvalidatedRef = useRef(false);
+  const searchRef = useRef(search);
+  searchRef.current = search;
+
+  // Save current scroll position on unmount so we can restore it when the
+  // user returns to this page. Skip saving if the user is in a search
+  // state — the filtered list doesn't correspond to the unfiltered
+  // chapter list, so restoring that scrollY later would jump to the
+  // wrong place.
+  useEffect(() => {
+    return () => {
+      if (searchRef.current.trim().length > 0 || searchInvalidatedRef.current) {
+        savedScrollY = null;
+      } else {
+        savedScrollY = window.scrollY;
+      }
+    };
+  }, []);
+
+  // Restore the saved scroll position once the chapter list has rendered,
+  // then clear it so a later unrelated visit to /quran (e.g. from the
+  // bottom nav) doesn't jump to a stale offset. We wait for `chapters`
+  // so the document is tall enough for the scroll target to actually
+  // exist.
+  useEffect(() => {
+    if (didRestoreScrollRef.current) return;
+    if (!chapters) return;
+    if (savedScrollY == null) {
+      didRestoreScrollRef.current = true;
+      return;
+    }
+    const y = savedScrollY;
+    savedScrollY = null;
+    didRestoreScrollRef.current = true;
+    requestAnimationFrame(() => {
+      window.scrollTo(0, y);
+    });
+  }, [chapters]);
+
+  // If the user starts searching, the saved scroll position no longer
+  // points at the same content, so discard it and remember that the
+  // context was invalidated (so unmount won't re-save a stale value).
+  useEffect(() => {
+    if (search.trim().length > 0) {
+      savedScrollY = null;
+      didRestoreScrollRef.current = true;
+      searchInvalidatedRef.current = true;
+    }
+  }, [search]);
 
   const filtered = useMemo(() => {
     if (!chapters) return [];

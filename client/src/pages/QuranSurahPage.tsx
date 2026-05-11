@@ -121,6 +121,19 @@ export default function QuranSurahPage() {
   const recorder = useVoiceRecorder();
   const audioElsRef = useRef<Map<number, HTMLAudioElement>>(new Map());
 
+  // Reset scroll position on mount when there's no deep-linked verse, so
+  // entering a surah from the chapter list always starts at verse 1
+  // instead of inheriting the previous window scroll position. We run
+  // this synchronously during the first render (before paint) so the
+  // user never sees a flash of mid-list content.
+  const didInitialScrollResetRef = useRef(false);
+  if (!didInitialScrollResetRef.current && typeof window !== "undefined") {
+    didInitialScrollResetRef.current = true;
+    if (!initialVerse) {
+      window.scrollTo(0, 0);
+    }
+  }
+
   // Save reading state on initial load (with deep-linked verse if any).
   useEffect(() => {
     if (surahId) {

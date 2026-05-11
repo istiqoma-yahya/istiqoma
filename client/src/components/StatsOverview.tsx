@@ -1,5 +1,5 @@
 import { type Deed } from "@shared/schema";
-import { ThumbsUp, Snowflake } from "lucide-react";
+import { Snowflake } from "lucide-react";
 import { DuaHandsIcon } from "@/components/DuaHandsIcon";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -89,7 +89,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
       >
         <div className="flex items-center justify-between mb-3">
           <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-            <ThumbsUp className="w-5 h-5" />
+            <span role="img" aria-hidden="true" style={{ fontSize: "1.25rem", lineHeight: 1 }}>{"\u{1F331}"}</span>
           </div>
           <span className="text-xs font-medium bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-lg" data-testid="text-stats-points">
             {formatNumber(availablePoints)} {t('stats.points')}

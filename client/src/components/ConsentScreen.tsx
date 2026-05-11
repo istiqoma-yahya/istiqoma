@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Loader2, ShieldCheck, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { User } from "@/hooks/use-auth";
 
 interface ConsentScreenProps {
@@ -113,23 +114,18 @@ export default function ConsentScreen({ onConfirmed, onRefused, asModal = false 
         </div>
       )}
 
-      <button
-        className="w-full py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-        style={{
-          background: canProceed ? "var(--color-primary, #10b981)" : undefined,
-          backgroundColor: canProceed ? undefined : "hsl(var(--muted))",
-          color: canProceed ? "#fff" : "hsl(var(--muted-foreground))",
-        }}
+      <Button
+        className="w-full"
         disabled={!canProceed || consentMutation.isPending}
         onClick={() => consentMutation.mutate()}
         data-testid="button-consent-continue"
       >
         {consentMutation.isPending ? (
-          <Loader2 className="inline w-4 h-4 animate-spin" />
+          <Loader2 className="w-4 h-4 animate-spin" />
         ) : (
           t("consent.continue")
         )}
-      </button>
+      </Button>
 
       <p className="text-xs text-muted-foreground text-center">
         {t("consent.privacyHint")}{" "}

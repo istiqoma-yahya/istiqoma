@@ -9,16 +9,9 @@ export function DuaHandsIcon({ className, style }: DuaHandsIconProps) {
       role="img"
       aria-hidden="true"
       className={className}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        lineHeight: 1,
-        fontSize: "1.25em",
-        ...style,
-      }}
+      style={{ fontSize: "1.25em", ...style }}
     >
-      🤲
+      {"\u{1F932}"}
     </span>
   );
 }

@@ -1886,12 +1886,12 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(campaigns)
       .where(and(lte(campaigns.startDate, today), gte(campaigns.endDate, today)))
-      .orderBy(desc(campaigns.createdAt));
+      .orderBy(campaigns.sortOrder, desc(campaigns.createdAt));
   }
 
   // ─── Admin: Campaigns ────────────────────────────────────────
   async listCampaigns(): Promise<Campaign[]> {
-    return await db.select().from(campaigns).orderBy(desc(campaigns.createdAt));
+    return await db.select().from(campaigns).orderBy(campaigns.sortOrder, desc(campaigns.createdAt));
   }
 
   async getCampaign(id: number): Promise<Campaign | null> {
@@ -1907,6 +1907,7 @@ export class DatabaseStorage implements IStorage {
         landingUrl: data.landingUrl,
         startDate: data.startDate,
         endDate: data.endDate,
+        sortOrder: data.sortOrder ?? 0,
       })
       .returning();
     return row;
@@ -1918,6 +1919,7 @@ export class DatabaseStorage implements IStorage {
     if (data.landingUrl !== undefined) patch.landingUrl = data.landingUrl;
     if (data.startDate !== undefined) patch.startDate = data.startDate;
     if (data.endDate !== undefined) patch.endDate = data.endDate;
+    if (data.sortOrder !== undefined) patch.sortOrder = data.sortOrder;
     const [row] = await db
       .update(campaigns)
       .set(patch)

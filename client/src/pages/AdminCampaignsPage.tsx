@@ -50,6 +50,7 @@ const formSchema = z
       }),
     startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Required"),
     endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Required"),
+    sortOrder: z.coerce.number().int().min(0).default(0),
   })
   .refine((d) => d.endDate >= d.startDate, {
     path: ["endDate"],
@@ -110,6 +111,7 @@ function CampaignFormDialog({
       landingUrl: "",
       startDate: "",
       endDate: "",
+      sortOrder: 0,
     },
   });
 
@@ -120,6 +122,7 @@ function CampaignFormDialog({
         landingUrl: campaign?.landingUrl ?? "",
         startDate: campaign?.startDate ?? "",
         endDate: campaign?.endDate ?? "",
+        sortOrder: campaign?.sortOrder ?? 0,
       });
       setPreviewUrl(campaign?.bannerImageUrl ?? "");
     }
@@ -273,6 +276,29 @@ function CampaignFormDialog({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="sortOrder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Display order</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      step={1}
+                      placeholder="0"
+                      {...field}
+                      data-testid="input-sort-order"
+                    />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    Lower numbers show first in the carousel.
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div className="grid grid-cols-2 gap-3">
               <FormField
                 control={form.control}
@@ -410,8 +436,13 @@ function CampaignsList() {
                 />
               </div>
               <div className="flex-1 min-w-0 space-y-1">
-                <div className="text-sm" data-testid={`text-dates-${c.id}`}>
-                  {formatDateRange(c.startDate, c.endDate)}
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground" data-testid={`text-order-${c.id}`}>
+                    Order: {c.sortOrder}
+                  </span>
+                  <span className="text-sm" data-testid={`text-dates-${c.id}`}>
+                    {formatDateRange(c.startDate, c.endDate)}
+                  </span>
                 </div>
                 <a
                   href={c.landingUrl}

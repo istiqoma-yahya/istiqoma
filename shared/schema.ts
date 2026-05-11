@@ -888,6 +888,7 @@ export const campaigns = pgTable("campaigns", {
   landingUrl: text("landing_url").notNull(),
   startDate: date("start_date").notNull(),
   endDate: date("end_date").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -908,6 +909,7 @@ export const insertCampaignSchema = z
     landingUrl: httpUrl,
     startDate: dateString,
     endDate: dateString,
+    sortOrder: z.number().int().min(0).default(0),
   })
   .refine((d) => d.endDate >= d.startDate, {
     path: ["endDate"],
@@ -920,6 +922,7 @@ export const updateCampaignSchema = z
     landingUrl: httpUrl.optional(),
     startDate: dateString.optional(),
     endDate: dateString.optional(),
+    sortOrder: z.number().int().min(0).optional(),
   })
   .refine(
     (d) =>

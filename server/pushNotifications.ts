@@ -24,6 +24,7 @@ export interface NotificationPayload {
   requireInteraction?: boolean;
   sound?: string;
   image?: string;
+  icon?: string;
   emotion?: Emotion;
 }
 
@@ -54,17 +55,25 @@ export async function sendNotificationToUser(userId: string, payload: Notificati
     return false;
   }
   let enriched = payload;
-  if (!payload.image) {
-    try {
-      const onboarding = await storage.getUserOnboarding(userId);
-      const gender = onboarding?.gender ?? null;
-      // Respect emotion from caller; default to neutral when unspecified
-      const emotion: Emotion = payload.emotion ?? 'neutral';
-      const image = getAvatarUrl(userId, gender, emotion);
-      if (image) enriched = { ...payload, image, emotion };
-    } catch (err) {
-      console.warn(`sendNotificationToUser: avatar enrichment failed for ${userId}`, err);
+  try {
+    const onboarding = await storage.getUserOnboarding(userId);
+    const gender = onboarding?.gender ?? null;
+    // Respect emotion from caller; default to neutral when unspecified
+    const emotion: Emotion = payload.emotion ?? 'neutral';
+    const avatarUrl = getAvatarUrl(userId, gender, emotion);
+    if (avatarUrl) {
+      enriched = {
+        ...payload,
+        emotion,
+        // Big hero image for Android/desktop Chrome (iOS ignores this).
+        image: payload.image ?? avatarUrl,
+        // Small icon — iOS Safari/PWA *does* render this, so the user
+        // sees their avatar character on iPhone push notifications too.
+        icon: payload.icon ?? avatarUrl,
+      };
     }
+  } catch (err) {
+    console.warn(`sendNotificationToUser: avatar enrichment failed for ${userId}`, err);
   }
   return sendToSubscription(subscription, enriched);
 }
@@ -119,7 +128,7 @@ export async function sendDailyReminders(): Promise<void> {
         url: '/',
         tag: 'daily-reminder',
         sound: subscription.notificationSound ?? 'chime',
-        ...(image ? { image, emotion } : {}),
+        ...(image ? { image, icon: image, emotion } : {}),
       });
     }
   }
@@ -147,7 +156,7 @@ export async function sendTargetAlert(userId: string, targetName: string, messag
     url: '/targets',
     tag: 'target-alert',
     sound: subscription.notificationSound ?? 'chime',
-    ...(image ? { image, emotion } : {}),
+    ...(image ? { image, icon: image, emotion } : {}),
   });
 }
 
@@ -244,7 +253,7 @@ export async function sendTargetReminders(): Promise<void> {
           url: `/targets/${target.id}`,
           tag: `target-reminder-${target.id}`,
           sound: subscription.notificationSound ?? 'chime',
-          ...(image ? { image, emotion } : {}),
+          ...(image ? { image, icon: image, emotion } : {}),
         });
       }
     }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'istiqoma-v1';
+const CACHE_NAME = 'istiqoma-v2';
 const AUDIO_CACHE_NAME = 'istiqoma-audio-v1';
 // Keep at most this many recently-played surah MP3s on disk per device.
 // Surah audio is 5–30 MB so 6 entries is roughly 60–180 MB worst case.
@@ -133,7 +133,7 @@ self.addEventListener('push', function(event) {
   const title = data.title || 'Istiqoma';
   const options = {
     body: data.body || 'You have a notification',
-    icon: '/icon-192.png',
+    icon: data.icon || '/icon-192.png',
     badge: '/icon-192.png',
     data: {
       url: data.url || '/'

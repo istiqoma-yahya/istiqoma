@@ -12,6 +12,20 @@ export const Q5_ICONS: Record<string, string> = {
 };
 
 const STORAGE_KEY = "quoteCardDismissed";
+const DISMISS_DURATION_MS = 8 * 60 * 60 * 1000;
+
+function isDismissed(): boolean {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (!stored) return false;
+  const dismissedAt = new Date(stored).getTime();
+  if (isNaN(dismissedAt)) {
+    localStorage.removeItem(STORAGE_KEY);
+    return false;
+  }
+  if (Date.now() - dismissedAt < DISMISS_DURATION_MS) return true;
+  localStorage.removeItem(STORAGE_KEY);
+  return false;
+}
 
 function getDayOfYear(): number {
   const now = new Date();
@@ -27,9 +41,7 @@ interface DailyPurposeQuoteCardProps {
 
 export function DailyPurposeQuoteCard({ identityKey }: DailyPurposeQuoteCardProps) {
   const { t } = useTranslation();
-  const [dismissed, setDismissed] = useState<boolean>(
-    () => localStorage.getItem(STORAGE_KEY) === "true"
-  );
+  const [dismissed, setDismissed] = useState<boolean>(() => isDismissed());
 
   const quotes = t(`purposeQuotes.${identityKey}`, { returnObjects: true }) as string[];
 
@@ -43,7 +55,7 @@ export function DailyPurposeQuoteCard({ identityKey }: DailyPurposeQuoteCardProp
   const label = t(`onboarding.q5.options.${identityKey}.label`);
 
   function handleDismiss() {
-    localStorage.setItem(STORAGE_KEY, "true");
+    localStorage.setItem(STORAGE_KEY, new Date().toISOString());
     setDismissed(true);
   }
 

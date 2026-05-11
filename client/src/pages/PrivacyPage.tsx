@@ -29,10 +29,10 @@ export default function PrivacyPage() {
           <p className="text-muted-foreground mt-1">
             <strong>{t("privacy.contactLabel")}</strong>{" "}
             <a
-              href="mailto:privacy@istiqoma.app"
+              href="mailto:appistiqoma@gmail.com"
               className="text-primary underline underline-offset-2"
             >
-              privacy@istiqoma.app
+              appistiqoma@gmail.com
             </a>{" "}
             {t("privacy.contactSuffix")}
           </p>
@@ -365,10 +365,10 @@ export default function PrivacyPage() {
           <p>
             {t("privacy.s8.contactPre")}
             <a
-              href="mailto:privacy@istiqoma.app"
+              href="mailto:appistiqoma@gmail.com"
               className="text-primary underline underline-offset-2"
             >
-              privacy@istiqoma.app
+              appistiqoma@gmail.com
             </a>
             {t("privacy.s8.contactPost")}
           </p>
@@ -402,7 +402,7 @@ export default function PrivacyPage() {
           <p className="text-sm text-muted-foreground">
             {t("privacyContact.body")}{" "}
             <a
-              href="mailto:privacy@istiqoma.app"
+              href="mailto:appistiqoma@gmail.com"
               className="text-primary underline underline-offset-2 font-medium"
               data-testid="link-privacy-email"
             >

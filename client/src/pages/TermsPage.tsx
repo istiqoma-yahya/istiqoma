@@ -127,10 +127,10 @@ export default function TermsPage() {
           <p>
             {t("terms.s9.pre")}
             <a
-              href="mailto:privacy@istiqoma.app"
+              href="mailto:appistiqoma@gmail.com"
               className="text-primary underline underline-offset-2"
             >
-              privacy@istiqoma.app
+              appistiqoma@gmail.com
             </a>
             {t("terms.s9.post")}
           </p>

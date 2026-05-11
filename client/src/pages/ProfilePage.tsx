@@ -583,7 +583,7 @@ export default function ProfilePage() {
           <p className="text-xs text-muted-foreground">
             {t("privacyContact.body")}{" "}
             <a
-              href="mailto:privacy@istiqoma.app"
+              href="mailto:appistiqoma@gmail.com"
               className="text-primary underline underline-offset-2"
               data-testid="link-profile-privacy-email"
             >

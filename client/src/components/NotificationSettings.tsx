@@ -98,11 +98,37 @@ export function NotificationSettings() {
       const res = await apiRequest("POST", "/api/push/test");
       return res.json();
     },
-    onSuccess: (data: any) => {
+    onSuccess: async (data: any) => {
       if (data.success) {
         toast({ title: t("common.success"), description: t("notifications.testSent") });
-      } else {
-        toast({ title: t("common.error"), description: t("notifications.testFailed"), variant: "destructive" });
+        return;
+      }
+      // Map server-reported reason to a clear, actionable message.
+      const reason: string | undefined = data?.reason;
+      let description = t("notifications.testFailed");
+      if (reason === "no_subscription") {
+        description = t("notifications.testFailedNoSubscription");
+      } else if (reason === "expired") {
+        description = t("notifications.testFailedExpired");
+      } else if (reason === "not_configured") {
+        description = t("notifications.testFailedNotConfigured");
+      } else if (reason === "push_service_error") {
+        description = t("notifications.testFailedPushServiceError", {
+          status: data?.statusCode ?? "?",
+        });
+      }
+      toast({ title: t("common.error"), description, variant: "destructive" });
+
+      // If iOS/desktop pushed back with a stale subscription, the server
+      // already deleted it. Force the client to drop its dead push token
+      // so the user can simply tap "Enable" again.
+      if (reason === "expired" || reason === "no_subscription") {
+        try {
+          await unsubscribeFromPush();
+        } catch {
+          // ignore — best effort
+        }
+        queryClient.invalidateQueries({ queryKey: ["/api/push/status"] });
       }
     },
   });

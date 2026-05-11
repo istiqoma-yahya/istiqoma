@@ -510,7 +510,12 @@ export const api = {
       method: "POST" as const,
       path: "/api/push/test",
       responses: {
-        200: z.object({ success: z.boolean() }),
+        200: z.object({
+          success: z.boolean(),
+          reason: z.enum(['no_subscription', 'expired', 'push_service_error', 'not_configured']).optional(),
+          statusCode: z.number().optional(),
+          message: z.string().optional(),
+        }),
         401: errorSchemas.unauthorized,
       },
     },

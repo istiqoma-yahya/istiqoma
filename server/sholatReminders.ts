@@ -30,6 +30,14 @@ function cleanupSentSholatAlerts(): void {
   }
 }
 
+function endpointHost(endpoint: string): string {
+  try {
+    return new URL(endpoint).host;
+  } catch {
+    return 'unknown';
+  }
+}
+
 async function sendToSubscription(subscription: PushSubscription, payload: { title: string; body: string; url?: string; tag?: string; sound?: string }): Promise<boolean> {
   const pushSubscription = {
     endpoint: subscription.endpoint,
@@ -39,13 +47,24 @@ async function sendToSubscription(subscription: PushSubscription, payload: { tit
     },
   };
 
+  const host = endpointHost(subscription.endpoint);
   try {
-    await webpush.sendNotification(pushSubscription, JSON.stringify(payload));
+    const result = await webpush.sendNotification(pushSubscription, JSON.stringify(payload));
+    console.log(
+      `[push] sholat delivered user=${subscription.userId} host=${host} status=${result.statusCode} tag=${payload.tag ?? 'none'}`
+    );
     return true;
   } catch (error: any) {
-    console.error('Failed to send sholat reminder:', error);
-    if (error.statusCode === 410 || error.statusCode === 404) {
+    const status = error?.statusCode;
+    const body = typeof error?.body === 'string' ? error.body.slice(0, 200) : undefined;
+    console.error(
+      `[push] sholat FAILED user=${subscription.userId} host=${host} status=${status ?? 'n/a'} tag=${payload.tag ?? 'none'} msg=${error?.message ?? 'unknown'}${body ? ` body=${body}` : ''}`
+    );
+    if (status === 410 || status === 404) {
       await storage.deletePushSubscription(subscription.userId);
+      console.warn(
+        `[push] sholat subscription gone — deleted db row user=${subscription.userId} host=${host}`
+      );
     }
     return false;
   }

@@ -28,7 +28,19 @@ export interface NotificationPayload {
   emotion?: Emotion;
 }
 
-async function sendToSubscription(subscription: PushSubscription, payload: NotificationPayload): Promise<boolean> {
+export type SendOutcome =
+  | { ok: true; statusCode?: number }
+  | { ok: false; reason: 'no_subscription' | 'expired' | 'push_service_error' | 'not_configured'; statusCode?: number; message?: string };
+
+function endpointHost(endpoint: string): string {
+  try {
+    return new URL(endpoint).host;
+  } catch {
+    return 'unknown';
+  }
+}
+
+async function sendToSubscription(subscription: PushSubscription, payload: NotificationPayload): Promise<SendOutcome> {
   const pushSubscription = {
     endpoint: subscription.endpoint,
     keys: {
@@ -37,22 +49,39 @@ async function sendToSubscription(subscription: PushSubscription, payload: Notif
     }
   };
 
+  const host = endpointHost(subscription.endpoint);
   try {
-    await webpush.sendNotification(pushSubscription, JSON.stringify(payload));
-    return true;
+    const result = await webpush.sendNotification(pushSubscription, JSON.stringify(payload));
+    console.log(
+      `[push] delivered user=${subscription.userId} host=${host} status=${result.statusCode} tag=${payload.tag ?? 'none'}`
+    );
+    return { ok: true, statusCode: result.statusCode };
   } catch (error: any) {
-    console.error('Failed to send push notification:', error);
-    if (error.statusCode === 410 || error.statusCode === 404) {
+    const status = error?.statusCode;
+    const body = typeof error?.body === 'string' ? error.body.slice(0, 200) : undefined;
+    console.error(
+      `[push] FAILED user=${subscription.userId} host=${host} status=${status ?? 'n/a'} tag=${payload.tag ?? 'none'} msg=${error?.message ?? 'unknown'}${body ? ` body=${body}` : ''}`
+    );
+    if (status === 410 || status === 404) {
       await storage.deletePushSubscription(subscription.userId);
+      console.warn(
+        `[push] subscription gone — deleted db row user=${subscription.userId} host=${host} (client must re-subscribe)`
+      );
+      return { ok: false, reason: 'expired', statusCode: status };
     }
-    return false;
+    return { ok: false, reason: 'push_service_error', statusCode: status, message: error?.message };
   }
 }
 
-export async function sendNotificationToUser(userId: string, payload: NotificationPayload): Promise<boolean> {
+export async function sendNotificationToUser(userId: string, payload: NotificationPayload): Promise<SendOutcome> {
+  if (!isPushConfigured()) {
+    console.warn(`[push] not configured — VAPID keys missing, cannot send to user=${userId}`);
+    return { ok: false, reason: 'not_configured' };
+  }
   const subscription = await storage.getPushSubscription(userId);
   if (!subscription) {
-    return false;
+    console.warn(`[push] no subscription on file for user=${userId}`);
+    return { ok: false, reason: 'no_subscription' };
   }
   let enriched = payload;
   try {
@@ -139,7 +168,6 @@ export async function sendTargetAlert(userId: string, targetName: string, messag
   if (!subscription || !subscription.targetAlerts) {
     return false;
   }
-
   let image: string | undefined;
   try {
     const onboarding = await storage.getUserOnboarding(userId);
@@ -150,7 +178,7 @@ export async function sendTargetAlert(userId: string, targetName: string, messag
     console.warn(`sendTargetAlert: avatar enrichment failed for ${userId}`, err);
   }
 
-  return sendToSubscription(subscription, {
+  const outcome = await sendToSubscription(subscription, {
     title: `Target: ${targetName}`,
     body: message,
     url: '/targets',
@@ -158,6 +186,7 @@ export async function sendTargetAlert(userId: string, targetName: string, messag
     sound: subscription.notificationSound ?? 'chime',
     ...(image ? { image, icon: image, emotion } : {}),
   });
+  return outcome.ok;
 }
 
 const sentTargetAlerts = new Map<string, number>();

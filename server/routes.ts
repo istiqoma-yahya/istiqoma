@@ -897,13 +897,22 @@ export async function registerRoutes(
   app.post(api.push.test.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
     const subscription = await storage.getPushSubscription(userId);
-    const success = await sendNotificationToUser(userId, {
+    const outcome = await sendNotificationToUser(userId, {
       title: "Test Notification",
       body: "Push notifications are working!",
       url: "/",
       sound: subscription?.notificationSound ?? "chime",
     });
-    res.json({ success });
+    if (outcome.ok) {
+      res.json({ success: true });
+      return;
+    }
+    res.json({
+      success: false,
+      reason: outcome.reason,
+      statusCode: outcome.statusCode,
+      message: outcome.message,
+    });
   });
 
   app.get(api.streak.get.path, isAuthenticated, async (req: any, res) => {

@@ -1292,7 +1292,7 @@ export function ProductTour({ onClose }: ProductTourProps) {
 
       {/* ── Main Content Area ── */}
       <div className="flex-1 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-        <div className="flex flex-col md:flex-row items-center gap-5 md:gap-8 w-full max-w-6xl">
+        <div className="flex flex-wrap items-center justify-center gap-5">
 
           {/* ── Single Device Frame (shared ref for accurate spotlight measurement) ── */}
           <div className="relative flex-shrink-0 w-[320px] sm:w-[340px]">
@@ -1328,7 +1328,7 @@ export function ProductTour({ onClose }: ProductTourProps) {
 
           {isDesktopCoachmark ? (
             /* Right coachmark — desktop only */
-            <div className="relative flex-1 max-w-[260px]">
+            <div className="relative w-[260px]">
               <AnimatePresence mode="wait">
                 <CoachmarkCard
                   key={step.id}

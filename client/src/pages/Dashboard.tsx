@@ -194,8 +194,6 @@ export default function Dashboard() {
 
         <OnboardingHintCard />
 
-        <CampaignBanner />
-
         <StatsOverview deeds={sortedDeeds} />
 
         <DashboardNavLinks
@@ -203,6 +201,11 @@ export default function Dashboard() {
           pendingCount={pendingCount}
           onNavigate={navigate}
         />
+
+        <div className="space-y-3">
+          <h3 className="text-xl font-display font-bold">{t('dashboard.others')}</h3>
+          <CampaignBanner />
+        </div>
 
         <div className="space-y-6">
           <h3 className="text-xl font-display font-bold flex items-center gap-2">

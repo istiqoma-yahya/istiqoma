@@ -128,8 +128,8 @@
   },
   "dashboard": {
     "greeting": "Assalaamu'alaikum",
-    "subtitle": "Apakah amal yang telah anda lakukan hari ini?",
-    "recordDeed": "Rekod Amal",
+    "subtitle": "Apakah kebaikan yang telah anda lakukan hari ini?",
+    "recordDeed": "Rekod Kebaikan",
     "recentActivity": "Aktiviti Terkini",
     "noDeeds": "Tiada amal yang direkod lagi",
     "startRecording": "Mula merekod amal baik anda untuk melihat progres anda dari semasa ke semasa.",
@@ -717,7 +717,7 @@
   },
   "streak": {
     "title": "Streak",
-    "daysInARow": "hari berturut-turut",
+    "daysInARow": "Hari Berturut-turut",
     "weekDays": [
       "Isn",
       "Sel",

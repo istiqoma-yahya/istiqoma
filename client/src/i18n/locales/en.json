@@ -128,8 +128,8 @@
   },
   "dashboard": {
     "greeting": "Assalaamu'alaikum",
-    "subtitle": "What good deeds have you done today?",
-    "recordDeed": "Record Deed",
+    "subtitle": "What good have you done today?",
+    "recordDeed": "Record Good Deed",
     "recentActivity": "Recent Activity",
     "noDeeds": "No deeds recorded yet",
     "startRecording": "Start tracking your good deeds to see your progress over time.",
@@ -716,7 +716,7 @@
   },
   "streak": {
     "title": "Streak",
-    "daysInARow": "days in a row",
+    "daysInARow": "Days in a Row",
     "weekDays": [
       "Mon",
       "Tue",

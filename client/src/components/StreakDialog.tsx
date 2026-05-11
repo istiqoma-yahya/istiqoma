@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Flame, Check, Snowflake } from "lucide-react";
+import { Check, Snowflake } from "lucide-react";
+import { DuaHandsIcon } from "@/components/DuaHandsIcon";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import {
@@ -76,7 +77,7 @@ export function StreakDialog({ open, streakCount, weekDays, frozenDays = [], has
                 animate={isActive ? { rotate: [0, -10, 10, -5, 5, 0], scale: [1, 1.1, 1] } : {}}
                 transition={{ duration: 0.8, delay: 0.5 }}
               >
-                <Flame className={`w-10 h-10 ${isActive ? "text-orange-500" : "text-gray-400 dark:text-gray-500"}`} />
+                <DuaHandsIcon style={{ fontSize: "2.5rem", opacity: isActive ? 1 : 0.4 }} />
               </motion.div>
               {!isActive && (
                 <motion.div

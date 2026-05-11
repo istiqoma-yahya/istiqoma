@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Flame, Moon, HandCoins, Shield, Calendar, CheckCircle2, Download, KeyRound, Play } from "lucide-react";
+import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Moon, HandCoins, Shield, Calendar, CheckCircle2, Download, KeyRound, Play } from "lucide-react";
+import { DuaHandsIcon } from "@/components/DuaHandsIcon";
 import { SiGoogle } from "react-icons/si";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -276,7 +277,7 @@ export default function Landing() {
               <div className="mt-2 mx-2 mb-2 p-3 bg-slate-900 rounded-xl flex items-center justify-between text-white">
                 <div className="flex items-center gap-3">
                   <div className="p-1.5 bg-white/10 rounded-lg">
-                    <Flame className="w-[18px] h-[18px] text-amber-400" />
+                    <DuaHandsIcon className="text-amber-400" style={{ fontSize: "1.125rem" }} />
                   </div>
                   <div>
                     <p className="text-xs font-medium text-slate-300">{t('landing.heroCard.currentStreak')}</p>

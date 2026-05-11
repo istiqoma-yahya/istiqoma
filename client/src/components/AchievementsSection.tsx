@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
+import { DuaHandsIcon } from "@/components/DuaHandsIcon";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -47,6 +48,7 @@ const LOCKED_CLASSES =
   "bg-muted/40 text-muted-foreground/70 border-muted-foreground/20";
 
 function getIcon(name: string): React.ComponentType<{ className?: string }> {
+  if (name === "DuaHands") return DuaHandsIcon;
   const Icons = LucideIcons as unknown as Record<
     string,
     React.ComponentType<{ className?: string }>

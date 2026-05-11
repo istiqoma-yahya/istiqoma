@@ -1,5 +1,6 @@
 import { type Deed } from "@shared/schema";
-import { ThumbsUp, Flame, Snowflake } from "lucide-react";
+import { ThumbsUp, Snowflake } from "lucide-react";
+import { DuaHandsIcon } from "@/components/DuaHandsIcon";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -115,7 +116,7 @@ export function StatsOverview({ deeds }: StatsOverviewProps) {
       >
         <div className="flex items-center justify-between mb-3">
           <div className={`p-2.5 rounded-xl relative ${hasActivityToday ? "bg-orange-500/10 text-orange-600 dark:text-orange-400" : "bg-gray-400/10 text-gray-400 dark:text-gray-500"}`}>
-            <Flame className="w-5 h-5" />
+            <DuaHandsIcon style={{ fontSize: "1.25rem", opacity: hasActivityToday ? 1 : 0.4 }} />
             {!hasActivityToday && (
               <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
                 <span className="text-white text-[9px] font-bold leading-none">!</span>

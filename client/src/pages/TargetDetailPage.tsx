@@ -48,10 +48,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { DuaHandsIcon } from "@/components/DuaHandsIcon";
 import {
   Loader2,
   ArrowLeft,
-  Flame,
   Trophy,
   Star,
   TrendingUp,
@@ -163,7 +163,7 @@ function HighlightCards({
 }) {
   const cards = [
     {
-      icon: Flame,
+      icon: DuaHandsIcon,
       value: currentStreak,
       label: "Streak Saat Ini",
       suffix: "",

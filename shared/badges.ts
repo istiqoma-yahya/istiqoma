@@ -185,7 +185,7 @@ export const BADGE_CATALOG: BadgeDef[] = [
     family: "milestone",
     name: "Istiqomah Streak",
     description: "Streak harian terpanjang yang pernah diraih.",
-    icon: "Flame",
+    icon: "DuaHands",
     thresholds: [7, 30, 100, 365],
     unit: "hari",
     criteria: { kind: "longestStreak" },

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import * as LucideIcons from "lucide-react";
 import { Share2, X } from "lucide-react";
+import { DuaHandsIcon } from "@/components/DuaHandsIcon";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +31,7 @@ const CONFETTI_COLORS = [
 ];
 
 function getIcon(name: string): React.ComponentType<{ className?: string }> {
+  if (name === "DuaHands") return DuaHandsIcon;
   const Icons = LucideIcons as unknown as Record<
     string,
     React.ComponentType<{ className?: string }>

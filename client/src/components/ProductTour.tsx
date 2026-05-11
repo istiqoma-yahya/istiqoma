@@ -12,7 +12,6 @@ import {
   Sunset,
   BookOpen,
   HandCoins,
-  Flame,
   Plus,
   RotateCcw,
   Target,
@@ -35,6 +34,7 @@ import {
 } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
 import { KeyRound, Loader2, Save, Settings } from "lucide-react";
+import { DuaHandsIcon } from "@/components/DuaHandsIcon";
 import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
 import { DashboardNavLinks } from "@/components/shared/DashboardNavLinks";
@@ -788,7 +788,7 @@ function ProgressScreen() {
               {t("tour.progressScreen.streak")}
             </p>
             <div className="flex items-center gap-1.5">
-              <Flame className="w-5 h-5 text-orange-500" />
+              <DuaHandsIcon className="text-orange-500" style={{ fontSize: "1.25rem" }} />
               <p className="text-2xl font-display font-bold text-orange-500">12</p>
               <span className="text-[10px] text-muted-foreground self-end mb-1">
                 {t("tour.progressScreen.days")}
@@ -870,7 +870,7 @@ function FinalScreen({ onSignUp }: { onSignUp: () => void }) {
         transition={{ duration: 0.5, type: "spring" }}
         className="w-20 h-20 rounded-3xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mb-5"
       >
-        <Flame className="w-10 h-10 text-emerald-500" />
+        <DuaHandsIcon className="text-emerald-500" style={{ fontSize: "2.5rem" }} />
       </motion.div>
 
       <h3 className="text-xl font-display font-bold mb-2">{t("tour.finalScreen.title")}</h3>

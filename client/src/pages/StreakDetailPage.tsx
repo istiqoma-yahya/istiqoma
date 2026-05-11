@@ -7,8 +7,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Snowflake,
-  Flame,
 } from "lucide-react";
+import { DuaHandsIcon } from "@/components/DuaHandsIcon";
 import {
   format,
   startOfMonth,
@@ -296,7 +296,7 @@ export default function StreakDetailPage() {
           >
             <div className="flex items-center gap-2 mb-1">
               <div className="p-1.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400">
-                <Flame className="w-4 h-4" />
+                <DuaHandsIcon style={{ fontSize: "1rem" }} />
               </div>
               <p className="text-xs text-muted-foreground font-medium">
                 {t("streakDetail.daysPracticed")}

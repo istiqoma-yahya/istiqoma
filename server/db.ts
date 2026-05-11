@@ -20,9 +20,13 @@ if (!connectionString) {
 
 export const pool = new Pool({
   connectionString,
-  ssl: isProduction
-    ? { rejectUnauthorized: true }
-    : { rejectUnauthorized: false },
+  // Supabase's pooler uses a self-signed cert chain not trusted by the
+  // Replit CA bundle. rejectUnauthorized:false keeps behavior consistent
+  // between schema push (drizzle.config.ts) and app runtime in both
+  // development and production. Without this, production login fails
+  // immediately with "self-signed certificate in certificate chain" the
+  // moment the OIDC callback tries to read/write the user row.
+  ssl: { rejectUnauthorized: false },
 });
 
 export const db = drizzle(pool, { schema });

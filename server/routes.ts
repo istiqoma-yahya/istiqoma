@@ -1537,7 +1537,7 @@ export async function registerRoutes(
   return httpServer;
 }
 
-const ADMIN_EMAILS = new Set<string>(["yahyaekananta@gmail.com"]);
+const ADMIN_EMAILS = new Set<string>(["yahyaekananta@gmail.com", "muhammadbiondi@gmail.com"]);
 
 function normalizeEmail(v: unknown): string | null {
   if (typeof v !== "string") return null;

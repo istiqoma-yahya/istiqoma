@@ -1631,5 +1631,227 @@
     "privacyLink": "Dasar Privasi",
     "refuseHint": "Belum bersedia untuk bersetuju?",
     "refuseLink": "Log keluar"
+  },
+  "privacy": {
+    "pageTitle": "Dasar Privasi",
+    "effectiveDateLabel": "Tarikh berkuat kuasa:",
+    "effectiveDate": "10 Mei 2026",
+    "appNameLabel": "Nama aplikasi:",
+    "contactLabel": "Hubungi:",
+    "contactSuffix": "— kami akan menjawab dalam 30 hari.",
+    "seeAlso": "Lihat juga",
+    "termsLink": "Terma Perkhidmatan",
+    "s1": {
+      "heading": "1. Tentang Dasar Ini",
+      "pre": "Istiqoma (\"kami\", \"milik kami\", atau \"aplikasi\") adalah aplikasi peningkatan diri secara rohani untuk umat Islam. Ia menggunakan ",
+      "strong": "API Quran Foundation (QF)",
+      "mid": " dan memaparkan kandungan Al-Quran yang bersumber daripada ",
+      "post": ". Dasar Privasi ini menerangkan cara kami mengumpul, menggunakan, dan melindungi maklumat peribadi anda, serta menerangkan hak-hak anda di bawah undang-undang privasi yang terpakai termasuk GDPR."
+    },
+    "s2": {
+      "heading": "2. Data yang Kami Kumpul",
+      "colData": "Data",
+      "colSource": "Sumber",
+      "colPurpose": "Tujuan",
+      "row1Data": "Alamat e-mel",
+      "row1Source": "Google / Replit OAuth",
+      "row1Purpose": "Pengenalan akaun",
+      "row2Data": "Nama paparan & avatar",
+      "row2Source": "Google / Replit OAuth atau input pengguna",
+      "row2Purpose": "Paparan profil",
+      "row3Data": "Nama pengguna & PIN dipincang",
+      "row3Source": "Dicipta pengguna semasa mendaftar",
+      "row3Purpose": "Pengesahan alternatif",
+      "row4Data": "Log amalan & data amalan keagamaan",
+      "row4Source": "Input pengguna",
+      "row4Purpose": "Ciri utama — menjejak amalan baik dan kemajuan rohani",
+      "row5Data": "Penanda buku Al-Quran & kedudukan bacaan",
+      "row5Source": "Interaksi pengguna",
+      "row5Purpose": "Ciri teruskan membaca",
+      "row6Data": "Kemajuan hafazan",
+      "row6Source": "Interaksi pengguna",
+      "row6Purpose": "Penjejakan hafazan",
+      "row7Data": "Sasaran & jawapan onboarding",
+      "row7Source": "Input pengguna",
+      "row7Purpose": "Matlamat peribadi",
+      "row8Data": "Titik akhir & kunci push subscription",
+      "row8Source": "Browser Web Push API",
+      "row8Purpose": "Menghantar peringatan solat & amalan",
+      "row9Data": "Lokasi anggaran (latitud/longitud)",
+      "row9Source": "Browser Geolocation API (opt-in)",
+      "row9Purpose": "Mengira waktu solat tempatan (peringatan Solat)",
+      "row10Data": "Data sesi",
+      "row10Source": "Jana pelayan",
+      "row10Purpose": "Mengekalkan anda log masuk (TTL 1 minggu)",
+      "notWord": "tidak",
+      "notePre": "Kami ",
+      "notePost": " menggunakan kuki untuk pengiklanan, menjalankan skrip analitik pihak ketiga, atau mengumpul data di luar yang disenaraikan di atas."
+    },
+    "s3": {
+      "heading": "3. Data Sensitif & Persetujuan GDPR",
+      "body1Pre": "Log amalan dan data amalan keagamaan (seperti solat yang dilakukan, bacaan Al-Quran, puasa, dan ibadah) merupakan ",
+      "body1Strong1": "data peribadi kategori khas (sensitif)",
+      "body1Mid": " di bawah Perkara 9 GDPR. Kami bergantung pada ",
+      "body1Strong2": "persetujuan eksplisit dan bebas",
+      "body1Post": " anda sebelum memproses maklumat ini. Anda boleh menarik balik persetujuan pada bila-bila masa dengan memadamkan akaun anda (lihat Seksyen 8).",
+      "body2Label": "Cara kami mengumpul persetujuan:",
+      "body2Rest": " Sebelum sebarang data keagamaan disimpan, setiap pengguna baharu mesti menanda dua kotak pada skrin persetujuan khusus:",
+      "check1": "\"Saya bersetuju Istiqoma menyimpan data amalan keagamaan saya untuk menjalankan ciri-ciri aplikasi.\"",
+      "check2": "\"Saya mengesahkan bahawa saya berusia 13 tahun atau lebih.\"",
+      "body3": "Butang Teruskan kekal dinyahdayakan sehingga kedua-dua kotak ditanda. Pengguna sedia ada yang mendaftar sebelum ciri ini diperkenalkan akan ditunjukkan gesaan persetujuan yang sama pada log masuk seterusnya dan tidak dapat mengakses aplikasi sehingga mereka mengesahkan.",
+      "body4Label": "Keperluan umur:",
+      "body4Rest": " Istiqoma tidak ditujukan untuk pengguna di bawah 13 tahun. Pendaftaran disekat bagi sesiapa yang tidak mengesahkan memenuhi keperluan umur minimum melalui kotak semak perisytiharan kendiri yang diterangkan di atas."
+    },
+    "s4": {
+      "heading": "4. Cara Kami Menggunakan Data Anda",
+      "item1": "Untuk mengendalikan aplikasi dan menyediakan ciri-cirinya kepada anda.",
+      "item2": "Untuk menghantar pemberitahuan push yang anda pilih (peringatan, amaran).",
+      "item3": "Untuk mengira waktu solat berdasarkan lokasi anda.",
+      "item4": "Untuk menyokong papan pendahulu dan sasaran komuniti (agregat).",
+      "item5Pre": "Kami ",
+      "item5Not": "tidak",
+      "item5Post": " menggunakan data anda untuk membina profil pengiklanan.",
+      "item6Pre": "Kami ",
+      "item6Not": "tidak",
+      "item6Post": " menjual data anda kepada pihak ketiga.",
+      "item7Pre": "Kami ",
+      "item7Not": "tidak",
+      "item7Post": " menggunakan data anda untuk melatih model AI tanpa persetujuan eksplisit berasingan daripada anda."
+    },
+    "s5": {
+      "heading": "5. Sub-Pemproses",
+      "colProcessor": "Sub-pemproses",
+      "colRole": "Peranan",
+      "colPolicy": "Dasar Privasi",
+      "supabaseRole": "Hosting pangkalan data (PostgreSQL)",
+      "replitRole": "Hosting aplikasi & identiti OAuth",
+      "webpushName": "Web Push (piawaian pelayar)",
+      "webpushRole": "Penghantaran pemberitahuan push melalui perkhidmatan push pelayar anda (cth. Google FCM untuk Chrome, Mozilla Autopush untuk Firefox)",
+      "qfName": "Quran Foundation / Quran.com",
+      "qfRole": "Teks, audio, dan data ayat Al-Quran (API baca sahaja)"
+    },
+    "s6": {
+      "heading": "6. Keselamatan",
+      "intro": "Kami serius dalam menjaga keselamatan data peribadi anda dan melaksanakan langkah-langkah berikut:",
+      "item1Label": "TLS semasa transit:",
+      "item1Rest": " Semua komunikasi antara peranti anda dan pelayan kami disulitkan melalui HTTPS.",
+      "item2Label": "Disulitkan semasa penyimpanan:",
+      "item2Rest": " Data anda disimpan pada instance PostgreSQL yang diuruskan Supabase, yang menggunakan penyulitan semasa penyimpanan.",
+      "item3Label": "Kawalan akses:",
+      "item3Rest": " Akses pangkalan data dihadkan kepada akaun perkhidmatan aplikasi dengan kebenaran minimum yang diperlukan. Akses manusia langsung diaudit dan dihadkan.",
+      "item4Label": "Putaran rahsia:",
+      "item4Pre": " Rahsia aplikasi (kunci API, kunci VAPID, kelayakan pangkalan data) diputar secara berkala mengikut keperluan ",
+      "item4Strong": "Security Rule 6.9",
+      "item4End": ".",
+      "item5Label": "Respons insiden keselamatan:",
+      "item5Pre": " Kami komited untuk mengakui insiden keselamatan yang disahkan dalam masa ",
+      "item5Strong": "24 jam",
+      "item5Post": " dan memberitahu pengguna yang terjejas seperti yang dikehendaki oleh undang-undang yang terpakai."
+    },
+    "s7": {
+      "heading": "7. Pemindahan Data Antarabangsa",
+      "bodyPre": "Istiqoma dihoskan pada infrastruktur yang dikendalikan oleh Replit dan Supabase, yang mungkin memproses data di pusat data di luar negara kediaman anda (termasuk Amerika Syarikat dan Kawasan Ekonomi Eropah). Jika dikehendaki oleh undang-undang, pemindahan ini dikawal oleh ",
+      "bodyStrong": "Klausa Kontrak Standard (SCC)",
+      "bodyPost": " atau perlindungan yang setara yang diterima pakai oleh setiap sub-pemproses. Sila rujuk dasar privasi sub-pemproses yang dipautkan di atas untuk butiran."
+    },
+    "s8": {
+      "heading": "8. Hak-Hak Anda",
+      "intro": "Bergantung pada bidang kuasa anda, anda mempunyai hak-hak berikut berkenaan data peribadi anda:",
+      "item1Label": "Akses & pembetulan:",
+      "item1Rest": " Lihat dan kemas kini maklumat profil anda terus dalam aplikasi (halaman Profil).",
+      "item2Label": "Batalkan token OAuth:",
+      "item2Pre": " Anda boleh membatalkan akses Istiqoma ke akaun Google anda pada bila-bila masa melalui ",
+      "item2LinkGoogle": "myaccount.google.com/permissions",
+      "item2Mid": ". Setelah integrasi OAuth Quran Foundation aktif, anda juga boleh membatalkan token tersebut di ",
+      "item2LinkQF": "titik akhir Pembatalan OAuth Quran Foundation",
+      "item2Post": ".",
+      "item3Label": "Pemadaman data:",
+      "item3Pre": " Anda boleh memadam akaun anda dan semua data berkaitan menggunakan ciri \"Padam Akaun Saya\" dalam tetapan aplikasi. Kami akan memadamkan data peribadi anda secara kekal dalam masa ",
+      "item3Strong1": "30 hari",
+      "item3Mid": " selepas permintaan anda, dan membersihkannya daripada sandaran dalam masa ",
+      "item3Strong2": "90 hari",
+      "item3Post": ".",
+      "item4Label": "Pemadaman akaun QF:",
+      "item4Rest": " Jika akaun Quran Foundation yang berkaitan dipadamkan, data berkaitan anda di Istiqoma juga akan dipadamkan.",
+      "contactPre": "Untuk menggunakan mana-mana hak ini, e-mel kami di ",
+      "contactPost": ". Kami akan menjawab dalam 30 hari."
+    },
+    "s9": {
+      "heading": "9. Kanak-Kanak",
+      "body": "Istiqoma tidak ditujukan untuk kanak-kanak di bawah umur 13 tahun. Kami tidak dengan sengaja mengumpul maklumat peribadi daripada kanak-kanak di bawah 13 tahun. Jika anda percaya seorang kanak-kanak di bawah 13 tahun telah memberikan kami maklumat peribadi, sila hubungi kami dan kami akan memadamnya dengan segera."
+    },
+    "s10": {
+      "heading": "10. Perubahan pada Dasar Ini",
+      "body": "Kami mungkin mengemas kini Dasar Privasi ini dari semasa ke semasa. Kami akan memberitahu anda tentang perubahan ketara melalui sepanduk dalam aplikasi atau dengan mengemas kini tarikh berkuat kuasa di atas. Penggunaan aplikasi yang berterusan selepas perubahan merupakan penerimaan anda terhadap dasar yang dikemas kini."
+    }
+  },
+  "terms": {
+    "pageTitle": "Terma Perkhidmatan",
+    "effectiveDateLabel": "Tarikh berkuat kuasa:",
+    "effectiveDate": "10 Mei 2026",
+    "appNameLabel": "Nama aplikasi:",
+    "intro": "Selamat datang ke Istiqoma. Dengan mengakses atau menggunakan aplikasi, anda bersetuju untuk terikat dengan Terma Perkhidmatan ini (\"Terma\"). Sila baca dengan teliti.",
+    "seeAlso": "Lihat juga",
+    "privacyLink": "Dasar Privasi",
+    "s1": {
+      "heading": "1. Penggunaan yang Dibenarkan",
+      "intro": "Anda bersetuju untuk menggunakan Istiqoma hanya untuk tujuan yang sah dan dengan cara yang:",
+      "item1": "Tidak melanggar mana-mana undang-undang atau peraturan tempatan, nasional, atau antarabangsa yang terpakai.",
+      "item2": "Tidak cuba mendapatkan akses tanpa kebenaran kepada mana-mana bahagian perkhidmatan, pelayan, atau sistem yang disambungkan.",
+      "item3": "Tidak mengganggu, mendisrupsi, atau membebankan infrastruktur aplikasi.",
+      "item4": "Tidak menghantar kandungan yang palsu, mengelirukan, atau berbahaya.",
+      "item5": "Tidak melakukan kejuruteraan terbalik, menyahkompilasi, atau mencuba mengekstrak kod sumber aplikasi.",
+      "item6": "Tidak menggunakan aplikasi untuk sebarang tujuan komersial tanpa persetujuan bertulis kami terlebih dahulu.",
+      "suspension": "Kami berhak untuk menggantung atau menamatkan akaun yang melanggar terma ini."
+    },
+    "s2": {
+      "heading": "2. Atribusi Kandungan Al-Quran",
+      "pre": "Teks Al-Quran, terjemahan, dan kandungan audio yang dipaparkan dalam Istiqoma bersumber daripada ",
+      "strong": "Quran Foundation",
+      "mid": " melalui API ",
+      "linkText": "Quran.com",
+      "after": ". Kandungan ini dibentangkan apa adanya dan ",
+      "notModified": "tidak diubah suai",
+      "rest": " oleh Istiqoma dengan cara apa pun. Semua hak ke atas kandungan Al-Quran kekal dengan Quran Foundation dan penulis terjemahan masing-masing. Penggunaan kandungan ini dikawal oleh ",
+      "qfTosLink": "Terma Perkhidmatan Quran Foundation",
+      "end": "."
+    },
+    "s3": {
+      "heading": "3. Kandungan Pengguna",
+      "body1": "Anda kekal memiliki kandungan yang anda cipta dalam aplikasi (log amalan, sasaran, nota, dll.). Dengan menghantar kandungan, anda memberikan kami lesen terhad, bukan eksklusif untuk menyimpan dan memaparkannya semata-mata untuk tujuan menyediakan perkhidmatan kepada anda.",
+      "body2": "Anda bertanggungjawab atas ketepatan dan kesesuaian kandungan yang anda hantar."
+    },
+    "s4": {
+      "heading": "4. Penafian",
+      "body1Pre": "Istiqoma disediakan atas dasar ",
+      "body1AsIs": "\"apa adanya\"",
+      "body1Mid": " dan ",
+      "body1AsAvail": "\"sebagaimana tersedia\"",
+      "body1Post": " tanpa jaminan apa pun, sama ada tersurat atau tersirat. Kami tidak menjamin bahawa perkhidmatan akan tidak terputus, bebas ralat, atau bebas daripada virus atau komponen berbahaya lain.",
+      "body2": "Aplikasi ini adalah alat penjejak tabiat rohani. Ia tidak memberikan nasihat keagamaan, undang-undang, perubatan, atau kewangan. Pengiraan waktu solat adalah anggaran dan harus disahkan dengan sumber tempatan."
+    },
+    "s5": {
+      "heading": "5. Had Liabiliti",
+      "body": "Setakat yang dibenarkan oleh undang-undang, Istiqoma dan operatornya tidak akan bertanggungjawab atas sebarang kerosakan tidak langsung, sampingan, khas, akibatan, atau punitif yang timbul daripada atau berkaitan dengan penggunaan aplikasi anda, walaupun kami telah dimaklumkan tentang kemungkinan kerosakan tersebut."
+    },
+    "s6": {
+      "heading": "6. Undang-Undang yang Mengawal & Pertikaian",
+      "body": "Terma ini dikawal oleh dan ditafsirkan mengikut undang-undang yang terpakai. Sebarang pertikaian yang timbul daripada atau berkaitan dengan Terma ini atau penggunaan Istiqoma anda akan cuba diselesaikan terlebih dahulu melalui rundingan suci hati. Jika tidak diselesaikan, pertikaian boleh dikemukakan kepada timbang tara yang mengikat atau mahkamah yang berwibawa. Di mana terma Quran Foundation memerlukan bidang kuasa New York untuk pertikaian berkaitan kandungan API mereka, terma tersebut mengutamakan perkara-perkara tersebut."
+    },
+    "s7": {
+      "heading": "7. Perubahan pada Terma Ini",
+      "body": "Kami mungkin mengemas kini Terma ini dari semasa ke semasa. Kami akan memberitahu anda tentang perubahan material melalui sepanduk dalam aplikasi atau dengan mengemas kini tarikh berkuat kuasa di atas. Penggunaan aplikasi yang berterusan selepas perubahan berkuat kuasa merupakan penerimaan anda terhadap Terma yang disemak."
+    },
+    "s8": {
+      "heading": "8. Privasi",
+      "pre": "",
+      "link": "Dasar Privasi",
+      "post": " kami menerangkan cara kami mengumpul, menggunakan, dan melindungi data peribadi anda. Dengan menggunakan Istiqoma, anda mengakui bahawa anda telah membaca dan memahami Dasar Privasi kami."
+    },
+    "s9": {
+      "heading": "9. Hubungi",
+      "pre": "Untuk pertanyaan tentang Terma ini, hubungi kami di ",
+      "post": "."
+    }
   }
 }

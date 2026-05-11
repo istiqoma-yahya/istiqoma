@@ -14,37 +14,36 @@ export default function PrivacyPage() {
               <ArrowLeft className="w-5 h-5" />
             </Link>
           </Button>
-          <h1 className="text-lg font-semibold">Privacy Policy</h1>
+          <h1 className="text-lg font-semibold">{t("privacy.pageTitle")}</h1>
         </div>
       </header>
 
       <main className="container max-w-3xl mx-auto px-4 py-10 space-y-8 text-sm leading-relaxed">
         <div>
           <p className="text-muted-foreground">
-            <strong>Effective date:</strong> May 10, 2026
+            <strong>{t("privacy.effectiveDateLabel")}</strong> {t("privacy.effectiveDate")}
           </p>
           <p className="text-muted-foreground mt-1">
-            <strong>App name:</strong> Istiqoma
+            <strong>{t("privacy.appNameLabel")}</strong> Istiqoma
           </p>
           <p className="text-muted-foreground mt-1">
-            <strong>Contact:</strong>{" "}
+            <strong>{t("privacy.contactLabel")}</strong>{" "}
             <a
               href="mailto:privacy@istiqoma.app"
               className="text-primary underline underline-offset-2"
             >
               privacy@istiqoma.app
             </a>{" "}
-            — we respond within 30 days.
+            {t("privacy.contactSuffix")}
           </p>
         </div>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold">1. About This Policy</h2>
+          <h2 className="text-xl font-bold">{t("privacy.s1.heading")}</h2>
           <p>
-            Istiqoma ("we", "our", or "the app") is a spiritual self-improvement
-            application for Muslims. It uses the{" "}
-            <strong>Quran Foundation (QF) APIs</strong> and displays Qur'an
-            content sourced from{" "}
+            {t("privacy.s1.pre")}
+            <strong>{t("privacy.s1.strong")}</strong>
+            {t("privacy.s1.mid")}
             <a
               href="https://quran.com"
               target="_blank"
@@ -53,181 +52,164 @@ export default function PrivacyPage() {
             >
               Quran.com
             </a>
-            . This Privacy Policy explains how we collect, use, and protect your
-            personal information, and describes your rights under applicable
-            privacy law including the GDPR.
+            {t("privacy.s1.post")}
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold">2. Data We Collect</h2>
+          <h2 className="text-xl font-bold">{t("privacy.s2.heading")}</h2>
           <div className="overflow-x-auto">
             <table className="w-full border border-border rounded-lg text-sm">
               <thead>
                 <tr className="bg-muted/60">
                   <th className="text-left p-3 font-semibold border-b border-border">
-                    Data
+                    {t("privacy.s2.colData")}
                   </th>
                   <th className="text-left p-3 font-semibold border-b border-border">
-                    Source
+                    {t("privacy.s2.colSource")}
                   </th>
                   <th className="text-left p-3 font-semibold border-b border-border">
-                    Purpose
+                    {t("privacy.s2.colPurpose")}
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 <tr>
-                  <td className="p-3">Email address</td>
-                  <td className="p-3">Google / Replit OAuth</td>
-                  <td className="p-3">Account identification</td>
+                  <td className="p-3">{t("privacy.s2.row1Data")}</td>
+                  <td className="p-3">{t("privacy.s2.row1Source")}</td>
+                  <td className="p-3">{t("privacy.s2.row1Purpose")}</td>
                 </tr>
                 <tr>
-                  <td className="p-3">Display name &amp; avatar</td>
-                  <td className="p-3">Google / Replit OAuth or user input</td>
-                  <td className="p-3">Profile display</td>
+                  <td className="p-3">{t("privacy.s2.row2Data")}</td>
+                  <td className="p-3">{t("privacy.s2.row2Source")}</td>
+                  <td className="p-3">{t("privacy.s2.row2Purpose")}</td>
                 </tr>
                 <tr>
-                  <td className="p-3">Username &amp; hashed PIN</td>
-                  <td className="p-3">User-created during sign-up</td>
-                  <td className="p-3">Alternative authentication</td>
+                  <td className="p-3">{t("privacy.s2.row3Data")}</td>
+                  <td className="p-3">{t("privacy.s2.row3Source")}</td>
+                  <td className="p-3">{t("privacy.s2.row3Purpose")}</td>
                 </tr>
                 <tr>
                   <td className="p-3">
                     <strong className="text-amber-600 dark:text-amber-400">
-                      Deed logs &amp; religious practice data
+                      {t("privacy.s2.row4Data")}
                     </strong>
                   </td>
-                  <td className="p-3">User input</td>
-                  <td className="p-3">
-                    Core feature — tracking good deeds and spiritual progress
-                  </td>
+                  <td className="p-3">{t("privacy.s2.row4Source")}</td>
+                  <td className="p-3">{t("privacy.s2.row4Purpose")}</td>
                 </tr>
                 <tr>
-                  <td className="p-3">Qur'an bookmarks &amp; reading position</td>
-                  <td className="p-3">User interaction</td>
-                  <td className="p-3">Continue-reading feature</td>
+                  <td className="p-3">{t("privacy.s2.row5Data")}</td>
+                  <td className="p-3">{t("privacy.s2.row5Source")}</td>
+                  <td className="p-3">{t("privacy.s2.row5Purpose")}</td>
                 </tr>
                 <tr>
-                  <td className="p-3">Memorization progress</td>
-                  <td className="p-3">User interaction</td>
-                  <td className="p-3">Hafalan tracking</td>
+                  <td className="p-3">{t("privacy.s2.row6Data")}</td>
+                  <td className="p-3">{t("privacy.s2.row6Source")}</td>
+                  <td className="p-3">{t("privacy.s2.row6Purpose")}</td>
                 </tr>
                 <tr>
-                  <td className="p-3">Targets &amp; onboarding answers</td>
-                  <td className="p-3">User input</td>
-                  <td className="p-3">Personalized goals</td>
+                  <td className="p-3">{t("privacy.s2.row7Data")}</td>
+                  <td className="p-3">{t("privacy.s2.row7Source")}</td>
+                  <td className="p-3">{t("privacy.s2.row7Purpose")}</td>
                 </tr>
                 <tr>
-                  <td className="p-3">Push subscription endpoint &amp; keys</td>
-                  <td className="p-3">Browser Web Push API</td>
-                  <td className="p-3">Sending prayer &amp; deed reminders</td>
+                  <td className="p-3">{t("privacy.s2.row8Data")}</td>
+                  <td className="p-3">{t("privacy.s2.row8Source")}</td>
+                  <td className="p-3">{t("privacy.s2.row8Purpose")}</td>
                 </tr>
                 <tr>
-                  <td className="p-3">
-                    Approximate location (latitude/longitude)
-                  </td>
-                  <td className="p-3">Browser Geolocation API (opt-in)</td>
-                  <td className="p-3">
-                    Calculating local prayer times (Sholat reminders)
-                  </td>
+                  <td className="p-3">{t("privacy.s2.row9Data")}</td>
+                  <td className="p-3">{t("privacy.s2.row9Source")}</td>
+                  <td className="p-3">{t("privacy.s2.row9Purpose")}</td>
                 </tr>
                 <tr>
-                  <td className="p-3">Session data</td>
-                  <td className="p-3">Server-generated</td>
-                  <td className="p-3">Keeping you signed in (1-week TTL)</td>
+                  <td className="p-3">{t("privacy.s2.row10Data")}</td>
+                  <td className="p-3">{t("privacy.s2.row10Source")}</td>
+                  <td className="p-3">{t("privacy.s2.row10Purpose")}</td>
                 </tr>
               </tbody>
             </table>
           </div>
           <p className="text-muted-foreground">
-            We do <strong>not</strong> use cookies for advertising, run
-            third-party analytics scripts, or collect data beyond what is listed
-            above.
+            {t("privacy.s2.notePre")}
+            <strong>{t("privacy.s2.notWord")}</strong>
+            {t("privacy.s2.notePost")}
           </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-xl font-bold">
-            3. Sensitive Data &amp; GDPR Consent
+            {t("privacy.s3.heading")}
           </h2>
           <p>
-            Deed logs and religious practice data (such as prayers performed,
-            Qur'an recitation, fasting, and acts of worship) constitute{" "}
-            <strong>special category (sensitive) personal data</strong> under
-            Article 9 of the GDPR. We rely on your{" "}
-            <strong>explicit, freely given consent</strong> before processing
-            this information. You may withdraw consent at any time by deleting
-            your account (see Section 8).
+            {t("privacy.s3.body1Pre")}
+            <strong>{t("privacy.s3.body1Strong1")}</strong>
+            {t("privacy.s3.body1Mid")}
+            <strong>{t("privacy.s3.body1Strong2")}</strong>
+            {t("privacy.s3.body1Post")}
           </p>
           <p>
-            <strong>How we collect consent:</strong> Before any religious data
-            is stored, every new user must actively check two boxes on a
-            dedicated consent screen:
+            <strong>{t("privacy.s3.body2Label")}</strong>
+            {t("privacy.s3.body2Rest")}
           </p>
           <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-            <li>
-              "I consent to Istiqoma storing my religious practice data to power
-              app features."
-            </li>
-            <li>"I confirm I am 13 years of age or older."</li>
+            <li>{t("privacy.s3.check1")}</li>
+            <li>{t("privacy.s3.check2")}</li>
           </ul>
+          <p>{t("privacy.s3.body3")}</p>
           <p>
-            The Continue button remains disabled until both boxes are ticked.
-            Existing users who signed up before this feature was introduced are
-            shown the same consent prompt on their next login and cannot access
-            the app until they confirm.
-          </p>
-          <p>
-            <strong>Age requirement:</strong> Istiqoma is not intended for users
-            under 13 years of age. Sign-up is blocked for anyone who does not
-            confirm they meet the minimum age requirement via the self-declaration
-            checkbox described above.
+            <strong>{t("privacy.s3.body4Label")}</strong>
+            {t("privacy.s3.body4Rest")}
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold">4. How We Use Your Data</h2>
+          <h2 className="text-xl font-bold">{t("privacy.s4.heading")}</h2>
           <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-            <li>To operate the app and provide its features to you.</li>
-            <li>To send push notifications you opt into (reminders, alerts).</li>
-            <li>To calculate prayer times based on your location.</li>
-            <li>To power leaderboards and community targets (aggregated).</li>
+            <li>{t("privacy.s4.item1")}</li>
+            <li>{t("privacy.s4.item2")}</li>
+            <li>{t("privacy.s4.item3")}</li>
+            <li>{t("privacy.s4.item4")}</li>
             <li>
-              We do <strong>not</strong> use your data to build advertising
-              profiles.
+              {t("privacy.s4.item5Pre")}
+              <strong>{t("privacy.s4.item5Not")}</strong>
+              {t("privacy.s4.item5Post")}
             </li>
             <li>
-              We do <strong>not</strong> sell your data to third parties.
+              {t("privacy.s4.item6Pre")}
+              <strong>{t("privacy.s4.item6Not")}</strong>
+              {t("privacy.s4.item6Post")}
             </li>
             <li>
-              We do <strong>not</strong> use your data to train AI models without
-              your separate, explicit consent.
+              {t("privacy.s4.item7Pre")}
+              <strong>{t("privacy.s4.item7Not")}</strong>
+              {t("privacy.s4.item7Post")}
             </li>
           </ul>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold">5. Sub-Processors</h2>
+          <h2 className="text-xl font-bold">{t("privacy.s5.heading")}</h2>
           <div className="overflow-x-auto">
             <table className="w-full border border-border rounded-lg text-sm">
               <thead>
                 <tr className="bg-muted/60">
                   <th className="text-left p-3 font-semibold border-b border-border">
-                    Sub-processor
+                    {t("privacy.s5.colProcessor")}
                   </th>
                   <th className="text-left p-3 font-semibold border-b border-border">
-                    Role
+                    {t("privacy.s5.colRole")}
                   </th>
                   <th className="text-left p-3 font-semibold border-b border-border">
-                    Privacy Policy
+                    {t("privacy.s5.colPolicy")}
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 <tr>
                   <td className="p-3 font-medium">Supabase</td>
-                  <td className="p-3">Database hosting (PostgreSQL)</td>
+                  <td className="p-3">{t("privacy.s5.supabaseRole")}</td>
                   <td className="p-3">
                     <a
                       href="https://supabase.com/privacy"
@@ -241,7 +223,7 @@ export default function PrivacyPage() {
                 </tr>
                 <tr>
                   <td className="p-3 font-medium">Replit</td>
-                  <td className="p-3">Application hosting &amp; OAuth identity</td>
+                  <td className="p-3">{t("privacy.s5.replitRole")}</td>
                   <td className="p-3">
                     <a
                       href="https://replit.com/privacy"
@@ -254,11 +236,8 @@ export default function PrivacyPage() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="p-3 font-medium">Web Push (browser standard)</td>
-                  <td className="p-3">
-                    Push notification delivery via your browser's push service
-                    (e.g. Google FCM for Chrome, Mozilla Autopush for Firefox)
-                  </td>
+                  <td className="p-3 font-medium">{t("privacy.s5.webpushName")}</td>
+                  <td className="p-3">{t("privacy.s5.webpushRole")}</td>
                   <td className="p-3">
                     <a
                       href="https://policies.google.com/privacy"
@@ -280,10 +259,8 @@ export default function PrivacyPage() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="p-3 font-medium">Quran Foundation / Quran.com</td>
-                  <td className="p-3">
-                    Qur'an text, audio, and verse data (read-only API)
-                  </td>
+                  <td className="p-3 font-medium">{t("privacy.s5.qfName")}</td>
+                  <td className="p-3">{t("privacy.s5.qfRole")}</td>
                   <td className="p-3">
                     <a
                       href="https://quran.com/privacy-policy"
@@ -301,139 +278,117 @@ export default function PrivacyPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold">6. Security</h2>
-          <p>
-            We take the security of your personal data seriously and implement
-            the following measures:
-          </p>
+          <h2 className="text-xl font-bold">{t("privacy.s6.heading")}</h2>
+          <p>{t("privacy.s6.intro")}</p>
           <ul className="list-disc list-inside space-y-1 text-muted-foreground">
             <li>
-              <strong>TLS in transit:</strong> All communication between your
-              device and our servers is encrypted via HTTPS.
+              <strong>{t("privacy.s6.item1Label")}</strong>
+              {t("privacy.s6.item1Rest")}
             </li>
             <li>
-              <strong>Encrypted at rest:</strong> Your data is stored on
-              Supabase-managed PostgreSQL instances, which use encryption at
-              rest.
+              <strong>{t("privacy.s6.item2Label")}</strong>
+              {t("privacy.s6.item2Rest")}
             </li>
             <li>
-              <strong>Access controls:</strong> Database access is restricted to
-              application service accounts with minimal required permissions.
-              Direct human access is audited and limited.
+              <strong>{t("privacy.s6.item3Label")}</strong>
+              {t("privacy.s6.item3Rest")}
             </li>
             <li>
-              <strong>Secret rotation:</strong> Application secrets (API keys,
-              VAPID keys, database credentials) are rotated on a cadence
-              consistent with <strong>Security Rule 6.9</strong> requirements.
+              <strong>{t("privacy.s6.item4Label")}</strong>
+              {t("privacy.s6.item4Pre")}
+              <strong>{t("privacy.s6.item4Strong")}</strong>
+              {t("privacy.s6.item4End")}
             </li>
             <li>
-              <strong>Security incident response:</strong> We commit to
-              acknowledging confirmed security incidents within{" "}
-              <strong>24 hours</strong> and notifying affected users as required
-              by applicable law.
+              <strong>{t("privacy.s6.item5Label")}</strong>
+              {t("privacy.s6.item5Pre")}
+              <strong>{t("privacy.s6.item5Strong")}</strong>
+              {t("privacy.s6.item5Post")}
             </li>
           </ul>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-xl font-bold">
-            7. International Data Transfers
+            {t("privacy.s7.heading")}
           </h2>
           <p>
-            Istiqoma is hosted on infrastructure operated by Replit and Supabase,
-            which may process data in data centers outside your country of
-            residence (including the United States and the European Economic
-            Area). Where required by law, these transfers are governed by{" "}
-            <strong>Standard Contractual Clauses (SCCs)</strong> or equivalent
-            safeguards adopted by each sub-processor. Please refer to the
-            sub-processor privacy policies linked above for details.
+            {t("privacy.s7.bodyPre")}
+            <strong>{t("privacy.s7.bodyStrong")}</strong>
+            {t("privacy.s7.bodyPost")}
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold">8. Your Rights</h2>
-          <p>
-            Depending on your jurisdiction, you have the following rights
-            regarding your personal data:
-          </p>
+          <h2 className="text-xl font-bold">{t("privacy.s8.heading")}</h2>
+          <p>{t("privacy.s8.intro")}</p>
           <ul className="list-disc list-inside space-y-1 text-muted-foreground">
             <li>
-              <strong>Access &amp; correction:</strong> View and update your
-              profile information directly in the app (Profile page).
+              <strong>{t("privacy.s8.item1Label")}</strong>
+              {t("privacy.s8.item1Rest")}
             </li>
             <li>
-              <strong>Revoke OAuth token:</strong> You can revoke Istiqoma's
-              access to your Google account at any time via{" "}
+              <strong>{t("privacy.s8.item2Label")}</strong>
+              {t("privacy.s8.item2Pre")}
               <a
                 href="https://myaccount.google.com/permissions"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary underline underline-offset-2"
               >
-                myaccount.google.com/permissions
+                {t("privacy.s8.item2LinkGoogle")}
               </a>
-              . Once Quran Foundation OAuth integration is active, you can also
-              revoke that token at the{" "}
+              {t("privacy.s8.item2Mid")}
               <a
                 href="https://quran.com/oauth/revoke"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary underline underline-offset-2"
               >
-                Quran Foundation OAuth Revocation endpoint
+                {t("privacy.s8.item2LinkQF")}
               </a>
-              .
+              {t("privacy.s8.item2Post")}
             </li>
             <li>
-              <strong>Data deletion:</strong> You can delete your account and all
-              associated data using the "Delete My Account" feature in the app
-              settings. We will hard-delete your personal data within{" "}
-              <strong>30 days</strong> of your request, and purge it from backups
-              within <strong>90 days</strong>.
+              <strong>{t("privacy.s8.item3Label")}</strong>
+              {t("privacy.s8.item3Pre")}
+              <strong>{t("privacy.s8.item3Strong1")}</strong>
+              {t("privacy.s8.item3Mid")}
+              <strong>{t("privacy.s8.item3Strong2")}</strong>
+              {t("privacy.s8.item3Post")}
             </li>
             <li>
-              <strong>QF account deletion:</strong> If your associated Quran
-              Foundation account is deleted, your linked data in Istiqoma will
-              also be deleted.
+              <strong>{t("privacy.s8.item4Label")}</strong>
+              {t("privacy.s8.item4Rest")}
             </li>
           </ul>
           <p>
-            To exercise any of these rights, email us at{" "}
+            {t("privacy.s8.contactPre")}
             <a
               href="mailto:privacy@istiqoma.app"
               className="text-primary underline underline-offset-2"
             >
               privacy@istiqoma.app
             </a>
-            . We will respond within 30 days.
+            {t("privacy.s8.contactPost")}
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold">9. Children</h2>
-          <p>
-            Istiqoma is not directed at children under the age of 13. We do not
-            knowingly collect personal information from children under 13. If you
-            believe a child under 13 has provided us with personal information,
-            please contact us and we will delete it promptly.
-          </p>
+          <h2 className="text-xl font-bold">{t("privacy.s9.heading")}</h2>
+          <p>{t("privacy.s9.body")}</p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold">10. Changes to This Policy</h2>
-          <p>
-            We may update this Privacy Policy from time to time. We will notify
-            you of significant changes via an in-app banner or by updating the
-            effective date above. Continued use of the app after changes
-            constitutes your acceptance of the updated policy.
-          </p>
+          <h2 className="text-xl font-bold">{t("privacy.s10.heading")}</h2>
+          <p>{t("privacy.s10.body")}</p>
         </section>
 
         <div className="border-t border-border pt-6 text-muted-foreground">
           <p>
-            See also our{" "}
+            {t("privacy.seeAlso")}{" "}
             <Link href="/terms" className="text-primary underline underline-offset-2">
-              Terms of Service
+              {t("privacy.termsLink")}
             </Link>
             .
           </p>

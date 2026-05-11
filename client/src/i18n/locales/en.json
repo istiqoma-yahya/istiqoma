@@ -1630,5 +1630,227 @@
     "privacyLink": "Privacy Policy",
     "refuseHint": "Not ready to consent?",
     "refuseLink": "Sign out"
+  },
+  "privacy": {
+    "pageTitle": "Privacy Policy",
+    "effectiveDateLabel": "Effective date:",
+    "effectiveDate": "May 10, 2026",
+    "appNameLabel": "App name:",
+    "contactLabel": "Contact:",
+    "contactSuffix": "— we respond within 30 days.",
+    "seeAlso": "See also our",
+    "termsLink": "Terms of Service",
+    "s1": {
+      "heading": "1. About This Policy",
+      "pre": "Istiqoma (\"we\", \"our\", or \"the app\") is a spiritual self-improvement application for Muslims. It uses the ",
+      "strong": "Quran Foundation (QF) APIs",
+      "mid": " and displays Qur'an content sourced from ",
+      "post": ". This Privacy Policy explains how we collect, use, and protect your personal information, and describes your rights under applicable privacy law including the GDPR."
+    },
+    "s2": {
+      "heading": "2. Data We Collect",
+      "colData": "Data",
+      "colSource": "Source",
+      "colPurpose": "Purpose",
+      "row1Data": "Email address",
+      "row1Source": "Google / Replit OAuth",
+      "row1Purpose": "Account identification",
+      "row2Data": "Display name & avatar",
+      "row2Source": "Google / Replit OAuth or user input",
+      "row2Purpose": "Profile display",
+      "row3Data": "Username & hashed PIN",
+      "row3Source": "User-created during sign-up",
+      "row3Purpose": "Alternative authentication",
+      "row4Data": "Deed logs & religious practice data",
+      "row4Source": "User input",
+      "row4Purpose": "Core feature — tracking good deeds and spiritual progress",
+      "row5Data": "Qur'an bookmarks & reading position",
+      "row5Source": "User interaction",
+      "row5Purpose": "Continue-reading feature",
+      "row6Data": "Memorization progress",
+      "row6Source": "User interaction",
+      "row6Purpose": "Hafalan tracking",
+      "row7Data": "Targets & onboarding answers",
+      "row7Source": "User input",
+      "row7Purpose": "Personalized goals",
+      "row8Data": "Push subscription endpoint & keys",
+      "row8Source": "Browser Web Push API",
+      "row8Purpose": "Sending prayer & deed reminders",
+      "row9Data": "Approximate location (latitude/longitude)",
+      "row9Source": "Browser Geolocation API (opt-in)",
+      "row9Purpose": "Calculating local prayer times (Sholat reminders)",
+      "row10Data": "Session data",
+      "row10Source": "Server-generated",
+      "row10Purpose": "Keeping you signed in (1-week TTL)",
+      "notWord": "not",
+      "notePre": "We do ",
+      "notePost": " use cookies for advertising, run third-party analytics scripts, or collect data beyond what is listed above."
+    },
+    "s3": {
+      "heading": "3. Sensitive Data & GDPR Consent",
+      "body1Pre": "Deed logs and religious practice data (such as prayers performed, Qur'an recitation, fasting, and acts of worship) constitute ",
+      "body1Strong1": "special category (sensitive) personal data",
+      "body1Mid": " under Article 9 of the GDPR. We rely on your ",
+      "body1Strong2": "explicit, freely given consent",
+      "body1Post": " before processing this information. You may withdraw consent at any time by deleting your account (see Section 8).",
+      "body2Label": "How we collect consent:",
+      "body2Rest": " Before any religious data is stored, every new user must actively check two boxes on a dedicated consent screen:",
+      "check1": "\"I consent to Istiqoma storing my religious practice data to power app features.\"",
+      "check2": "\"I confirm I am 13 years of age or older.\"",
+      "body3": "The Continue button remains disabled until both boxes are ticked. Existing users who signed up before this feature was introduced are shown the same consent prompt on their next login and cannot access the app until they confirm.",
+      "body4Label": "Age requirement:",
+      "body4Rest": " Istiqoma is not intended for users under 13 years of age. Sign-up is blocked for anyone who does not confirm they meet the minimum age requirement via the self-declaration checkbox described above."
+    },
+    "s4": {
+      "heading": "4. How We Use Your Data",
+      "item1": "To operate the app and provide its features to you.",
+      "item2": "To send push notifications you opt into (reminders, alerts).",
+      "item3": "To calculate prayer times based on your location.",
+      "item4": "To power leaderboards and community targets (aggregated).",
+      "item5Pre": "We do ",
+      "item5Not": "not",
+      "item5Post": " use your data to build advertising profiles.",
+      "item6Pre": "We do ",
+      "item6Not": "not",
+      "item6Post": " sell your data to third parties.",
+      "item7Pre": "We do ",
+      "item7Not": "not",
+      "item7Post": " use your data to train AI models without your separate, explicit consent."
+    },
+    "s5": {
+      "heading": "5. Sub-Processors",
+      "colProcessor": "Sub-processor",
+      "colRole": "Role",
+      "colPolicy": "Privacy Policy",
+      "supabaseRole": "Database hosting (PostgreSQL)",
+      "replitRole": "Application hosting & OAuth identity",
+      "webpushName": "Web Push (browser standard)",
+      "webpushRole": "Push notification delivery via your browser's push service (e.g. Google FCM for Chrome, Mozilla Autopush for Firefox)",
+      "qfName": "Quran Foundation / Quran.com",
+      "qfRole": "Qur'an text, audio, and verse data (read-only API)"
+    },
+    "s6": {
+      "heading": "6. Security",
+      "intro": "We take the security of your personal data seriously and implement the following measures:",
+      "item1Label": "TLS in transit:",
+      "item1Rest": " All communication between your device and our servers is encrypted via HTTPS.",
+      "item2Label": "Encrypted at rest:",
+      "item2Rest": " Your data is stored on Supabase-managed PostgreSQL instances, which use encryption at rest.",
+      "item3Label": "Access controls:",
+      "item3Rest": " Database access is restricted to application service accounts with minimal required permissions. Direct human access is audited and limited.",
+      "item4Label": "Secret rotation:",
+      "item4Pre": " Application secrets (API keys, VAPID keys, database credentials) are rotated on a cadence consistent with ",
+      "item4Strong": "Security Rule 6.9",
+      "item4End": " requirements.",
+      "item5Label": "Security incident response:",
+      "item5Pre": " We commit to acknowledging confirmed security incidents within ",
+      "item5Strong": "24 hours",
+      "item5Post": " and notifying affected users as required by applicable law."
+    },
+    "s7": {
+      "heading": "7. International Data Transfers",
+      "bodyPre": "Istiqoma is hosted on infrastructure operated by Replit and Supabase, which may process data in data centers outside your country of residence (including the United States and the European Economic Area). Where required by law, these transfers are governed by ",
+      "bodyStrong": "Standard Contractual Clauses (SCCs)",
+      "bodyPost": " or equivalent safeguards adopted by each sub-processor. Please refer to the sub-processor privacy policies linked above for details."
+    },
+    "s8": {
+      "heading": "8. Your Rights",
+      "intro": "Depending on your jurisdiction, you have the following rights regarding your personal data:",
+      "item1Label": "Access & correction:",
+      "item1Rest": " View and update your profile information directly in the app (Profile page).",
+      "item2Label": "Revoke OAuth token:",
+      "item2Pre": " You can revoke Istiqoma's access to your Google account at any time via ",
+      "item2LinkGoogle": "myaccount.google.com/permissions",
+      "item2Mid": ". Once Quran Foundation OAuth integration is active, you can also revoke that token at the ",
+      "item2LinkQF": "Quran Foundation OAuth Revocation endpoint",
+      "item2Post": ".",
+      "item3Label": "Data deletion:",
+      "item3Pre": " You can delete your account and all associated data using the \"Delete My Account\" feature in the app settings. We will hard-delete your personal data within ",
+      "item3Strong1": "30 days",
+      "item3Mid": " of your request, and purge it from backups within ",
+      "item3Strong2": "90 days",
+      "item3Post": ".",
+      "item4Label": "QF account deletion:",
+      "item4Rest": " If your associated Quran Foundation account is deleted, your linked data in Istiqoma will also be deleted.",
+      "contactPre": "To exercise any of these rights, email us at ",
+      "contactPost": ". We will respond within 30 days."
+    },
+    "s9": {
+      "heading": "9. Children",
+      "body": "Istiqoma is not directed at children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe a child under 13 has provided us with personal information, please contact us and we will delete it promptly."
+    },
+    "s10": {
+      "heading": "10. Changes to This Policy",
+      "body": "We may update this Privacy Policy from time to time. We will notify you of significant changes via an in-app banner or by updating the effective date above. Continued use of the app after changes constitutes your acceptance of the updated policy."
+    }
+  },
+  "terms": {
+    "pageTitle": "Terms of Service",
+    "effectiveDateLabel": "Effective date:",
+    "effectiveDate": "May 10, 2026",
+    "appNameLabel": "App name:",
+    "intro": "Welcome to Istiqoma. By accessing or using the app, you agree to be bound by these Terms of Service (\"Terms\"). Please read them carefully.",
+    "seeAlso": "See also our",
+    "privacyLink": "Privacy Policy",
+    "s1": {
+      "heading": "1. Acceptable Use",
+      "intro": "You agree to use Istiqoma only for lawful purposes and in a way that:",
+      "item1": "Does not violate any applicable local, national, or international law or regulation.",
+      "item2": "Does not attempt to gain unauthorized access to any part of the service, its servers, or any connected systems.",
+      "item3": "Does not interfere with, disrupt, or overburden the app's infrastructure.",
+      "item4": "Does not submit false, misleading, or harmful content.",
+      "item5": "Does not reverse-engineer, decompile, or attempt to extract the source code of the application.",
+      "item6": "Does not use the app for any commercial purpose without our prior written consent.",
+      "suspension": "We reserve the right to suspend or terminate accounts that violate these terms."
+    },
+    "s2": {
+      "heading": "2. Qur'an Content Attribution",
+      "pre": "The Qur'an text, translations, and audio content displayed in Istiqoma are sourced from the ",
+      "strong": "Quran Foundation",
+      "mid": " via the ",
+      "linkText": "Quran.com",
+      "after": " API. This content is presented as-is and is ",
+      "notModified": "not modified",
+      "rest": " by Istiqoma in any way. All rights to the Qur'an content remain with the Quran Foundation and the respective translation authors. Use of this content is governed by the ",
+      "qfTosLink": "Quran Foundation Terms of Service",
+      "end": "."
+    },
+    "s3": {
+      "heading": "3. User Content",
+      "body1": "You retain ownership of any content you create within the app (deed logs, targets, notes, etc.). By submitting content, you grant us a limited, non-exclusive license to store and display it solely for the purpose of providing the service to you.",
+      "body2": "You are responsible for the accuracy and appropriateness of content you submit."
+    },
+    "s4": {
+      "heading": "4. Disclaimers",
+      "body1Pre": "Istiqoma is provided on an ",
+      "body1AsIs": "\"as is\"",
+      "body1Mid": " and ",
+      "body1AsAvail": "\"as available\"",
+      "body1Post": " basis without warranties of any kind, either express or implied. We do not warrant that the service will be uninterrupted, error-free, or free of viruses or other harmful components.",
+      "body2": "The app is a spiritual habit-tracking tool. It does not constitute religious, legal, medical, or financial advice. Prayer time calculations are estimates and should be verified against local sources."
+    },
+    "s5": {
+      "heading": "5. Limitation of Liability",
+      "body": "To the fullest extent permitted by law, Istiqoma and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or related to your use of the app, even if we have been advised of the possibility of such damages."
+    },
+    "s6": {
+      "heading": "6. Governing Law & Disputes",
+      "body": "These Terms are governed by and construed in accordance with applicable law. Any dispute arising out of or relating to these Terms or your use of Istiqoma shall first be attempted to be resolved through good-faith negotiation. If unresolved, disputes may be submitted to binding arbitration or the courts of competent jurisdiction. Where Quran Foundation terms require New York jurisdiction for disputes related to their API content, those terms take precedence for such matters."
+    },
+    "s7": {
+      "heading": "7. Changes to These Terms",
+      "body": "We may update these Terms from time to time. We will notify you of material changes via an in-app banner or by updating the effective date above. Continued use of the app after changes become effective constitutes your acceptance of the revised Terms."
+    },
+    "s8": {
+      "heading": "8. Privacy",
+      "pre": "Our ",
+      "link": "Privacy Policy",
+      "post": " explains how we collect, use, and protect your personal data. By using Istiqoma, you acknowledge that you have read and understood our Privacy Policy."
+    },
+    "s9": {
+      "heading": "9. Contact",
+      "pre": "For questions about these Terms, contact us at ",
+      "post": "."
+    }
   }
 }

@@ -23,10 +23,8 @@ export function CampaignBanner() {
         <img
           src={campaign.bannerImageUrl}
           alt=""
-          width={320}
-          height={100}
-          className="block"
-          style={{ width: 320, height: 100, objectFit: "cover" }}
+          className="block w-full"
+          style={{ aspectRatio: "238 / 100", objectFit: "cover" }}
           data-testid="img-campaign-banner"
         />
       </a>

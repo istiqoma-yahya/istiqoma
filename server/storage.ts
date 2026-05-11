@@ -10,6 +10,19 @@ import { toZonedTime, fromZonedTime } from "date-fns-tz";
 // Default timezone for users (Indonesia)
 const DEFAULT_TIMEZONE = "Asia/Jakarta";
 
+// Canonical list of built-in protected categories seeded for every user.
+// Used both for new-user seeding (createCategory) and lazy backfill
+// (getCategories) so the two paths can never drift.
+const REQUIRED_PROTECTED_CATEGORIES = [
+  "Sholat Fardhu",
+  "Sholat Sunnah",
+  "Puasa",
+  "Dzikir",
+  "Baca Quran",
+  "Shodaqoh",
+  "Hafalan Quran",
+] as const;
+
 // Typed error used by the quiz code-path so the route handlers (which read
 // `status` off the thrown error via getErrorStatus) get an HTTP status and
 // a clean JSON-safe message instead of a generic 500/HTML response.
@@ -275,11 +288,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCategories(userId: string): Promise<Category[]> {
-    return await db
+    const existing = await db
       .select()
       .from(categories)
       .where(eq(categories.userId, userId))
       .orderBy(asc(categories.sortOrder), asc(categories.id));
+
+    // Backfill any missing required protected categories for existing users
+    const existingNames = new Set(existing.map(c => c.name));
+    const missing = REQUIRED_PROTECTED_CATEGORIES.filter(name => !existingNames.has(name));
+    if (missing.length > 0) {
+      let maxSortOrder = existing.length > 0 ? Math.max(...existing.map(c => c.sortOrder)) : -1;
+      for (const name of missing) {
+        await db.insert(categories).values({
+          name,
+          userId,
+          isProtected: true,
+          sortOrder: ++maxSortOrder,
+        }).onConflictDoNothing();
+      }
+      return await db
+        .select()
+        .from(categories)
+        .where(eq(categories.userId, userId))
+        .orderBy(asc(categories.sortOrder), asc(categories.id));
+    }
+
+    return existing;
   }
 
   async createCategory(userId: string, insertCategory: InsertCategory): Promise<Category> {
@@ -301,27 +336,18 @@ export class DatabaseStorage implements IStorage {
     
     // If this is a new user (only 1 category), seed other protected categories
     if (existing.length === 0) {
-      const defaultProtected = [
-        "Sholat Fardhu", 
-        "Sholat Sunnah", 
-        "Puasa", 
-        "Dzikir", 
-        "Baca Quran", 
-        "Shodaqoh"
-      ];
-      
       // Get current categories again to avoid race conditions
       const currentCategories = await this.getCategories(userId);
       const existingNames = new Set(currentCategories.map(c => c.name));
       
-      for (const name of defaultProtected) {
+      for (const name of REQUIRED_PROTECTED_CATEGORIES) {
         if (!existingNames.has(name)) {
           await db.insert(categories).values({
             name,
             userId,
             isProtected: true,
             sortOrder: ++maxSortOrder + 1
-          });
+          }).onConflictDoNothing();
           existingNames.add(name);
         }
       }

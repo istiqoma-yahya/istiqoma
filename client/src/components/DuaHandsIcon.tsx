@@ -9,7 +9,7 @@ export function DuaHandsIcon({ className, style }: DuaHandsIconProps) {
       role="img"
       aria-hidden="true"
       className={className}
-      style={{ fontSize: "1.25em", ...style }}
+      style={{ fontSize: "1em", lineHeight: 1, ...style }}
     >
       {"\u{1F932}"}
     </span>

@@ -892,6 +892,15 @@
         "tingkatkan": "Want to raise the overall quality of my worship"
       }
     },
+    "qg": {
+      "question": "Which best describes you?",
+      "hint": "This helps us personalise your notification avatars",
+      "skip": "Skip for now",
+      "options": {
+        "male": "Muslim (Male)",
+        "female": "Muslimah (Female)"
+      }
+    },
     "q2": {
       "question": "What most often holds you back from doing more good?",
       "hint": "Be honest — there are no wrong answers",
@@ -1363,6 +1372,13 @@
     "error": "Couldn't load the quiz.",
     "retry": "Try again"
   },
+  "genderPrompt": {
+    "title": "Personalise your avatars",
+    "subtitle": "Tell us who you are so we can show you a matching character in notifications.",
+    "male": "Muslim (Male)",
+    "female": "Muslimah (Female)",
+    "dismiss": "Dismiss"
+  },
   "onboardingSettings": {
     "title": "Your journey",
     "identityHeading": "Your identity",
@@ -1374,7 +1390,12 @@
     "incompleteError": "Please answer every question and pick at least one focus.",
     "unsavedChanges": "Unsaved changes",
     "notCompletedYet": "You haven't finished onboarding yet.",
-    "startOnboardingCta": "Start onboarding"
+    "startOnboardingCta": "Start onboarding",
+    "genderHeading": "Notification avatar",
+    "genderHint": "Pick the character that matches you — we'll show it in push notifications.",
+    "genderMale": "Muslim (Male)",
+    "genderFemale": "Muslimah (Female)",
+    "genderSaved": "Avatar preference saved"
   },
   "tour": {
     "steps": {

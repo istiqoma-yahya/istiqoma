@@ -5,7 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, registerUsernameAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
-import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS, insertCampaignSchema, updateCampaignSchema, type NewlyEarnedBadge, type PushSubscription } from "@shared/schema";
+import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, patchOnboardingGenderSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS, insertCampaignSchema, updateCampaignSchema, type NewlyEarnedBadge, type PushSubscription } from "@shared/schema";
 import {
   checkRateLimit,
   generateRecommendations,
@@ -1385,6 +1385,18 @@ export async function registerRoutes(
         }
       }
 
+      res.json(row);
+    } catch (err) {
+      const status = getErrorStatus(err) ?? 400;
+      res.status(status).json({ message: getErrorMessage(err) });
+    }
+  });
+
+  app.patch("/api/onboarding/gender", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const parsed = patchOnboardingGenderSchema.parse(req.body);
+      const row = await storage.patchOnboardingGender(userId, parsed);
       res.json(row);
     } catch (err) {
       const status = getErrorStatus(err) ?? 400;

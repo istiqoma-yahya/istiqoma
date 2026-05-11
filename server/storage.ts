@@ -162,6 +162,7 @@ export interface IStorage {
   deleteCustomDzikirType(id: number, userId: string): Promise<void>;
   getUserOnboarding(userId: string): Promise<UserOnboarding | null>;
   upsertUserOnboarding(userId: string, data: InsertUserOnboarding): Promise<UserOnboarding>;
+  patchOnboardingGender(userId: string, patch: { gender?: string | null; genderPromptDismissed?: boolean }): Promise<UserOnboarding | null>;
   getStreakFreezerBalance(userId: string): Promise<{ owned: number; used: number; available: number }>;
   getPointsBalance(userId: string): Promise<{ earned: number; spent: number; available: number }>;
   getFrozenDates(userId: string): Promise<Set<string>>;
@@ -1050,6 +1051,7 @@ export class DatabaseStorage implements IStorage {
       q4: data.q4,
       q5: data.q5,
       identityKey: data.identityKey,
+      gender: data.gender ?? null,
       completed: true,
       completedAt: now,
       updatedAt: now,
@@ -1066,6 +1068,7 @@ export class DatabaseStorage implements IStorage {
           q4: values.q4,
           q5: values.q5,
           identityKey: values.identityKey,
+          ...(values.gender != null ? { gender: values.gender } : {}),
           completed: true,
           completedAt: now,
           updatedAt: now,
@@ -1073,6 +1076,19 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return row;
+  }
+
+  async patchOnboardingGender(userId: string, patch: { gender?: string | null; genderPromptDismissed?: boolean }): Promise<UserOnboarding | null> {
+    const now = new Date();
+    const set: Record<string, unknown> = { updatedAt: now };
+    if ('gender' in patch) set.gender = patch.gender ?? null;
+    if ('genderPromptDismissed' in patch) set.genderPromptDismissed = patch.genderPromptDismissed;
+    const [row] = await db
+      .update(userOnboarding)
+      .set(set)
+      .where(eq(userOnboarding.userId, userId))
+      .returning();
+    return row || null;
   }
 
   // ─── Streak Freezer ────────────────────────────────────────────

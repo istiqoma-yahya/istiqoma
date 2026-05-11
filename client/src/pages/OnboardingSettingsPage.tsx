@@ -98,6 +98,7 @@ export default function OnboardingSettingsPage() {
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [hydrated, setHydrated] = useState(false);
+  const [genderChoice, setGenderChoice] = useState<"male" | "female" | null>(null);
 
   useEffect(() => {
     if (onboarding && !hydrated) {
@@ -110,9 +111,23 @@ export default function OnboardingSettingsPage() {
         q4: (onboarding.q4 as Q4) ?? "",
         q5: (onboarding.q5 as Q5) ?? "",
       });
+      setGenderChoice((onboarding.gender as "male" | "female" | null) ?? null);
       setHydrated(true);
     }
   }, [onboarding, hydrated]);
+
+  const genderMutation = useMutation({
+    mutationFn: async (gender: "male" | "female" | null) => {
+      await apiRequest("PATCH", "/api/onboarding/gender", { gender });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
+      toast({ title: t("onboardingSettings.genderSaved") });
+    },
+    onError: () => {
+      toast({ title: t("onboardingSettings.saveError"), variant: "destructive" });
+    },
+  });
 
   const saveMutation = useMutation({
     mutationFn: async (values: FormState) => {
@@ -402,6 +417,49 @@ export default function OnboardingSettingsPage() {
                       {selected && (
                         <span className="text-emerald-500 text-sm mt-1">✓</span>
                       )}
+                    </button>
+                  );
+                })}
+              </div>
+            </Card>
+
+            <Card className="p-5" data-testid="card-gender-settings">
+              <p className="font-semibold text-sm mb-1" data-testid="text-gender-heading">
+                {t("onboardingSettings.genderHeading")}
+              </p>
+              <p className="text-xs text-muted-foreground mb-4">
+                {t("onboardingSettings.genderHint")}
+              </p>
+              <div className="flex gap-3">
+                {(["male", "female"] as const).map((g) => {
+                  const selected = genderChoice === g;
+                  const imgSrc = g === "male" ? "/avatars/muslim-1-neutral.png" : "/avatars/muslimah-1-neutral.png";
+                  return (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => {
+                        const next = selected ? null : g;
+                        setGenderChoice(next);
+                        genderMutation.mutate(next);
+                      }}
+                      disabled={genderMutation.isPending}
+                      className={`flex-1 flex flex-col items-center gap-2 p-3 rounded-lg border transition-colors ${
+                        selected
+                          ? "border-emerald-500 bg-emerald-500/10"
+                          : "border-border hover:border-emerald-500/50 hover:bg-muted"
+                      }`}
+                      data-testid={`button-gender-settings-${g}`}
+                    >
+                      <img
+                        src={imgSrc}
+                        alt={t(`onboardingSettings.gender${g === "male" ? "Male" : "Female"}`)}
+                        className="w-16 h-16 object-contain"
+                      />
+                      <span className="text-xs font-medium">
+                        {t(`onboardingSettings.gender${g === "male" ? "Male" : "Female"}`)}
+                      </span>
+                      {selected && <span className="text-emerald-500 text-xs">✓</span>}
                     </button>
                   );
                 })}

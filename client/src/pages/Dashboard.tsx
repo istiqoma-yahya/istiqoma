@@ -6,6 +6,7 @@ import { StatsOverview } from "@/components/StatsOverview";
 import { DeedCard } from "@/components/DeedCard";
 import { OnboardingHintCard } from "@/components/OnboardingHintCard";
 import { DailyPurposeQuoteCard } from "@/components/DailyPurposeQuoteCard";
+import { GenderPromptCard } from "@/components/GenderPromptCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { CampaignBanner } from "@/components/CampaignBanner";
@@ -48,6 +49,10 @@ export default function Dashboard() {
   });
 
   const identityKey = onboarding?.identityKey ?? null;
+  const showGenderPrompt =
+    onboarding?.completed === true &&
+    !onboarding?.gender &&
+    !onboarding?.genderPromptDismissed;
 
   const { doneCount, pendingCount } = (() => {
     if (!targetsProgress || targetsProgress.length === 0) return { doneCount: 0, pendingCount: 0 };
@@ -191,6 +196,8 @@ export default function Dashboard() {
         </div>
 
         {identityKey && <DailyPurposeQuoteCard identityKey={identityKey} />}
+
+        {showGenderPrompt && <GenderPromptCard />}
 
         <OnboardingHintCard />
 

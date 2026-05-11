@@ -3,6 +3,7 @@ import { toZonedTime } from 'date-fns-tz';
 import { storage } from './storage';
 import type { PushSubscription } from '@shared/schema';
 import { getDisplayName, dailyReminderCopy, targetReminderCopy } from './notificationCopy';
+import { getAvatarUrl, type Emotion } from './avatarSelection';
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
@@ -22,6 +23,8 @@ export interface NotificationPayload {
   tag?: string;
   requireInteraction?: boolean;
   sound?: string;
+  image?: string;
+  emotion?: Emotion;
 }
 
 async function sendToSubscription(subscription: PushSubscription, payload: NotificationPayload): Promise<boolean> {
@@ -50,7 +53,20 @@ export async function sendNotificationToUser(userId: string, payload: Notificati
   if (!subscription) {
     return false;
   }
-  return sendToSubscription(subscription, payload);
+  let enriched = payload;
+  if (!payload.image) {
+    try {
+      const onboarding = await storage.getUserOnboarding(userId);
+      const gender = onboarding?.gender ?? null;
+      // Respect emotion from caller; default to neutral when unspecified
+      const emotion: Emotion = payload.emotion ?? 'neutral';
+      const image = getAvatarUrl(userId, gender, emotion);
+      if (image) enriched = { ...payload, image, emotion };
+    } catch (err) {
+      console.warn(`sendNotificationToUser: avatar enrichment failed for ${userId}`, err);
+    }
+  }
+  return sendToSubscription(subscription, enriched);
 }
 
 export async function sendDailyReminders(): Promise<void> {
@@ -79,29 +95,59 @@ export async function sendDailyReminders(): Promise<void> {
     if (Math.abs(currentTotalMinutes - reminderTotalMinutes) <= 1) {
       const name = await getDisplayName(subscription.userId);
       const { title, body } = dailyReminderCopy(subscription.userId, name);
+      const onboarding = await storage.getUserOnboarding(subscription.userId);
+      const gender = onboarding?.gender ?? null;
+      // Check if the user has logged any deeds today (in their timezone)
+      let emotion: Emotion = 'neutral';
+      try {
+        const allDeeds = await storage.getDeeds(subscription.userId);
+        const todayStr = `${nowInUserTz.getFullYear()}-${String(nowInUserTz.getMonth() + 1).padStart(2, '0')}-${String(nowInUserTz.getDate()).padStart(2, '0')}`;
+        const hasDeedToday = allDeeds.some((d) => {
+          if (!d.createdAt) return false;
+          const dInUserTz = toZonedTime(new Date(d.createdAt), userTimezone);
+          const dStr = `${dInUserTz.getFullYear()}-${String(dInUserTz.getMonth() + 1).padStart(2, '0')}-${String(dInUserTz.getDate()).padStart(2, '0')}`;
+          return dStr === todayStr;
+        });
+        emotion = hasDeedToday ? 'neutral' : 'sad';
+      } catch {
+        emotion = 'neutral';
+      }
+      const image = getAvatarUrl(subscription.userId, gender, emotion);
       await sendToSubscription(subscription, {
         title,
         body,
         url: '/',
         tag: 'daily-reminder',
         sound: subscription.notificationSound ?? 'chime',
+        ...(image ? { image, emotion } : {}),
       });
     }
   }
 }
 
-export async function sendTargetAlert(userId: string, targetName: string, message: string): Promise<boolean> {
+export async function sendTargetAlert(userId: string, targetName: string, message: string, emotion: Emotion = 'neutral'): Promise<boolean> {
   const subscription = await storage.getPushSubscription(userId);
   if (!subscription || !subscription.targetAlerts) {
     return false;
   }
-  
+
+  let image: string | undefined;
+  try {
+    const onboarding = await storage.getUserOnboarding(userId);
+    const gender = onboarding?.gender ?? null;
+    const url = getAvatarUrl(userId, gender, emotion);
+    if (url) image = url;
+  } catch (err) {
+    console.warn(`sendTargetAlert: avatar enrichment failed for ${userId}`, err);
+  }
+
   return sendToSubscription(subscription, {
     title: `Target: ${targetName}`,
     body: message,
     url: '/targets',
     tag: 'target-alert',
     sound: subscription.notificationSound ?? 'chime',
+    ...(image ? { image, emotion } : {}),
   });
 }
 
@@ -174,12 +220,31 @@ export async function sendTargetReminders(): Promise<void> {
           targetType: target.targetType,
         });
 
+        // Emotion: glow if achieved, sad if limit exceeded or behind, neutral otherwise
+        let emotion: Emotion = 'neutral';
+        if (target.targetType === 'achievement' && percentComplete >= 100) {
+          emotion = 'glow';
+        } else if (target.targetType === 'limit' && percentComplete > 100) {
+          emotion = 'sad';
+        } else if (target.targetType === 'achievement' && percentComplete < 50) {
+          emotion = 'sad';
+        }
+
+        let gender: string | null = null;
+        try {
+          const onboarding = await storage.getUserOnboarding(subscription.userId);
+          gender = onboarding?.gender ?? null;
+        } catch { /* ignore */ }
+
+        const image = getAvatarUrl(subscription.userId, gender, emotion);
+
         await sendToSubscription(subscription, {
           title,
           body,
           url: `/targets/${target.id}`,
           tag: `target-reminder-${target.id}`,
           sound: subscription.notificationSound ?? 'chime',
+          ...(image ? { image, emotion } : {}),
         });
       }
     }

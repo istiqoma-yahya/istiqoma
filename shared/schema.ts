@@ -500,6 +500,8 @@ export const userOnboarding = pgTable("user_onboarding", {
   q4: text("q4"),
   q5: text("q5"),
   identityKey: text("identity_key"),
+  gender: text("gender", { enum: ["male", "female"] }),
+  genderPromptDismissed: boolean("gender_prompt_dismissed").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -542,7 +544,14 @@ export const insertUserOnboardingSchema = createInsertSchema(userOnboarding)
     q4: z.enum(Q4_VALUES),
     q5: z.enum(Q5_VALUES),
     identityKey: z.enum(Q5_VALUES),
+    gender: z.enum(["male", "female"]).optional().nullable(),
+    genderPromptDismissed: z.boolean().optional(),
   });
+
+export const patchOnboardingGenderSchema = z.object({
+  gender: z.enum(["male", "female"]).nullable().optional(),
+  genderPromptDismissed: z.boolean().optional(),
+});
 
 export type UserOnboarding = typeof userOnboarding.$inferSelect;
 export type InsertUserOnboarding = z.infer<typeof insertUserOnboardingSchema>;

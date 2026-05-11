@@ -4,6 +4,7 @@ import { storage } from './storage';
 import type { PushSubscription } from '@shared/schema';
 import webpush from 'web-push';
 import { getDisplayName, sholatReminderCopy } from './notificationCopy';
+import { getAvatarUrl } from './avatarSelection';
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
@@ -108,12 +109,22 @@ export async function sendSholatReminders(): Promise<void> {
             minutesBefore: MINUTES_BEFORE,
           });
 
+          let gender: string | null = null;
+          try {
+            const onboarding = await storage.getUserOnboarding(subscription.userId);
+            gender = onboarding?.gender ?? null;
+          } catch (err) {
+            console.warn(`sholatReminders: avatar enrichment failed for ${subscription.userId}`, err);
+          }
+          const image = getAvatarUrl(subscription.userId, gender, 'neutral');
+
           await sendToSubscription(subscription, {
             title,
             body,
             url: '/',
             tag: `sholat-${prayer.key}`,
             sound: subscription.notificationSound ?? 'chime',
+            ...(image ? { image, emotion: 'neutral' } : {}),
           });
         }
       }

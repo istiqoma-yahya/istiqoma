@@ -893,6 +893,15 @@
         "tingkatkan": "Ingin meningkatkan kualiti ibadah secara keseluruhan"
       }
     },
+    "qg": {
+      "question": "Yang mana paling menggambarkan anda?",
+      "hint": "Ini membantu kami menyesuaikan avatar notifikasi anda",
+      "skip": "Langkau buat masa ini",
+      "options": {
+        "male": "Muslim (Lelaki)",
+        "female": "Muslimah (Perempuan)"
+      }
+    },
     "q2": {
       "question": "Apa yang paling kerap menghalang anda berbuat lebih banyak kebaikan?",
       "hint": "Jujur ya, tiada jawapan yang salah",
@@ -1364,6 +1373,13 @@
     "error": "Gagal memuatkan kuiz.",
     "retry": "Cuba lagi"
   },
+  "genderPrompt": {
+    "title": "Peribadikan avatar anda",
+    "subtitle": "Beritahu kami siapa anda supaya kami boleh menunjukkan watak yang sepadan dalam notifikasi.",
+    "male": "Muslim (Lelaki)",
+    "female": "Muslimah (Perempuan)",
+    "dismiss": "Tutup"
+  },
   "onboardingSettings": {
     "title": "Perjalanan anda",
     "identityHeading": "Identiti anda",
@@ -1375,7 +1391,12 @@
     "incompleteError": "Sila jawab semua soalan dan pilih sekurang-kurangnya satu fokus.",
     "unsavedChanges": "Perubahan belum disimpan",
     "notCompletedYet": "Anda belum menyelesaikan onboarding.",
-    "startOnboardingCta": "Mulakan onboarding"
+    "startOnboardingCta": "Mulakan onboarding",
+    "genderHeading": "Avatar notifikasi",
+    "genderHint": "Pilih watak yang mewakili anda — akan muncul dalam notifikasi push.",
+    "genderMale": "Muslim (Lelaki)",
+    "genderFemale": "Muslimah (Perempuan)",
+    "genderSaved": "Keutamaan avatar disimpan"
   },
   "tour": {
     "steps": {

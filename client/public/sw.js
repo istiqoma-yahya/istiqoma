@@ -139,9 +139,12 @@ self.addEventListener('push', function(event) {
       url: data.url || '/'
     },
     tag: data.tag || 'istiqoma-notification',
-    requireInteraction: data.requireInteraction || false,
+    requireInteraction: data.requireInteraction || (data.emotion === 'sad') || false,
     silent: false
   };
+  if (data.image) {
+    options.image = data.image;
+  }
 
   event.waitUntil(
     Promise.all([

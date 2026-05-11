@@ -12,13 +12,14 @@ import "./onboarding.css";
 
 type Answers = {
   q1?: Q1;
+  gender?: "male" | "female";
   q2?: Q2;
   q3: Q3[];
   q4?: Q4;
   q5?: Q5;
 };
 
-const SCREEN_KEYS = ["consent", "s0", "s1", "s2", "q1", "q2", "q3", "q4", "q5", "result"] as const;
+const SCREEN_KEYS = ["consent", "s0", "s1", "s2", "q1", "qg", "q2", "q3", "q4", "q5", "result"] as const;
 type ScreenKey = (typeof SCREEN_KEYS)[number];
 
 const Q1_OPTIONS: { value: Q1; iconKey: string }[] = [
@@ -82,10 +83,11 @@ export default function OnboardingFlow() {
   const progressPct = (index / (total - 1)) * 100;
 
   const stepLabel = useMemo(() => {
-    if (index === 0) return "";
-    if (index === 1) return "";
+    if (index === 0 || index === 1) return "";
     if (index <= 3) return t("onboarding.intro");
-    if (index <= 8) return t("onboarding.quizCount", { current: index - 3, total: 5 });
+    if (index === 4) return t("onboarding.quizCount", { current: 1, total: 5 });
+    if (index === 5) return t("onboarding.intro");
+    if (index >= 6 && index <= 9) return t("onboarding.quizCount", { current: index - 4, total: 5 });
     return t("onboarding.done");
   }, [index, t]);
 
@@ -106,6 +108,7 @@ export default function OnboardingFlow() {
         q4: answers.q4,
         q5: answers.q5,
         identityKey: answers.q5,
+        gender: answers.gender ?? null,
       });
     },
     onSuccess: async () => {
@@ -302,6 +305,52 @@ export default function OnboardingFlow() {
                 stepLabel={t("onboarding.quizCount", { current: 1, total: 5 })}
                 nextLabel={t("onboarding.next")}
               />
+            )}
+
+            {screen === "qg" && (
+              <div className="ob-quiz-wrap">
+                <p className="ob-eyebrow">{t("onboarding.intro")}</p>
+                <p className="ob-quiz-question">{t("onboarding.qg.question")}</p>
+                <p className="ob-quiz-hint">{t("onboarding.qg.hint")}</p>
+                <div className="ob-options" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.8rem" }}>
+                  {(["male", "female"] as const).map((g) => {
+                    const selected = answers.gender === g;
+                    const imgSrc = g === "male" ? "/avatars/muslim-1-neutral.png" : "/avatars/muslimah-1-neutral.png";
+                    return (
+                      <button
+                        type="button"
+                        key={g}
+                        className={`ob-option ob-option-grid ${selected ? "selected" : ""}`}
+                        onClick={() => setAnswers((a) => ({ ...a, gender: selected ? undefined : g }))}
+                        data-testid={`option-gender-${g}`}
+                      >
+                        <img
+                          src={imgSrc}
+                          alt={t(`onboarding.qg.options.${g}`)}
+                          style={{ width: "4rem", height: "4rem", objectFit: "contain", margin: "0 auto 0.4rem" }}
+                        />
+                        <span className="ob-option-label">{t(`onboarding.qg.options.${g}`)}</span>
+                        <span className="ob-option-check" />
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  className="ob-btn-main"
+                  onClick={goNext}
+                  data-testid="button-onboarding-next-qg"
+                >
+                  {t("onboarding.next")} →
+                </button>
+                <button
+                  type="button"
+                  className="ob-btn-skip"
+                  onClick={goNext}
+                  data-testid="button-onboarding-skip-gender"
+                >
+                  {t("onboarding.qg.skip")}
+                </button>
+              </div>
             )}
 
             {screen === "q2" && (

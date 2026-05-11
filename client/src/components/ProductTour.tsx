@@ -16,7 +16,6 @@ import {
   RotateCcw,
   Target,
   TrendingUp,
-  ArrowRight,
   Bookmark,
   GraduationCap,
   Circle,
@@ -1294,56 +1293,6 @@ export function ProductTour({ onClose }: ProductTourProps) {
       {/* ── Main Content Area ── */}
       <div className="flex-1 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
         <div className="flex flex-col md:flex-row items-center gap-5 md:gap-8 w-full max-w-6xl">
-
-          {/* Left info panel — desktop only */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`info-${currentStep}`}
-              initial={{ opacity: 0, x: -16 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="hidden md:flex flex-col gap-4 flex-1 max-w-xs"
-            >
-              <div>
-                <p className="text-emerald-500 text-xs font-semibold uppercase tracking-wider mb-2">
-                  {t("tour.coachmark.stepOf", { current: currentStep + 1, total: STEPS.length })}
-                </p>
-                <h2 className="text-2xl font-display font-bold mb-3">{step.title}</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
-              </div>
-
-              {step.interactionAdvances && !canAdvance && (
-                <div className="flex items-center gap-2 text-xs text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2">
-                  <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse flex-shrink-0" />
-                  {t("tour.topBar.tryOrSkip")}
-                </div>
-              )}
-
-              {!isLast && (
-                <button
-                  onClick={goNext}
-                  className="btn-primary flex items-center gap-2 self-start"
-                  data-testid="tour-desktop-next"
-                >
-                  {canAdvance ? t("tour.topBar.continue") : t("tour.topBar.skip")} <ArrowRight className="w-4 h-4" />
-                </button>
-              )}
-              {isLast && (
-                <button
-                  onClick={() => {
-                    onClose();
-                    const el = document.querySelector('[data-testid="auth-chooser"]');
-                    if (el) (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
-                  }}
-                  className="btn-primary flex items-center gap-2 self-start"
-                  data-testid="tour-desktop-signup"
-                >
-                  {t("tour.actions.signUpFree")} <ArrowRight className="w-4 h-4" />
-                </button>
-              )}
-            </motion.div>
-          </AnimatePresence>
 
           {/* ── Single Device Frame (shared ref for accurate spotlight measurement) ── */}
           <div className="relative flex-shrink-0 w-[320px] sm:w-[340px]">

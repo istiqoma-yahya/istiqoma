@@ -556,6 +556,40 @@ export default function Landing() {
           </div>
         </section>
       )}
+      {/* CTA Section */}
+      <section className="relative z-10 py-24 overflow-hidden border-t border-border" data-testid="section-cta">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-500/10 via-background to-background pointer-events-none" />
+        <div className="relative z-10 container mx-auto px-6 max-w-2xl text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="font-arabic text-3xl text-amber-500/80 mb-6 block" data-testid="text-cta-bismillah">
+              بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم
+            </span>
+            <h2 className="text-3xl md:text-5xl font-bold font-display mb-4 leading-tight" data-testid="text-cta-heading">
+              {t('landing.cta.title')}
+            </h2>
+            <p className="text-muted-foreground mb-10 text-base md:text-lg" data-testid="text-cta-subtitle">
+              {t('landing.cta.subtitle')}
+            </p>
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="btn-primary text-base px-10 py-3.5 inline-flex items-center justify-center gap-2"
+              data-testid="button-cta-signup"
+            >
+              <SiGoogle className="w-5 h-5 shrink-0" />
+              {t('landing.cta.button')}
+            </button>
+            <p className="mt-5 text-sm text-muted-foreground" data-testid="text-cta-note">
+              {t('landing.cta.note')}
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
         <p data-testid="text-footer-copyright">© {new Date().getFullYear()} {t('app.name')}. {t('app.tagline')}</p>

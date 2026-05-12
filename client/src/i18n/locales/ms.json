@@ -55,6 +55,12 @@
   },
   "landing": {
     "joinPill": "Sertai 50+ Muslim yang lain",
+    "cta": {
+      "title": "Mulakan Perjalanan Istiqomah Anda",
+      "subtitle": "Percuma selama-lamanya. Tiada iklan. Direka untuk membantu anda konsisten.",
+      "button": "Daftar dengan Google",
+      "note": "Atau log masuk dengan nama pengguna & PIN"
+    },
     "title": "Bina Amalan Harian",
     "titleLine2": "Yang Konsisten",
     "subtitle": "Istiqoma membantu anda membina tabiat konsisten dalam berdoa, beramal, dan muhasabah diri.",

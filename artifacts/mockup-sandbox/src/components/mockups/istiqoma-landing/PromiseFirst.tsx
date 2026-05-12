@@ -51,10 +51,15 @@ export function PromiseFirst() {
               <span className="text-sm font-medium text-slate-300">Bergabung dengan 50.000+ Muslim lainnya</span>
             </div>
             
-            <h1 className="text-6xl md:text-8xl font-display font-semibold leading-[1.1] tracking-tight mb-8 max-w-5xl">
+            <h1 className="text-6xl md:text-8xl font-display font-semibold leading-[1.1] tracking-tight mb-4 max-w-5xl">
               Bangun Amalan Harian <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-200">Yang Konsisten</span>
             </h1>
+            <div className="flex items-center gap-3 mb-8 text-sm text-slate-500">
+              <span>EN: Build Consistent Daily Deeds</span>
+              <span className="opacity-40">·</span>
+              <span>MS: Bina Amalan Harian Yang Konsisten</span>
+            </div>
             
             <p className="text-xl md:text-2xl text-slate-400 max-w-3xl mb-12 leading-relaxed font-light">
               Lacak ibadah, tilawah, dan kebaikan harian Anda dalam satu aplikasi. Bangun kebiasaan spiritual yang istiqomah dan raih keberkahan setiap hari.

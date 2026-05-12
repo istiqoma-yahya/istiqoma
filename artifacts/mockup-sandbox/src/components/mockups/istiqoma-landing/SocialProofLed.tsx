@@ -49,12 +49,17 @@ export function SocialProofLed() {
               </span>
             </Badge>
             
-            <h1 className="text-5xl md:text-7xl font-extbold tracking-tight text-white leading-[1.1]">
-              Konsisten Beribadah, <br/>
+            <h1 className="text-5xl md:text-7xl font-extbold tracking-tight text-white leading-[1.1] mb-4">
+              Bangun Amalan Harian <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-200">
-                Satu Hari Sekali.
+                Yang Konsisten
               </span>
             </h1>
+            <div className="flex items-center justify-center gap-3 mb-4 text-sm text-slate-500">
+              <span>EN: Build Consistent Daily Deeds</span>
+              <span className="opacity-40">·</span>
+              <span>MS: Bina Amalan Harian Yang Konsisten</span>
+            </div>
             
             <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
               Bangun kebiasaan spiritual yang tahan lama. Lacak sholat, tilawah, dan puasa Anda dalam satu aplikasi yang didesain untuk menjaga keistiqomahan Anda.

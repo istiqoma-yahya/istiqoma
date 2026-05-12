@@ -58,9 +58,14 @@ export function IslamicEditorial() {
           <div className={`transition-all duration-1000 transform ${mounted ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
             <span className="text-amber-500 font-serif italic tracking-widest text-sm uppercase mb-6 block">Premium Spiritual Habit Tracker</span>
             <h1 className="text-6xl md:text-8xl font-serif text-white leading-tight mb-4">
-              Istiqomah <br/>
-              <span className="font-arabic text-7xl md:text-9xl text-emerald-400/90 leading-none mt-2 block font-normal">في كل يوم</span>
+              Bangun Amalan Harian <br/>
+              <span className="text-emerald-400">Yang Konsisten</span>
             </h1>
+            <div className="flex items-center justify-center gap-3 mb-4 text-sm text-slate-500">
+              <span>EN: Build Consistent Daily Deeds</span>
+              <span className="opacity-40">·</span>
+              <span>MS: Bina Amalan Harian Yang Konsisten</span>
+            </div>
             <p className="text-xl text-slate-400 max-w-2xl mx-auto mt-8 font-light leading-relaxed">
               Jejak langkah spiritualmu, dirawat dengan indah. Bangun kebiasaan baik, lacak ibadah, dan temukan ketenangan dalam konsistensi.
             </p>

@@ -57,9 +57,14 @@ export function AppDemoCenter() {
               <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 mb-6 px-3 py-1 text-xs font-medium uppercase tracking-wider">
                 Aplikasi Habit Tracker Muslim #1
               </Badge>
-              <h1 className="text-5xl md:text-6xl font-extrabold font-jakarta text-white leading-[1.1] mb-6">
-                Bangun <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-200">Habit Spiritual</span> yang Bertahan Lama.
+              <h1 className="text-5xl md:text-6xl font-extrabold font-jakarta text-white leading-[1.1] mb-3">
+                Bangun Amalan Harian <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-200">Yang Konsisten</span>
               </h1>
+              <div className="flex items-center gap-3 mb-6 text-sm text-slate-500">
+                <span>EN: Build Consistent Daily Deeds</span>
+                <span className="opacity-40">·</span>
+                <span>MS: Bina Amalan Harian Yang Konsisten</span>
+              </div>
               <p className="text-lg text-slate-400 mb-8 leading-relaxed">
                 Istiqoma membantu Anda mencatat amal ibadah harian, membangun streak yang konsisten, dan memantau progress spiritual Anda dalam satu aplikasi yang elegan.
               </p>

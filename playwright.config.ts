@@ -25,7 +25,11 @@ export default defineConfig({
   projects: [
     {
       name: "public",
-      testMatch: ["**/auth-chooser.spec.ts", "**/product-tour.spec.ts"],
+      testMatch: [
+        "**/auth-chooser.spec.ts",
+        "**/product-tour.spec.ts",
+        "**/qf-content.spec.ts",
+      ],
       use: { ...devices["Desktop Chrome"] },
     },
     {

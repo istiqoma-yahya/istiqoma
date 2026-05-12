@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { AlertTriangle, ArrowLeft, ChevronRight, Download, Loader2, Lock, Mail, Sparkles, Trash2, User as UserIcon } from "lucide-react";
+import { AlertTriangle, ArrowLeft, BookOpen, ChevronRight, Download, Link2, Loader2, Lock, Mail, Sparkles, Trash2, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -42,6 +42,107 @@ import {
   type UpdateProfileInput,
 } from "@shared/models/auth";
 import type { UserOnboarding } from "@shared/schema";
+
+// ─── Quran Foundation connection card ────────────────────────────
+// Surfaces the per-user "Connect Quran Foundation" / "Disconnect" UI
+// on the profile page. Connection is a one-click OAuth handoff: we
+// hit GET /api/qf/connect, the server starts the PKCE flow, redirects
+// the user to QF, and on return drops them back at /profile?qf=...
+// (handled below to show a toast). Local data continues to work even
+// if QF is never connected.
+function QuranFoundationConnectCard() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const status = useQuery<{ configured: boolean; connected: boolean; env: string }>({
+    queryKey: ["/api/qf/status"],
+  });
+
+  // Show toast on return from the OAuth callback redirect, then strip
+  // the marker query params so reloads don't re-fire the toast.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const qf = url.searchParams.get("qf");
+    if (!qf) return;
+    if (qf === "connected") {
+      toast({ title: t("profile.qfConnectSuccess") });
+    } else if (qf === "error") {
+      toast({ title: t("profile.qfConnectError"), variant: "destructive" });
+    }
+    url.searchParams.delete("qf");
+    url.searchParams.delete("reason");
+    window.history.replaceState({}, "", url.toString());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const disconnectMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/qf/disconnect");
+    },
+    onSuccess: () => {
+      toast({ title: t("profile.qfDisconnectSuccess") });
+      queryClient.invalidateQueries({ queryKey: ["/api/qf/status"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/quran/bookmarks"] });
+    },
+  });
+
+  // Hide the card entirely when the server is not configured for QF
+  // (e.g. a developer running locally without QF_USER_CLIENT_ID set).
+  // Showing a non-functional button would just confuse the user.
+  if (!status.data?.configured) return null;
+
+  if (status.data.connected) {
+    return (
+      <Card className="p-5 border-emerald-500/30 bg-emerald-500/5" data-testid="card-qf-connected">
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-lg bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+            <BookOpen className="w-4 h-4 text-emerald-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-medium mb-1" data-testid="text-qf-connected-heading">
+              {t("profile.qfConnectedHeading")}
+            </h3>
+            <p className="text-xs text-muted-foreground mb-3">{t("profile.qfConnectedDesc")}</p>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => disconnectMutation.mutate()}
+              disabled={disconnectMutation.isPending}
+              data-testid="button-qf-disconnect"
+            >
+              {disconnectMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {t("profile.qfDisconnectCta")}
+            </Button>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="p-5" data-testid="card-qf-connect">
+      <div className="flex items-start gap-3">
+        <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+          <BookOpen className="w-4 h-4 text-muted-foreground" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-medium mb-1">{t("profile.qfConnectTitle")}</h3>
+          <p className="text-xs text-muted-foreground mb-3">{t("profile.qfConnectDesc")}</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              window.location.href = "/api/qf/connect";
+            }}
+            data-testid="button-qf-connect"
+          >
+            <Link2 className="w-4 h-4 mr-2" />
+            {t("profile.qfConnectCta")}
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
 
 const Q5_ICONS: Record<string, string> = {
   "dekat-allah": "🤲",
@@ -534,6 +635,8 @@ export default function ProfilePage() {
                 </div>
               </Card>
             )}
+
+            <QuranFoundationConnectCard />
 
             <Card className="p-5 border-destructive/40" data-testid="card-danger-zone">
               <div className="flex items-center gap-3 mb-4">

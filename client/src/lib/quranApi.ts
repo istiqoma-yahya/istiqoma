@@ -1,12 +1,20 @@
-// Thin wrapper around the public quran.com API. We hit it directly from
-// the browser (no server-side proxy): the API is CORS-enabled, fully
-// public, and benefits from the user's HTTP cache. Keeping it client-side
-// also means our backend never has to be in the read path for verses or
-// audio, which would otherwise be a lot of bandwidth for content that
-// doesn't change.
+// Thin wrapper around the Quran Foundation Content API.
 //
-// API docs: https://api.quran.com/api/v4
-const BASE = "https://api.quran.com/api/v4";
+// We route all Qur'an content reads through our own server proxy at
+// `/api/qf/content/*`, which forwards the call to the QF Content API
+// (`https://apis.quran.foundation/content/api/v4/...`) using a cached
+// OAuth2 client_credentials token + the required `x-auth-token` /
+// `x-client-id` headers. The QF Content API is the official,
+// hackathon-required content source; the path shape is identical to
+// the legacy `api.quran.com/api/v4`, so the rest of the client code
+// (verse keys, reciter ids, etc.) is unchanged.
+//
+// If QF credentials are not configured on the server, the proxy
+// transparently falls back to `api.quran.com/api/v4` so dev still
+// works.
+//
+// Docs: https://api-docs.quran.foundation
+const BASE = "/api/qf/content";
 
 export type Chapter = {
   id: number;
@@ -64,7 +72,7 @@ export function translationIdForLocale(locale: string): number {
 async function fetchJson<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`);
   if (!res.ok) {
-    throw new Error(`quran.com API ${res.status}: ${res.statusText}`);
+    throw new Error(`Quran Foundation API ${res.status}: ${res.statusText}`);
   }
   return res.json() as Promise<T>;
 }

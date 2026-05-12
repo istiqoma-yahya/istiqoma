@@ -471,6 +471,61 @@ Sends a test notification to the user.
 
 ---
 
+## Quran Foundation Integration
+
+Istiqoma uses the official **Quran Foundation API** for all Qur'an content
+and (optionally) for syncing per-user verse bookmarks.
+
+### Content API proxy
+
+`GET /api/qf/content/<v4-path>` — server-side proxy that forwards GET
+requests to the QF Content API (`https://apis.quran.foundation/content/api/v4/<v4-path>`).
+The server handles OAuth2 client_credentials token caching, attaches
+the required `x-auth-token` and `x-client-id` headers, and clears its
+cached token + retries once on a 401 from upstream. The path shape is
+identical to the legacy `api.quran.com/api/v4` and to the QF spec.
+
+Allow-listed sub-paths (anything else returns 404):
+
+- `/chapters`, `/chapters/{id}`
+- `/verses/by_chapter/{id}`
+- `/resources/recitations`, `/resources/translations`
+- `/chapter_recitations/{reciter_id}/{chapter_id}`
+- `/recitations/{reciter_id}/by_chapter/{chapter_id}`
+
+If `QF_CONTENT_CLIENT_ID` / `QF_CONTENT_CLIENT_SECRET` are not set on
+the server (e.g. local dev), the proxy transparently falls back to
+`api.quran.com/api/v4` so the app keeps working.
+
+### User API — Bookmarks (OAuth2 + PKCE)
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/qf/status` | `{ configured, connected, env }` for the current user |
+| `GET` | `/api/qf/connect` | Begin PKCE auth — redirects to QF |
+| `GET` | `/api/qf/callback` | OAuth2 callback — exchanges code for tokens |
+| `POST` | `/api/qf/disconnect` | Revoke the local token row |
+
+When a user is connected:
+
+- `POST /api/quran/bookmarks` mirrors to QF in the background.
+- `DELETE /api/quran/bookmarks/:surah/:verse` mirrors the removal.
+- `GET /api/quran/bookmarks` merges remote QF bookmarks into the local list.
+
+Mirroring is **non-fatal**: the local PostgreSQL row is the source of
+truth, and a QF outage never breaks the local response.
+
+### Required environment variables
+
+| Name | Required | Description |
+| --- | --- | --- |
+| `QF_CONTENT_CLIENT_ID` | yes (prod) | Content API client id |
+| `QF_CONTENT_CLIENT_SECRET` | yes (prod) | Content API client secret |
+| `QF_USER_CLIENT_ID` | optional | Enables the bookmark sync flow |
+| `QF_USER_CLIENT_SECRET` | optional | Required if the user client is set |
+| `QF_REDIRECT_URI` | optional | Defaults to `<host>/api/qf/callback` |
+| `QF_ENV` | optional | `production` (default) or `prelive` |
+
 ## Error Format
 
 All errors follow a consistent JSON format:

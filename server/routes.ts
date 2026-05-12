@@ -19,6 +19,14 @@ import { calculatePoints } from "./calculatePoints";
 import { evaluateBadgesForUser } from "./badges";
 import { registerMemorizationRoutes } from "./memorization-router";
 import { registerCommunityTargetRoutes } from "./community-targets-router";
+import { registerQfContentRoutes } from "./qf-content";
+import {
+  registerQfUserRoutes,
+  mirrorAddBookmark,
+  mirrorRemoveBookmark,
+  listRemoteBookmarks,
+  isUserConnected as isQfUserConnected,
+} from "./qf-user";
 import { sql, eq, and, gte, lte } from "drizzle-orm";
 import { users } from "@shared/models/auth";
 import { authStorage } from "./replit_integrations/auth";
@@ -119,6 +127,8 @@ export async function registerRoutes(
   registerAuthRoutes(app);
   registerUsernameAuthRoutes(app);
   registerVoiceTranscribeRoute(app);
+  registerQfContentRoutes(app);
+  registerQfUserRoutes(app, isAuthenticated);
 
   // Deeds Routes - Protected
   app.get(api.deeds.list.path, isAuthenticated, async (req: any, res) => {
@@ -1414,14 +1424,50 @@ export async function registerRoutes(
   });
 
   // ─── Qur'an ──────────────────────────────────────────────────
-  // Personal data only (bookmarks + last-read / reciter pref). All public
-  // Qur'an content (chapters, verses, audio) is fetched directly from the
-  // public quran.com API by the frontend; we deliberately do not proxy it
-  // server-side because it's read-heavy, CORS-enabled, and benefits from
-  // browser caching.
+  // Personal data only (bookmarks + last-read / reciter pref + per-verse
+  // memorization). All public Qur'an content (chapters, verses, audio,
+  // reciters) is served by the QF Content API via our proxy at
+  // `/api/qf/content/*` — see registerQfContentRoutes in qf-content.ts.
+  // Bookmark add/remove is mirrored to the user's Quran Foundation
+  // account when they have connected it via /api/qf/connect.
   app.get(api.quran.listBookmarks.path, isAuthenticated, async (req: any, res) => {
     const userId = req.user.claims.sub;
     const rows = await storage.getQuranBookmarks(userId);
+    // Best-effort: if the user has connected their Quran Foundation
+    // account, also surface bookmarks they made on other QF-powered
+    // apps. We merge by (surah, verse) so duplicates collapse and the
+    // local row always wins (it has the canonical id/createdAt).
+    if (await isQfUserConnected(userId)) {
+      try {
+        const remote = await listRemoteBookmarks(userId);
+        const seen = new Set(rows.map((r) => `${r.surahNumber}:${r.verseNumber}`));
+        const merged = [...rows];
+        // Use a unique negative counter so each remote-only bookmark has a
+        // distinct id — prevents duplicate React keys in the client list.
+        let remoteIdCounter = -1;
+        for (const r of remote) {
+          const key = `${r.surahNumber}:${r.verseNumber}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          // Synthesize a row shaped like a local bookmark so the client
+          // doesn't need a new type. id is negative to mark it remote-only.
+          merged.push({
+            id: remoteIdCounter--,
+            userId,
+            surahNumber: r.surahNumber,
+            verseNumber: r.verseNumber,
+            createdAt: null as unknown as Date,
+          });
+        }
+        merged.sort(
+          (a, b) =>
+            a.surahNumber - b.surahNumber || a.verseNumber - b.verseNumber,
+        );
+        return res.json(merged);
+      } catch {
+        // QF read failure must never block the local response.
+      }
+    }
     res.json(rows);
   });
 
@@ -1430,6 +1476,9 @@ export async function registerRoutes(
       const input = api.quran.addBookmark.input.parse(req.body);
       const userId = req.user.claims.sub;
       const bookmark = await storage.addQuranBookmark(userId, input);
+      // Mirror to Quran Foundation in the background. Local DB stays
+      // the source of truth — never let a QF outage break the response.
+      void mirrorAddBookmark(userId, input.surahNumber, input.verseNumber);
       res.status(201).json(bookmark);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -1450,6 +1499,7 @@ export async function registerRoutes(
       return res.status(400).json({ message: "Invalid surah or verse" });
     }
     await storage.removeQuranBookmark(userId, surah, verse);
+    void mirrorRemoveBookmark(userId, surah, verse);
     res.status(204).send();
   });
 

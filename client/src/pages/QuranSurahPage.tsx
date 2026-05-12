@@ -79,6 +79,11 @@ export default function QuranSurahPage() {
     return v ? parseInt(v, 10) : null;
   }, []);
 
+  const backDestination = useMemo(() => {
+    const url = new URL(window.location.href);
+    return url.searchParams.get("from") === "memorization" ? "/quran/memorization" : "/quran";
+  }, []);
+
   const initialMemMode = useMemo(() => {
     const url = new URL(window.location.href);
     return url.searchParams.get("mode") === "memorize";
@@ -466,7 +471,7 @@ export default function QuranSurahPage() {
           <Button
             size="icon"
             variant="ghost"
-            onClick={() => navigate("/quran")}
+            onClick={() => navigate(backDestination)}
             data-testid="button-back"
             aria-label="Back"
           >

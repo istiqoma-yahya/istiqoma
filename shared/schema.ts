@@ -942,3 +942,20 @@ export const updateCampaignSchema = z
 export type Campaign = typeof campaigns.$inferSelect;
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 export type UpdateCampaign = z.infer<typeof updateCampaignSchema>;
+
+// ─── Quran Foundation per-user OAuth tokens ───────────────────
+// Stores access/refresh tokens issued by Quran Foundation's User API
+// (Authorization Code + PKCE flow) so we can mirror bookmarks to QF on
+// behalf of users who have connected their account.
+export const qfUserTokens = pgTable("qf_user_tokens", {
+  userId: varchar("user_id").primaryKey().references(() => users.id),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token"),
+  expiresAt: timestamp("expires_at").notNull(),
+  scope: text("scope"),
+  qfAccountId: text("qf_account_id"),
+  connectedAt: timestamp("connected_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type QfUserToken = typeof qfUserTokens.$inferSelect;

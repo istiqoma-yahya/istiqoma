@@ -1437,36 +1437,41 @@ export async function registerRoutes(
     // account, also surface bookmarks they made on other QF-powered
     // apps. We merge by (surah, verse) so duplicates collapse and the
     // local row always wins (it has the canonical id/createdAt).
-    if (await isQfUserConnected(userId)) {
-      try {
-        const remote = await listRemoteBookmarks(userId);
-        const seen = new Set(rows.map((r) => `${r.surahNumber}:${r.verseNumber}`));
-        const merged = [...rows];
-        // Use a unique negative counter so each remote-only bookmark has a
-        // distinct id — prevents duplicate React keys in the client list.
-        let remoteIdCounter = -1;
-        for (const r of remote) {
-          const key = `${r.surahNumber}:${r.verseNumber}`;
-          if (seen.has(key)) continue;
-          seen.add(key);
-          // Synthesize a row shaped like a local bookmark so the client
-          // doesn't need a new type. id is negative to mark it remote-only.
-          merged.push({
-            id: remoteIdCounter--,
-            userId,
-            surahNumber: r.surahNumber,
-            verseNumber: r.verseNumber,
-            createdAt: null as unknown as Date,
-          });
+    try {
+      if (await isQfUserConnected(userId)) {
+        try {
+          const remote = await listRemoteBookmarks(userId);
+          const seen = new Set(rows.map((r) => `${r.surahNumber}:${r.verseNumber}`));
+          const merged = [...rows];
+          // Use a unique negative counter so each remote-only bookmark has a
+          // distinct id — prevents duplicate React keys in the client list.
+          let remoteIdCounter = -1;
+          for (const r of remote) {
+            const key = `${r.surahNumber}:${r.verseNumber}`;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            // Synthesize a row shaped like a local bookmark so the client
+            // doesn't need a new type. id is negative to mark it remote-only.
+            merged.push({
+              id: remoteIdCounter--,
+              userId,
+              surahNumber: r.surahNumber,
+              verseNumber: r.verseNumber,
+              createdAt: null as unknown as Date,
+            });
+          }
+          merged.sort(
+            (a, b) =>
+              a.surahNumber - b.surahNumber || a.verseNumber - b.verseNumber,
+          );
+          return res.json(merged);
+        } catch {
+          // QF read failure must never block the local response.
         }
-        merged.sort(
-          (a, b) =>
-            a.surahNumber - b.surahNumber || a.verseNumber - b.verseNumber,
-        );
-        return res.json(merged);
-      } catch {
-        // QF read failure must never block the local response.
       }
+    } catch (err) {
+      // DB-level error (e.g. missing table) must never crash the server.
+      console.error("[qf-user] isQfUserConnected failed:", err);
     }
     res.json(rows);
   });

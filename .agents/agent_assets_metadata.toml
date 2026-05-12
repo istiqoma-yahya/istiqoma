@@ -1,0 +1,26 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "LUh6eORO6kPD3K-lWWYXt"
+uri = "file://artifacts/mockup-sandbox/public/images/istiqoma-hero-bg.png"
+type = "image"
+title = "dark emerald islamic geometric background"
+
+[[generated]]
+id = "SPNdPK9buJjrDgMcA9Tgi"
+uri = "file://artifacts/mockup-sandbox/public/images/hero-islamic-pattern.png"
+type = "image"
+title = "Islamic geometric pattern dark hero"
+
+[[generated]]
+id = "QcAtRPbzA8ITxdsBVR3aW"
+uri = "file://artifacts/mockup-sandbox/public/images/islamic-hero.png"
+type = "image"
+title = "Islamic geometric abstract background"
+
+[[generated]]
+id = "Yz78-pAFI64Dxhy1TvGD1"
+uri = "file://artifacts/mockup-sandbox/public/images/istiqoma-app-mockup.png"
+type = "image"
+title = "smartphone mockup with dark app UI"

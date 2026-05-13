@@ -16,8 +16,9 @@
 // https://api-docs.quran.foundation/docs/user_related_apis_versioned/add-user-bookmark/
 import crypto from "node:crypto";
 import type { Express, Request, Response } from "express";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "./db";
+import { qfUserTokens, type QfUserToken } from "../shared/schema";
 
 const QF_ENV = (process.env.QF_ENV || "production").toLowerCase();
 const IS_PRELIVE = QF_ENV === "prelive" || QF_ENV === "dev" || QF_ENV === "development";
@@ -54,23 +55,15 @@ function getRedirectUri(req: Request): string {
   return `${proto}://${host}/api/qf/callback`;
 }
 
-// ─── Token storage (raw SQL — keeps the file self-contained without a
-// Drizzle schema dance for a tiny table) ────────────────────────────
-type QfTokenRow = {
-  user_id: string;
-  access_token: string;
-  refresh_token: string | null;
-  expires_at: Date;
-  scope: string | null;
-  qf_account_id: string | null;
-};
+// ─── Token storage ───────────────────────────────────────────────────
 
-async function readTokens(userId: string): Promise<QfTokenRow | null> {
-  const r = await db.execute<QfTokenRow>(sql`
-    SELECT user_id, access_token, refresh_token, expires_at, scope, qf_account_id
-    FROM qf_user_tokens WHERE user_id = ${userId} LIMIT 1
-  `);
-  return r.rows[0] ?? null;
+async function readTokens(userId: string): Promise<QfUserToken | null> {
+  const rows = await db
+    .select()
+    .from(qfUserTokens)
+    .where(eq(qfUserTokens.userId, userId))
+    .limit(1);
+  return rows[0] ?? null;
 }
 
 async function writeTokens(
@@ -83,21 +76,36 @@ async function writeTokens(
     qfAccountId: string | null;
   },
 ): Promise<void> {
-  await db.execute(sql`
-    INSERT INTO qf_user_tokens (user_id, access_token, refresh_token, expires_at, scope, qf_account_id, updated_at)
-    VALUES (${userId}, ${data.accessToken}, ${data.refreshToken}, ${data.expiresAt}, ${data.scope}, ${data.qfAccountId}, NOW())
-    ON CONFLICT (user_id) DO UPDATE SET
-      access_token = EXCLUDED.access_token,
-      refresh_token = COALESCE(EXCLUDED.refresh_token, qf_user_tokens.refresh_token),
-      expires_at = EXCLUDED.expires_at,
-      scope = EXCLUDED.scope,
-      qf_account_id = COALESCE(EXCLUDED.qf_account_id, qf_user_tokens.qf_account_id),
-      updated_at = NOW()
-  `);
+  // COALESCE(newValue, currentColumn) in the SET clause is atomic: if the
+  // incoming value is null, PostgreSQL keeps the current stored value.
+  // ${qfUserTokens.refreshToken} is a typed Drizzle column reference so
+  // any future column rename is caught by the TypeScript compiler.
+  await db
+    .insert(qfUserTokens)
+    .values({
+      userId,
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      expiresAt: data.expiresAt,
+      scope: data.scope,
+      qfAccountId: data.qfAccountId,
+      updatedAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: qfUserTokens.userId,
+      set: {
+        accessToken: data.accessToken,
+        refreshToken: sql`COALESCE(${data.refreshToken}, ${qfUserTokens.refreshToken})`,
+        expiresAt: data.expiresAt,
+        scope: data.scope,
+        qfAccountId: sql`COALESCE(${data.qfAccountId}, ${qfUserTokens.qfAccountId})`,
+        updatedAt: new Date(),
+      },
+    });
 }
 
 async function deleteTokens(userId: string): Promise<void> {
-  await db.execute(sql`DELETE FROM qf_user_tokens WHERE user_id = ${userId}`);
+  await db.delete(qfUserTokens).where(eq(qfUserTokens.userId, userId));
 }
 
 // ─── PKCE pending state — stored on the user's session, not in DB.
@@ -110,13 +118,13 @@ declare module "express-session" {
 }
 
 // ─── Token refresh ──────────────────────────────────────────────────
-async function refreshAccessToken(userId: string, row: QfTokenRow): Promise<string | null> {
-  if (!row.refresh_token) return null;
+async function refreshAccessToken(userId: string, row: QfUserToken): Promise<string | null> {
+  if (!row.refreshToken) return null;
   const body = new URLSearchParams({
     grant_type: "refresh_token",
     client_id: CLIENT_ID,
     client_secret: CLIENT_SECRET,
-    refresh_token: row.refresh_token,
+    refresh_token: row.refreshToken,
   });
   const res = await fetch(`${AUTH_BASE}/oauth2/token`, {
     method: "POST",
@@ -133,10 +141,10 @@ async function refreshAccessToken(userId: string, row: QfTokenRow): Promise<stri
   const expiresAt = new Date(Date.now() + (data.expires_in ?? 3600) * 1000);
   await writeTokens(userId, {
     accessToken: data.access_token,
-    refreshToken: data.refresh_token ?? row.refresh_token,
+    refreshToken: data.refresh_token ?? row.refreshToken,
     expiresAt,
     scope: data.scope ?? row.scope,
-    qfAccountId: row.qf_account_id,
+    qfAccountId: row.qfAccountId,
   });
   return data.access_token;
 }
@@ -145,7 +153,7 @@ async function getValidAccessToken(userId: string): Promise<string | null> {
   const row = await readTokens(userId);
   if (!row) return null;
   // Re-use if at least 60s of validity remain.
-  if (row.expires_at.getTime() - 60_000 > Date.now()) return row.access_token;
+  if (row.expiresAt.getTime() - 60_000 > Date.now()) return row.accessToken;
   return refreshAccessToken(userId, row);
 }
 

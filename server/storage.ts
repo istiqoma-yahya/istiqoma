@@ -1,9 +1,9 @@
 import { db } from "./db";
 export { db };
 import { computeCommunityTargetLeaderboard, getCommunityPeriodBounds as getCommunityPeriodBoundsHelper, type LeaderboardMember } from "./community-targets-helpers";
-import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, quizQuestions, userQuizProgress, quizAttempts, campaigns, communityTargets, communityTargetMembers, recommendationRateLimitCalls, voiceParseRateLimitCalls, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization, type QuizState, type QuizActiveAttempt, type QuizAnswerResult, type QuizLeaderboardEntry, type Campaign, type InsertCampaign, type UpdateCampaign, type CommunityTarget, type InsertCommunityTarget, type CommunityTargetMember, type CommunityTargetListItem, type CommunityTargetLeaderboardEntry } from "@shared/schema";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, usernameLogins, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, quizQuestions, userQuizProgress, quizAttempts, campaigns, communityTargets, communityTargetMembers, recommendationRateLimitCalls, voiceParseRateLimitCalls, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization, type QuizState, type QuizActiveAttempt, type QuizAnswerResult, type QuizLeaderboardEntry, type Campaign, type InsertCampaign, type UpdateCampaign, type CommunityTarget, type InsertCommunityTarget, type CommunityTargetMember, type CommunityTargetListItem, type CommunityTargetLeaderboardEntry } from "@shared/schema";
 import { userBadges } from "@shared/badges";
-import { eq, desc, and, asc, sql, gte, lte, isNull, inArray, ilike, or, count } from "drizzle-orm";
+import { eq, desc, and, asc, sql, gte, lte, gt, isNull, inArray, ilike, or, count } from "drizzle-orm";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 
@@ -1509,32 +1509,39 @@ export class DatabaseStorage implements IStorage {
         break;
     }
 
-    // Resolve effective cursor first when mode = around and no cursor is
-    // provided. We look up the current user's rank in this window so the
-    // initial fetch is centered on them. If the user has no points in this
-    // window (so no rank), default the window to the top of the board.
+    // One typed Drizzle query fetches every user's points in the period window
+    // along with their display name (OIDC users: users.username; PIN users:
+    // usernameLogins.username). Ranking and windowing are done in TypeScript
+    // so all column references are compile-time safe.
+    const allUserPoints = await db
+      .select({
+        id: users.id,
+        username: sql<string | null>`COALESCE(${users.username}, ${usernameLogins.username})`,
+        email: users.email,
+        profileImageUrl: users.profileImageUrl,
+        pts: sql<number>`COALESCE(SUM(CASE WHEN ${deeds.createdAt} >= ${startUtc} AND ${deeds.createdAt} <= ${endUtc} THEN ${deeds.points} ELSE 0 END), 0)::int`,
+      })
+      .from(users)
+      .leftJoin(usernameLogins, eq(usernameLogins.userId, users.id))
+      .leftJoin(deeds, eq(deeds.userId, users.id))
+      .groupBy(users.id, usernameLogins.username);
+
+    // Filter to users with points > 0, then sort by pts DESC, id ASC
+    // (mirrors the original ROW_NUMBER() OVER (ORDER BY pts DESC, id ASC) ordering).
+    const ranked = allUserPoints
+      .filter(u => u.pts > 0)
+      .sort((a, b) => b.pts - a.pts || a.id.localeCompare(b.id));
+
+    const total = ranked.length;
+
+    // Resolve effective cursor for "around" mode when none is provided.
+    // If the current user has no points in the window, default to the top.
     let cursor = opts.cursor;
     let me: { rank: number; points: number } | null = null;
     if (opts.mode === "around" && cursor === null) {
-      const meRows = await db.execute(sql`
-        WITH user_points AS (
-          SELECT u.id,
-            COALESCE(SUM(CASE WHEN d.created_at >= ${startUtc} AND d.created_at <= ${endUtc} THEN d.points ELSE 0 END), 0)::int AS pts
-          FROM ${users} u
-          LEFT JOIN ${deeds} d ON d.user_id = u.id
-          GROUP BY u.id
-        ),
-        ranked AS (
-          SELECT id, pts,
-            (ROW_NUMBER() OVER (ORDER BY pts DESC, id ASC))::int AS rank
-          FROM user_points
-          WHERE pts > 0
-        )
-        SELECT rank, pts FROM ranked WHERE id = ${currentUserId}
-      `);
-      const row = (meRows.rows ?? meRows)[0] as { rank?: number; pts?: number } | undefined;
-      if (row && typeof row.rank === "number") {
-        me = { rank: Number(row.rank), points: Number(row.pts ?? 0) };
+      const myIdx = ranked.findIndex(u => u.id === currentUserId);
+      if (myIdx !== -1) {
+        me = { rank: myIdx + 1, points: ranked[myIdx].pts };
         cursor = me.rank;
       } else {
         cursor = 1;
@@ -1566,60 +1573,26 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // `users.username` is the SSO display field. Username-login users
-    // intentionally have NULL there — their handle lives in
-    // `username_logins`. COALESCE so both kinds of users get a name on
-    // the leaderboard.
-    const result = await db.execute(sql`
-      WITH user_points AS (
-        SELECT u.id,
-          COALESCE(u.username, ul.username) AS username,
-          u.email, u.profile_image_url,
-          COALESCE(SUM(CASE WHEN d.created_at >= ${startUtc} AND d.created_at <= ${endUtc} THEN d.points ELSE 0 END), 0)::int AS pts
-        FROM ${users} u
-        LEFT JOIN username_logins ul ON ul.user_id = u.id
-        LEFT JOIN ${deeds} d ON d.user_id = u.id
-        GROUP BY u.id, ul.username
-      ),
-      ranked AS (
-        SELECT id, username, email, profile_image_url, pts,
-          (ROW_NUMBER() OVER (ORDER BY pts DESC, id ASC))::int AS rank
-        FROM user_points
-        WHERE pts > 0
-      ),
-      window_rows AS (
-        SELECT * FROM ranked
-        WHERE rank BETWEEN ${lowRank} AND ${highRank}
-        ORDER BY rank
-      )
-      SELECT
-        (SELECT COALESCE(json_agg(row_to_json(w) ORDER BY w.rank), '[]'::json) FROM window_rows w) AS entries,
-        (SELECT row_to_json(m) FROM (SELECT rank, pts FROM ranked WHERE id = ${currentUserId}) m) AS me,
-        (SELECT COUNT(*)::int FROM ranked) AS total
-    `);
-
-    const row = (result.rows ?? result)[0] as {
-      entries: Array<{ id: string; username: string | null; email: string | null; profile_image_url: string | null; pts: number; rank: number }>;
-      me: { rank: number; pts: number } | null;
-      total: number;
-    };
-
-    const entries: LeaderboardEntry[] = (row.entries ?? []).map((r) => ({
-      rank: Number(r.rank),
+    // Slice the ranked array to the requested window (ranks are 1-indexed).
+    const windowSlice = ranked.slice(lowRank - 1, highRank);
+    const entries: LeaderboardEntry[] = windowSlice.map((r, i) => ({
+      rank: lowRank + i,
       userId: r.id,
-      username: r.username,
-      email: r.email,
-      profileImageUrl: r.profile_image_url,
-      points: Number(r.pts),
+      username: r.username ?? null,
+      email: r.email ?? null,
+      profileImageUrl: r.profileImageUrl ?? null,
+      points: r.pts,
     }));
 
-    if (!me && row.me) {
-      me = { rank: Number(row.me.rank), points: Number(row.me.pts) };
-    } else if (!me && opts.mode !== "around") {
-      // Other modes might be called without me being computed; keep as null.
+    // Compute me if not already set (before/after modes don't set it above).
+    if (!me) {
+      const myIdx = ranked.findIndex(r => r.id === currentUserId);
+      if (myIdx !== -1) {
+        me = { rank: myIdx + 1, points: ranked[myIdx].pts };
+      }
     }
 
-    return { entries, me, total: Number(row.total ?? 0) };
+    return { entries, me, total };
   }
 
   // ─── Quiz ───────────────────────────────────────────────────
@@ -1731,15 +1704,20 @@ export class DatabaseStorage implements IStorage {
     // content fall back to a random sample drawn from the entire question
     // bank so progression remains unlimited. We always require at least 10
     // questions to exist somewhere in the bank.
-    const picked = await db.execute<{ id: number }>(sql`
-      SELECT id FROM ${quizQuestions} WHERE level = ${level} ORDER BY RANDOM() LIMIT 10
-    `);
-    let ids = ((picked.rows ?? picked) as Array<{ id: number }>).map((r) => Number(r.id));
+    const picked = await db
+      .select({ id: quizQuestions.id })
+      .from(quizQuestions)
+      .where(eq(quizQuestions.level, level))
+      .orderBy(sql`RANDOM()`)
+      .limit(10);
+    let ids = picked.map((r) => r.id);
     if (ids.length < 10) {
-      const fallback = await db.execute<{ id: number }>(sql`
-        SELECT id FROM ${quizQuestions} ORDER BY RANDOM() LIMIT 10
-      `);
-      ids = ((fallback.rows ?? fallback) as Array<{ id: number }>).map((r) => Number(r.id));
+      const fallback = await db
+        .select({ id: quizQuestions.id })
+        .from(quizQuestions)
+        .orderBy(sql`RANDOM()`)
+        .limit(10);
+      ids = fallback.map((r) => r.id);
     }
     if (ids.length < 10) {
       throw new QuizError(
@@ -1881,44 +1859,54 @@ export class DatabaseStorage implements IStorage {
     total: number;
   }> {
     const cap = Math.max(1, Math.min(200, limit | 0 || 50));
-    const result = await db.execute(sql`
-      WITH base AS (
-        SELECT u.id, COALESCE(u.username, ul.username) AS username,
-          u.email, u.profile_image_url,
-          COALESCE(p.current_level, 1) AS level,
-          COALESCE(p.total_correct, 0) AS total_correct
-        FROM ${users} u
-        LEFT JOIN username_logins ul ON ul.user_id = u.id
-        INNER JOIN ${userQuizProgress} p ON p.user_id = u.id
-        WHERE COALESCE(p.total_correct, 0) > 0 OR COALESCE(p.current_level, 1) > 1
-      ),
-      ranked AS (
-        SELECT *, (ROW_NUMBER() OVER (ORDER BY level DESC, total_correct DESC, id ASC))::int AS rank
-        FROM base
-      )
-      SELECT
-        (SELECT COALESCE(json_agg(row_to_json(w) ORDER BY w.rank), '[]'::json)
-          FROM (SELECT * FROM ranked ORDER BY rank LIMIT ${cap}) w) AS entries,
-        (SELECT row_to_json(m) FROM (SELECT rank, level, total_correct FROM ranked WHERE id = ${currentUserId}) m) AS me,
-        (SELECT COUNT(*)::int FROM ranked) AS total
-    `);
-    const row = (result.rows ?? result)[0] as {
-      entries: Array<{ id: string; username: string | null; email: string | null; profile_image_url: string | null; level: number; total_correct: number; rank: number }>;
-      me: { rank: number; level: number; total_correct: number } | null;
-      total: number;
-    };
-    const entries: QuizLeaderboardEntry[] = (row.entries ?? []).map((r) => ({
-      rank: Number(r.rank),
+
+    // One typed Drizzle query fetches all qualifying users with quiz progress
+    // and their display names. Ranking and slicing are done in TypeScript so
+    // all column references are compile-time safe.
+    const allProgress = await db
+      .select({
+        id: users.id,
+        username: sql<string | null>`COALESCE(${users.username}, ${usernameLogins.username})`,
+        email: users.email,
+        profileImageUrl: users.profileImageUrl,
+        level: userQuizProgress.currentLevel,
+        totalCorrect: userQuizProgress.totalCorrect,
+      })
+      .from(users)
+      .leftJoin(usernameLogins, eq(usernameLogins.userId, users.id))
+      .innerJoin(userQuizProgress, eq(userQuizProgress.userId, users.id))
+      .where(
+        or(
+          gt(userQuizProgress.totalCorrect, 0),
+          gt(userQuizProgress.currentLevel, 1),
+        )
+      );
+
+    // Sort by level DESC, totalCorrect DESC, id ASC
+    // (mirrors original ROW_NUMBER() OVER (ORDER BY level DESC, total_correct DESC, id ASC)).
+    const ranked = allProgress.sort((a, b) =>
+      b.level - a.level || b.totalCorrect - a.totalCorrect || a.id.localeCompare(b.id)
+    );
+
+    const total = ranked.length;
+
+    const entries: QuizLeaderboardEntry[] = ranked.slice(0, cap).map((r, i) => ({
+      rank: i + 1,
       userId: r.id,
-      username: r.username,
-      email: r.email,
-      profileImageUrl: r.profile_image_url,
-      level: Number(r.level),
-      totalCorrect: Number(r.total_correct),
+      username: r.username ?? null,
+      email: r.email ?? null,
+      profileImageUrl: r.profileImageUrl ?? null,
+      level: r.level,
+      totalCorrect: r.totalCorrect,
       isCurrentUser: r.id === currentUserId,
     }));
-    const me = row.me ? { rank: Number(row.me.rank), level: Number(row.me.level), totalCorrect: Number(row.me.total_correct) } : null;
-    return { entries, me, total: Number(row.total ?? 0) };
+
+    const myIdx = ranked.findIndex(r => r.id === currentUserId);
+    const me = myIdx !== -1
+      ? { rank: myIdx + 1, level: ranked[myIdx].level, totalCorrect: ranked[myIdx].totalCorrect }
+      : null;
+
+    return { entries, me, total };
   }
 
   // ─── Public: Active Campaigns ─────────────────────────────────

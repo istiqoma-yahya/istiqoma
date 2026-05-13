@@ -476,7 +476,16 @@ export default function TargetsPage() {
         if (updateModalTarget.isJamaah) deedData.isJamaah = updateModalTarget.isJamaah;
         if (updateModalTarget.quranUnit) deedData.quranUnit = updateModalTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz";
         if (updateModalTarget.sedekahType) deedData.sedekahType = updateModalTarget.sedekahType as "uang" | "hitungan";
-        if (updateModalTarget.customUnit) deedData.customUnit = updateModalTarget.customUnit;
+        // Dzikir targets always use "times" (matching DzikirPage). For other targets,
+        // validate the stored value is a recognised enum member before passing through.
+        {
+          const _allowed = ["hitungan","ayat","halaman","surat","juz","rakaat","hari","uang","times","days"] as const;
+          if (updateModalTarget.dzikirType) {
+            deedData.customUnit = "times";
+          } else if (updateModalTarget.customUnit && (_allowed as readonly string[]).includes(updateModalTarget.customUnit)) {
+            deedData.customUnit = updateModalTarget.customUnit as typeof _allowed[number];
+          }
+        }
         
         createDeed.mutate(deedData, {
           onSuccess: async (createdDeed) => {
@@ -531,7 +540,16 @@ export default function TargetsPage() {
         if (updateModalTarget.isJamaah) deedData.isJamaah = updateModalTarget.isJamaah;
         if (updateModalTarget.quranUnit) deedData.quranUnit = updateModalTarget.quranUnit as "ayat" | "halaman" | "surat" | "juz";
         if (updateModalTarget.sedekahType) deedData.sedekahType = updateModalTarget.sedekahType as "uang" | "hitungan";
-        if (updateModalTarget.customUnit) deedData.customUnit = updateModalTarget.customUnit;
+        // Dzikir targets always use "times" (matching DzikirPage). For other targets,
+        // validate the stored value is a recognised enum member before passing through.
+        {
+          const _allowed = ["hitungan","ayat","halaman","surat","juz","rakaat","hari","uang","times","days"] as const;
+          if (updateModalTarget.dzikirType) {
+            deedData.customUnit = "times";
+          } else if (updateModalTarget.customUnit && (_allowed as readonly string[]).includes(updateModalTarget.customUnit)) {
+            deedData.customUnit = updateModalTarget.customUnit as typeof _allowed[number];
+          }
+        }
         
         createDeed.mutate(deedData, {
           onSuccess: async (createdDeed) => {

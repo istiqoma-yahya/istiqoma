@@ -574,15 +574,26 @@ export default function Landing() {
             <h2 className="text-3xl md:text-5xl font-bold font-display mb-4 leading-tight" data-testid="text-cta-heading">
               {t('landing.cta.title')}
             </h2>
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              className="btn-primary text-base px-10 py-3.5 inline-flex items-center justify-center gap-2"
-              data-testid="button-cta-signup"
-            >
-              <SiGoogle className="w-5 h-5 shrink-0" />
-              {t('landing.cta.button')}
-            </button>
+            <div className="flex flex-col gap-3 max-w-md mx-auto">
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className="btn-primary w-full text-base px-6 py-3.5 flex items-center justify-center gap-2"
+                data-testid="button-cta-signup"
+              >
+                <SiGoogle className="w-5 h-5 shrink-0" />
+                <span className="whitespace-nowrap">{t('landing.authChooser.continueGoogle')}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleUsernameLogin}
+                className="btn-secondary w-full text-base px-6 py-3.5 flex items-center justify-center gap-2 border border-border"
+                data-testid="button-cta-username"
+              >
+                <KeyRound className="w-5 h-5 shrink-0" />
+                <span className="whitespace-nowrap">{t('landing.authChooser.continueUsername')}</span>
+              </button>
+            </div>
             <p className="mt-5 text-sm text-muted-foreground" data-testid="text-cta-note">
               {t('landing.cta.note')}
             </p>

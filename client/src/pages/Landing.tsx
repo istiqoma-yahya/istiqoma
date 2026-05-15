@@ -574,9 +574,6 @@ export default function Landing() {
             <h2 className="text-3xl md:text-5xl font-bold font-display mb-4 leading-tight" data-testid="text-cta-heading">
               {t('landing.cta.title')}
             </h2>
-            <p className="text-muted-foreground mb-10 text-base md:text-lg" data-testid="text-cta-subtitle">
-              {t('landing.cta.subtitle')}
-            </p>
             <button
               type="button"
               onClick={handleGoogleLogin}

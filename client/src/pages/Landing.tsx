@@ -594,9 +594,6 @@ export default function Landing() {
                 <span className="whitespace-nowrap">{t('landing.authChooser.continueUsername')}</span>
               </button>
             </div>
-            <p className="mt-5 text-sm text-muted-foreground" data-testid="text-cta-note">
-              {t('landing.cta.note')}
-            </p>
           </motion.div>
         </div>
       </section>

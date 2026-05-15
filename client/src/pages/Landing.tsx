@@ -354,7 +354,7 @@ export default function Landing() {
                 {
                   icon: BookOpen,
                   title: t('landing.features.quranTitle'),
-                  desc: t('landing.features.quranDesc'),
+                  desc: "Baca atau dengarkan lantunan Al-Quran dari berbagai Qori. Hafalkan Al-Quran dengan metode rekam suara.",
                   iconBg: "bg-blue-500/10",
                   iconColor: "text-blue-500"
                 },

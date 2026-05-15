@@ -94,32 +94,51 @@ const ALLOWED_PATH_RE =
 async function proxyGet(targetPath: string, query: string): Promise<globalThis.Response> {
   const qs = query ? `?${query}` : "";
   if (isQfContentConfigured()) {
-    let token = await getQfContentToken();
-    let upstream = await fetch(`${API_BASE}/content/api/v4${targetPath}${qs}`, {
-      headers: {
-        "x-auth-token": token,
-        "x-client-id": CLIENT_ID,
-      },
-    });
-    if (upstream.status === 401) {
-      // Token may have expired between the cache check and the call.
-      // Per QF docs: clear cache, re-request once, retry once.
-      clearCachedToken();
-      token = await getQfContentToken();
-      upstream = await fetch(`${API_BASE}/content/api/v4${targetPath}${qs}`, {
+    try {
+      let token = await getQfContentToken();
+      let upstream = await fetch(`${API_BASE}/content/api/v4${targetPath}${qs}`, {
         headers: {
           "x-auth-token": token,
           "x-client-id": CLIENT_ID,
         },
       });
+      if (upstream.status === 401) {
+        // Token may have expired between the cache check and the call.
+        // Per QF docs: clear cache, re-request once, retry once.
+        clearCachedToken();
+        token = await getQfContentToken();
+        upstream = await fetch(`${API_BASE}/content/api/v4${targetPath}${qs}`, {
+          headers: {
+            "x-auth-token": token,
+            "x-client-id": CLIENT_ID,
+          },
+        });
+      }
+      if (!upstream.ok) {
+        throw new Error(`QF upstream returned ${upstream.status} for ${targetPath}`);
+      }
+      return upstream;
+    } catch (err) {
+      console.warn(
+        "[qf-content] token error or upstream failure, falling back to quran.com:",
+        err instanceof Error ? err.message : err
+      );
+      // Fall through to the public quran.com fallback below.
     }
-    return upstream;
   }
   // Fallback to public quran.com v4 (identical path shape).
   return fetch(`${FALLBACK_BASE}/api/v4${targetPath}${qs}`);
 }
 
 export function registerQfContentRoutes(app: Express): void {
+  if (isQfContentConfigured()) {
+    console.log(
+      `[qf-content] QF Content API configured (env=${QF_CONTENT_ENV}, base=${API_BASE})`
+    );
+  } else {
+    console.log("[qf-content] QF Content API credentials not set — using quran.com fallback");
+  }
+
   // `/api/qf/content/<rest>` → upstream `<API_BASE>/content/api/v4/<rest>`.
   // GET only — the Content API is read-only for our use cases.
   app.get(/^\/api\/qf\/content(\/.*)$/, async (req: Request, res: ExpressResponse) => {

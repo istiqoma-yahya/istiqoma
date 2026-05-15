@@ -118,11 +118,9 @@ export default function Landing() {
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Background Gradients */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
-
       {/* Navbar */}
       <nav className="container mx-auto px-6 py-6 relative z-10 flex items-center justify-between gap-4">
         <div className="flex items-center">
@@ -144,7 +142,6 @@ export default function Landing() {
           </button>
         </div>
       </nav>
-
       {/* Hero Section */}
       <section className="relative min-h-[600px] md:min-h-[700px]">
         {/* Unicorn Studio Animation Background */}
@@ -300,7 +297,6 @@ export default function Landing() {
           </div>
         </main>
       </section>
-
       {/* Features Section */}
       <section
         className="relative z-20 py-20 -mt-24"
@@ -410,7 +406,6 @@ export default function Landing() {
           </motion.div>
         </div>
       </section>
-
       {/* Personalize Section */}
       <section className="relative z-10 py-20 bg-muted/30" data-testid="section-personalize">
         <div className="container mx-auto px-6">
@@ -507,7 +502,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Testimonial Section */}
       <section className="relative z-10 py-20 bg-background">
         <div className="container mx-auto px-6">
@@ -533,7 +527,6 @@ export default function Landing() {
           </motion.div>
         </div>
       </section>
-
       {isInstallable && !isInstalled && (
         <section className="relative z-10 pb-16 bg-background">
           <div className="container mx-auto px-6">
@@ -558,7 +551,6 @@ export default function Landing() {
           </div>
         </section>
       )}
-
       {/* CTA Section */}
       <section className="relative z-10 py-24 overflow-hidden border-t border-border" data-testid="section-cta">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-500/10 via-background to-background pointer-events-none" />
@@ -571,7 +563,7 @@ export default function Landing() {
             <span className="font-arabic text-3xl text-amber-500/80 mb-6 block" data-testid="text-cta-bismillah">
               بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم
             </span>
-            <h2 className="text-3xl md:text-5xl font-bold font-display mb-4 leading-tight" data-testid="text-cta-heading">
+            <h2 className="text-3xl md:text-5xl font-bold font-display leading-tight mb-[32px]" data-testid="text-cta-heading">
               {t('landing.cta.title')}
             </h2>
             <div className="flex flex-col gap-3 max-w-md mx-auto">
@@ -597,7 +589,6 @@ export default function Landing() {
           </motion.div>
         </div>
       </section>
-
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
         <p data-testid="text-footer-copyright">© {new Date().getFullYear()} {t('app.name')}. {t('app.tagline')}</p>
@@ -611,7 +602,6 @@ export default function Landing() {
           </a>
         </div>
       </footer>
-
       {/* Product Tour Overlay */}
       <AnimatePresence>
         {showTour && <ProductTour onClose={() => setShowTour(false)} />}

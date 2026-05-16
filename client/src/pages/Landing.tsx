@@ -9,6 +9,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import testimonialAvatar from "@/assets/testimonial-yahya.png";
 import istiqomaHorizontalLogo from "@assets/Istiqoma_New_Horizontal_Logo_1777797342711.png";
 import istiqomaHorizontalLogoDark from "@assets/Istiqoma_New_Horizontal_Logo_-_Darkmode_1777805633685.png";
+import istiqomaLogogram from "@assets/Istiqoma_New_Logogram_1777797303038.png";
+import istiqomaLogogramDark from "@assets/Istiqoma_New_Logogram_-_Darkmode_1777804992399.png";
 import { useTheme } from "@/components/ThemeProvider";
 import { useInstallPWA } from "@/hooks/use-install-pwa";
 import { ProductTour } from "@/components/ProductTour";
@@ -28,6 +30,7 @@ export default function Landing() {
   const { theme } = useTheme();
   const { toast } = useToast();
   const logoSrc = theme === "dark" ? istiqomaHorizontalLogoDark : istiqomaHorizontalLogo;
+  const logogramSrc = theme === "dark" ? istiqomaLogogramDark : istiqomaLogogram;
   const [showSticky, setShowSticky] = useState(false);
   const [showTour, setShowTour] = useState(false);
   const { isInstallable, isInstalled, install } = useInstallPWA();
@@ -91,7 +94,7 @@ export default function Landing() {
             <div className="container mx-auto flex items-center justify-between gap-4">
               <div className="flex items-center">
                 <img
-                  src={logoSrc}
+                  src={logogramSrc}
                   alt="Istiqoma"
                   className="h-8 w-auto"
                   data-testid="img-logo-sticky"

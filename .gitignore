@@ -9,3 +9,8 @@ playwright-report
 playwright/.cache
 screenshots
 .cache
+
+# Local environment files — never commit secrets
+.env
+.env.local
+.env.*.local

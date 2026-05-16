@@ -178,7 +178,20 @@ export async function fetchVerseAudioUrl(
 
     const file = data.audio_files.find((f) => f.verse_key === targetKey);
     if (file) {
-      const url = file.url.startsWith("http") ? file.url : `${VERSE_AUDIO_CDN}${file.url}`;
+      // The QF Content API returns one of three URL shapes per reciter:
+      //   1. Absolute URL  -> "https://server7.mp3quran.net/.../001.mp3"
+      //   2. Protocol-relative -> "//mirrors.quranicaudio.com/.../091002.mp3"
+      //      (e.g. reciter 6 Husary). Browsers accept these on https pages,
+      //      but we must NOT prepend our own CDN host or we get
+      //      "https://audio.qurancdn.com///mirrors.quranicaudio.com/..." → 404.
+      //   3. Path-only      -> "Alafasy/mp3/091002.mp3" (e.g. reciter 7).
+      //      These are served by the qurancdn.com CDN.
+      const raw = file.url;
+      const url = raw.startsWith("http")
+        ? raw
+        : raw.startsWith("//")
+          ? `https:${raw}`
+          : `${VERSE_AUDIO_CDN}${raw}`;
       return url;
     }
 

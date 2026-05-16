@@ -126,13 +126,18 @@ async function refreshAccessToken(userId: string, row: QfUserToken): Promise<str
   if (!row.refreshToken) return null;
   const body = new URLSearchParams({
     grant_type: "refresh_token",
-    client_id: CLIENT_ID,
-    client_secret: CLIENT_SECRET,
     refresh_token: row.refreshToken,
   });
+  // QF requires client_secret_basic — credentials in the Authorization
+  // header, NOT in the POST body (which would be client_secret_post and
+  // is rejected with invalid_client).
+  const basicAuth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
   const res = await fetch(`${AUTH_BASE}/oauth2/token`, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${basicAuth}`,
+    },
     body,
   });
   if (!res.ok) return null;
@@ -323,15 +328,20 @@ export function registerQfUserRoutes(
     try {
       const body = new URLSearchParams({
         grant_type: "authorization_code",
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
         redirect_uri: getRedirectUri(req),
         code,
         code_verifier: pending.codeVerifier,
       });
+      // QF requires client_secret_basic — credentials in the Authorization
+      // header, NOT in the POST body (which would be client_secret_post and
+      // is rejected with invalid_client).
+      const basicAuth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
       const r = await fetch(`${AUTH_BASE}/oauth2/token`, {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Basic ${basicAuth}`,
+        },
         body,
       });
       if (!r.ok) {

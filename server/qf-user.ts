@@ -34,9 +34,13 @@ const API_BASE = IS_PRELIVE
 const CLIENT_ID = process.env.QF_USER_CLIENT_ID || "";
 const CLIENT_SECRET = process.env.QF_USER_CLIENT_SECRET || "";
 // Scopes required for the Bookmarks endpoints. `openid` is required by
-// the OIDC layer; `offline` requests a refresh_token; `bookmark` grants
-// access to the bookmarks endpoints.
-const SCOPES = "openid offline bookmark";
+// the OIDC layer; `offline_access` requests a refresh_token; `bookmark`
+// grants access to the bookmarks endpoints. QF's production OAuth client
+// only allows the standard OIDC name `offline_access` — passing the
+// shorthand `offline` (which the pre-live server tolerated) is rejected
+// with `error=invalid_scope`, which surfaces in the browser as a failed
+// redirect ("site can't be reached").
+const SCOPES = "openid offline_access bookmark";
 
 export function isQfUserConfigured(): boolean {
   return Boolean(CLIENT_ID && CLIENT_SECRET);

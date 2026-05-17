@@ -1,100 +1,125 @@
-# Istiqoma — A Better You, One Deed at a Time
+# Istiqoma — إستقامة
 
-> **Quran Foundation Hackathon Submission**
+> **"Steadfastness"** — Your daily companion for spiritual growth and Islamic self-improvement.
 
-Istiqoma (إستقامة — "steadfastness") is a spiritual self-improvement app for Muslims. It brings together daily good-deed tracking, prayer time reminders, a full Qur'an reader with audio, and a points-and-streak system — all in one dark-themed, mobile-friendly Progressive Web App.
-
-**Live app:** [https://istiqoma.com](https://istiqoma.com)
+**Live app → [istiqoma.com](https://istiqoma.com)**
 
 ---
 
-## Screenshots
+## What is Istiqoma?
 
-<table>
-  <tr>
-    <td align="center"><img src="attached_assets/Screenshot_2026-05-03_at_17.59.44_1777806008957.png" width="480" alt="Landing page"/><br/><sub>Landing page</sub></td>
-    <td align="center"><img src="attached_assets/IMG_3949_1777268146468.png" width="220" alt="Dashboard — deeds, streak, Quran memorization target"/><br/><sub>Dashboard — deeds, streak &amp; Quran targets</sub></td>
-    <td align="center"><img src="attached_assets/IMG_3206_1772190342604.png" width="220" alt="Activity feed with points per deed"/><br/><sub>Activity feed &amp; points</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="attached_assets/IMG_3201_1772118037170.png" width="220" alt="Khatam Al-Quran — Quran reading target with juz counter and calendar"/><br/><sub>Khatam Al-Quran target (powered by QF Content API)</sub></td>
-    <td align="center"><img src="attached_assets/IMG_3947_1777249079115.png" width="220" alt="Prayer tracker — Sholat times"/><br/><sub>Prayer time tracker</sub></td>
-    <td align="center"><img src="attached_assets/IMG_3967_1777512496689.png" width="220" alt="Target consistency calendar"/><br/><sub>Target consistency calendar</sub></td>
-  </tr>
-</table>
+Istiqoma (إستقامة) is a spiritual self-improvement app for Muslims. It brings together everything you need to build and maintain consistent Islamic habits — a full Qur'an reader with audio and memorization tools, daily deed tracking, targets, prayer times, Qibla, dzikir counter, and more — all in one dark-themed, mobile-friendly Progressive Web App.
+
+<p align="center">
+  <img src="attached_assets/Screenshot_2026-05-17_at_06.48.42_1778975349367.png" width="820" alt="Istiqoma landing page"/>
+</p>
 
 ---
 
-## Key Features
+## Features
 
-- **Good-deed log** — record Sholat, Dzikir, Puasa, Quran reading, Sedekah, and custom acts of worship. Points are calculated server-side based on category and quantity.
-- **Full Qur'an reader** — all 114 surahs, multiple translations, verse-by-verse Arabic text, powered by the **Quran Foundation Content API**.
-- **Spotify-style audio player** — full-surah recitation with a mini player, reciter picker, and real-time verse highlighting driven by QF verse-timing data.
-- **Memorization tracker** — mark verses as memorized; each verse earns 50 points and auto-logs a "Hafalan Quran" deed that counts toward your streak and leaderboard rank.
-- **Cross-device bookmark sync** — connect your Quran.com / QuranReflect account via **Quran Foundation User API** (OAuth2 + PKCE) and your bookmarks sync between Istiqoma and Quran.com.
-- **Prayer times & Qibla** — location-aware prayer schedules using the `adhan` library; live compass for Qibla direction.
-- **Streaks & Streak Freezer** — daily streak tracking; spend earned points to freeze a missed day and protect your streak.
-- **Spiritual targets** — set recurring goals (daily/weekly/monthly) with interactive consistency calendars.
-- **Islamic Quiz** — 100 questions across 10 levels, fully localized in Indonesian, Malay, and English.
-- **Leaderboard** — community rankings by total points.
-- **Push notifications** — daily reminders, prayer-time alerts, and target nudges.
-- **Multilingual** — Indonesian (id), Malay (ms), English (en).
+### 📖 Full Qur'an Reader with Audio
+Read the complete Qur'an — all 114 surahs with multiple translations and verse-by-verse Arabic text. A built-in Spotify-style audio player streams full-surah recitation with a mini player, reciter picker, and **real-time verse highlighting** that auto-scrolls to the ayah currently being recited. Powered by the **Quran Foundation Content API**.
+
+<p align="center">
+  <img src="attached_assets/IMG_4213_1778976738085.PNG" width="240" alt="Quran chapter list with Continue Reading and Bookmarks/Memorize tiles"/>
+  <img src="attached_assets/IMG_4215_1778976738086.PNG" width="240" alt="Now Playing — full-surah audio with auto-advance and continuous play"/>
+  <img src="attached_assets/IMG_4214_1778976738086.PNG" width="240" alt="Cross-device bookmarks synced via Quran Foundation User API"/>
+</p>
+
+### 🧠 Qur'an Memorization (Hifz)
+Practice and strengthen your memorization with an interactive tool that lets you **hide and reveal verses** (show full, first-and-last word, or fully hidden). **Record your own voice** to assess and review your recitation and tajweed. Each memorized verse earns 50 points and is automatically logged as a "Hafalan Quran" deed so it counts toward your streak and leaderboard rank.
+
+<p align="center">
+  <img src="attached_assets/IMG_4216_1778976738087.PNG" width="240" alt="Memorization mode with hide/reveal controls"/>
+  <img src="attached_assets/IMG_4217_1778976738087.PNG" width="240" alt="In-app voice recording for self-assessment of recitation"/>
+  <img src="attached_assets/IMG_4218_1778976738088.PNG" width="240" alt="Playback of your own recorded recitation"/>
+</p>
+
+### 🔁 Cross-device Bookmark Sync
+Connect your Quran.com / QuranReflect account via the **Quran Foundation User API** (OAuth2 + PKCE) and your verse bookmarks sync seamlessly between Istiqoma and Quran.com — read a verse here, bookmark it, and find it waiting for you on every device.
+
+### 🕌 Daily Good Deed Tracking
+Log Sholat, Dzikir, Puasa, Quran reading, Sedekah, kindness to parents, seeking knowledge, and any custom act of worship. Points are calculated server-side based on category and quantity, fueling a streak system that rewards consistency.
+
+<p align="center">
+  <img src="attached_assets/IMG_4205_1778976738082.PNG" width="240" alt="Dashboard — daily greeting, record deed CTA, points, streak, targets"/>
+  <img src="attached_assets/IMG_3103_1778976738080.PNG" width="240" alt="Streak celebration modal after logging a deed"/>
+</p>
+
+### 🎯 Personal & Community Targets
+Set meaningful commitments — daily, weekly, monthly, or one-time. Organize related goals into **folders**, track progress on an interactive consistency calendar, and join **community targets** to pursue shared spiritual goals with others.
+
+<p align="center">
+  <img src="attached_assets/IMG_4207_1778976738083.PNG" width="240" alt="Targets organized into folders with Individual/Community tabs"/>
+</p>
+
+### 📊 Progress Analytics
+Visualize your spiritual growth over time through beautiful line charts and category breakdowns. See patterns in your deed history across all categories — Dzikir, Fasting, Memorization, Recitation, Sholat, and more.
+
+<p align="center">
+  <img src="attached_assets/IMG_4208_1778976738083.PNG" width="240" alt="Spiritual Progress charts — line chart per category and deeds-by-category pie"/>
+</p>
+
+### 📚 Islamic Quiz
+Test and expand your knowledge of Islam through 100 questions across 10 levels, with a global leaderboard. Fully localized in English, Indonesian, and Malay — religious terms (Salah, Wudu, ﷺ, surah names, etc.) are kept literal across all locales.
+
+<p align="center">
+  <img src="attached_assets/IMG_4206_1778976738082.PNG" width="240" alt="Islamic Quiz — Level 8 question about the Conquest of Makkah"/>
+</p>
+
+### 🕐 Prayer Times & 🧭 Qibla Finder
+Accurate, location-based prayer schedules (Fajr, Dhuhr, Asr, Maghrib, Isha — plus Imsak, Sunrise, Dhuha, Tahajjud windows) powered by the `adhan` library. Mark prayers as complete to log them as deeds. Find the Qibla wherever you are with a live compass.
+
+<p align="center">
+  <img src="attached_assets/IMG_4211_1778976738084.PNG" width="240" alt="Prayer page — today's prayer times for Depok, Jawa Barat"/>
+  <img src="attached_assets/IMG_4212_1778976738085.PNG" width="240" alt="Live Qibla compass showing 295°"/>
+</p>
+
+### 📿 Dzikir Counter
+A simple, distraction-free digital tasbih for post-prayer remembrance and daily wird. Pick from common adhkar (Subhanallah, Alhamdulillah, Allahu Akbar, …) or add your own. Every tap is a point.
+
+<p align="center">
+  <img src="attached_assets/IMG_4209_1778976738084.PNG" width="240" alt="Dzikir Counter — tap-to-count tasbih"/>
+</p>
+
+### ❄️ Streaks & Streak Freezer
+Daily streak tracking that survives life's chaos — spend earned points to **freeze a missed day** and protect your streak. A floor date prevents retroactive repair beyond a safe horizon, and concurrent-safe locking prevents double-spends.
+
+### 🔔 Smart Push Notifications
+- Daily reminders at a time of your choosing (defaults derived from your onboarding answers).
+- Per-prayer Sholat reminders computed from your location.
+- Target nudges when you're falling behind.
+- Configurable notification sound (chime, double, ding, none).
+
+### 🌐 Multilingual
+Full UI translation in **English, Indonesian (Bahasa), and Malay** — including all 100 quiz questions.
+
+### 🔐 Flexible Authentication
+- **Google Sign-In** via Replit Auth (OIDC).
+- **Username + PIN** for users without Google, with brute-force protection (per-username lockout + per-IP rate limit) and scrypt-hashed PINs.
+- 90-day rolling sessions so you stay signed in.
 
 ---
 
 ## Quran Foundation API Integration
 
-Istiqoma uses two official Quran Foundation APIs as the hackathon-required integrations.
+Istiqoma uses **two** official Quran Foundation APIs:
 
 ### 1 — Content API (OAuth2 Client Credentials)
-
-**What it powers:** the entire Qur'an reader experience — chapter list, verse text, translations, reciter catalogue, surah-level audio streams, and verse timing data.
-
-| Feature | QF endpoint used |
-|---|---|
-| Chapter list & metadata | `GET /chapters` |
-| Verse text + translations | `GET /verses/by_chapter/{id}` |
-| Available reciters | `GET /resources/recitations` |
-| Surah audio stream URL | `GET /chapter_recitations/{reciter}/{chapter}` |
-| Verse timing segments | `GET /recitations/{reciter}/by_chapter/{chapter}?segments=true` |
-
-**Implementation:** `server/qf-content.ts` is a thin Express proxy at `/api/qf/content/*`. It:
-
-- Fetches an `OAuth2 client_credentials` token (scope: `content`) and caches it in-process.
-- Refreshes the token 60 seconds before expiry; on a 401 it clears the cache and retries once.
-- Attaches the required `x-auth-token` and `x-client-id` headers on every upstream request so credentials never reach the browser.
-- Enforces an allowlist of paths to prevent open-relay abuse.
-- Falls back transparently to the public `api.quran.com/api/v4` (identical path shape) when credentials are not configured, so local development works out of the box without QF keys.
-
-Verse-timing data (`?segments=true`) drives the real-time **active-verse highlight and auto-scroll** in the Qur'an reader: the player's `timeupdate` event compares playback position against `timestamp_from`/`timestamp_to` boundaries to scroll and highlight the current ayah as audio plays.
+Powers the entire Qur'an reader experience — chapter list, verse text, translations, reciter catalogue, surah audio streams, and **verse timing data** for the real-time active-ayah highlight. Implemented as a thin server-side proxy at `/api/qf/content/*` (`server/qf-content.ts`) so credentials never reach the browser. Falls back transparently to the public `api.quran.com/api/v4` when QF credentials aren't configured, so local development works out of the box.
 
 ### 2 — User API — Bookmarks (OAuth2 Authorization Code + PKCE)
+Powers cross-device bookmark sync between Istiqoma and users' Quran.com / QuranReflect accounts. Implemented in `server/qf-user.ts` with `scope=openid offline_access bookmark` and `client_secret_basic` token-endpoint authentication (both required by QF production). Mirroring is **non-fatal** — the local database is always the source of truth, so a QF outage never breaks the response.
 
-**What it powers:** cross-device bookmark sync between Istiqoma and users' Quran.com / QuranReflect accounts.
-
-**User flow:** A "Connect Quran Foundation" card on the profile page initiates the OAuth2 PKCE flow (`scope: openid offline_access bookmark`). After authorizing on Quran Foundation's consent page, the user's access and refresh tokens are stored in the `qf_user_tokens` table. From then on, every bookmark add/remove in Istiqoma is mirrored to QF in the background, and `GET /api/quran/bookmarks` merges the remote QF list into the local response.
-
-**Implementation:** `server/qf-user.ts` — key details:
-
-- Token exchange and refresh use `client_secret_basic` (HTTP Basic `Authorization` header) as required by QF production — sending credentials in the POST body is rejected with `invalid_client`.
-- The scope string is `openid offline_access bookmark`; the shorthand `offline` is rejected by QF production with `invalid_scope`.
-- Mirroring is **non-fatal**: if QF is unreachable, the local database remains the source of truth and the response always succeeds.
-- Endpoints: `GET /api/qf/connect` (start flow), `GET /api/qf/callback` (exchange code), `POST /api/qf/disconnect`, `GET /api/qf/status`.
-
----
-
-## Hackathon Judging Checklist
-
-| Requirement | Where to find it |
+| QF endpoint | Used for |
 |---|---|
-| Uses QF Content API | `server/qf-content.ts` — proxy at `/api/qf/content/*`; powering Qur'an reader, audio, verse timing |
-| Uses QF User API | `server/qf-user.ts` — OAuth2 PKCE bookmark sync at `/api/qf/*` |
-| Production QF credentials configured | `QF_CONTENT_ENV=production`, `QF_ENV=production` in env |
-| Real-time verse highlight via QF timing data | `client/src/pages/SurahPage.tsx` — `timeupdate` vs `timestamp_from`/`timestamp_to` |
-| Cross-device bookmark sync | Profile page → "Connect Quran Foundation" card → `qf_user_tokens` table |
-| Quran memorization rewarded as deeds | `POST /api/quran/memorizations` → auto-logs 50-pt "Hafalan Quran" deed |
-| Live at custom domain | [https://istiqoma.com](https://istiqoma.com) |
-| Mobile-friendly PWA | Installable from browser; dark theme; bottom navigation |
+| `GET /chapters` | Chapter list & metadata |
+| `GET /verses/by_chapter/{id}` | Verse text + translations |
+| `GET /resources/recitations` | Available reciters |
+| `GET /chapter_recitations/{reciter}/{chapter}` | Surah audio stream URL |
+| `GET /recitations/{reciter}/by_chapter/{chapter}?segments=true` | Verse timing data driving the live ayah highlight |
+| `GET/POST/DELETE /bookmarks` (User API) | Cross-device bookmark sync |
 
 ---
 
@@ -102,107 +127,66 @@ Verse-timing data (`?segments=true`) drives the real-time **active-verse highlig
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 18, TypeScript, Vite |
-| Routing | Wouter |
-| State / data | TanStack React Query v5 |
-| Styling | Tailwind CSS, shadcn/ui (Radix UI) |
-| Animations | Framer Motion |
+| Frontend | React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui (Radix UI), Framer Motion, Wouter, TanStack React Query v5 |
 | Backend | Express.js, TypeScript, Node.js (`tsx`) |
 | Database | PostgreSQL (Supabase) + Drizzle ORM |
 | Auth | Replit Auth (OIDC / Google SSO) + Username & PIN |
 | Sessions | `express-session` with PostgreSQL store |
-| Push notifications | Web Push API + VAPID keys |
+| Push | Web Push API + VAPID keys |
 | Prayer times | `adhan` library |
-| Deployment | Replit Autoscale |
+| Deployment | Replit Autoscale (PWA, installable on any device) |
 
 ---
 
-## Local Setup
+## Getting Started
 
-### Prerequisites
+Just visit **[istiqoma.com](https://istiqoma.com)** — no download required. Install it as a PWA from your browser for the full app experience on iOS, Android, or desktop.
 
-- Node.js 18+
-- A PostgreSQL database (Supabase free tier works)
-
-### 1. Fork on Replit or clone
-
-This project is hosted on Replit. To run it yourself:
-
-- **Replit (recommended):** fork the project at [https://replit.com/@your-username/istiqoma](https://replit.com) — dependencies install automatically.
-- **Local clone:**
+### Running locally
 
 ```bash
-git clone https://github.com/your-org/istiqoma.git   # replace with actual repo URL
+git clone https://github.com/your-org/istiqoma.git
 cd istiqoma
 npm install
 ```
 
-### 2. Environment variables
-
-Create a `.env` file (or set these in your hosting environment):
+Create a `.env` file:
 
 ```env
-# ── Required ──────────────────────────────────────────────────────────
+# Required
 DATABASE_URL=postgresql://user:password@host:5432/dbname
 SESSION_SECRET=a-long-random-string-at-least-32-chars
 
-# ── Web Push (generate with: npx web-push generate-vapid-keys) ────────
+# Web Push (generate with: npx web-push generate-vapid-keys)
 VAPID_PUBLIC_KEY=...
 VAPID_PRIVATE_KEY=...
 VAPID_SUBJECT=mailto:you@example.com
 
-# ── Quran Foundation Content API (OAuth2 client_credentials) ─────────
-# Get credentials at https://api-docs.quran.foundation
+# Quran Foundation Content API (optional — falls back to api.quran.com)
 QF_CONTENT_CLIENT_ID=your-content-client-id
 QF_CONTENT_CLIENT_SECRET=your-content-client-secret
-# QF_CONTENT_ENV=production   # default; use "prelive" for testing
 
-# ── Quran Foundation User API (OAuth2 Authorization Code + PKCE) ─────
-# Same client if your QF client has the bookmark scope approved
+# Quran Foundation User API (optional — hides "Connect QF" button if unset)
 QF_USER_CLIENT_ID=your-user-client-id
 QF_USER_CLIENT_SECRET=your-user-client-secret
 QF_REDIRECT_URI=https://your-domain.com/api/qf/callback
-# QF_ENV=production           # default; use "prelive" for testing
 ```
 
-> **Local dev without QF credentials:** Both QF integrations degrade gracefully. Without `QF_CONTENT_CLIENT_ID`, the Qur'an reader falls back to the public `api.quran.com/api/v4` API. Without `QF_USER_CLIENT_ID`, the "Connect Quran Foundation" button is hidden and bookmark sync is skipped — all other features work normally.
-
-### 3. Run database migrations
+Then:
 
 ```bash
-npm run db:push
+npm run db:push   # apply database schema
+npm run dev       # start the app on http://localhost:5000
 ```
 
-### 4. Start the development server
-
-```bash
-npm run dev
-```
-
-The app runs on [http://localhost:5000](http://localhost:5000) — Express serves both the API and the Vite-built frontend on the same port.
+See [`API_REFERENCE.md`](./API_REFERENCE.md) for the full REST API documentation.
 
 ---
 
-## Project Structure
+## Contributing
 
-```
-istiqoma/
-├── client/          # React frontend (pages, components, hooks, i18n)
-├── server/          # Express backend (routes, storage, QF proxies)
-│   ├── qf-content.ts   # QF Content API proxy
-│   └── qf-user.ts      # QF User API (OAuth2 + bookmarks)
-├── shared/          # Drizzle schema, Zod types, API contract
-└── API_REFERENCE.md # Full REST API documentation
-```
+Contributions, bug reports, and feature suggestions are welcome. Open an issue or submit a pull request.
 
 ---
 
-## API Reference
-
-See [`API_REFERENCE.md`](./API_REFERENCE.md) for the complete REST API documentation including the QF proxy endpoints and all data types.
-
----
-
-## License
-
-MIT
+*May this app be a source of barakah for every Muslim who uses it. 🤲*

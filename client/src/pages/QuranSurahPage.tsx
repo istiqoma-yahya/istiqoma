@@ -11,6 +11,7 @@ import {
   Eye,
   EyeOff,
   Mic,
+  Pause,
   Square,
   Trash2,
 } from "lucide-react";
@@ -19,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { QuranMiniPlayer } from "@/components/QuranMiniPlayer";
+import { VoiceRecordingMiniPlayer } from "@/components/VoiceRecordingMiniPlayer";
 import { QuranFontPicker } from "@/components/QuranFontPicker";
 import { useToast } from "@/hooks/use-toast";
 import { useVoiceRecorder } from "../../replit_integrations/audio/useVoiceRecorder";
@@ -124,7 +126,19 @@ export default function QuranSurahPage() {
   const [recordingsVersion, setRecordingsVersion] = useState(0);
   const [activeRecordVerse, setActiveRecordVerse] = useState<number | null>(null);
   const recorder = useVoiceRecorder();
-  const audioElsRef = useRef<Map<number, HTMLAudioElement>>(new Map());
+
+  // Shared audio element for playing back recorded verses. Only one
+  // recording plays at a time, so we keep a single hidden <audio> driven
+  // by the floating mini-player below.
+  const recordAudioRef = useRef<HTMLAudioElement | null>(null);
+  if (!recordAudioRef.current && typeof window !== "undefined") {
+    recordAudioRef.current = new Audio();
+    recordAudioRef.current.preload = "auto";
+  }
+  const [playingRecordVerse, setPlayingRecordVerse] = useState<number | null>(null);
+  const [recordIsPlaying, setRecordIsPlaying] = useState(false);
+  const [recordPosition, setRecordPosition] = useState(0);
+  const [recordDuration, setRecordDuration] = useState(0);
 
   // Reset scroll position on mount when there's no deep-linked verse, so
   // entering a surah from the chapter list always starts at verse 1
@@ -284,13 +298,69 @@ export default function QuranSurahPage() {
   }, [surahId]);
 
   // Final cleanup on unmount (e.g. user navigates away from the Quran page
-  // entirely). Same goal: nothing recorded outlives the session.
+  // entirely). Same goal: nothing recorded outlives the session, and the
+  // shared playback element must release its source.
   useEffect(() => {
     return () => {
       recordingsRef.current.forEach((rec) => URL.revokeObjectURL(rec.url));
       recordingsRef.current.clear();
+      const a = recordAudioRef.current;
+      if (a) {
+        a.pause();
+        a.removeAttribute("src");
+        a.load();
+      }
     };
   }, []);
+
+  // Wire the shared recording-playback <audio> element to our React state
+  // so the floating mini-player can show progress and respond to controls.
+  useEffect(() => {
+    const a = recordAudioRef.current;
+    if (!a) return;
+    const onPlay = () => setRecordIsPlaying(true);
+    const onPause = () => setRecordIsPlaying(false);
+    const onTime = () => setRecordPosition(a.currentTime || 0);
+    const onLoaded = () => setRecordDuration(a.duration || 0);
+    const onEnded = () => {
+      setRecordIsPlaying(false);
+      setRecordPosition(0);
+      // Auto-hide the floating player when playback finishes naturally,
+      // matching the "visible while replaying" intent.
+      setPlayingRecordVerse(null);
+      a.removeAttribute("src");
+      a.load();
+      setRecordDuration(0);
+    };
+    a.addEventListener("play", onPlay);
+    a.addEventListener("pause", onPause);
+    a.addEventListener("timeupdate", onTime);
+    a.addEventListener("loadedmetadata", onLoaded);
+    a.addEventListener("ended", onEnded);
+    return () => {
+      a.removeEventListener("play", onPlay);
+      a.removeEventListener("pause", onPause);
+      a.removeEventListener("timeupdate", onTime);
+      a.removeEventListener("loadedmetadata", onLoaded);
+      a.removeEventListener("ended", onEnded);
+    };
+  }, []);
+
+  // When the user navigates between surahs, stop any in-flight playback
+  // and hide the floating player — the recordings for the previous surah
+  // are already revoked above.
+  useEffect(() => {
+    const a = recordAudioRef.current;
+    if (a) {
+      a.pause();
+      a.removeAttribute("src");
+      a.load();
+    }
+    setPlayingRecordVerse(null);
+    setRecordIsPlaying(false);
+    setRecordPosition(0);
+    setRecordDuration(0);
+  }, [surahId]);
 
   const bookmarkSet = useMemo(() => {
     if (!bookmarks || !surahId) return new Set<number>();
@@ -443,6 +513,19 @@ export default function QuranSurahPage() {
     }
   };
 
+  const closeRecordPlayer = () => {
+    const a = recordAudioRef.current;
+    if (a) {
+      a.pause();
+      a.removeAttribute("src");
+      a.load();
+    }
+    setPlayingRecordVerse(null);
+    setRecordIsPlaying(false);
+    setRecordPosition(0);
+    setRecordDuration(0);
+  };
+
   const deleteRecord = (verseNumber: number) => {
     const rec = recordingsRef.current.get(verseNumber);
     if (rec) {
@@ -450,19 +533,61 @@ export default function QuranSurahPage() {
       recordingsRef.current.delete(verseNumber);
       setRecordingsVersion((n) => n + 1);
     }
-    const audio = audioElsRef.current.get(verseNumber);
-    if (audio) {
-      audio.pause();
+    if (playingRecordVerse === verseNumber) {
+      closeRecordPlayer();
     }
   };
 
   const playRecord = (verseNumber: number) => {
-    const audio = audioElsRef.current.get(verseNumber);
-    if (audio) {
-      audio.currentTime = 0;
-      void audio.play();
+    const a = recordAudioRef.current;
+    if (!a) return;
+    const rec = recordingsRef.current.get(verseNumber);
+    if (!rec) return;
+
+    // Toggle: if this verse's recording is already loaded into the shared
+    // player, just pause/resume instead of restarting from zero.
+    if (playingRecordVerse === verseNumber) {
+      if (a.paused) {
+        void a.play();
+      } else {
+        a.pause();
+      }
+      return;
+    }
+
+    // Swap source to this verse's recording.
+    a.pause();
+    a.src = rec.url;
+    a.currentTime = 0;
+    setRecordPosition(0);
+    setRecordDuration(0);
+    setPlayingRecordVerse(verseNumber);
+    void a.play().catch(() => {
+      setRecordIsPlaying(false);
+    });
+  };
+
+  const seekRecord = (seconds: number) => {
+    const a = recordAudioRef.current;
+    if (!a) return;
+    a.currentTime = seconds;
+    setRecordPosition(seconds);
+  };
+
+  const toggleRecordPlayback = () => {
+    const a = recordAudioRef.current;
+    if (!a || playingRecordVerse === null) return;
+    if (a.paused) {
+      void a.play();
+    } else {
+      a.pause();
     }
   };
+
+  const playingRecordLabel = useMemo(() => {
+    if (playingRecordVerse === null || !chapter) return "";
+    return `${chapter.name_simple} · ${t("quranMenu.verseShort")} ${playingRecordVerse}`;
+  }, [playingRecordVerse, chapter, t]);
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -730,38 +855,42 @@ export default function QuranSurahPage() {
                           </Button>
                         )}
 
-                        {recording && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => playRecord(v.verse_number)}
-                              data-testid={`button-play-record-${v.verse_number}`}
-                              aria-label={t("quranMenu.playRecording")}
-                            >
-                              <Play className="w-3.5 h-3.5 mr-1" />
-                              {t("quranMenu.playRecording")}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => deleteRecord(v.verse_number)}
-                              data-testid={`button-delete-record-${v.verse_number}`}
-                              aria-label={t("quranMenu.deleteRecording")}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                            <audio
-                              ref={(el) => {
-                                if (el) audioElsRef.current.set(v.verse_number, el);
-                                else audioElsRef.current.delete(v.verse_number);
-                              }}
-                              src={recording.url}
-                              preload="auto"
-                              data-testid={`audio-record-${v.verse_number}`}
-                            />
-                          </>
-                        )}
+                        {recording && (() => {
+                          const isThisPlaying =
+                            playingRecordVerse === v.verse_number && recordIsPlaying;
+                          return (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => playRecord(v.verse_number)}
+                                data-testid={`button-play-record-${v.verse_number}`}
+                                aria-label={
+                                  isThisPlaying
+                                    ? t("quranMenu.voicePlayerPause")
+                                    : t("quranMenu.playRecording")
+                                }
+                                aria-pressed={isThisPlaying}
+                              >
+                                {isThisPlaying ? (
+                                  <Pause className="w-3.5 h-3.5 mr-1" />
+                                ) : (
+                                  <Play className="w-3.5 h-3.5 mr-1" />
+                                )}
+                                {t("quranMenu.playRecording")}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => deleteRecord(v.verse_number)}
+                                data-testid={`button-delete-record-${v.verse_number}`}
+                                aria-label={t("quranMenu.deleteRecording")}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </>
+                          );
+                        })()}
                       </div>
                     )}
 
@@ -825,6 +954,18 @@ export default function QuranSurahPage() {
       </main>
 
       <QuranMiniPlayer />
+      {playingRecordVerse !== null && (
+        <VoiceRecordingMiniPlayer
+          label={playingRecordLabel}
+          position={recordPosition}
+          duration={recordDuration}
+          isPlaying={recordIsPlaying}
+          onToggle={toggleRecordPlayback}
+          onSeek={seekRecord}
+          onClose={closeRecordPlayer}
+          stacked={current != null}
+        />
+      )}
       <BottomNavigation />
     </div>
   );

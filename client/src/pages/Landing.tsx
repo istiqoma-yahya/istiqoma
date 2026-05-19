@@ -307,11 +307,35 @@ function RemindersIllustration() {
 function AnalyticsIllustration() {
   const { t } = useTranslation();
   const base = "landing.featureSections.analytics.illustration";
-  const bars = [40, 65, 50, 80, 55, 90, 70];
-  const days = ["S", "M", "T", "W", "T", "F", "S"];
+  const dayValues = [12, 20, 15, 24, 17, 27, 21];
+  const days = [0, 1, 2, 3, 4, 5, 6].map((i) => t(`${base}.dayShort_${i}`));
+  const yMax = 30;
+  const peakIdx = dayValues.indexOf(Math.max(...dayValues));
+  const peakValue = dayValues[peakIdx];
+  const gridLines = [30, 20, 10];
+
+  const sparkPoints = [10, 14, 12, 18, 16, 22, 24];
+  const sparkMax = Math.max(...sparkPoints);
+  const sparkMin = Math.min(...sparkPoints);
+  const sparkW = 100;
+  const sparkH = 24;
+  const sparkCoords = sparkPoints.map((v, i) => {
+    const x = (i / (sparkPoints.length - 1)) * sparkW;
+    const y = sparkH - ((v - sparkMin) / (sparkMax - sparkMin || 1)) * sparkH;
+    return [x, y] as const;
+  });
+  const sparkLine = sparkCoords.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const sparkArea = `${sparkLine} L${sparkW},${sparkH} L0,${sparkH} Z`;
+
+  const categories = [
+    { key: "sholat", value: 78, color: "bg-emerald-500" },
+    { key: "dzikir", value: 62, color: "bg-violet-500" },
+    { key: "quran", value: 45, color: "bg-blue-500" },
+  ] as const;
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" data-testid="text-analytics-illustration-label">
             {t(`${base}.label`)}
@@ -323,14 +347,94 @@ function AnalyticsIllustration() {
           +24%
         </div>
       </div>
-      <div className="flex items-end gap-2 h-28 mb-3">
-        {bars.map((h, i) => (
-          <div key={i} className="flex-1 flex flex-col items-center justify-end gap-2">
-            <div className="w-full rounded-md bg-violet-500" style={{ height: `${h}%` }} />
-            <span className="text-[10px] text-muted-foreground">{days[i]}</span>
+
+      <div className="mb-4" data-testid="row-analytics-illustration-chart">
+        <div className="relative h-28 pl-6">
+          {gridLines.map((v) => (
+            <div
+              key={v}
+              className="absolute left-0 right-0 flex items-center"
+              style={{ top: `${(1 - v / yMax) * 100}%` }}
+            >
+              <span className="w-5 -translate-y-1/2 pr-1 text-right text-[9px] text-muted-foreground/70 tabular-nums">{v}</span>
+              <div className="flex-1 border-t border-dashed border-border/70" />
+            </div>
+          ))}
+          <div className="absolute left-6 right-0 top-0 bottom-0 flex items-end gap-2">
+            {dayValues.map((v, i) => {
+              const isPeak = i === peakIdx;
+              return (
+                <div key={i} className="relative flex-1 flex flex-col items-center justify-end h-full">
+                  {isPeak && (
+                    <span
+                      className="absolute left-1/2 -translate-x-1/2 -top-1 -translate-y-full rounded bg-violet-500 px-1.5 py-0.5 text-[9px] font-semibold text-white shadow-sm whitespace-nowrap"
+                      data-testid="text-analytics-illustration-peak-value"
+                    >
+                      {peakValue}
+                    </span>
+                  )}
+                  <div
+                    className={`w-full rounded-t-md ${isPeak ? "bg-violet-500" : "bg-violet-500/40"}`}
+                    style={{ height: `${(v / yMax) * 100}%` }}
+                    data-testid={`row-analytics-illustration-bar-${i}`}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="flex gap-2 pl-6 mt-1.5">
+          {days.map((d, i) => (
+            <span
+              key={i}
+              className={`flex-1 text-center text-[10px] ${i === peakIdx ? "text-violet-500 font-semibold" : "text-muted-foreground"}`}
+              data-testid={`text-analytics-illustration-day-${i}`}
+            >
+              {d}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-4 rounded-lg border border-border/70 bg-muted/30 p-3" data-testid="row-analytics-illustration-trend">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground" data-testid="text-analytics-illustration-trend-label">
+            {t(`${base}.trendLabel`)}
+          </span>
+          <span className="text-[11px] font-semibold text-emerald-500 tabular-nums" data-testid="text-analytics-illustration-trend-delta">+18%</span>
+        </div>
+        <svg viewBox={`0 0 ${sparkW} ${sparkH}`} preserveAspectRatio="none" className="block w-full h-7" aria-hidden="true">
+          <defs>
+            <linearGradient id="analyticsSparkFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="currentColor" stopOpacity="0.35" className="text-emerald-500" />
+              <stop offset="100%" stopColor="currentColor" stopOpacity="0" className="text-emerald-500" />
+            </linearGradient>
+          </defs>
+          <path d={sparkArea} fill="url(#analyticsSparkFill)" />
+          <path d={sparkLine} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500" vectorEffect="non-scaling-stroke" />
+          <circle cx={sparkCoords[sparkCoords.length - 1][0]} cy={sparkCoords[sparkCoords.length - 1][1]} r="2" className="fill-emerald-500" />
+        </svg>
+      </div>
+
+      <div className="space-y-2 mb-4" data-testid="row-analytics-illustration-categories">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground" data-testid="text-analytics-illustration-categories-title">
+          {t(`${base}.categoriesTitle`)}
+        </p>
+        {categories.map((c) => (
+          <div key={c.key} className="flex items-center gap-3" data-testid={`row-analytics-illustration-category-${c.key}`}>
+            <span className="w-14 truncate text-xs text-foreground" data-testid={`text-analytics-illustration-category-${c.key}-name`}>
+              {t(`${base}.category_${c.key}`)}
+            </span>
+            <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+              <div className={`h-full rounded-full ${c.color}`} style={{ width: `${c.value}%` }} />
+            </div>
+            <span className="w-9 text-right text-[11px] font-semibold text-foreground tabular-nums" data-testid={`text-analytics-illustration-category-${c.key}-value`}>
+              {c.value}%
+            </span>
           </div>
         ))}
       </div>
+
       <div className="flex items-center justify-between text-xs pt-3 border-t border-border">
         <span className="text-muted-foreground">{t(`${base}.streak`)}</span>
         <span className="text-foreground font-semibold" data-testid="text-analytics-illustration-streak">42 {t(`${base}.days`)}</span>

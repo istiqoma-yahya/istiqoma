@@ -206,7 +206,19 @@
           "label": "This week",
           "deeds": "deeds",
           "streak": "Current streak",
-          "days": "days"
+          "days": "days",
+          "trendLabel": "30-day trend",
+          "categoriesTitle": "Top categories",
+          "category_sholat": "Sholat",
+          "category_dzikir": "Dzikir",
+          "category_quran": "Qur'an",
+          "dayShort_0": "S",
+          "dayShort_1": "M",
+          "dayShort_2": "T",
+          "dayShort_3": "W",
+          "dayShort_4": "T",
+          "dayShort_5": "F",
+          "dayShort_6": "S"
         }
       },
       "community": {

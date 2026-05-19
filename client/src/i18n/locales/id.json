@@ -206,7 +206,19 @@
           "label": "Minggu ini",
           "deeds": "amal",
           "streak": "Streak saat ini",
-          "days": "hari"
+          "days": "hari",
+          "trendLabel": "Tren 30 hari",
+          "categoriesTitle": "Kategori teratas",
+          "category_sholat": "Sholat",
+          "category_dzikir": "Dzikir",
+          "category_quran": "Qur'an",
+          "dayShort_0": "M",
+          "dayShort_1": "S",
+          "dayShort_2": "S",
+          "dayShort_3": "R",
+          "dayShort_4": "K",
+          "dayShort_5": "J",
+          "dayShort_6": "S"
         }
       },
       "community": {

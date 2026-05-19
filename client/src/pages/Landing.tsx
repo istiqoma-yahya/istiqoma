@@ -25,6 +25,421 @@ declare global {
   }
 }
 
+type FeatureDeepDiveTestIds = {
+  section?: string;
+  illustration?: string;
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
+  benefit1?: string;
+  benefit2?: string;
+};
+
+type FeatureDeepDiveProps = {
+  featureKey: string;
+  icon: React.ComponentType<{ className?: string }>;
+  iconBg: string;
+  iconColor: string;
+  decorativeGradient: string;
+  side: "left" | "right";
+  bgAlt: boolean;
+  illustration: React.ReactNode;
+  i18nBase?: string;
+  showEyebrow?: boolean;
+  testIds?: FeatureDeepDiveTestIds;
+};
+
+function FeatureDeepDive({
+  featureKey,
+  icon: Icon,
+  iconBg,
+  iconColor,
+  decorativeGradient,
+  side,
+  bgAlt,
+  illustration,
+  i18nBase,
+  showEyebrow = true,
+  testIds,
+}: FeatureDeepDiveProps) {
+  const { t } = useTranslation();
+  const base = i18nBase ?? `landing.featureSections.${featureKey}`;
+  const ids = {
+    section: testIds?.section ?? `section-feature-${featureKey}`,
+    illustration: testIds?.illustration ?? `card-feature-${featureKey}-illustration`,
+    eyebrow: testIds?.eyebrow ?? `text-feature-${featureKey}-eyebrow`,
+    title: testIds?.title ?? `text-feature-${featureKey}-title`,
+    subtitle: testIds?.subtitle ?? `text-feature-${featureKey}-subtitle`,
+    benefit1: testIds?.benefit1 ?? `text-feature-${featureKey}-benefit-1`,
+    benefit2: testIds?.benefit2 ?? `text-feature-${featureKey}-benefit-2`,
+  };
+  const illustrationOnLeft = side === "left";
+  return (
+    <section
+      className={`relative z-10 py-20 ${bgAlt ? "bg-muted/30" : "bg-background"}`}
+      data-testid={ids.section}
+    >
+      <div className="container mx-auto px-6">
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, x: illustrationOnLeft ? -20 : 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6 }}
+            className={`relative ${illustrationOnLeft ? "order-2 md:order-1" : "order-2 md:order-2"}`}
+          >
+            <div className={`absolute inset-0 bg-gradient-to-r ${decorativeGradient} rounded-2xl transform rotate-2`} />
+            <div
+              className="relative bg-card border border-border rounded-xl p-6 md:p-8 max-w-md mx-auto md:mx-0 shadow-2xl"
+              data-testid={ids.illustration}
+            >
+              {illustration}
+            </div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: illustrationOnLeft ? 20 : -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className={illustrationOnLeft ? "order-1 md:order-2" : "order-1 md:order-1"}
+          >
+            {showEyebrow && (
+              <div className="flex items-center gap-3 mb-5">
+                <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center`}>
+                  <Icon className={`w-5 h-5 ${iconColor}`} />
+                </div>
+                <span
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                  data-testid={ids.eyebrow}
+                >
+                  {t(`${base}.eyebrow`)}
+                </span>
+              </div>
+            )}
+            <h2
+              className="text-3xl md:text-4xl font-bold font-display tracking-tight mb-6"
+              data-testid={ids.title}
+            >
+              {t(`${base}.title`)}
+            </h2>
+            <p
+              className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed"
+              data-testid={ids.subtitle}
+            >
+              {t(`${base}.subtitle`)}
+            </p>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                <span
+                  className="text-muted-foreground text-sm"
+                  data-testid={ids.benefit1}
+                >
+                  {t(`${base}.benefit1`)}
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                <span
+                  className="text-muted-foreground text-sm"
+                  data-testid={ids.benefit2}
+                >
+                  {t(`${base}.benefit2`)}
+                </span>
+              </li>
+            </ul>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SpiritualGoalsIllustration() {
+  const { t } = useTranslation();
+  return (
+    <>
+      <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-6 border-b border-border pb-4" data-testid="text-personalize-card-title">
+        {t('landing.personalize.cardTitle')}
+      </h4>
+      <div className="space-y-6">
+        <div>
+          <div className="flex justify-between text-sm mb-2">
+            <span className="text-foreground font-medium" data-testid="text-quran-goal-label">{t('landing.personalize.quranGoal')}</span>
+            <span className="text-emerald-500 font-medium" data-testid="text-quran-goal-value">{t('landing.personalize.quranPages')}</span>
+          </div>
+          <div className="h-2 rounded-full overflow-hidden bg-[#43546b]">
+            <div className="h-full w-1/4 bg-emerald-500 rounded-full" />
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-muted rounded-md text-muted-foreground">
+              <Bell className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground" data-testid="text-tahajjud-title">{t('landing.personalize.tahajjudTitle')}</p>
+              <p className="text-xs text-muted-foreground" data-testid="text-tahajjud-desc">{t('landing.personalize.tahajjudDesc')}</p>
+            </div>
+          </div>
+          <div className="w-11 h-6 bg-emerald-500 rounded-full flex items-center px-1">
+            <div className="w-4 h-4 rounded-full shadow-sm ml-auto bg-[#f8fafc]" />
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-muted rounded-md text-muted-foreground">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground" data-testid="text-fasting-title">{t('landing.personalize.fastingTitle')}</p>
+              <p className="text-xs text-muted-foreground" data-testid="text-fasting-desc">{t('landing.personalize.fastingDesc')}</p>
+            </div>
+          </div>
+          <div className="w-11 h-6 rounded-full flex items-center px-1 bg-[#43546b]">
+            <div className="w-4 h-4 bg-muted-foreground rounded-full shadow-sm" />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function DzikirIllustration() {
+  const { t } = useTranslation();
+  const base = "landing.featureSections.dzikir.illustration";
+  return (
+    <div className="text-center">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4" data-testid="text-dzikir-illustration-label">
+        {t(`${base}.label`)}
+      </p>
+      <div className="relative w-40 h-40 mx-auto mb-5">
+        <svg className="absolute inset-0 transform -rotate-90 w-full h-full" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="68" stroke="currentColor" strokeWidth="10" fill="none" className="text-muted" />
+          <circle cx="80" cy="80" r="68" stroke="currentColor" strokeWidth="10" fill="none" strokeLinecap="round" strokeDasharray={2 * Math.PI * 68} strokeDashoffset={2 * Math.PI * 68 * (1 - 33 / 100)} className="text-emerald-500" />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-5xl font-bold font-display text-foreground" data-testid="text-dzikir-illustration-count">33</span>
+          <span className="text-xs text-muted-foreground mt-1" data-testid="text-dzikir-illustration-target">/ 100</span>
+        </div>
+      </div>
+      <p className="font-arabic text-2xl text-foreground mb-1" data-testid="text-dzikir-illustration-arabic">سُبْحَانَ ٱللَّٰه</p>
+      <p className="text-sm text-muted-foreground mb-5" data-testid="text-dzikir-illustration-type">{t(`${base}.type`)}</p>
+      <button type="button" className="w-full bg-emerald-500 text-white rounded-xl py-3 text-sm font-semibold shadow-sm" tabIndex={-1} data-testid="button-dzikir-illustration-tap">
+        {t(`${base}.tap`)}
+      </button>
+    </div>
+  );
+}
+
+function QuranIllustration() {
+  const { t } = useTranslation();
+  const base = "landing.featureSections.quran.illustration";
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" data-testid="text-quran-illustration-surah">
+            {t(`${base}.surah`)}
+          </p>
+          <p className="text-sm text-foreground font-medium" data-testid="text-quran-illustration-verse-ref">{t(`${base}.verseRef`)}</p>
+        </div>
+        <div className="w-8 h-8 rounded-md bg-blue-500/10 flex items-center justify-center">
+          <BookOpen className="w-4 h-4 text-blue-500" />
+        </div>
+      </div>
+      <p className="font-arabic text-2xl text-foreground text-right leading-loose mb-4" dir="rtl" data-testid="text-quran-illustration-arabic">
+        وَلَا تَيْـَٔسُوا۟ مِن رَّوْحِ ٱللَّهِ
+      </p>
+      <p className="text-sm text-muted-foreground italic mb-4" data-testid="text-quran-illustration-translation">
+        {t(`${base}.translation`)}
+      </p>
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+        <span>{t(`${base}.progress`)}</span>
+      </div>
+    </div>
+  );
+}
+
+function RemindersIllustration() {
+  const { t } = useTranslation();
+  const base = "landing.featureSections.reminders.illustration";
+  return (
+    <div className="space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2" data-testid="text-reminders-illustration-label">
+        {t(`${base}.label`)}
+      </p>
+      <div className="flex items-start gap-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl" data-testid="row-reminders-illustration-fajr">
+        <div className="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+          <Bell className="w-4 h-4 text-amber-500" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground" data-testid="text-reminders-illustration-fajr-title">{t(`${base}.fajrTitle`)}</p>
+          <p className="text-xs text-muted-foreground" data-testid="text-reminders-illustration-fajr-desc">{t(`${base}.fajrDesc`)}</p>
+        </div>
+        <span className="text-xs text-muted-foreground whitespace-nowrap" data-testid="text-reminders-illustration-fajr-time">04:42</span>
+      </div>
+      <div className="flex items-start gap-3 p-3 bg-muted rounded-xl" data-testid="row-reminders-illustration-tahajjud">
+        <div className="w-9 h-9 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+          <Moon className="w-4 h-4 text-emerald-500" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground" data-testid="text-reminders-illustration-tahajjud-title">{t(`${base}.tahajjudTitle`)}</p>
+          <p className="text-xs text-muted-foreground" data-testid="text-reminders-illustration-tahajjud-desc">{t(`${base}.tahajjudDesc`)}</p>
+        </div>
+        <span className="text-xs text-muted-foreground whitespace-nowrap" data-testid="text-reminders-illustration-tahajjud-time">03:15</span>
+      </div>
+      <div className="flex items-start gap-3 p-3 bg-muted rounded-xl" data-testid="row-reminders-illustration-quran">
+        <div className="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+          <BookOpen className="w-4 h-4 text-blue-500" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground" data-testid="text-reminders-illustration-quran-title">{t(`${base}.quranTitle`)}</p>
+          <p className="text-xs text-muted-foreground" data-testid="text-reminders-illustration-quran-desc">{t(`${base}.quranDesc`)}</p>
+        </div>
+        <span className="text-xs text-muted-foreground whitespace-nowrap" data-testid="text-reminders-illustration-quran-time">20:00</span>
+      </div>
+    </div>
+  );
+}
+
+function AnalyticsIllustration() {
+  const { t } = useTranslation();
+  const base = "landing.featureSections.analytics.illustration";
+  const bars = [40, 65, 50, 80, 55, 90, 70];
+  const days = ["S", "M", "T", "W", "T", "F", "S"];
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" data-testid="text-analytics-illustration-label">
+            {t(`${base}.label`)}
+          </p>
+          <p className="text-2xl font-bold font-display text-foreground mt-1" data-testid="text-analytics-illustration-total">128 <span className="text-sm font-normal text-muted-foreground">{t(`${base}.deeds`)}</span></p>
+        </div>
+        <div className="flex items-center gap-1 text-emerald-500 text-xs font-semibold bg-emerald-500/10 px-2 py-1 rounded-md" data-testid="text-analytics-illustration-trend">
+          <TrendingUp className="w-3 h-3" />
+          +24%
+        </div>
+      </div>
+      <div className="flex items-end gap-2 h-28 mb-3">
+        {bars.map((h, i) => (
+          <div key={i} className="flex-1 flex flex-col items-center justify-end gap-2">
+            <div className="w-full rounded-md bg-violet-500" style={{ height: `${h}%` }} />
+            <span className="text-[10px] text-muted-foreground">{days[i]}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-between text-xs pt-3 border-t border-border">
+        <span className="text-muted-foreground">{t(`${base}.streak`)}</span>
+        <span className="text-foreground font-semibold" data-testid="text-analytics-illustration-streak">42 {t(`${base}.days`)}</span>
+      </div>
+    </div>
+  );
+}
+
+function CommunityIllustration() {
+  const { t } = useTranslation();
+  const base = "landing.featureSections.community.illustration";
+  const rows = [
+    { name: "Aisha R.", pts: 1840, accent: "bg-amber-500/20 text-amber-500" },
+    { name: "Yusuf A.", pts: 1620, accent: "bg-slate-400/20 text-slate-400" },
+    { name: t(`${base}.you`), pts: 1485, accent: "bg-orange-500/20 text-orange-500", me: true },
+  ];
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4" data-testid="text-community-illustration-label">
+        {t(`${base}.label`)}
+      </p>
+      <div className="space-y-2">
+        {rows.map((r, i) => (
+          <div
+            key={i}
+            className={`flex items-center gap-3 p-3 rounded-xl border ${r.me ? "border-cyan-500/40 bg-cyan-500/5" : "border-border bg-muted/40"}`}
+            data-testid={`row-community-illustration-rank-${i + 1}`}
+          >
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${r.accent}`}>
+              {i + 1}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground truncate" data-testid={`text-community-illustration-name-${i + 1}`}>{r.name}</p>
+            </div>
+            <span className="text-sm font-bold text-foreground tabular-nums" data-testid={`text-community-illustration-points-${i + 1}`}>{r.pts.toLocaleString()}</span>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground mt-4 text-center">{t(`${base}.caption`)}</p>
+    </div>
+  );
+}
+
+function BadgesIllustration() {
+  const { t } = useTranslation();
+  const base = "landing.featureSections.badges.illustration";
+  const badges = [
+    { icon: Moon, label: t(`${base}.badge1`), color: "text-emerald-500", bg: "bg-emerald-500/10", unlocked: true },
+    { icon: BookOpen, label: t(`${base}.badge2`), color: "text-blue-500", bg: "bg-blue-500/10", unlocked: true },
+    { icon: Award, label: t(`${base}.badge3`), color: "text-orange-500", bg: "bg-orange-500/10", unlocked: false },
+  ];
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4" data-testid="text-badges-illustration-label">
+        {t(`${base}.label`)}
+      </p>
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        {badges.map((b, i) => (
+          <div key={i} className={`flex flex-col items-center text-center p-3 rounded-xl border border-border ${b.unlocked ? "" : "opacity-40"}`} data-testid={`card-badges-illustration-badge-${i + 1}`}>
+            <div className={`w-12 h-12 rounded-full ${b.bg} flex items-center justify-center mb-2`}>
+              <b.icon className={`w-5 h-5 ${b.color}`} />
+            </div>
+            <p className="text-[11px] font-semibold text-foreground leading-tight" data-testid={`text-badges-illustration-badge-${i + 1}`}>{b.label}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-between p-3 rounded-xl bg-orange-500/10 border border-orange-500/30" data-testid="row-badges-illustration-progress">
+        <div className="flex items-center gap-2">
+          <Award className="w-4 h-4 text-orange-500" />
+          <span className="text-xs font-semibold text-foreground">{t(`${base}.progressTitle`)}</span>
+        </div>
+        <span className="text-xs text-muted-foreground" data-testid="text-badges-illustration-progress-value">14 / 30</span>
+      </div>
+    </div>
+  );
+}
+
+function PrivacyIllustration() {
+  const { t } = useTranslation();
+  const base = "landing.featureSections.privacy.illustration";
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-5" data-testid="text-privacy-illustration-label">
+        {t(`${base}.label`)}
+      </p>
+      <div className="flex flex-col items-center text-center mb-6">
+        <div className="w-20 h-20 rounded-full bg-slate-500/10 flex items-center justify-center mb-4">
+          <Shield className="w-10 h-10 text-slate-500" />
+        </div>
+        <p className="text-lg font-bold font-display text-foreground" data-testid="text-privacy-illustration-headline">{t(`${base}.headline`)}</p>
+      </div>
+      <div className="space-y-3">
+        {([
+          [Check, t(`${base}.point1`)],
+          [Check, t(`${base}.point2`)],
+          [Check, t(`${base}.point3`)],
+        ] as const).map(([Ic, txt], i) => (
+          <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/40" data-testid={`row-privacy-illustration-point-${i + 1}`}>
+            <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+              <Ic className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+            </div>
+            <span className="text-sm text-foreground" data-testid={`text-privacy-illustration-point-${i + 1}`}>{txt}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Landing() {
   const { t } = useTranslation();
   const { theme } = useTheme();
@@ -409,104 +824,8 @@ export default function Landing() {
           </motion.div>
         </div>
       </section>
-      {/* Personalize Section */}
-      <section className="relative z-10 py-20 bg-muted/30" data-testid="section-personalize">
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
-
-            {/* Left: Preferences Card */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="order-2 md:order-1 relative"
-            >
-              {/* Decorative BG */}
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 rounded-2xl transform rotate-2" />
-
-              {/* Preferences Interface */}
-              <div className="relative bg-card border border-border rounded-xl px-6 py-6 md:p-8 max-w-md mx-auto md:mx-0 shadow-2xl" data-testid="card-personalize">
-                <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-6 border-b border-border pb-4" data-testid="text-personalize-card-title">
-                  {t('landing.personalize.cardTitle')}
-                </h4>
-
-                <div className="space-y-6">
-                  {/* Control 1: Slider */}
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-foreground font-medium" data-testid="text-quran-goal-label">{t('landing.personalize.quranGoal')}</span>
-                      <span className="text-emerald-500 font-medium" data-testid="text-quran-goal-value">{t('landing.personalize.quranPages')}</span>
-                    </div>
-                    <div className="h-2 rounded-full overflow-hidden bg-[#43546b]">
-                      <div className="h-full w-1/4 bg-emerald-500 rounded-full" />
-                    </div>
-                  </div>
-
-                  {/* Control 2: Toggle ON */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-muted rounded-md text-muted-foreground">
-                        <Bell className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-foreground" data-testid="text-tahajjud-title">{t('landing.personalize.tahajjudTitle')}</p>
-                        <p className="text-xs text-muted-foreground" data-testid="text-tahajjud-desc">{t('landing.personalize.tahajjudDesc')}</p>
-                      </div>
-                    </div>
-                    <div className="w-11 h-6 bg-emerald-500 rounded-full flex items-center px-1">
-                      <div className="w-4 h-4 rounded-full shadow-sm ml-auto bg-[#f8fafc]" />
-                    </div>
-                  </div>
-
-                  {/* Control 3: Toggle OFF */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-muted rounded-md text-muted-foreground">
-                        <Calendar className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-foreground" data-testid="text-fasting-title">{t('landing.personalize.fastingTitle')}</p>
-                        <p className="text-xs text-muted-foreground" data-testid="text-fasting-desc">{t('landing.personalize.fastingDesc')}</p>
-                      </div>
-                    </div>
-                    <div className="w-11 h-6 rounded-full flex items-center px-1 bg-[#43546b]">
-                      <div className="w-4 h-4 bg-muted-foreground rounded-full shadow-sm" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Right: Text Content */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="order-1 md:order-2"
-            >
-              <h2 className="text-3xl md:text-4xl font-bold font-display tracking-tight mb-6" data-testid="text-personalize-title">
-                {t('landing.personalize.title')}
-              </h2>
-              <p className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed" data-testid="text-personalize-subtitle">
-                {t('landing.personalize.subtitle')}
-              </p>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground text-sm" data-testid="text-benefit-1">{t('landing.personalize.benefit1')}</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground text-sm" data-testid="text-benefit-2">{t('landing.personalize.benefit2')}</span>
-                </li>
-              </ul>
-            </motion.div>
-
-          </div>
-        </div>
-      </section>
-      {/* Testimonial Section */}
-      <section className="relative z-10 py-20 bg-background">
+      {/* Testimonial Section (moved before deep-dives) */}
+      <section className="relative z-10 py-20 bg-background" data-testid="section-testimonial">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -530,6 +849,103 @@ export default function Landing() {
           </motion.div>
         </div>
       </section>
+      {/* Deep-dive: Spiritual Goals (Personalize) */}
+      <FeatureDeepDive
+        featureKey="goals"
+        icon={Target}
+        iconBg="bg-emerald-500/10"
+        iconColor="text-emerald-500"
+        decorativeGradient="from-emerald-500/10 to-emerald-500/5"
+        side="left"
+        bgAlt
+        showEyebrow={false}
+        illustration={<SpiritualGoalsIllustration />}
+        testIds={{
+          section: "section-personalize",
+          illustration: "card-personalize",
+          title: "text-personalize-title",
+          subtitle: "text-personalize-subtitle",
+          benefit1: "text-benefit-1",
+          benefit2: "text-benefit-2",
+        }}
+      />
+      {/* Deep-dive: Dzikir */}
+      <FeatureDeepDive
+        featureKey="dzikir"
+        icon={Fingerprint}
+        iconBg="bg-emerald-500/10"
+        iconColor="text-emerald-500"
+        decorativeGradient="from-emerald-500/10 to-emerald-500/5"
+        side="right"
+        bgAlt={false}
+        illustration={<DzikirIllustration />}
+      />
+      {/* Deep-dive: Quran Reader */}
+      <FeatureDeepDive
+        featureKey="quran"
+        icon={BookOpen}
+        iconBg="bg-blue-500/10"
+        iconColor="text-blue-500"
+        decorativeGradient="from-blue-500/10 to-blue-500/5"
+        side="left"
+        bgAlt={true}
+        illustration={<QuranIllustration />}
+      />
+      {/* Deep-dive: Reminders */}
+      <FeatureDeepDive
+        featureKey="reminders"
+        icon={Bell}
+        iconBg="bg-amber-500/10"
+        iconColor="text-amber-500"
+        decorativeGradient="from-amber-500/10 to-amber-500/5"
+        side="right"
+        bgAlt={false}
+        illustration={<RemindersIllustration />}
+      />
+      {/* Deep-dive: Analytics */}
+      <FeatureDeepDive
+        featureKey="analytics"
+        icon={TrendingUp}
+        iconBg="bg-violet-500/10"
+        iconColor="text-violet-500"
+        decorativeGradient="from-violet-500/10 to-violet-500/5"
+        side="left"
+        bgAlt={true}
+        illustration={<AnalyticsIllustration />}
+      />
+      {/* Deep-dive: Community */}
+      <FeatureDeepDive
+        featureKey="community"
+        icon={Users}
+        iconBg="bg-cyan-500/10"
+        iconColor="text-cyan-500"
+        decorativeGradient="from-cyan-500/10 to-cyan-500/5"
+        side="right"
+        bgAlt={false}
+        illustration={<CommunityIllustration />}
+      />
+      {/* Deep-dive: Badges */}
+      <FeatureDeepDive
+        featureKey="badges"
+        icon={Award}
+        iconBg="bg-orange-500/10"
+        iconColor="text-orange-500"
+        decorativeGradient="from-orange-500/10 to-orange-500/5"
+        side="left"
+        bgAlt={true}
+        illustration={<BadgesIllustration />}
+      />
+      {/* Deep-dive: Privacy First */}
+      <FeatureDeepDive
+        featureKey="privacy"
+        icon={Shield}
+        iconBg="bg-slate-500/10"
+        iconColor="text-slate-500"
+        decorativeGradient="from-slate-500/10 to-slate-500/5"
+        side="right"
+        bgAlt={false}
+        illustration={<PrivacyIllustration />}
+      />
       {isInstallable && !isInstalled && (
         <section className="relative z-10 pb-16 bg-background">
           <div className="container mx-auto px-6">

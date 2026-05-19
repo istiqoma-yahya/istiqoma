@@ -147,6 +147,109 @@
       "benefit2": "Privacy first. Your deeds are between you and Allah.",
       "benefit3": "Offline capable for when you disconnect to reconnect."
     },
+    "featureSections": {
+      "goals": {
+        "eyebrow": "Spiritual Goals",
+        "title": "Personalize your worship goals",
+        "subtitle": "Customize your dashboard to focus on the habits you want to build right now. Start with the obligatory (Fard), then gradually add voluntary ones (Sunnah) as your spiritual growth progresses.",
+        "benefit1": "Smart reminders based on your location and calendar.",
+        "benefit2": "Privacy first. Your deeds are between you and Allah."
+      },
+      "dzikir": {
+        "eyebrow": "Dzikir Counter",
+        "title": "A tasbih that travels with you",
+        "subtitle": "Count each remembrance with a calm, distraction-free counter — at home, on the road, or after every prayer.",
+        "benefit1": "Tap-to-count with haptic feedback and per-type targets.",
+        "benefit2": "Save your sessions as deeds so every dhikr adds to your streak.",
+        "illustration": {
+          "label": "Today's Dzikir",
+          "type": "Subhanallah",
+          "tap": "Tap to count"
+        }
+      },
+      "quran": {
+        "eyebrow": "Quran Reader",
+        "title": "Read, listen, and memorise the Qur'an",
+        "subtitle": "Beautiful Arabic typography, multiple reciters, and a memorisation mode that gently reveals each verse at your pace.",
+        "benefit1": "Bookmark verses and pick up exactly where you left off.",
+        "benefit2": "Built-in memorisation mode with recording playback.",
+        "illustration": {
+          "surah": "Surah Yusuf",
+          "verseRef": "Verse 87",
+          "translation": "“…and do not despair of the mercy of Allah.”",
+          "progress": "Last read · 2 minutes ago"
+        }
+      },
+      "reminders": {
+        "eyebrow": "Smart Reminders",
+        "title": "Never miss the moments that matter",
+        "subtitle": "Location-aware prayer alerts, Tahajjud nudges, and target reminders that respect your day.",
+        "benefit1": "Adhan-accurate prayer times based on your location.",
+        "benefit2": "Personalised reminders for your sunnah habits.",
+        "illustration": {
+          "label": "Upcoming reminders",
+          "fajrTitle": "Fajr Prayer",
+          "fajrDesc": "Starts in 12 minutes",
+          "tahajjudTitle": "Tahajjud",
+          "tahajjudDesc": "Last third of the night",
+          "quranTitle": "Quran Reading",
+          "quranDesc": "Daily goal: 5 pages"
+        }
+      },
+      "analytics": {
+        "eyebrow": "Deed Analytics",
+        "title": "See your spiritual growth clearly",
+        "subtitle": "Friendly charts and streak history that show where you're consistent and where to lean in next.",
+        "benefit1": "Weekly and monthly breakdowns by category.",
+        "benefit2": "Streak history that celebrates consistency, not perfection.",
+        "illustration": {
+          "label": "This week",
+          "deeds": "deeds",
+          "streak": "Current streak",
+          "days": "days"
+        }
+      },
+      "community": {
+        "eyebrow": "Community Challenges",
+        "title": "Compete in goodness, together",
+        "subtitle": "Join friendly leaderboards and global challenges that turn worship into a shared journey.",
+        "benefit1": "Seasonal leaderboards for dhikr, fasting, and charity.",
+        "benefit2": "Encourage friends without ever exposing private details.",
+        "illustration": {
+          "label": "Weekly leaderboard",
+          "you": "You",
+          "caption": "Top 3 this week · points reset every Monday"
+        }
+      },
+      "badges": {
+        "eyebrow": "Rewards & Badges",
+        "title": "Small wins that keep you going",
+        "subtitle": "Earn points, streak milestones, and beautiful badges as your habits take root, inshaAllah.",
+        "benefit1": "Unlock badges for prayer, Qur'an, and dhikr milestones.",
+        "benefit2": "Use points to protect your streak with streak freezes.",
+        "illustration": {
+          "label": "Recent achievements",
+          "badge1": "30-Day Fajr",
+          "badge2": "Qur'an Reader",
+          "badge3": "Charity Champ",
+          "progressTitle": "Next badge"
+        }
+      },
+      "privacy": {
+        "eyebrow": "Privacy First",
+        "title": "Your worship is yours alone",
+        "subtitle": "Istiqoma is built so your deeds stay between you and Allah — no ads, no tracking pixels, no data sold.",
+        "benefit1": "No third-party advertising or analytics resellers.",
+        "benefit2": "Export or delete your data anytime, no questions asked.",
+        "illustration": {
+          "label": "Your data, your rules",
+          "headline": "Between you and Allah",
+          "point1": "End-to-end encrypted in transit",
+          "point2": "Never sold or shared",
+          "point3": "Delete your account anytime"
+        }
+      }
+    },
     "testimonial": {
       "quote": "Istiqoma didn't just help to get consistent worshipping Allah every day, it also gave me a visual representation of my relationship with my faith.",
       "name": "Yahya Pramudya Ekananta",

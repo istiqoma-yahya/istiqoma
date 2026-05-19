@@ -147,6 +147,109 @@
       "benefit2": "Mengutamakan privasi. Amalmu hanya antara kamu dan Allah.",
       "benefit3": "Bisa offline untuk saat kamu memutuskan koneksi untuk menyambung kembali."
     },
+    "featureSections": {
+      "goals": {
+        "eyebrow": "Target Spiritual",
+        "title": "Personalisasi target ibadah",
+        "subtitle": "Sesuaikan dashboard untuk fokus pada kebiasaan yang ingin kamu bangun sekarang. Mulai dari yang wajib (Fardhu), lalu tambahkan yang sunnah secara bertahap seiring pertumbuhan spiritualmu.",
+        "benefit1": "Pengingat cerdas berdasarkan lokasi dan kalendermu.",
+        "benefit2": "Mengutamakan privasi. Amalmu hanya antara kamu dan Allah."
+      },
+      "dzikir": {
+        "eyebrow": "Penghitung Dzikir",
+        "title": "Tasbih yang selalu menemanimu",
+        "subtitle": "Hitung setiap dzikir dengan penghitung yang tenang dan bebas gangguan — di rumah, di perjalanan, atau setelah sholat.",
+        "benefit1": "Ketuk untuk menghitung dengan haptic feedback dan target per jenis.",
+        "benefit2": "Simpan sesi sebagai amal agar setiap dzikir menambah streak-mu.",
+        "illustration": {
+          "label": "Dzikir Hari Ini",
+          "type": "Subhanallah",
+          "tap": "Ketuk untuk menghitung"
+        }
+      },
+      "quran": {
+        "eyebrow": "Pembaca Quran",
+        "title": "Baca, dengar, dan hafalkan Al-Qur'an",
+        "subtitle": "Tipografi Arab yang indah, banyak pilihan qori, dan mode hafalan yang mengungkap setiap ayat sesuai ritmemu.",
+        "benefit1": "Tandai ayat dan lanjutkan tepat di tempat kamu berhenti.",
+        "benefit2": "Mode hafalan dengan pemutar rekaman bawaan.",
+        "illustration": {
+          "surah": "Surah Yusuf",
+          "verseRef": "Ayat 87",
+          "translation": "“…dan jangan berputus asa dari rahmat Allah.”",
+          "progress": "Terakhir dibaca · 2 menit lalu"
+        }
+      },
+      "reminders": {
+        "eyebrow": "Pengingat Cerdas",
+        "title": "Jangan lewatkan momen yang berarti",
+        "subtitle": "Pengingat sholat berbasis lokasi, ajakan Tahajjud, dan pengingat target yang menghormati harimu.",
+        "benefit1": "Jadwal sholat akurat berdasarkan lokasimu.",
+        "benefit2": "Pengingat personal untuk kebiasaan sunnahmu.",
+        "illustration": {
+          "label": "Pengingat berikutnya",
+          "fajrTitle": "Sholat Subuh",
+          "fajrDesc": "Dimulai 12 menit lagi",
+          "tahajjudTitle": "Tahajjud",
+          "tahajjudDesc": "Sepertiga malam terakhir",
+          "quranTitle": "Baca Qur'an",
+          "quranDesc": "Target harian: 5 halaman"
+        }
+      },
+      "analytics": {
+        "eyebrow": "Analisis Amal",
+        "title": "Lihat pertumbuhan spiritualmu dengan jelas",
+        "subtitle": "Grafik yang ramah dan riwayat streak menunjukkan di mana kamu konsisten dan apa yang bisa ditingkatkan.",
+        "benefit1": "Ringkasan mingguan dan bulanan per kategori.",
+        "benefit2": "Riwayat streak yang merayakan konsistensi, bukan kesempurnaan.",
+        "illustration": {
+          "label": "Minggu ini",
+          "deeds": "amal",
+          "streak": "Streak saat ini",
+          "days": "hari"
+        }
+      },
+      "community": {
+        "eyebrow": "Tantangan Komunitas",
+        "title": "Berlomba dalam kebaikan, bersama-sama",
+        "subtitle": "Ikuti papan peringkat yang menyenangkan dan tantangan global yang menjadikan ibadah sebagai perjalanan bersama.",
+        "benefit1": "Papan peringkat musiman untuk dzikir, puasa, dan sedekah.",
+        "benefit2": "Saling menyemangati tanpa membuka detail pribadi.",
+        "illustration": {
+          "label": "Papan peringkat mingguan",
+          "you": "Kamu",
+          "caption": "Top 3 minggu ini · poin reset setiap Senin"
+        }
+      },
+      "badges": {
+        "eyebrow": "Penghargaan & Lencana",
+        "title": "Kemenangan kecil yang menjaga semangatmu",
+        "subtitle": "Raih poin, milestone streak, dan lencana indah seiring tumbuhnya kebiasaanmu, insya Allah.",
+        "benefit1": "Buka lencana untuk pencapaian sholat, Qur'an, dan dzikir.",
+        "benefit2": "Gunakan poin untuk melindungi streak dengan streak freeze.",
+        "illustration": {
+          "label": "Pencapaian terbaru",
+          "badge1": "Subuh 30 Hari",
+          "badge2": "Pembaca Qur'an",
+          "badge3": "Juara Sedekah",
+          "progressTitle": "Lencana berikutnya"
+        }
+      },
+      "privacy": {
+        "eyebrow": "Privasi Terjaga",
+        "title": "Ibadahmu adalah milikmu",
+        "subtitle": "Istiqoma dibangun agar amalmu tetap antara kamu dan Allah — tanpa iklan, tanpa pixel pelacak, tanpa data dijual.",
+        "benefit1": "Tanpa iklan pihak ketiga atau penjual analitik.",
+        "benefit2": "Ekspor atau hapus datamu kapan saja, tanpa pertanyaan.",
+        "illustration": {
+          "label": "Datamu, aturanmu",
+          "headline": "Antara kamu dan Allah",
+          "point1": "Terenkripsi end-to-end saat dikirim",
+          "point2": "Tidak pernah dijual atau dibagikan",
+          "point3": "Hapus akunmu kapan saja"
+        }
+      }
+    },
     "testimonial": {
       "quote": "Istiqoma tidak hanya membantu saya konsisten beribadah kepada Allah setiap hari, tapi juga memberikan representasi visual dari hubungan saya dengan iman saya.",
       "name": "Yahya Pramudya Ekananta",

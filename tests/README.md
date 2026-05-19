@@ -44,6 +44,12 @@ installed in this Repl via Nix).
   resulting session cookie, so no OIDC mock is needed.
 - `recommendations.spec.ts` — same `authenticated` project / storage
   state as `memorization-mode.spec.ts`.
+- `voice-recording-mini-player.spec.ts` — same `authenticated` project.
+  Mocks `MediaRecorder` and `HTMLAudioElement.play/pause` so no real
+  microphone or audio hardware is needed. Covers: player appearance with
+  correct label, play/pause toggle aria-label state, verse-swap label
+  update, close (×) hides the player, delete removes the player and the
+  per-verse controls.
 
 The agent's testing skill can still drive the same suites against a
 stubbed Replit OIDC issuer via `runTest({ testReplitAuth: true })`; that

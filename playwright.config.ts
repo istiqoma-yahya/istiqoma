@@ -37,6 +37,7 @@ export default defineConfig({
       testMatch: [
         "**/memorization-mode.spec.ts",
         "**/recommendations.spec.ts",
+        "**/voice-recording-mini-player.spec.ts",
       ],
       use: { ...devices["Desktop Chrome"], storageState: STORAGE_STATE_PATH },
     },

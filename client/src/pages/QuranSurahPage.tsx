@@ -37,6 +37,7 @@ import {
 } from "@/hooks/use-quran";
 import { useQuranAudio } from "@/components/QuranAudioProvider";
 import { usePageMeta } from "@/hooks/use-page-meta";
+import { useJsonLd } from "@/hooks/use-json-ld";
 
 type DisplayMode = "full" | "firstLast" | "hidden";
 
@@ -127,6 +128,26 @@ export default function QuranSurahPage() {
     locale: i18n.language?.split("-")[0] ?? "en",
     canonicalPath: surahId ? `/quran/${surahId}` : "/quran",
   });
+
+  useJsonLd(
+    chapter
+      ? {
+          "@context": "https://schema.org",
+          "@type": "Chapter",
+          name: `Surah ${chapter.name_simple}`,
+          alternateName: chapter.name_arabic,
+          position: chapter.id,
+          description: `Surah ${chapter.name_simple} (${chapter.name_arabic}) — ${chapter.verses_count} verses, revealed in ${chapter.revelation_place === "makkah" ? "Makkah" : "Madinah"}.`,
+          inLanguage: "ar",
+          url: `https://istiqoma.com/quran/${chapter.id}`,
+          isPartOf: {
+            "@type": "Book",
+            name: "Al-Quran Al-Karim",
+            url: "https://istiqoma.com/quran",
+          },
+        }
+      : null,
+  );
 
   const verseRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const [topVerse, setTopVerse] = useState<number | null>(null);

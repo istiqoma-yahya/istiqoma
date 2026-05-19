@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { Coordinates, Qibla, PrayerTimes, CalculationMethod, Prayer } from "adhan";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,12 @@ interface LocationState {
 export default function QiblaPage() {
   const { t, i18n } = useTranslation();
 
+  usePageMeta({
+    title: t("seo.qibla.title"),
+    description: t("seo.qibla.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/qibla",
+  });
   const saved = getSavedLocation();
   const [location, setLocation] = useState<LocationState>({
     latitude: saved?.latitude ?? null,

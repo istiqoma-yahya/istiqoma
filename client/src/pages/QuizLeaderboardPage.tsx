@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, Trophy } from "lucide-react";
@@ -17,7 +18,13 @@ type Response = {
 };
 
 export default function QuizLeaderboardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  usePageMeta({
+    title: t("seo.quizLeaderboard.title"),
+    description: t("seo.quizLeaderboard.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/quiz/leaderboard",
+  });
   const [, navigate] = useLocation();
 
   const { data, isLoading, isError, refetch } = useQuery<Response>({

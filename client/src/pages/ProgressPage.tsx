@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { useDeeds } from "@/hooks/use-deeds";
 import { useCategoryName } from "@/hooks/use-categories";
 import { useDzikirTypeName } from "@/hooks/use-dzikir-types";
@@ -34,7 +35,13 @@ import {
 } from "@/components/ui/select";
 
 export default function ProgressPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  usePageMeta({
+    title: t("seo.progress.title"),
+    description: t("seo.progress.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/progress",
+  });
   const { data: deeds, isLoading } = useDeeds();
   const { theme } = useTheme();
   const translateCategoryName = useCategoryName();

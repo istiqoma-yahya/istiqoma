@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { useCreateDeed } from "@/hooks/use-deeds";
 import { useCategories } from "@/hooks/use-categories";
 import { useCustomDzikirTypes, useCreateCustomDzikirType, useRenameCustomDzikirType, useDeleteCustomDzikirType } from "@/hooks/use-dzikir-types";
@@ -67,8 +68,14 @@ export default function DzikirPage() {
   const { mutate: renameCustomType, isPending: isRenaming } = useRenameCustomDzikirType();
   const { mutate: deleteCustomType } = useDeleteCustomDzikirType();
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
+  usePageMeta({
+    title: t("seo.dzikir.title"),
+    description: t("seo.dzikir.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/dzikir",
+  });
   useEffect(() => {
     localStorage.setItem("lastDzikirType", selectedDzikirType);
   }, [selectedDzikirType]);

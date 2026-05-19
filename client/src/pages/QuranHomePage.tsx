@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { Search, Bookmark, BookOpen, GraduationCap } from "lucide-react";
@@ -20,7 +21,13 @@ import { useQuranAudio } from "@/components/QuranAudioProvider";
 let savedScrollY: number | null = null;
 
 export default function QuranHomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  usePageMeta({
+    title: t("seo.quran.title"),
+    description: t("seo.quran.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/quran",
+  });
   const [, navigate] = useLocation();
   const [search, setSearch] = useState("");
   const { data: chapters, isLoading } = useChapters();

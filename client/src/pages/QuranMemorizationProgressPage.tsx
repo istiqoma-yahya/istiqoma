@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, GraduationCap } from "lucide-react";
@@ -11,7 +12,13 @@ import { QuranMiniPlayer } from "@/components/QuranMiniPlayer";
 import { useChapters, useMemorizations } from "@/hooks/use-quran";
 
 export default function QuranMemorizationProgressPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  usePageMeta({
+    title: t("seo.quranMemorization.title"),
+    description: t("seo.quranMemorization.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/quran/memorization",
+  });
   const [, navigate] = useLocation();
   const { data: chapters, isLoading: chaptersLoading } = useChapters();
   const { data: memorizations, isLoading: memLoading } = useMemorizations();

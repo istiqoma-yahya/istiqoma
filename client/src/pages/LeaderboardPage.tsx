@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -60,7 +61,13 @@ const initialState: PeriodState = {
 };
 
 export default function LeaderboardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  usePageMeta({
+    title: t("seo.leaderboard.title"),
+    description: t("seo.leaderboard.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/leaderboard",
+  });
   const [, navigate] = useLocation();
   const [period, setPeriod] = useState<Period>("daily");
   const tz = useMemo(getBrowserTimezone, []);

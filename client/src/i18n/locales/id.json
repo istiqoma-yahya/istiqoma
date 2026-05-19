@@ -2046,5 +2046,77 @@
       "pre": "Untuk pertanyaan tentang Syarat ini, hubungi kami di ",
       "post": "."
     }
+  },
+  "seo": {
+    "landing": {
+      "title": "Istiqoma — Pelacak kebiasaan spiritual untuk Muslim",
+      "description": "Bangun ibadah harian yang konsisten. Catat sholat, dzikir, puasa, sedekah, dan bacaan Al-Qur'an dengan pengingat lembut, streak, dan analitik yang indah."
+    },
+    "dashboard": {
+      "title": "Dasbor — Ibadah harianmu",
+      "description": "Lihat sholat harian, dzikir, bacaan Al-Qur'an, dan progres streak-mu sekilas."
+    },
+    "progress": {
+      "title": "Progres — Perjalanan spiritualmu",
+      "description": "Visualisasikan kebiasaan ibadahmu dari waktu ke waktu dengan grafik dan rincian kategori."
+    },
+    "targets": {
+      "title": "Target — Atur tujuan spiritual",
+      "description": "Buat dan pantau target pribadi maupun komunitas untuk sholat, puasa, Al-Qur'an, dan lainnya."
+    },
+    "quran": {
+      "title": "Al-Qur'an — Baca, dengar, dan hafal",
+      "description": "Baca Al-Qur'an dengan tipografi Arab yang indah, dengarkan beragam qari, dan hafalkan ayat demi ayat."
+    },
+    "quranSurah": {
+      "title": "Al-Qur'an — Surah {{name}} ({{transliteration}})",
+      "description": "Surah {{transliteration}} ({{name}}) — {{translated}}. Surah ke-{{number}} dalam Al-Qur'an, diturunkan di {{revelation}}, berisi {{verses}} ayat. Baca dengan terjemahan, dengarkan beragam qari, dan hafalkan ayat demi ayat di Istiqoma.",
+      "makkah": "Makkah",
+      "madinah": "Madinah"
+    },
+    "quranBookmarks": {
+      "title": "Penanda Al-Qur'an",
+      "description": "Lanjutkan bacaanmu tepat di tempat terakhir kamu berhenti."
+    },
+    "quranMemorization": {
+      "title": "Progres hafalan Al-Qur'an",
+      "description": "Pantau ayat-ayat yang sudah kamu hafal di seluruh Al-Qur'an."
+    },
+    "quiz": {
+      "title": "Kuis Islami — Uji pengetahuanmu",
+      "description": "Asah pengetahuan Islammu lewat 10 level soal pilihan ganda."
+    },
+    "quizLeaderboard": {
+      "title": "Papan peringkat kuis",
+      "description": "Lihat bagaimana komunitas berperforma di Kuis Islami."
+    },
+    "leaderboard": {
+      "title": "Papan peringkat — Berlomba dalam kebaikan",
+      "description": "Lihat performa terbaik di komunitas Istiqoma dan berlomba dalam amal kebaikan."
+    },
+    "profile": {
+      "title": "Profil & pengaturan",
+      "description": "Kelola akun, bahasa, pengingat, dan layanan tersambungmu."
+    },
+    "dzikir": {
+      "title": "Penghitung Dzikir",
+      "description": "Tasbih digital yang tenang dan menemanimu, dengan target per jenis dan riwayat sesi tersimpan."
+    },
+    "sholat": {
+      "title": "Pelacak Sholat",
+      "description": "Catat sholat fardhu harianmu dan bangun kebiasaan sholat yang konsisten."
+    },
+    "qibla": {
+      "title": "Kiblat & jadwal sholat",
+      "description": "Temukan arah Ka'bah dan lihat jadwal sholat hari ini berdasarkan lokasi kamu."
+    },
+    "privacy": {
+      "title": "Kebijakan privasi",
+      "description": "Bagaimana Istiqoma mengumpulkan, menyimpan, dan melindungi data perjalanan spiritualmu."
+    },
+    "terms": {
+      "title": "Syarat layanan",
+      "description": "Syarat yang berlaku saat kamu menggunakan Istiqoma."
+    }
   }
 }

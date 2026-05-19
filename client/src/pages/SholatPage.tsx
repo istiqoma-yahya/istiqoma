@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { useLocation } from "wouter";
 import { Coordinates, PrayerTimes, CalculationMethod, Prayer, SunnahTimes } from "adhan";
 import { Card } from "@/components/ui/card";
@@ -56,6 +57,12 @@ function toMidnight(d: Date): Date {
 
 export default function SholatPage() {
   const { t, i18n } = useTranslation();
+  usePageMeta({
+    title: t("seo.sholat.title"),
+    description: t("seo.sholat.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/sholat",
+  });
   const [, navigate] = useLocation();
 
   const saved = getSavedLocation();

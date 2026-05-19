@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { RecordDeedChooserDialog } from "@/components/RecordDeedChooserDialog";
 import { useAuth } from "@/hooks/use-auth";
 import { useDeeds } from "@/hooks/use-deeds";
@@ -36,7 +37,13 @@ export default function Dashboard() {
   const { user, logout, isLoggingOut } = useAuth();
   const { data: deeds, isLoading } = useDeeds();
   const [, navigate] = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  usePageMeta({
+    title: t("seo.dashboard.title"),
+    description: t("seo.dashboard.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/",
+  });
   const [chooserOpen, setChooserOpen] = useState(false);
 
   const { data: targetsProgress } = useQuery<TargetWithProgress[]>({

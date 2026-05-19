@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { useLocation, useSearch } from "wouter";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import {
@@ -242,6 +243,12 @@ function targetCountLabel(count: number, t: (key: string, opts?: Record<string, 
 
 export default function TargetsPage() {
   const { t, i18n } = useTranslation();
+  usePageMeta({
+    title: t("seo.targets.title"),
+    description: t("seo.targets.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/targets",
+  });
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
@@ -153,7 +154,13 @@ const Q5_ICONS: Record<string, string> = {
 };
 
 export default function ProfilePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  usePageMeta({
+    title: t("seo.profile.title"),
+    description: t("seo.profile.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/profile",
+  });
   const [, navigate] = useLocation();
   const { user, isLoading, isAuthenticated } = useAuth();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

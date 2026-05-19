@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -27,6 +28,12 @@ function extractServerMessage(err: Error): string | null {
 
 export default function QuizPage() {
   const { t, i18n } = useTranslation();
+  usePageMeta({
+    title: t("seo.quiz.title"),
+    description: t("seo.quiz.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/quiz",
+  });
   const [, navigate] = useLocation();
   const locale = i18n.language?.split("-")[0] ?? "en";
   const localeParam = ["id", "ms"].includes(locale) ? locale : "en";

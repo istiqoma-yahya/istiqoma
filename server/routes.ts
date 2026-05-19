@@ -118,10 +118,88 @@ function resolveLocale(req: { query: { locale?: unknown }; headers: { "accept-la
   return "en";
 }
 
+const SITE_ORIGIN = "https://istiqoma.com";
+
+function buildRobotsTxt(): string {
+  // Allow: public marketing/content surfaces (landing, Qur'an reader,
+  // quiz, leaderboard, legal). Disallow: API + every authenticated/
+  // user-specific surface so search engines don't index login walls
+  // or personal data pages.
+  return [
+    "User-agent: *",
+    "Allow: /",
+    "Allow: /quran",
+    "Allow: /quiz",
+    "Allow: /leaderboard",
+    "Allow: /privacy",
+    "Allow: /terms",
+    "Disallow: /api/",
+    "Disallow: /admin",
+    "Disallow: /admin/",
+    "Disallow: /profile",
+    "Disallow: /profile/",
+    "Disallow: /notifications",
+    "Disallow: /progress",
+    "Disallow: /dzikir",
+    "Disallow: /sholat",
+    "Disallow: /qibla",
+    "Disallow: /targets",
+    "Disallow: /targets/",
+    "Disallow: /community-targets",
+    "Disallow: /community-targets/",
+    "Disallow: /categories",
+    "Disallow: /deeds",
+    "Disallow: /create-deed",
+    "Disallow: /create-deed/",
+    "Disallow: /edit-deed/",
+    "Disallow: /streak",
+    "Disallow: /streak-freezer",
+    "Disallow: /quran/bookmarks",
+    "Disallow: /quran/memorization",
+    "Disallow: /quiz/leaderboard",
+    "Disallow: /login/",
+    "Disallow: /objects/",
+    "",
+    `Sitemap: ${SITE_ORIGIN}/sitemap.xml`,
+    "",
+  ].join("\n");
+}
+
+function buildSitemapXml(): string {
+  const today = new Date().toISOString().slice(0, 10);
+  const urls: { loc: string; changefreq: string; priority: string }[] = [
+    { loc: "/", changefreq: "weekly", priority: "1.0" },
+    { loc: "/quran", changefreq: "weekly", priority: "0.9" },
+    { loc: "/quiz", changefreq: "monthly", priority: "0.7" },
+    { loc: "/leaderboard", changefreq: "daily", priority: "0.5" },
+    { loc: "/privacy", changefreq: "yearly", priority: "0.3" },
+    { loc: "/terms", changefreq: "yearly", priority: "0.3" },
+  ];
+  for (let i = 1; i <= 114; i++) {
+    urls.push({ loc: `/quran/${i}`, changefreq: "monthly", priority: "0.6" });
+  }
+  const body = urls
+    .map(
+      (u) =>
+        `  <url>\n    <loc>${SITE_ORIGIN}${u.loc}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`,
+    )
+    .join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // SEO: robots.txt + sitemap.xml. Registered before any catch-all so they
+  // win over the SPA index.html fallback in production.
+  app.get("/robots.txt", (_req, res) => {
+    res.type("text/plain").send(buildRobotsTxt());
+  });
+  app.get("/sitemap.xml", (_req, res) => {
+    res.type("application/xml").send(buildSitemapXml());
+  });
+
   // Setup Replit Auth
   await setupAuth(app);
   registerAuthRoutes(app);

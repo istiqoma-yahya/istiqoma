@@ -2045,5 +2045,77 @@
       "pre": "For questions about these Terms, contact us at ",
       "post": "."
     }
+  },
+  "seo": {
+    "landing": {
+      "title": "Istiqoma — Spiritual habit tracker for Muslims",
+      "description": "Build consistent daily worship. Track prayers, dzikir, fasting, sadaqah, and Qur'an reading with gentle reminders, streaks, and beautiful analytics."
+    },
+    "dashboard": {
+      "title": "Dashboard — Your daily worship",
+      "description": "See your daily prayers, dzikir, Qur'an reading and streak progress at a glance."
+    },
+    "progress": {
+      "title": "Progress — Your spiritual journey",
+      "description": "Visualise your worship habits over time with friendly charts and category breakdowns."
+    },
+    "targets": {
+      "title": "Targets — Set spiritual goals",
+      "description": "Create and track personal and community targets for prayer, fasting, Qur'an, and more."
+    },
+    "quran": {
+      "title": "Qur'an — Read, listen and memorise",
+      "description": "Read the Qur'an in beautiful Arabic typography, listen to multiple reciters, and memorise verse by verse."
+    },
+    "quranSurah": {
+      "title": "Qur'an — Surah {{name}} ({{transliteration}})",
+      "description": "Surah {{transliteration}} ({{name}}) — {{translated}}. Chapter {{number}} of the Holy Qur'an, revealed in {{revelation}}, {{verses}} verses. Read with translation, listen to multiple reciters, and memorise verse by verse on Istiqoma.",
+      "makkah": "Makkah",
+      "madinah": "Madinah"
+    },
+    "quranBookmarks": {
+      "title": "Qur'an bookmarks",
+      "description": "Pick up exactly where you left off in your Qur'an reading."
+    },
+    "quranMemorization": {
+      "title": "Qur'an memorisation progress",
+      "description": "Track which verses you've memorised across the entire Qur'an."
+    },
+    "quiz": {
+      "title": "Islamic Quiz — Test your knowledge",
+      "description": "Sharpen your Islamic knowledge across 10 levels of multiple-choice questions."
+    },
+    "quizLeaderboard": {
+      "title": "Quiz leaderboard",
+      "description": "See how the community is doing on the Islamic Quiz."
+    },
+    "leaderboard": {
+      "title": "Leaderboard — Compete in goodness",
+      "description": "See top performers across the Istiqoma community and compete in good deeds."
+    },
+    "profile": {
+      "title": "Profile & settings",
+      "description": "Manage your account, language, reminders and connected services."
+    },
+    "dzikir": {
+      "title": "Dzikir counter",
+      "description": "A calm digital tasbih that travels with you, with per-type targets and saved sessions."
+    },
+    "sholat": {
+      "title": "Sholat tracker",
+      "description": "Log your daily Fardhu prayers and build a consistent prayer habit."
+    },
+    "qibla": {
+      "title": "Qibla & prayer times",
+      "description": "Find the direction of the Kaaba and see today's prayer times based on your location."
+    },
+    "privacy": {
+      "title": "Privacy policy",
+      "description": "How Istiqoma collects, stores, and protects your spiritual journey data."
+    },
+    "terms": {
+      "title": "Terms of service",
+      "description": "The terms that apply when you use Istiqoma."
+    }
   }
 }

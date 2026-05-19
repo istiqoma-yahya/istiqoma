@@ -2046,5 +2046,77 @@
       "pre": "Untuk pertanyaan tentang Terma ini, hubungi kami di ",
       "post": "."
     }
+  },
+  "seo": {
+    "landing": {
+      "title": "Istiqoma — Penjejak tabiat rohani untuk Muslim",
+      "description": "Bina ibadah harian yang konsisten. Jejaki solat, zikir, puasa, sedekah dan bacaan Al-Quran dengan peringatan lembut, streak dan analitik yang indah."
+    },
+    "dashboard": {
+      "title": "Papan pemuka — Ibadah harian anda",
+      "description": "Lihat solat harian, zikir, bacaan Al-Quran dan kemajuan streak anda sekilas pandang."
+    },
+    "progress": {
+      "title": "Kemajuan — Perjalanan rohani anda",
+      "description": "Visualkan tabiat ibadah anda dari masa ke masa dengan carta dan pecahan kategori."
+    },
+    "targets": {
+      "title": "Sasaran — Tetapkan matlamat rohani",
+      "description": "Cipta dan jejaki sasaran peribadi dan komuniti untuk solat, puasa, Al-Quran dan banyak lagi."
+    },
+    "quran": {
+      "title": "Al-Quran — Baca, dengar dan hafal",
+      "description": "Baca Al-Quran dengan tipografi Arab yang indah, dengar pelbagai qari dan hafal ayat demi ayat."
+    },
+    "quranSurah": {
+      "title": "Al-Quran — Surah {{name}} ({{transliteration}})",
+      "description": "Surah {{transliteration}} ({{name}}) — {{translated}}. Surah ke-{{number}} dalam Al-Quran, diturunkan di {{revelation}}, mengandungi {{verses}} ayat. Baca dengan terjemahan, dengar pelbagai qari dan hafal ayat demi ayat di Istiqoma.",
+      "makkah": "Makkah",
+      "madinah": "Madinah"
+    },
+    "quranBookmarks": {
+      "title": "Tanda buku Al-Quran",
+      "description": "Sambung bacaan anda tepat di tempat anda berhenti."
+    },
+    "quranMemorization": {
+      "title": "Kemajuan hafazan Al-Quran",
+      "description": "Pantau ayat-ayat yang telah anda hafal di seluruh Al-Quran."
+    },
+    "quiz": {
+      "title": "Kuiz Islamik — Uji pengetahuan anda",
+      "description": "Asah pengetahuan Islam anda melalui 10 tahap soalan aneka pilihan."
+    },
+    "quizLeaderboard": {
+      "title": "Papan kedudukan kuiz",
+      "description": "Lihat prestasi komuniti dalam Kuiz Islamik."
+    },
+    "leaderboard": {
+      "title": "Papan kedudukan — Berlumba dalam kebaikan",
+      "description": "Lihat prestasi terbaik komuniti Istiqoma dan berlumba dalam amal kebaikan."
+    },
+    "profile": {
+      "title": "Profil & tetapan",
+      "description": "Urus akaun, bahasa, peringatan dan perkhidmatan tersambung anda."
+    },
+    "dzikir": {
+      "title": "Pengira Zikir",
+      "description": "Tasbih digital yang tenang menemani anda, dengan sasaran setiap jenis dan sesi tersimpan."
+    },
+    "sholat": {
+      "title": "Penjejak Solat",
+      "description": "Catatkan solat fardhu harian anda dan bina tabiat solat yang konsisten."
+    },
+    "qibla": {
+      "title": "Kiblat & waktu solat",
+      "description": "Cari arah Kaabah dan lihat waktu solat hari ini berdasarkan lokasi anda."
+    },
+    "privacy": {
+      "title": "Dasar privasi",
+      "description": "Bagaimana Istiqoma mengumpul, menyimpan dan melindungi data perjalanan rohani anda."
+    },
+    "terms": {
+      "title": "Terma perkhidmatan",
+      "description": "Terma yang terpakai apabila anda menggunakan Istiqoma."
+    }
   }
 }

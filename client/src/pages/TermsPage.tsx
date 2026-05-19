@@ -1,10 +1,17 @@
 import { ArrowLeft } from "lucide-react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
 export default function TermsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  usePageMeta({
+    title: t("seo.terms.title"),
+    description: t("seo.terms.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/terms",
+  });
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">

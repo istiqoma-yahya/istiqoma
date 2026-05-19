@@ -36,6 +36,7 @@ import {
   useRemoveMemorization,
 } from "@/hooks/use-quran";
 import { useQuranAudio } from "@/components/QuranAudioProvider";
+import { usePageMeta } from "@/hooks/use-page-meta";
 
 type DisplayMode = "full" | "firstLast" | "hidden";
 
@@ -70,7 +71,7 @@ function FirstLastWordView({ text }: { text: string }) {
 }
 
 export default function QuranSurahPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [, navigate] = useLocation();
   const [, params] = useRoute("/quran/:id");
   const surahId = params?.id ? parseInt(params.id, 10) : null;
@@ -102,6 +103,30 @@ export default function QuranSurahPage() {
   const updateReadingState = useUpdateReadingState();
   const { toast } = useToast();
   const { playSurah, playAyah, current, currentAyah, isPlaying, isLoading } = useQuranAudio();
+
+  usePageMeta({
+    title: chapter
+      ? t("seo.quranSurah.title", {
+          name: chapter.name_arabic,
+          transliteration: chapter.name_simple,
+        })
+      : t("seo.quran.title"),
+    description: chapter
+      ? t("seo.quranSurah.description", {
+          name: chapter.name_arabic,
+          transliteration: chapter.name_simple,
+          translated: chapter.translated_name?.name ?? chapter.name_simple,
+          number: chapter.id,
+          revelation:
+            chapter.revelation_place === "makkah"
+              ? t("seo.quranSurah.makkah")
+              : t("seo.quranSurah.madinah"),
+          verses: chapter.verses_count,
+        })
+      : t("seo.quran.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: surahId ? `/quran/${surahId}` : "/quran",
+  });
 
   const verseRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const [topVerse, setTopVerse] = useState<number | null>(null);

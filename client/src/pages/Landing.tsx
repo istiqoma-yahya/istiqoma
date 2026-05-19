@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Moon, HandCoins, Shield, Calendar, CheckCircle2, Download, KeyRound, Play } from "lucide-react";
 import { DuaHandsIcon } from "@/components/DuaHandsIcon";
@@ -545,7 +546,13 @@ function PrivacyIllustration() {
 }
 
 export default function Landing() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  usePageMeta({
+    title: t("seo.landing.title"),
+    description: t("seo.landing.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/",
+  });
   const { theme } = useTheme();
   const { toast } = useToast();
   const logoSrc = theme === "dark" ? istiqomaHorizontalLogoDark : istiqomaHorizontalLogo;

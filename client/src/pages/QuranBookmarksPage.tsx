@@ -1,4 +1,5 @@
 import { useLocation } from "wouter";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Bookmark, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -14,6 +15,12 @@ import { useMemo } from "react";
 
 export default function QuranBookmarksPage() {
   const { t, i18n } = useTranslation();
+  usePageMeta({
+    title: t("seo.quranBookmarks.title"),
+    description: t("seo.quranBookmarks.description"),
+    locale: i18n.language?.split("-")[0] ?? "en",
+    canonicalPath: "/quran/bookmarks",
+  });
   const [, navigate] = useLocation();
   const { data: bookmarks, isLoading } = useBookmarks();
   const { data: chapters } = useChapters();

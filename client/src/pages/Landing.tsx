@@ -162,7 +162,7 @@ export default function Landing() {
               className="w-full md:w-[65%]"
             >
               <div className="flex justify-center md:justify-start mb-6">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-border backdrop-blur-sm">
                   <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-sm font-medium text-muted-foreground" data-testid="text-hero-join-pill">{t('landing.joinPill')}</span>
                 </div>

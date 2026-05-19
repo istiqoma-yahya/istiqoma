@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import type { Campaign } from "@shared/schema";
 
 const AUTO_ADVANCE_MS = 5000;
 
 export function CampaignBanner() {
+  const { t } = useTranslation();
   const { data: campaigns } = useQuery<Campaign[]>({
     queryKey: ["/api/campaigns/active"],
     staleTime: 5 * 60 * 1000,
@@ -55,7 +57,8 @@ export function CampaignBanner() {
   };
 
   return (
-    <div className="mb-6" data-testid="campaign-banner">
+    <div className="space-y-3 mb-6" data-testid="campaign-banner">
+      <h3 className="text-xl font-display font-bold">{t('dashboard.others')}</h3>
       <div className="relative rounded-lg overflow-hidden shadow-sm">
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.a

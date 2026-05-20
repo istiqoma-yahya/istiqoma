@@ -81,10 +81,10 @@ export function VoiceRecordingMiniPlayer({
           <div className="px-3 pb-2">
             <Slider
               value={[position]}
-              max={duration || 1}
+              max={duration > 0 ? duration : 1}
               step={0.1}
               onValueChange={(v) => onSeek(v[0])}
-              disabled={!duration}
+              disabled={duration <= 0}
               data-testid="slider-voice-player-progress"
               aria-label={t("quranMenu.voicePlayerSeek")}
             />

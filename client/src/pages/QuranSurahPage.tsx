@@ -168,7 +168,7 @@ export default function QuranSurahPage() {
   // In-memory recordings map (verse number -> object URL + blob).
   // Recordings are session-only: we revoke + clear them on unmount or
   // route change so nothing persists. Nothing is uploaded.
-  const recordingsRef = useRef<Map<number, { url: string; blob: Blob }>>(new Map());
+  const recordingsRef = useRef<Map<number, { url: string; blob: Blob; duration: number }>>(new Map());
   const [recordingsVersion, setRecordingsVersion] = useState(0);
   const [activeRecordVerse, setActiveRecordVerse] = useState<number | null>(null);
   const recorder = useVoiceRecorder();
@@ -367,7 +367,9 @@ export default function QuranSurahPage() {
     const onPlay = () => setRecordIsPlaying(true);
     const onPause = () => setRecordIsPlaying(false);
     const onTime = () => setRecordPosition(a.currentTime || 0);
-    const onLoaded = () => setRecordDuration(a.duration || 0);
+    const onLoaded = () => {
+      if (isFinite(a.duration) && a.duration > 0) setRecordDuration(a.duration);
+    };
     const onEnded = () => {
       setRecordIsPlaying(false);
       setRecordPosition(0);
@@ -540,7 +542,7 @@ export default function QuranSurahPage() {
     const verseNumber = activeRecordVerse;
     if (verseNumber === null) return;
     try {
-      const blob = await recorder.stopRecording();
+      const { blob, duration } = await recorder.stopRecording();
       if (blob.size === 0) {
         setActiveRecordVerse(null);
         return;
@@ -550,7 +552,7 @@ export default function QuranSurahPage() {
       const prev = recordingsRef.current.get(verseNumber);
       if (prev) URL.revokeObjectURL(prev.url);
       const url = URL.createObjectURL(blob);
-      recordingsRef.current.set(verseNumber, { url, blob });
+      recordingsRef.current.set(verseNumber, { url, blob, duration });
       setRecordingsVersion((n) => n + 1);
     } catch (err) {
       console.error("voice recorder stop failed", err);
@@ -606,7 +608,10 @@ export default function QuranSurahPage() {
     a.src = rec.url;
     a.currentTime = 0;
     setRecordPosition(0);
-    setRecordDuration(0);
+    // Seed duration from the value we measured during recording so the
+    // slider and right-side label are correct immediately, before the
+    // browser parses the WebM metadata (which often reports Infinity).
+    setRecordDuration(rec.duration);
     setPlayingRecordVerse(verseNumber);
     void a.play().catch(() => {
       setRecordIsPlaying(false);

@@ -92,7 +92,7 @@
     },
     "cta": {
       "title": "Mulai Perjalanan Istiqomahmu",
-      "subtitle": "Gratis selamanya. Tanpa iklan. Didesain untuk membantu kamu konsisten.",
+      "subtitle": "Gratis untuk memulai. Didesain untuk membantu kamu konsisten.",
       "button": "Daftar dengan Google",
       "note": "Atau masuk dengan nama pengguna & PIN"
     },
@@ -250,8 +250,8 @@
       "privacy": {
         "eyebrow": "Privasi Terjaga",
         "title": "Ibadahmu adalah milikmu",
-        "subtitle": "Istiqoma dibangun agar amalmu tetap antara kamu dan Allah — tanpa iklan, tanpa pixel pelacak, tanpa data dijual.",
-        "benefit1": "Tanpa iklan pihak ketiga atau penjual analitik.",
+        "subtitle": "Istiqoma dibangun agar amalmu tetap antara kamu dan Allah — tanpa pixel pelacak, dan datamu tidak pernah dijual.",
+        "benefit1": "Data ibadahmu tidak pernah dijual atau dibagikan ke pihak ketiga.",
         "benefit2": "Ekspor atau hapus datamu kapan saja, tanpa pertanyaan.",
         "illustration": {
           "label": "Datamu, aturanmu",
@@ -1878,7 +1878,7 @@
       "row10Purpose": "Menjagamu tetap masuk (TTL 1 minggu)",
       "notWord": "tidak",
       "notePre": "Kami ",
-      "notePost": " menggunakan cookies untuk iklan, menjalankan skrip analitik pihak ketiga, atau mengumpulkan data di luar yang tercantum di atas."
+      "notePost": " menjalankan skrip analitik pihak ketiga, atau mengumpulkan data di luar yang tercantum di atas."
     },
     "s3": {
       "heading": "3. Data Sensitif & Persetujuan GDPR",
@@ -1903,7 +1903,7 @@
       "item4": "Untuk mendukung papan peringkat dan target komunitas (agregat).",
       "item5Pre": "Kami ",
       "item5Not": "tidak",
-      "item5Post": " menggunakan datamu untuk membuat profil iklan.",
+      "item5Post": " menjual datamu atau menggunakannya untuk membuat profil iklan pihak ketiga.",
       "item6Pre": "Kami ",
       "item6Not": "tidak",
       "item6Post": " menjual datamu kepada pihak ketiga.",

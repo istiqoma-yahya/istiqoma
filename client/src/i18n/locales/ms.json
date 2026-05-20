@@ -92,7 +92,7 @@
     },
     "cta": {
       "title": "Mulakan Perjalanan Istiqomah Anda",
-      "subtitle": "Percuma selama-lamanya. Tiada iklan. Direka untuk membantu anda konsisten.",
+      "subtitle": "Percuma untuk bermula. Direka untuk membantu anda konsisten.",
       "button": "Daftar dengan Google",
       "note": "Atau log masuk dengan nama pengguna & PIN"
     },
@@ -250,8 +250,8 @@
       "privacy": {
         "eyebrow": "Privasi Terjamin",
         "title": "Ibadahmu adalah milikmu",
-        "subtitle": "Istiqoma dibina supaya amalmu kekal antara kamu dan Allah — tiada iklan, tiada piksel penjejak, tiada data dijual.",
-        "benefit1": "Tiada iklan pihak ketiga atau penjual analitik.",
+        "subtitle": "Istiqoma dibina supaya amalmu kekal antara kamu dan Allah — tiada piksel penjejak, dan data anda tidak pernah dijual.",
+        "benefit1": "Data ibadah anda tidak pernah dijual atau dikongsi dengan pihak ketiga.",
         "benefit2": "Eksport atau padam datamu bila-bila masa, tanpa sebarang soalan.",
         "illustration": {
           "label": "Datamu, peraturanmu",
@@ -1878,7 +1878,7 @@
       "row10Purpose": "Mengekalkan anda log masuk (TTL 1 minggu)",
       "notWord": "tidak",
       "notePre": "Kami ",
-      "notePost": " menggunakan kuki untuk pengiklanan, menjalankan skrip analitik pihak ketiga, atau mengumpul data di luar yang disenaraikan di atas."
+      "notePost": " menjalankan skrip analitik pihak ketiga, atau mengumpul data di luar yang disenaraikan di atas."
     },
     "s3": {
       "heading": "3. Data Sensitif & Persetujuan GDPR",
@@ -1903,7 +1903,7 @@
       "item4": "Untuk menyokong papan pendahulu dan sasaran komuniti (agregat).",
       "item5Pre": "Kami ",
       "item5Not": "tidak",
-      "item5Post": " menggunakan data anda untuk membina profil pengiklanan.",
+      "item5Post": " menjual data anda atau menggunakannya untuk membina profil pengiklanan pihak ketiga.",
       "item6Pre": "Kami ",
       "item6Not": "tidak",
       "item6Post": " menjual data anda kepada pihak ketiga.",

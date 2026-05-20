@@ -92,7 +92,7 @@
     },
     "cta": {
       "title": "Start Your Journey of Istiqomah",
-      "subtitle": "Free forever. No ads. Designed to help you stay consistent.",
+      "subtitle": "Free to start. Designed to help you stay consistent.",
       "button": "Sign up with Google",
       "note": "Or sign in with username & PIN"
     },
@@ -250,8 +250,8 @@
       "privacy": {
         "eyebrow": "Privacy First",
         "title": "Your worship is yours alone",
-        "subtitle": "Istiqoma is built so your deeds stay between you and Allah — no ads, no tracking pixels, no data sold.",
-        "benefit1": "No third-party advertising or analytics resellers.",
+        "subtitle": "Istiqoma is built so your deeds stay between you and Allah — no tracking pixels, and your data is never sold.",
+        "benefit1": "Your worship data is never sold or shared with third parties.",
         "benefit2": "Export or delete your data anytime, no questions asked.",
         "illustration": {
           "label": "Your data, your rules",
@@ -1877,7 +1877,7 @@
       "row10Purpose": "Keeping you signed in (1-week TTL)",
       "notWord": "not",
       "notePre": "We do ",
-      "notePost": " use cookies for advertising, run third-party analytics scripts, or collect data beyond what is listed above."
+      "notePost": " run third-party analytics scripts, or collect data beyond what is listed above."
     },
     "s3": {
       "heading": "3. Sensitive Data & GDPR Consent",
@@ -1902,7 +1902,7 @@
       "item4": "To power leaderboards and community targets (aggregated).",
       "item5Pre": "We do ",
       "item5Not": "not",
-      "item5Post": " use your data to build advertising profiles.",
+      "item5Post": " sell your data or use it to build third-party advertising profiles.",
       "item6Pre": "We do ",
       "item6Not": "not",
       "item6Post": " sell your data to third parties.",

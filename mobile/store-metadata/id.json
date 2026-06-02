@@ -1,0 +1,26 @@
+{
+  "_notes": {
+    "short_description": "Maks 80 karakter (Google Play). Apple menggunakan subtitle, maks 30 karakter.",
+    "apple_subtitle": "Maks 30 karakter — ditampilkan di bawah nama aplikasi di App Store.",
+    "long_description": "Apple: hingga 4000 karakter (teks biasa). Google: hingga 4000 karakter.",
+    "keywords": "Apple: 100 karakter total, dipisahkan koma."
+  },
+
+  "app_name": "Istiqoma",
+  "apple_subtitle": "Pelacak Ibadah Harian",
+  "short_description": "Lacak sholat, Al-Qur'an, dzikir, puasa & amal harian Anda",
+
+  "long_description": "Istiqoma membantu umat Muslim membangun kebiasaan ibadah yang konsisten — satu amal dalam satu waktu.\n\nCatat sholat fardhu, bacaan Al-Qur'an, dzikir, puasa, sedekah, dan ibadah kustom lainnya. Tetapkan target, kumpulkan poin, jaga streak, dan saksikan progres spiritual Anda berkembang.\n\n🕌 WAKTU SHOLAT & KIBLAT\nWaktu sholat akurat berdasarkan lokasi Anda. Kompas kiblat yang indah. Pelacakan sholat dengan pengingat tepat waktu.\n\n📖 PEMBACA AL-QUR'AN\nAl-Qur'an lengkap dengan terjemahan bahasa Indonesia, pilihan qari, audio dengan sorotan ayat per ayat, bookmark, dan pelacakan hafalan. Dapatkan poin untuk setiap ayat yang Anda hafal.\n\n📿 PENGHITUNG DZIKIR\nTampilan ketuk untuk menghitung dzikir pagi/petang, tasbih, tahmid, takbir, istighfar, dan jenis dzikir kustom.\n\n🏆 STREAK & PAPAN PERINGKAT\nJaga streak harian, raih lencana pencapaian, dan lihat posisi Anda di papan peringkat komunitas. Pembekuan streak opsional tersedia.\n\n🎯 TARGET & TUJUAN\nTetapkan target ibadah mingguan, bulanan, atau satu kali. Kalender visual menunjukkan konsistensi Anda.\n\n🧠 KUIS ISLAM\nUji dan perluas pengetahuan Islam Anda dengan 100 pertanyaan dalam 10 tingkat. Tersedia dalam Bahasa Indonesia, Inggris, dan Melayu.\n\n🔔 PENGINGAT CERDAS\nPengingat harian personal dan peringatan sholat sesuai jadwal waktu sholat lokal Anda.\n\n🌙 RAMADAN & PUASA\nLacak puasa, tarawih, dan sedekah sepanjang bulan suci.\n\nIstiqoma tersedia dalam Bahasa Indonesia, Inggris, dan Melayu. Data Anda bersifat pribadi dan tersimpan dengan aman.",
+
+  "keywords_apple": "quran,sholat,muslim,ibadah,dzikir,puasa,islam,hafalan,streak,habit",
+
+  "whats_new": "• Pembaca Al-Qur'an lengkap dengan sorotan audio ayat per ayat dan sinkronisasi bookmark Quran Foundation\n• Kuis Islam dengan 100 pertanyaan dalam Bahasa Indonesia, Inggris, dan Melayu\n• Penghitung dzikir pagi dan petang\n• Pembekuan streak — jaga streak Anda di hari-hari sulit\n• Pengingat waktu sholat dengan perhitungan akurat berdasarkan lokasi\n• Peningkatan performa dan perbaikan bug",
+
+  "age_rating": "4+",
+  "category_primary": "Kesehatan & Kebugaran",
+  "category_secondary": "Pendidikan",
+
+  "privacy_url": "https://istiqoma.com/privacy",
+  "support_url": "https://istiqoma.com/support",
+  "marketing_url": "https://istiqoma.com"
+}

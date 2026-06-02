@@ -42,7 +42,61 @@ npx cap add android
 These commands create `ios/` and `android/` project folders. They are in `.gitignore` because
 they're large and auto-generated — regenerate them from this repo on any fresh clone.
 
-### 4. Copy the web build into the native projects
+### 4. Generate app icons and splash screens
+
+Source assets are in `resources/` (already committed):
+
+| File | Size | Purpose |
+|------|------|---------|
+| `resources/icon.png` | 1024×1024, opaque | iOS icons (all sizes) |
+| `resources/icon-foreground.png` | 1024×1024, transparent | Android adaptive icon foreground |
+| `resources/icon-background.png` | 1024×1024, solid emerald | Android adaptive icon background |
+| `resources/splash.png` | 2732×2732 | Splash screen (light + dark) |
+| `resources/splash-dark.png` | 2732×2732 | Splash screen dark mode |
+
+Run `@capacitor/assets` to generate every platform-specific size into `ios/` and `android/`:
+
+```bash
+npx @capacitor/assets generate
+```
+
+This writes icons to `ios/App/App/Assets.xcassets/` and
+`android/app/src/main/res/mipmap-*/`. Run it after `npx cap add ios` and
+`npx cap add android`, and re-run it any time the source icon changes.
+
+### 5. Apply permission strings and privacy manifest
+
+**iOS** — copy template files from `mobile/ios/`:
+
+```bash
+# Merge into ios/App/App/Info.plist (see mobile/ios/Info.plist.additions.xml)
+# Copy localized InfoPlist.strings:
+cp mobile/ios/InfoPlist.strings.en ios/App/App/en.lproj/InfoPlist.strings
+cp mobile/ios/InfoPlist.strings.id ios/App/App/id.lproj/InfoPlist.strings
+cp mobile/ios/InfoPlist.strings.ms ios/App/App/ms.lproj/InfoPlist.strings
+# Copy privacy manifest:
+cp mobile/ios/PrivacyInfo.xcprivacy ios/App/App/PrivacyInfo.xcprivacy
+```
+
+Then in Xcode open `ios/App/App/Info.plist` and merge the key-value pairs
+from `mobile/ios/Info.plist.additions.xml` (microphone, location, URL scheme,
+background modes).
+
+**Android** — merge from `mobile/android/`:
+
+```bash
+# Merge permissions into AndroidManifest.xml (see mobile/android/permissions.xml)
+# Copy permission rationale strings:
+cp mobile/android/strings.xml.en android/app/src/main/res/values/strings.xml
+cp mobile/android/strings.xml.id android/app/src/main/res/values-id/strings.xml
+cp mobile/android/strings.xml.ms android/app/src/main/res/values-ms/strings.xml
+```
+
+Then in `android/app/src/main/AndroidManifest.xml` merge the `<uses-permission>`
+tags and the `<intent-filter>` for the `istiqoma://` scheme from
+`mobile/android/permissions.xml`.
+
+### 6. Copy the web build into the native projects
 
 ```bash
 npx cap sync
@@ -206,11 +260,32 @@ the app after the system browser completes.
 
 ---
 
-## Known issues in the native shell (separate tasks)
+## Store Metadata
 
-| Issue | Planned fix |
-|---|---|
-| App icons are the default Capacitor icon | Task #279 — Mobile app assets |
+Pre-written store listing copy (titles, descriptions, keywords, what's new) is in
+`mobile/store-metadata/`:
+
+| File | Language |
+|------|----------|
+| `en.json` | English |
+| `id.json` | Bahasa Indonesia |
+| `ms.json` | Bahasa Melayu |
+
+Each file contains: `app_name`, `apple_subtitle` (30 chars), `short_description` (80 chars),
+`long_description` (up to 4000 chars), `keywords_apple` (100 chars, comma-separated),
+`whats_new`, `category_primary`, `category_secondary`, and URLs for privacy / support /
+marketing pages.
+
+Store screenshots (pre-processed to required resolutions) are in
+`mobile/store-metadata/screenshots/`:
+
+| Subdirectory | Sizes | Destination |
+|---|---|---|
+| `ios/` | 1290×2796 (6.7"), 1242×2208 (5.5") | App Store Connect |
+| `android/` | 1080×1920 (phone) | Google Play Console |
+
+See `mobile/store-metadata/screenshots/README.md` for regeneration instructions
+and notes about iPad and tablet screenshots (require Simulator captures).
 
 ---
 

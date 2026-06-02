@@ -1,0 +1,30 @@
+{
+  "_notes": {
+    "short_description": "Max 80 chars (Google Play). Apple uses subtitle, max 30 chars.",
+    "apple_subtitle": "Max 30 chars — shown under app name on App Store.",
+    "long_description": "Apple: up to 4000 chars (plain text). Google: up to 4000 chars (plain text, basic HTML allowed).",
+    "keywords": "Apple: 100 chars total, comma-separated. Google: does not use a keyword field (keywords are inferred from title + description).",
+    "whats_new": "Apple: 4000 chars max. Google: 500 chars max.",
+    "privacy_url": "Required by both stores.",
+    "support_url": "Required by Apple.",
+    "marketing_url": "Optional on both."
+  },
+
+  "app_name": "Istiqoma",
+  "apple_subtitle": "Muslim Habit Tracker",
+  "short_description": "Track daily prayers, Qur'an, dzikir, fasting & good deeds",
+
+  "long_description": "Istiqoma helps Muslims build consistent daily worship — one deed at a time.\n\nLog your prayers (Sholat Fardhu), Qur'an reading, dzikir, fasting, sadaqah, and any custom ibadah. Set personal targets, earn points, maintain streaks, and watch your spiritual progress grow.\n\n🕌 PRAYER TIMES & QIBLA\nAccurate prayer times calculated for your exact location. Beautiful compass for Qibla direction. Prayer completion tracking with reminders.\n\n📖 QUR'AN READER\nFull Qur'an with Indonesian translations, multiple reciters, audio playback with verse-by-verse highlighting, bookmarks, and memorization tracking. Earn points for every verse you memorize.\n\n📿 DZIKIR COUNTER\nBeautiful tap-to-count interface for morning/evening adhkar, tasbih, tahmid, takbir, istighfar, and custom dzikir types.\n\n🏆 STREAKS & LEADERBOARD\nMaintain daily streaks, earn achievement badges, and see where you stand on the community leaderboard. Optional streak freezes let you protect your progress on difficult days.\n\n🎯 TARGETS & GOALS\nSet weekly, monthly, or one-time worship targets. Visual calendar shows your consistency. Progress bars keep you on track.\n\n🧠 ISLAMIC QUIZ\nTest and grow your Islamic knowledge with 100 questions across 10 levels. Available in English, Bahasa Indonesia, and Bahasa Melayu.\n\n🔔 SMART REMINDERS\nPersonalized daily reminders and Sholat alerts timed to your local prayer schedule. Choose from gentle notification sounds.\n\n🌙 RAMADAN & FASTING\nTrack fasting days, track tarawih, and log sadaqah throughout the holy month.\n\nIstiqoma is available in English, Bahasa Indonesia, and Bahasa Melayu. Your data is private and securely stored.",
+
+  "keywords_apple": "quran,prayer,muslim,ibadah,dzikir,sholat,islam,hafalan,streak,habit",
+
+  "whats_new": "• Full Qur'an reader with verse-by-verse audio highlighting and Quran Foundation bookmark sync\n• Islamic Quiz with 100 questions in English, Indonesian, and Malay\n• Dzikir counter with morning/evening adhkar\n• Streak freezer — protect your streak on difficult days\n• Prayer time reminders with accurate local calculation\n• Performance improvements and bug fixes",
+
+  "age_rating": "4+",
+  "category_primary": "Health & Fitness",
+  "category_secondary": "Education",
+
+  "privacy_url": "https://istiqoma.com/privacy",
+  "support_url": "https://istiqoma.com/support",
+  "marketing_url": "https://istiqoma.com"
+}

@@ -1,0 +1,25 @@
+{
+  "_notes": {
+    "short_description": "Maks 80 aksara (Google Play). Apple menggunakan subtitle, maks 30 aksara.",
+    "apple_subtitle": "Maks 30 aksara — dipaparkan di bawah nama apl di App Store.",
+    "long_description": "Apple: sehingga 4000 aksara (teks biasa). Google: sehingga 4000 aksara."
+  },
+
+  "app_name": "Istiqoma",
+  "apple_subtitle": "Penjejak Ibadah Harian",
+  "short_description": "Jejak solat, Al-Quran, zikir, puasa & amalan harian anda",
+
+  "long_description": "Istiqoma membantu umat Islam membina tabiat ibadah yang konsisten — satu amalan pada satu masa.\n\nCatat solat fardu, bacaan Al-Quran, zikir, puasa, sedekah, dan ibadah khusus yang lain. Tetapkan sasaran, kumpul mata, kekalkan streak, dan saksikan kemajuan rohani anda berkembang.\n\n🕌 WAKTU SOLAT & KIBLAT\nWaktu solat tepat berdasarkan lokasi anda. Kompas kiblat yang cantik. Penjejakan solat dengan peringatan tepat pada masanya.\n\n📖 PEMBACA AL-QURAN\nAl-Quran lengkap dengan terjemahan bahasa Melayu, pelbagai qari, audio dengan sorotan ayat demi ayat, penanda buku, dan penjejakan hafazan. Dapatkan mata untuk setiap ayat yang anda hafaz.\n\n📿 PEMBILANG ZIKIR\nAntara muka ketuk untuk mengira zikir pagi/petang, tasbih, tahmid, takbir, istighfar, dan jenis zikir khusus.\n\n🏆 STREAK & PAPAN PENDAHULU\nKekalkan streak harian, raih lencana pencapaian, dan lihat kedudukan anda di papan pendahulu komuniti. Pembekuan streak pilihan tersedia.\n\n🎯 SASARAN & MATLAMAT\nTetapkan sasaran ibadah mingguan, bulanan, atau sekali sahaja. Kalendar visual menunjukkan konsistensi anda.\n\n🧠 KUIZ ISLAM\nUji dan perluas pengetahuan Islam anda dengan 100 soalan dalam 10 tahap. Tersedia dalam Bahasa Melayu, Inggeris, dan Indonesia.\n\n🔔 PERINGATAN PINTAR\nPeringatan harian peribadi dan amaran solat mengikut jadual waktu solat tempatan anda.\n\n🌙 RAMADAN & PUASA\nJejak puasa, tarawih, dan sedekah sepanjang bulan suci.\n\nIstiqoma tersedia dalam Bahasa Melayu, Indonesia, dan Inggeris. Data anda adalah peribadi dan disimpan dengan selamat.",
+
+  "keywords_apple": "quran,solat,muslim,ibadah,zikir,puasa,islam,hafazan,streak,habit",
+
+  "whats_new": "• Pembaca Al-Quran lengkap dengan sorotan audio ayat demi ayat dan penyegerakan penanda buku Quran Foundation\n• Kuiz Islam dengan 100 soalan dalam Bahasa Melayu, Inggeris, dan Indonesia\n• Pembilang zikir pagi dan petang\n• Pembekuan streak — lindungi streak anda pada hari-hari yang sukar\n• Peringatan waktu solat dengan pengiraan tepat berdasarkan lokasi\n• Penambahbaikan prestasi dan pembaikan pepijat",
+
+  "age_rating": "4+",
+  "category_primary": "Kesihatan & Kecergasan",
+  "category_secondary": "Pendidikan",
+
+  "privacy_url": "https://istiqoma.com/privacy",
+  "support_url": "https://istiqoma.com/support",
+  "marketing_url": "https://istiqoma.com"
+}

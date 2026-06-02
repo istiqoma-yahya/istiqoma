@@ -64,37 +64,44 @@ This writes icons to `ios/App/App/Assets.xcassets/` and
 `android/app/src/main/res/mipmap-*/`. Run it after `npx cap add ios` and
 `npx cap add android`, and re-run it any time the source icon changes.
 
-### 5. Apply permission strings and privacy manifest
+### 5. Apply permission strings, privacy manifest & deep-link config
 
-**iOS** — copy template files from `mobile/ios/`:
-
-```bash
-# Merge into ios/App/App/Info.plist (see mobile/ios/Info.plist.additions.xml)
-# Copy localized InfoPlist.strings:
-cp mobile/ios/InfoPlist.strings.en ios/App/App/en.lproj/InfoPlist.strings
-cp mobile/ios/InfoPlist.strings.id ios/App/App/id.lproj/InfoPlist.strings
-cp mobile/ios/InfoPlist.strings.ms ios/App/App/ms.lproj/InfoPlist.strings
-# Copy privacy manifest:
-cp mobile/ios/PrivacyInfo.xcprivacy ios/App/App/PrivacyInfo.xcprivacy
-```
-
-Then in Xcode open `ios/App/App/Info.plist` and merge the key-value pairs
-from `mobile/ios/Info.plist.additions.xml` (microphone, location, URL scheme,
-background modes).
-
-**Android** — merge from `mobile/android/`:
+Run the included automation script once after each `npx cap add ios/android`:
 
 ```bash
-# Merge permissions into AndroidManifest.xml (see mobile/android/permissions.xml)
-# Copy permission rationale strings:
-cp mobile/android/strings.xml.en android/app/src/main/res/values/strings.xml
-cp mobile/android/strings.xml.id android/app/src/main/res/values-id/strings.xml
-cp mobile/android/strings.xml.ms android/app/src/main/res/values-ms/strings.xml
+chmod +x mobile/apply-native-config.sh
+./mobile/apply-native-config.sh
 ```
 
-Then in `android/app/src/main/AndroidManifest.xml` merge the `<uses-permission>`
-tags and the `<intent-filter>` for the `istiqoma://` scheme from
-`mobile/android/permissions.xml`.
+The script (`mobile/apply-native-config.sh`) uses Python's `plistlib` and string
+manipulation to make all required changes idempotently:
+
+**iOS — what it wires in:**
+| Destination | Change |
+|-------------|--------|
+| `ios/App/App/Info.plist` | `NSMicrophoneUsageDescription` (en/id/ms), `NSLocationWhenInUseUsageDescription` (en/id/ms), `UIBackgroundModes` (remote-notification, audio), `CFBundleURLTypes` (istiqoma:// scheme) |
+| `ios/App/App/PrivacyInfo.xcprivacy` | Full Apple privacy manifest (data types: email, name, user content, audio, location, device ID, product interaction, user ID; `NSPrivacyTracking = false`) |
+| `ios/App/App/{en,id,ms}.lproj/InfoPlist.strings` | Localized usage descriptions in English, Bahasa Indonesia, and Bahasa Melayu |
+
+Source templates (human-readable, committed in git):
+- `mobile/ios/Info.plist.additions.xml` — documents every key added
+- `mobile/ios/PrivacyInfo.xcprivacy` — full privacy manifest XML
+- `mobile/ios/InfoPlist.strings.{en,id,ms}` — localized usage strings
+
+**Android — what it wires in:**
+| Destination | Change |
+|-------------|--------|
+| `android/app/src/main/AndroidManifest.xml` | `INTERNET`, `POST_NOTIFICATIONS`, `RECORD_AUDIO`, `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `VIBRATE` permissions; `istiqoma://` deep-link intent filter |
+| `android/app/src/main/res/values/strings_istiqoma.xml` | English permission rationale strings |
+| `android/app/src/main/res/values-id/strings_istiqoma.xml` | Indonesian permission rationale strings |
+| `android/app/src/main/res/values-ms/strings_istiqoma.xml` | Malay permission rationale strings |
+
+Source templates: `mobile/android/permissions.xml` and `mobile/android/strings.xml.{en,id,ms}`
+
+**Splash screen** — the React app already calls `SplashScreen.hide({ fadeOutDuration: 200 })`
+in `client/src/lib/capacitor.ts` → `initCapacitorPlugins()` on every native launch.
+The splash configuration in `capacitor.config.ts` sets the background color to
+`#0a0a0a` and the spinner color to `#10b981` (emerald) to match the brand.
 
 ### 6. Copy the web build into the native projects
 

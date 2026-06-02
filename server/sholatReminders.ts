@@ -5,6 +5,7 @@ import type { PushSubscription } from '@shared/schema';
 import webpush from 'web-push';
 import { getDisplayName, sholatReminderCopy } from './notificationCopy';
 import { getAvatarUrl } from './avatarSelection';
+import { sendApnsNotification, sendFcmNotification } from './nativePush';
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
@@ -39,6 +40,45 @@ function endpointHost(endpoint: string): string {
 }
 
 async function sendToSubscription(subscription: PushSubscription, payload: { title: string; body: string; url?: string; tag?: string; sound?: string }): Promise<boolean> {
+  // ── Native: iOS (APNs) ──────────────────────────────────────────────────
+  if (subscription.platform === 'ios') {
+    if (!subscription.deviceToken) return false;
+    const outcome = await sendApnsNotification(subscription.userId, subscription.deviceToken, {
+      title: payload.title,
+      body: payload.body,
+      url: payload.url,
+      tag: payload.tag,
+      sound: payload.sound,
+    });
+    if (!outcome.ok && outcome.reason === 'expired') {
+      await storage.deleteNativePushTokenByPlatform(subscription.userId, 'ios');
+      console.warn(`[push] sholat APNs token expired — deleted ios row user=${subscription.userId}`);
+    }
+    return outcome.ok;
+  }
+
+  // ── Native: Android (FCM) ───────────────────────────────────────────────
+  if (subscription.platform === 'android') {
+    if (!subscription.deviceToken) return false;
+    const outcome = await sendFcmNotification(subscription.userId, subscription.deviceToken, {
+      title: payload.title,
+      body: payload.body,
+      url: payload.url,
+      tag: payload.tag,
+      sound: payload.sound,
+    });
+    if (!outcome.ok && outcome.reason === 'expired') {
+      await storage.deleteNativePushTokenByPlatform(subscription.userId, 'android');
+      console.warn(`[push] sholat FCM token expired — deleted android row user=${subscription.userId}`);
+    }
+    return outcome.ok;
+  }
+
+  // ── Web: VAPID ──────────────────────────────────────────────────────────
+  if (!subscription.endpoint || !subscription.p256dh || !subscription.auth) {
+    return false;
+  }
+
   const pushSubscription = {
     endpoint: subscription.endpoint,
     keys: {
@@ -63,7 +103,7 @@ async function sendToSubscription(subscription: PushSubscription, payload: { tit
     if (status === 410 || status === 404) {
       await storage.deletePushSubscription(subscription.userId);
       console.warn(
-        `[push] sholat subscription gone — deleted db row user=${subscription.userId} host=${host}`
+        `[push] sholat subscription gone — deleted web row user=${subscription.userId} host=${host}`
       );
     }
     return false;
@@ -82,73 +122,68 @@ export async function sendSholatReminders(): Promise<void> {
       if (subscription.latitude == null || subscription.longitude == null) continue;
 
       const lat = subscription.latitude;
-      const lng = subscription.longitude;
-      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) continue;
-
+      const lon = subscription.longitude;
       const userTimezone = subscription.timezone || 'Asia/Jakarta';
-      const nowInUserTz = toZonedTime(nowUtc, userTimezone);
 
-      const coordinates = new Coordinates(lat, lng);
-      const params = CalculationMethod.MuslimWorldLeague();
-      const prayerTimes = new PrayerTimes(coordinates, nowInUserTz, params);
+      let nowInUserTz: Date;
+      try {
+        nowInUserTz = toZonedTime(nowUtc, userTimezone);
+      } catch {
+        continue;
+      }
+
+      const coords = new Coordinates(lat, lon);
+      const prayerTimes = new PrayerTimes(coords, nowInUserTz, CalculationMethod.MoonsightingCommittee());
 
       const prayers = [
-        { key: 'fajr', time: prayerTimes.fajr },
-        { key: 'dhuhr', time: prayerTimes.dhuhr },
-        { key: 'asr', time: prayerTimes.asr },
-        { key: 'maghrib', time: prayerTimes.maghrib },
-        { key: 'isha', time: prayerTimes.isha },
-      ];
+        [Prayer.Fajr, 'fajr'],
+        [Prayer.Dhuhr, 'dhuhr'],
+        [Prayer.Asr, 'asr'],
+        [Prayer.Maghrib, 'maghrib'],
+        [Prayer.Isha, 'isha'],
+      ] as [typeof Prayer[keyof typeof Prayer], string][];
 
-      const todayStr = `${nowInUserTz.getFullYear()}-${String(nowInUserTz.getMonth() + 1).padStart(2, '0')}-${String(nowInUserTz.getDate()).padStart(2, '0')}`;
-      let cachedName: string | null | undefined;
+      for (const [prayer, name] of prayers) {
+        const prayerTime = prayerTimes.timeForPrayer(prayer);
+        if (!prayerTime) continue;
 
-      for (const prayer of prayers) {
-        const prayerTimeInUserTz = toZonedTime(prayer.time, userTimezone);
-        const diffMs = prayerTimeInUserTz.getTime() - nowInUserTz.getTime();
-        const diffMinutes = diffMs / 60000;
+        const reminderTime = new Date(prayerTime.getTime() - MINUTES_BEFORE * 60 * 1000);
+        const diffMs = Math.abs(nowUtc.getTime() - reminderTime.getTime());
+        if (diffMs > 60000) continue;
 
-        if (diffMinutes >= (MINUTES_BEFORE - 1) && diffMinutes <= (MINUTES_BEFORE + 1)) {
-          const dedupKey = `sholat-${subscription.userId}-${prayer.key}-${todayStr}`;
-          if (sentSholatAlerts.has(dedupKey)) continue;
+        const dedupKey = `${subscription.userId}-${name}-${prayerTime.toISOString()}`;
+        if (sentSholatAlerts.has(dedupKey)) continue;
+        sentSholatAlerts.set(dedupKey, Date.now());
 
-          sentSholatAlerts.set(dedupKey, Date.now());
+        const displayName = await getDisplayName(subscription.userId);
+        const prayerHours = String(prayerTime.getHours()).padStart(2, '0');
+        const prayerMins = String(prayerTime.getMinutes()).padStart(2, '0');
+        const { title, body } = sholatReminderCopy(subscription.userId, displayName, {
+          prayerName: PRAYER_NAMES[name] ?? name,
+          hours: prayerHours,
+          minutes: prayerMins,
+          minutesBefore: MINUTES_BEFORE,
+        });
 
-          const prayerName = PRAYER_NAMES[prayer.key] || prayer.key;
-          const hours = prayerTimeInUserTz.getHours().toString().padStart(2, '0');
-          const minutes = prayerTimeInUserTz.getMinutes().toString().padStart(2, '0');
+        let gender: string | null = null;
+        try {
+          const onboarding = await storage.getUserOnboarding(subscription.userId);
+          gender = onboarding?.gender ?? null;
+        } catch { /* ignore */ }
 
-          if (cachedName === undefined) {
-            cachedName = await getDisplayName(subscription.userId);
-          }
-          const { title, body } = sholatReminderCopy(subscription.userId, cachedName, {
-            prayerName,
-            hours,
-            minutes,
-            minutesBefore: MINUTES_BEFORE,
-          });
+        const image = getAvatarUrl(subscription.userId, gender, 'neutral');
 
-          let gender: string | null = null;
-          try {
-            const onboarding = await storage.getUserOnboarding(subscription.userId);
-            gender = onboarding?.gender ?? null;
-          } catch (err) {
-            console.warn(`sholatReminders: avatar enrichment failed for ${subscription.userId}`, err);
-          }
-          const image = getAvatarUrl(subscription.userId, gender, 'neutral');
-
-          await sendToSubscription(subscription, {
-            title,
-            body,
-            url: '/',
-            tag: `sholat-${prayer.key}`,
-            sound: subscription.notificationSound ?? 'chime',
-            ...(image ? { image, emotion: 'neutral' } : {}),
-          });
-        }
+        await sendToSubscription(subscription, {
+          title,
+          body,
+          url: '/sholat',
+          tag: `sholat-${name}`,
+          sound: subscription.notificationSound ?? 'chime',
+          ...(image ? { image, icon: image } : {}),
+        });
       }
-    } catch (error) {
-      console.error(`Error processing sholat reminder for user ${subscription.userId}:`, error);
+    } catch (err) {
+      console.error(`[push] sholat reminder error user=${subscription.userId}`, err);
     }
   }
 }

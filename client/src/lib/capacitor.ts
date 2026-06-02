@@ -1,7 +1,7 @@
 import { Capacitor } from "@capacitor/core";
 
 export const isNative = Capacitor.isNativePlatform();
-export const platform = Capacitor.getPlatform();
+export const platform = Capacitor.getPlatform(); // "web" | "ios" | "android"
 export const isIOS = platform === "ios";
 export const isAndroid = platform === "android";
 export const isWeb = platform === "web";
@@ -14,7 +14,8 @@ export async function initCapacitorPlugins() {
   const { App } = await import("@capacitor/app");
 
   try {
-    await StatusBar.setStyle({ style: Style.Dark });
+    // Light icons/text for the dark (#0a0a0a) app background.
+    await StatusBar.setStyle({ style: Style.Light });
     await StatusBar.setBackgroundColor({ color: "#0a0a0a" });
   } catch {
   }

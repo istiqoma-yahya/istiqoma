@@ -46,6 +46,7 @@ import { NotificationPrompt } from "@/components/NotificationPrompt";
 import { BadgeCelebration } from "@/components/BadgeCelebration";
 import { registerNotificationSoundListener, setupAudioUnlock } from "@/lib/sounds";
 import PrivacyBanner from "@/components/PrivacyBanner";
+import { useNativePush } from "@/hooks/use-native-push";
 
 function EditDeedRoute({ params }: { params: { id: string } }) {
   const { data: deeds } = useDeeds();
@@ -99,6 +100,21 @@ function Router() {
   );
 }
 
+function AppInner() {
+  // Register for native push notifications (iOS APNs / Android FCM).
+  // No-op on web — safe to call unconditionally.
+  useNativePush();
+  return (
+    <>
+      <Toaster />
+      <PrivacyBanner />
+      <Router />
+      <BadgeCelebration />
+      <NotificationPrompt />
+    </>
+  );
+}
+
 function App() {
   useEffect(() => {
     setupAudioUnlock();
@@ -111,11 +127,7 @@ function App() {
         <TooltipProvider>
           <QuranFontProvider>
             <QuranAudioProvider>
-              <Toaster />
-              <PrivacyBanner />
-              <Router />
-              <BadgeCelebration />
-              <NotificationPrompt />
+              <AppInner />
             </QuranAudioProvider>
           </QuranFontProvider>
         </TooltipProvider>

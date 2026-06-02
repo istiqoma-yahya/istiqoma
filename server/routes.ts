@@ -5,7 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, registerUsernameAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { sendNotificationToUser, sendTargetAlert, isPushConfigured } from "./pushNotifications";
-import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, patchOnboardingGenderSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS, insertCampaignSchema, updateCampaignSchema, type NewlyEarnedBadge, type PushSubscription } from "@shared/schema";
+import { deeds, insertCustomDzikirTypeSchema, insertUserOnboardingSchema, patchOnboardingGenderSchema, Q4_TO_REMINDER_TIME, STREAK_FREEZER_PACKS, insertCampaignSchema, updateCampaignSchema, insertNativePushTokenSchema, type NewlyEarnedBadge, type PushSubscription } from "@shared/schema";
 import {
   checkRateLimit,
   generateRecommendations,
@@ -935,8 +935,9 @@ export async function registerRoutes(
 
   // Strip push subscription secrets and location from API responses so they
   // are never included in logs or exposed beyond what the client already sent.
+  // device_token is also stripped — threat-model: do not log native tokens.
   function sanitizePushSubscription(sub: PushSubscription) {
-    const { endpoint: _e, p256dh: _p, auth: _a, latitude: _lat, longitude: _lon, ...safe } = sub;
+    const { endpoint: _e, p256dh: _p, auth: _a, latitude: _lat, longitude: _lon, deviceToken: _dt, ...safe } = sub;
     return safe;
   }
 
@@ -1003,6 +1004,52 @@ export async function registerRoutes(
       statusCode: outcome.statusCode,
       message: outcome.message,
     });
+  });
+
+  // ── Native push token registration (iOS APNs / Android FCM) ─────────────
+  // Called by the Capacitor client after PushNotifications.register() fires.
+  // Device tokens are never echoed back in the response (threat-model).
+  app.post("/api/push/native-register", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const input = insertNativePushTokenSchema.parse(req.body);
+      const saved = await storage.saveNativePushToken(
+        userId,
+        input.platform,
+        input.deviceToken,
+        {
+          dailyReminder: input.dailyReminder,
+          reminderTime: input.reminderTime,
+          timezone: input.timezone,
+          targetAlerts: input.targetAlerts,
+          sholatReminder: input.sholatReminder,
+          latitude: input.latitude,
+          longitude: input.longitude,
+          notificationSound: input.notificationSound,
+        },
+      );
+      res.status(201).json({ success: true, subscription: sanitizePushSubscription(saved) });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message, field: err.errors[0].path.join(".") });
+      }
+      throw err;
+    }
+  });
+
+  // Unregister a native push token (e.g. on sign-out or permission revoked).
+  app.delete("/api/push/native-unregister", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { platform } = z.object({ platform: z.enum(["ios", "android"]) }).parse(req.body);
+      await storage.deleteNativePushTokenByPlatform(userId, platform);
+      res.status(204).send();
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      throw err;
+    }
   });
 
   app.get(api.streak.get.path, isAuthenticated, async (req: any, res) => {

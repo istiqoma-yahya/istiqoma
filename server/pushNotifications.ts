@@ -4,6 +4,7 @@ import { storage } from './storage';
 import type { PushSubscription } from '@shared/schema';
 import { getDisplayName, dailyReminderCopy, targetReminderCopy } from './notificationCopy';
 import { getAvatarUrl, type Emotion } from './avatarSelection';
+import { sendApnsNotification, sendFcmNotification, isApnsConfigured, isFcmConfigured } from './nativePush';
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
@@ -41,6 +42,37 @@ function endpointHost(endpoint: string): string {
 }
 
 async function sendToSubscription(subscription: PushSubscription, payload: NotificationPayload): Promise<SendOutcome> {
+  // ── Native: iOS (APNs) ──────────────────────────────────────────────────
+  if (subscription.platform === 'ios') {
+    if (!subscription.deviceToken) {
+      return { ok: false, reason: 'no_subscription' };
+    }
+    const outcome = await sendApnsNotification(subscription.userId, subscription.deviceToken, payload);
+    if (!outcome.ok && outcome.reason === 'expired') {
+      await storage.deleteNativePushTokenByPlatform(subscription.userId, 'ios');
+      console.warn(`[push] APNs token expired — deleted ios row user=${subscription.userId}`);
+    }
+    return outcome;
+  }
+
+  // ── Native: Android (FCM) ───────────────────────────────────────────────
+  if (subscription.platform === 'android') {
+    if (!subscription.deviceToken) {
+      return { ok: false, reason: 'no_subscription' };
+    }
+    const outcome = await sendFcmNotification(subscription.userId, subscription.deviceToken, payload);
+    if (!outcome.ok && outcome.reason === 'expired') {
+      await storage.deleteNativePushTokenByPlatform(subscription.userId, 'android');
+      console.warn(`[push] FCM token expired — deleted android row user=${subscription.userId}`);
+    }
+    return outcome;
+  }
+
+  // ── Web: VAPID ──────────────────────────────────────────────────────────
+  if (!subscription.endpoint || !subscription.p256dh || !subscription.auth) {
+    return { ok: false, reason: 'no_subscription' };
+  }
+
   const pushSubscription = {
     endpoint: subscription.endpoint,
     keys: {
@@ -65,7 +97,7 @@ async function sendToSubscription(subscription: PushSubscription, payload: Notif
     if (status === 410 || status === 404) {
       await storage.deletePushSubscription(subscription.userId);
       console.warn(
-        `[push] subscription gone — deleted db row user=${subscription.userId} host=${host} (client must re-subscribe)`
+        `[push] subscription gone — deleted web row user=${subscription.userId} host=${host} (client must re-subscribe)`
       );
       return { ok: false, reason: 'expired', statusCode: status };
     }
@@ -74,30 +106,23 @@ async function sendToSubscription(subscription: PushSubscription, payload: Notif
 }
 
 export async function sendNotificationToUser(userId: string, payload: NotificationPayload): Promise<SendOutcome> {
-  if (!isPushConfigured()) {
-    console.warn(`[push] not configured — VAPID keys missing, cannot send to user=${userId}`);
-    return { ok: false, reason: 'not_configured' };
-  }
+  // Try web subscription first (the primary path for this helper).
   const subscription = await storage.getPushSubscription(userId);
   if (!subscription) {
-    console.warn(`[push] no subscription on file for user=${userId}`);
+    console.warn(`[push] no web subscription on file for user=${userId}`);
     return { ok: false, reason: 'no_subscription' };
   }
   let enriched = payload;
   try {
     const onboarding = await storage.getUserOnboarding(userId);
     const gender = onboarding?.gender ?? null;
-    // Respect emotion from caller; default to neutral when unspecified
     const emotion: Emotion = payload.emotion ?? 'neutral';
     const avatarUrl = getAvatarUrl(userId, gender, emotion);
     if (avatarUrl) {
       enriched = {
         ...payload,
         emotion,
-        // Big hero image for Android/desktop Chrome (iOS ignores this).
         image: payload.image ?? avatarUrl,
-        // Small icon — iOS Safari/PWA *does* render this, so the user
-        // sees their avatar character on iPhone push notifications too.
         icon: payload.icon ?? avatarUrl,
       };
     }
@@ -124,42 +149,50 @@ export async function sendDailyReminders(): Promise<void> {
     }
     const currentHour = nowInUserTz.getHours();
     const currentMinute = nowInUserTz.getMinutes();
-    
-    const [reminderHour, reminderMinute] = subscription.reminderTime.split(':').map(Number);
-    
-    const currentTotalMinutes = currentHour * 60 + currentMinute;
-    const reminderTotalMinutes = reminderHour * 60 + reminderMinute;
-    
-    if (Math.abs(currentTotalMinutes - reminderTotalMinutes) <= 1) {
-      const name = await getDisplayName(subscription.userId);
-      const { title, body } = dailyReminderCopy(subscription.userId, name);
+
+    // Parse the reminder time (format: "HH:MM")
+    const [reminderHour, reminderMinute] = (subscription.reminderTime || "21:00").split(":").map(Number);
+    if (isNaN(reminderHour) || isNaN(reminderMinute)) continue;
+
+    // Only send during the exact reminder minute
+    if (currentHour !== reminderHour || currentMinute !== reminderMinute) continue;
+
+    let cachedName: string | null | undefined;
+    let gender: string | null = null;
+    try {
       const onboarding = await storage.getUserOnboarding(subscription.userId);
-      const gender = onboarding?.gender ?? null;
-      // Check if the user has logged any deeds today (in their timezone)
-      let emotion: Emotion = 'neutral';
-      try {
-        const allDeeds = await storage.getDeeds(subscription.userId);
-        const todayStr = `${nowInUserTz.getFullYear()}-${String(nowInUserTz.getMonth() + 1).padStart(2, '0')}-${String(nowInUserTz.getDate()).padStart(2, '0')}`;
-        const hasDeedToday = allDeeds.some((d) => {
-          if (!d.createdAt) return false;
-          const dInUserTz = toZonedTime(new Date(d.createdAt), userTimezone);
-          const dStr = `${dInUserTz.getFullYear()}-${String(dInUserTz.getMonth() + 1).padStart(2, '0')}-${String(dInUserTz.getDate()).padStart(2, '0')}`;
-          return dStr === todayStr;
-        });
-        emotion = hasDeedToday ? 'neutral' : 'sad';
-      } catch {
-        emotion = 'neutral';
-      }
-      const image = getAvatarUrl(subscription.userId, gender, emotion);
-      await sendToSubscription(subscription, {
-        title,
-        body,
-        url: '/',
-        tag: 'daily-reminder',
-        sound: subscription.notificationSound ?? 'chime',
-        ...(image ? { image, icon: image, emotion } : {}),
-      });
+      gender = onboarding?.gender ?? null;
+    } catch { /* ignore */ }
+
+    if (cachedName === undefined) {
+      cachedName = await getDisplayName(subscription.userId);
     }
+    const { title, body } = dailyReminderCopy(subscription.userId, cachedName);
+
+    // Compute emotion: sad if no deed today, neutral otherwise
+    let emotion: Emotion = 'neutral';
+    try {
+      const todayStr = `${nowInUserTz.getFullYear()}-${String(nowInUserTz.getMonth() + 1).padStart(2, '0')}-${String(nowInUserTz.getDate()).padStart(2, '0')}`;
+      const deeds = await storage.getDeeds(subscription.userId);
+      const hasDeedToday = deeds.some((d) => {
+        if (!d.createdAt) return false;
+        const dInUserTz = toZonedTime(new Date(d.createdAt), userTimezone);
+        const dStr = `${dInUserTz.getFullYear()}-${String(dInUserTz.getMonth() + 1).padStart(2, '0')}-${String(dInUserTz.getDate()).padStart(2, '0')}`;
+        return dStr === todayStr;
+      });
+      emotion = hasDeedToday ? 'neutral' : 'sad';
+    } catch {
+      emotion = 'neutral';
+    }
+    const image = getAvatarUrl(subscription.userId, gender, emotion);
+    await sendToSubscription(subscription, {
+      title,
+      body,
+      url: '/',
+      tag: 'daily-reminder',
+      sound: subscription.notificationSound ?? 'chime',
+      ...(image ? { image, icon: image, emotion } : {}),
+    });
   }
 }
 
@@ -258,7 +291,6 @@ export async function sendTargetReminders(): Promise<void> {
           targetType: target.targetType,
         });
 
-        // Emotion: glow if achieved, sad if limit exceeded or behind, neutral otherwise
         let emotion: Emotion = 'neutral';
         if (target.targetType === 'achievement' && percentComplete >= 100) {
           emotion = 'glow';
@@ -290,5 +322,6 @@ export async function sendTargetReminders(): Promise<void> {
 }
 
 export function isPushConfigured(): boolean {
-  return !!(VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY);
+  // The scheduler runs if at least one delivery channel is ready.
+  return !!(VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) || isApnsConfigured() || isFcmConfigured();
 }

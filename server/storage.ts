@@ -156,7 +156,10 @@ export interface IStorage {
   savePushSubscription(userId: string, subscription: InsertPushSubscription): Promise<PushSubscription>;
   updatePushSubscriptionSettings(userId: string, settings: Partial<InsertPushSubscription>): Promise<PushSubscription | null>;
   deletePushSubscription(userId: string): Promise<void>;
+  deletePushSubscriptionByPlatform(userId: string, platform: string): Promise<void>;
   getAllPushSubscriptions(): Promise<PushSubscription[]>;
+  saveNativePushToken(userId: string, platform: "ios" | "android", deviceToken: string, settings: Partial<InsertPushSubscription>): Promise<PushSubscription>;
+  deleteNativePushTokenByPlatform(userId: string, platform: "ios" | "android"): Promise<void>;
   getCustomDzikirTypes(userId: string): Promise<CustomDzikirType[]>;
   createCustomDzikirType(userId: string, label: string): Promise<CustomDzikirType>;
   updateCustomDzikirType(id: number, userId: string, label: string): Promise<CustomDzikirType>;
@@ -1014,19 +1017,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPushSubscription(userId: string): Promise<PushSubscription | null> {
+    // Returns the web (VAPID) row only. Native rows are accessed via getAllPushSubscriptions().
     const [subscription] = await db
       .select()
       .from(pushSubscriptions)
-      .where(eq(pushSubscriptions.userId, userId))
+      .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.platform, "web")))
       .limit(1);
     return subscription || null;
   }
 
   async savePushSubscription(userId: string, subscription: InsertPushSubscription): Promise<PushSubscription> {
     const existing = await this.getPushSubscription(userId);
-    // Only persist a timezone value if it is a valid IANA identifier
-    const sanitizedTimezone = validateTimezone(subscription.timezone) ?? existing?.timezone ?? null;
-    
+    const sanitizedTimezone = validateTimezone(subscription.timezone) ?? existing?.timezone ?? "Asia/Jakarta";
+
     if (existing) {
       const [updated] = await db
         .update(pushSubscriptions)
@@ -1034,6 +1037,7 @@ export class DatabaseStorage implements IStorage {
           endpoint: subscription.endpoint,
           p256dh: subscription.p256dh,
           auth: subscription.auth,
+          platform: "web",
           dailyReminder: subscription.dailyReminder ?? existing.dailyReminder,
           reminderTime: subscription.reminderTime ?? existing.reminderTime,
           timezone: sanitizedTimezone,
@@ -1042,14 +1046,14 @@ export class DatabaseStorage implements IStorage {
           latitude: subscription.latitude ?? existing.latitude,
           longitude: subscription.longitude ?? existing.longitude,
         })
-        .where(eq(pushSubscriptions.userId, userId))
+        .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.platform, "web")))
         .returning();
       return updated;
     }
-    
+
     const [created] = await db
       .insert(pushSubscriptions)
-      .values({ ...subscription, userId, timezone: sanitizedTimezone })
+      .values({ ...subscription, userId, platform: "web", timezone: sanitizedTimezone })
       .returning();
     return created;
   }
@@ -1060,25 +1064,94 @@ export class DatabaseStorage implements IStorage {
 
     const sanitized = { ...settings };
     if ("timezone" in sanitized) {
-      sanitized.timezone = validateTimezone(sanitized.timezone) ?? existing.timezone ?? null;
+      sanitized.timezone = validateTimezone(sanitized.timezone) ?? existing.timezone ?? "Asia/Jakarta";
     }
-    
-    const [updated] = await db
+
+    // Propagate settings to ALL platforms for this user so reminder prefs stay
+    // consistent across web, iOS, and Android subscriptions.
+    await db
       .update(pushSubscriptions)
       .set(sanitized)
-      .where(eq(pushSubscriptions.userId, userId))
-      .returning();
-    return updated;
+      .where(eq(pushSubscriptions.userId, userId));
+
+    // Return the web row for the route response.
+    const [updated] = await db
+      .select()
+      .from(pushSubscriptions)
+      .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.platform, "web")))
+      .limit(1);
+    return updated ?? null;
   }
 
   async deletePushSubscription(userId: string): Promise<void> {
+    // Deletes the web (VAPID) row only. Native tokens are not affected.
     await db
       .delete(pushSubscriptions)
-      .where(eq(pushSubscriptions.userId, userId));
+      .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.platform, "web")));
+  }
+
+  async deletePushSubscriptionByPlatform(userId: string, platform: string): Promise<void> {
+    await db
+      .delete(pushSubscriptions)
+      .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.platform, platform as "web" | "ios" | "android")));
   }
 
   async getAllPushSubscriptions(): Promise<PushSubscription[]> {
     return await db.select().from(pushSubscriptions);
+  }
+
+  async saveNativePushToken(
+    userId: string,
+    platform: "ios" | "android",
+    deviceToken: string,
+    settings: Partial<InsertPushSubscription>,
+  ): Promise<PushSubscription> {
+    const sanitizedTimezone = validateTimezone(settings.timezone) ?? "Asia/Jakarta";
+
+    // Try to carry over web subscription settings as defaults so the user
+    // does not lose their reminder preferences on first native registration.
+    const webSub = await this.getPushSubscription(userId);
+
+    const row = {
+      userId,
+      platform,
+      deviceToken,
+      dailyReminder: settings.dailyReminder ?? webSub?.dailyReminder ?? true,
+      reminderTime: settings.reminderTime ?? webSub?.reminderTime ?? "21:00",
+      timezone: sanitizedTimezone,
+      targetAlerts: settings.targetAlerts ?? webSub?.targetAlerts ?? true,
+      sholatReminder: settings.sholatReminder ?? webSub?.sholatReminder ?? true,
+      latitude: settings.latitude ?? webSub?.latitude ?? null,
+      longitude: settings.longitude ?? webSub?.longitude ?? null,
+      notificationSound: settings.notificationSound ?? webSub?.notificationSound ?? "chime",
+    };
+
+    // Upsert by (userId, platform) — updates token and syncs settings on re-registration.
+    const [upserted] = await db
+      .insert(pushSubscriptions)
+      .values(row)
+      .onConflictDoUpdate({
+        target: [pushSubscriptions.userId, pushSubscriptions.platform],
+        set: {
+          deviceToken,
+          dailyReminder: row.dailyReminder,
+          reminderTime: row.reminderTime,
+          timezone: row.timezone,
+          targetAlerts: row.targetAlerts,
+          sholatReminder: row.sholatReminder,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          notificationSound: row.notificationSound,
+        },
+      })
+      .returning();
+    return upserted;
+  }
+
+  async deleteNativePushTokenByPlatform(userId: string, platform: "ios" | "android"): Promise<void> {
+    await db
+      .delete(pushSubscriptions)
+      .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.platform, platform)));
   }
 
   async getCustomDzikirTypes(userId: string): Promise<CustomDzikirType[]> {

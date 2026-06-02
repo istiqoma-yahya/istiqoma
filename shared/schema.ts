@@ -252,9 +252,14 @@ export const voiceParseRateLimitCalls = pgTable("voice_parse_rate_limit_calls", 
 export const pushSubscriptions = pgTable("push_subscriptions", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  endpoint: text("endpoint").notNull(),
-  p256dh: text("p256dh").notNull(),
-  auth: text("auth").notNull(),
+  // "web" rows use VAPID (endpoint/p256dh/auth).
+  // "ios" / "android" rows use deviceToken (APNs / FCM).
+  platform: text("platform", { enum: ["web", "ios", "android"] }).notNull().default("web"),
+  deviceToken: text("device_token"),
+  // VAPID Web Push fields — nullable because native rows do not use them.
+  endpoint: text("endpoint"),
+  p256dh: text("p256dh"),
+  auth: text("auth"),
   dailyReminder: boolean("daily_reminder").notNull().default(true),
   reminderTime: text("reminder_time").notNull().default("21:00"),
   timezone: text("timezone").notNull().default("Asia/Jakarta"),
@@ -264,7 +269,11 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   longitude: doublePrecision("longitude"),
   notificationSound: text("notification_sound").notNull().default("chime"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // One subscription per (user, platform). A user can have up to 3 rows:
+  // one for web VAPID, one for iOS APNs, one for Android FCM.
+  uniqUserPlatform: uniqueIndex("uniq_push_sub_user_platform").on(table.userId, table.platform),
+}));
 
 export const insertDeedSchema = createInsertSchema(deeds).pick({
   description: true,
@@ -465,6 +474,8 @@ export type TargetWithProgress = Target & {
   percentComplete: number;
 };
 
+// Schema for VAPID Web Push subscription (platform = "web").
+// endpoint / p256dh / auth are required for web rows.
 export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions).pick({
   endpoint: true,
   p256dh: true,
@@ -489,6 +500,25 @@ export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions
   latitude: z.number().min(-90).max(90).optional(),
   longitude: z.number().min(-180).max(180).optional(),
   notificationSound: z.enum(["chime", "double", "ding", "none"]).optional().default("chime"),
+});
+
+// Shared notification preference fields for native push registration.
+const nativePushSettingsSchema = z.object({
+  dailyReminder: z.boolean().optional().default(true),
+  reminderTime: z.string().optional().default("21:00"),
+  timezone: z.string().optional().default("Asia/Jakarta"),
+  targetAlerts: z.boolean().optional().default(true),
+  sholatReminder: z.boolean().optional().default(true),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+  notificationSound: z.enum(["chime", "double", "ding", "none"]).optional().default("chime"),
+});
+
+// Schema for native push token registration (platform = "ios" | "android").
+// deviceToken is the APNs device token or FCM registration ID.
+export const insertNativePushTokenSchema = nativePushSettingsSchema.extend({
+  platform: z.enum(["ios", "android"]),
+  deviceToken: z.string().min(1, "deviceToken is required"),
 });
 
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;

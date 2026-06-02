@@ -53,22 +53,39 @@ npx cap sync
 ## Daily development workflow
 
 ```bash
-# 1. Build web + sync to native projects
-npm run build && npx cap sync
+# Build web + sync to native projects (calls vite build + cap sync)
+npm run mobile:sync
 
-# 2a. Open in Xcode (then Run from Xcode)
-npx cap open ios
+# Open in Xcode (then Run from Xcode's toolbar)
+npm run mobile:open:ios
 
-# 2b. Open in Android Studio (then Run from Android Studio)
-npx cap open android
+# Open in Android Studio (then Run from the menu)
+npm run mobile:open:android
 ```
 
-Or to run directly on a connected device / simulator:
+Or to run directly on a connected device / simulator without opening the IDE:
 
 ```bash
-npx cap run ios       # needs a booted iOS simulator or connected iPhone
-npx cap run android   # needs a running Android emulator or connected Android device
+npm run mobile:ios       # builds, syncs, runs on booted iOS simulator / connected iPhone
+npm run mobile:android   # builds, syncs, runs on Android emulator / connected device
 ```
+
+### Why mobile builds never include Replit dev-only plugins
+
+`vite.config.ts` conditionally loads the Replit dev banner and Cartographer plugins only
+when **both** `NODE_ENV !== "production"` **and** `REPL_ID !== undefined` are true:
+
+```ts
+...(process.env.NODE_ENV !== "production" && process.env.REPL_ID !== undefined
+  ? [devBanner(), cartographer()]
+  : [])
+```
+
+`npm run mobile:sync` calls `npm run build`, which runs `tsx script/build.ts` with
+`NODE_ENV=production` (set by the build script). This means `REPL_ID` is irrelevant —
+`NODE_ENV=production` alone prevents the dev-only plugins from loading. The bundled
+`dist/public/` output that Capacitor copies into the native shells is always clean
+production output.
 
 ---
 

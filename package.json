@@ -9,13 +9,18 @@
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
     "db:push": "drizzle-kit push",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "mobile:sync": "npm run build && npx cap sync",
+    "mobile:ios": "npm run mobile:sync && npx cap run ios",
+    "mobile:android": "npm run mobile:sync && npx cap run android",
+    "mobile:open:ios": "npx cap open ios",
+    "mobile:open:android": "npx cap open android"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",
     "@capacitor/android": "^8.4.0",
     "@capacitor/app": "^8.1.0",
-    "@capacitor/cli": "^7.6.6",
+    "@capacitor/cli": "^8.4.0",
     "@capacitor/core": "^8.4.0",
     "@capacitor/ios": "^8.4.0",
     "@capacitor/keyboard": "^8.0.3",

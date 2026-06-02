@@ -52,6 +52,16 @@ function safeReturnToFromLocation(): string {
   return candidate;
 }
 
+function isCapacitorNative(): boolean {
+  if (typeof window === "undefined") return false;
+  const cap = (window as any).Capacitor;
+  return (
+    cap !== undefined &&
+    typeof cap.isNativePlatform === "function" &&
+    cap.isNativePlatform() === true
+  );
+}
+
 function triggerSessionExpiredRedirect(): void {
   if (redirectInFlight) return;
   redirectInFlight = true;
@@ -59,6 +69,17 @@ function triggerSessionExpiredRedirect(): void {
     redirectInFlight = false;
     return;
   }
+
+  // On native (Capacitor WebView) we must NOT navigate window.location to
+  // /api/login — that would run the OIDC flow inside the WebView which
+  // breaks cookie sharing. Instead dispatch a custom event; the
+  // useNativeAuth hook listens for it and opens the system browser.
+  if (isCapacitorNative()) {
+    window.dispatchEvent(new CustomEvent("istiqoma:reauth-needed"));
+    redirectInFlight = false;
+    return;
+  }
+
   try {
     toast({
       title: i18next.t("common.sessionExpired"),

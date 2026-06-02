@@ -16,6 +16,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { useInstallPWA } from "@/hooks/use-install-pwa";
 import { ProductTour } from "@/components/ProductTour";
 import { useToast } from "@/hooks/use-toast";
+import { openNativeLogin } from "@/lib/native-login";
 
 declare global {
   interface Window {
@@ -581,7 +582,7 @@ export default function Landing() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "/api/login";
+    openNativeLogin().catch(console.error);
   };
 
   const handleUsernameLogin = () => {

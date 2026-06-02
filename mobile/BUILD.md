@@ -161,11 +161,55 @@ which:
 
 ---
 
+## Native OAuth Flows (Google Sign-In + Quran Foundation)
+
+Both Replit Auth (OIDC / Google SSO) and the Quran Foundation User API use full-page
+browser redirects. WKWebView (iOS) and Capacitor WebView (Android) do **not** share
+session cookies with the system browser, so both flows run via `@capacitor/browser`
+(SFSafariViewController on iOS, Chrome Custom Tab on Android):
+
+1. **Replit Auth / Google SSO** — client opens `Browser.open("/api/login?native=1")`.
+   After OIDC completes, the server redirects to `istiqoma://auth/done?token=<t>`.
+   `App.addListener("appUrlOpen")` receives the token, the app calls
+   `GET /api/auth/native-session?token=<t>` from the WebView to plant the session
+   cookie, then invalidates `/api/auth/user`.
+
+2. **QF Connect** — client calls authenticated `GET /api/qf/connect-native` from the
+   WebView, receives a JSON `{ url }`, opens it via `Browser.open(url)`. After the
+   QF consent page, the server redirects to `istiqoma://qf/done`. The app invalidates
+   `/api/qf/status` and `/api/quran/bookmarks`.
+
+### iOS — no extra setup needed
+
+The `ios.scheme: "istiqoma"` in `capacitor.config.ts` already registers `istiqoma://`
+as a custom URL scheme in `Info.plist`. SFSafariViewController will hand off
+`istiqoma://` URLs to the app automatically.
+
+### Android — register the intent filter
+
+Chrome Custom Tabs cannot redirect to a custom scheme unless the scheme is registered
+as an Android intent filter. After running `npx cap add android`, add the following
+`<intent-filter>` inside the `<activity>` element in
+`android/app/src/main/AndroidManifest.xml`:
+
+```xml
+<intent-filter android:label="Istiqoma OAuth Callback">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="istiqoma" />
+</intent-filter>
+```
+
+This lets the OS route `istiqoma://auth/done` and `istiqoma://qf/done` back into
+the app after the system browser completes.
+
+---
+
 ## Known issues in the native shell (separate tasks)
 
 | Issue | Planned fix |
 |---|---|
-| Google sign-in / Replit Auth redirects fail | Task #278 — Native OAuth flow via in-app browser |
 | App icons are the default Capacitor icon | Task #279 — Mobile app assets |
 
 ---

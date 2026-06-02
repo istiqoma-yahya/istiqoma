@@ -35,6 +35,8 @@ import { AchievementsSection } from "@/components/AchievementsSection";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { isNative } from "@/lib/capacitor";
+import { openNativeLoginWithProvider, openNativeBrowser } from "@/lib/native-login";
 import { useQuery } from "@tanstack/react-query";
 import {
   changePinSchema,
@@ -132,7 +134,17 @@ function QuranFoundationConnectCard() {
             type="button"
             variant="outline"
             onClick={() => {
-              window.location.href = "/api/qf/connect";
+              if (isNative) {
+                // Fetch the QF auth URL from the server (authenticated WebView
+                // request), then open it in the system browser so the OAuth
+                // flow runs in SFSafariViewController / Chrome Custom Tab.
+                fetch("/api/qf/connect-native", { credentials: "include" })
+                  .then((r) => r.json())
+                  .then(({ url }: { url: string }) => openNativeBrowser(url))
+                  .catch(console.error);
+              } else {
+                window.location.href = "/api/qf/connect";
+              }
             }}
             data-testid="button-qf-connect"
           >
@@ -174,9 +186,16 @@ export default function ProfilePage() {
   // login screen instead of leaving them stuck on a spinner.
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      window.location.href = "/api/login";
+      if (isNative) {
+        // On native, navigate to "/" (Landing/AuthWrapper) which has the
+        // proper native login UI. Opening /api/login in the WebView would
+        // break the OIDC cookie flow.
+        navigate("/");
+      } else {
+        window.location.href = "/api/login";
+      }
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading, isAuthenticated, navigate]);
   const { toast } = useToast();
 
   const form = useForm<UpdateProfileInput>({
@@ -631,7 +650,7 @@ export default function ProfilePage() {
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        window.location.href = "/api/login?provider=google";
+                        openNativeLoginWithProvider("google").catch(console.error);
                       }}
                       data-testid="button-connect-gmail"
                     >

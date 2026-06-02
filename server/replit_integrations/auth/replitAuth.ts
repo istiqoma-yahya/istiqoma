@@ -17,6 +17,33 @@ import { storage } from "../../storage";
 import { pool } from "../../db";
 import { csrfOriginCheck } from "./csrfProtection";
 
+declare module "express-session" {
+  interface SessionData {
+    nativeOAuth?: boolean;
+  }
+}
+
+// ─── Native-app session exchange tokens ─────────────────────────────────────
+// After the OIDC callback completes inside SFSafariViewController / Chrome
+// Custom Tab, the session cookie lives in the system browser, not in the
+// Capacitor WebView. We solve this by generating a short-lived one-time token
+// here and redirecting to the `istiqoma://auth/done?token=<t>` custom URL
+// scheme. The WebView receives the token via appUrlOpen, then calls
+// GET /api/auth/native-session?token=<t> from its own cookie context,
+// which calls req.login() and plants the session cookie in the WebView.
+const NATIVE_EXCHANGE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const nativeExchangeTokens = new Map<
+  string,
+  { user: Express.User; expiresAt: number }
+>();
+
+function cleanupExpiredExchangeTokens() {
+  const now = Date.now();
+  nativeExchangeTokens.forEach((v, k) => {
+    if (now > v.expiresAt) nativeExchangeTokens.delete(k);
+  });
+}
+
 const DEFAULT_CATEGORIES = [
   "Dzikir",
   "Sholat Fardhu",
@@ -240,6 +267,7 @@ export async function setupAuth(app: Express) {
     ensureStrategy(req.hostname);
     const provider =
       typeof req.query.provider === "string" ? req.query.provider : undefined;
+    const native = req.query.native === "1";
 
     // When initiated from the Connect Gmail card, send the user back to
     // /profile after the round-trip (success or cancel) instead of "/".
@@ -247,6 +275,15 @@ export async function setupAuth(app: Express) {
       returnTo?: string;
       authFailureRedirect?: string;
     };
+
+    // Store the native flag in the session so /api/callback can read it
+    // after the OIDC round-trip through the system browser.
+    if (native) {
+      req.session.nativeOAuth = true;
+    } else {
+      delete req.session.nativeOAuth;
+    }
+
     if (provider === "google") {
       sess.returnTo = "/profile";
       sess.authFailureRedirect = "/profile";
@@ -276,15 +313,74 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/callback", (req, res, next) => {
     ensureStrategy(req.hostname);
+    const isNativeFlow = req.session.nativeOAuth === true;
     const sess = req.session as (typeof req.session) & {
       authFailureRedirect?: string;
+      returnTo?: string;
     };
-    const failureRedirect = sess.authFailureRedirect ?? "/api/login";
+    const failureRedirect = isNativeFlow
+      ? "istiqoma://auth/failed"
+      : (sess.authFailureRedirect ?? "/api/login");
+    delete req.session.nativeOAuth;
     delete sess.authFailureRedirect;
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/",
-      failureRedirect,
-    })(req, res, next);
+
+    // Use the callback form so we can intercept the result and issue a
+    // custom URL scheme redirect for the native in-app browser flow.
+    passport.authenticate(
+      `replitauth:${req.hostname}`,
+      (err: unknown, user: Express.User | false) => {
+        if (err || !user) {
+          return res.redirect(failureRedirect);
+        }
+        req.login(user, (loginErr) => {
+          if (loginErr) {
+            return res.redirect(failureRedirect);
+          }
+          if (isNativeFlow) {
+            // Generate a short-lived one-time token so the Capacitor WebView
+            // can establish its own session via GET /api/auth/native-session.
+            const token = randomBytes(32).toString("hex");
+            nativeExchangeTokens.set(token, {
+              user,
+              expiresAt: Date.now() + NATIVE_EXCHANGE_TTL_MS,
+            });
+            cleanupExpiredExchangeTokens();
+            return res.redirect(`istiqoma://auth/done?token=${token}`);
+          }
+          // Web flow: honor returnTo saved before the OIDC round-trip.
+          const returnTo =
+            sess.returnTo && isSafeReturnTo(sess.returnTo)
+              ? sess.returnTo
+              : "/";
+          delete sess.returnTo;
+          return res.redirect(returnTo);
+        });
+      },
+    )(req, res, next);
+  });
+
+  // Called by the Capacitor WebView after it receives the exchange token
+  // via the istiqoma://auth/done?token=<t> deep link. Validates the token,
+  // calls req.login() so express-session sets a cookie in the WebView's
+  // HTTP context, and responds 200 JSON so the client can proceed.
+  app.get("/api/auth/native-session", (req, res, next) => {
+    const tokenParam =
+      typeof req.query.token === "string" ? req.query.token : null;
+    if (!tokenParam) {
+      return res.status(400).json({ message: "Missing token" });
+    }
+
+    const entry = nativeExchangeTokens.get(tokenParam);
+    nativeExchangeTokens.delete(tokenParam); // consume immediately — one-time use
+
+    if (!entry || Date.now() > entry.expiresAt) {
+      return res.status(401).json({ message: "Token expired or invalid" });
+    }
+
+    req.login(entry.user, (err) => {
+      if (err) return next(err);
+      res.json({ ok: true });
+    });
   });
 
   app.post("/api/logout", csrfOriginCheck(), buildLogoutHandler(config));

@@ -1,0 +1,1 @@
+- [Native OAuth cookie problem](native-oauth-cookie-problem.md) — WKWebView and system browser have separate cookie jars; OIDC/QF OAuth must use exchange-token pattern via @capacitor/browser.

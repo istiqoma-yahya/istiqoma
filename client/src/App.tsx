@@ -47,6 +47,7 @@ import { BadgeCelebration } from "@/components/BadgeCelebration";
 import { registerNotificationSoundListener, setupAudioUnlock } from "@/lib/sounds";
 import PrivacyBanner from "@/components/PrivacyBanner";
 import { useNativePush } from "@/hooks/use-native-push";
+import { useNativeAuth } from "@/hooks/use-native-auth";
 
 function EditDeedRoute({ params }: { params: { id: string } }) {
   const { data: deeds } = useDeeds();
@@ -104,6 +105,9 @@ function AppInner() {
   // Register for native push notifications (iOS APNs / Android FCM).
   // No-op on web — safe to call unconditionally.
   useNativePush();
+  // Handle OAuth deep-link callbacks from the system browser (istiqoma://).
+  // No-op on web — safe to call unconditionally.
+  useNativeAuth();
   return (
     <>
       <Toaster />

@@ -112,6 +112,26 @@ async function deleteTokens(userId: string): Promise<void> {
   await db.delete(qfUserTokens).where(eq(qfUserTokens.userId, userId));
 }
 
+// ─── Native PKCE store — for the Capacitor in-app browser flow ──────────────
+// When the user connects QF from the native app, we can't use the session
+// to hold the PKCE state because the QF OAuth flow runs in
+// SFSafariViewController / Chrome Custom Tab which does NOT share cookies
+// with the Capacitor WebView. Instead we stash the PKCE state here, keyed
+// by the `state` parameter, and the callback looks it up without needing
+// a session. Entries expire after 10 minutes.
+const NATIVE_QF_PKCE_TTL_MS = 10 * 60 * 1000;
+const nativeQfPkceStore = new Map<
+  string,
+  { codeVerifier: string; userId: string; expiresAt: number }
+>();
+
+function cleanupNativeQfPkce() {
+  const now = Date.now();
+  nativeQfPkceStore.forEach((v, k) => {
+    if (now > v.expiresAt) nativeQfPkceStore.delete(k);
+  });
+}
+
 // ─── PKCE pending state — stored on the user's session, not in DB.
 // One in-flight authorization at a time per session is plenty for our
 // "Connect Quran Foundation" button.
@@ -289,7 +309,7 @@ export function registerQfUserRoutes(
     });
   });
 
-  // Begin connection: generate PKCE, stash on session, redirect to QF.
+  // Begin connection (web): generate PKCE, stash on session, redirect to QF.
   app.get("/api/qf/connect", isAuthenticated, (req: Request, res: Response) => {
     if (!isQfUserConfigured()) {
       return res.status(503).json({ message: "QF User API is not configured on the server" });
@@ -312,11 +332,141 @@ export function registerQfUserRoutes(
     res.redirect(`${AUTH_BASE}/oauth2/auth?${params.toString()}`);
   });
 
-  // Callback: exchange code for tokens, persist, then redirect back into the app.
-  app.get("/api/qf/callback", isAuthenticated, async (req: Request, res: Response) => {
+  // Begin connection (native): called via authenticated fetch from the WebView.
+  // Returns a JSON object with the QF authorization URL so the client can open
+  // it in the system browser via @capacitor/browser. The PKCE state is stored
+  // in the server-side nativeQfPkceStore (not the session) so the callback can
+  // validate it even though SFSafariViewController has a different session.
+  app.get("/api/qf/connect-native", isAuthenticated, (req: Request, res: Response) => {
+    if (!isQfUserConfigured()) {
+      return res.status(503).json({ message: "QF User API is not configured on the server" });
+    }
     const userId = (req as unknown as { user: { claims: { sub: string } } }).user.claims.sub;
-    const pending = req.session.qfPkce;
+    const codeVerifier = base64url(crypto.randomBytes(32));
+    const codeChallenge = base64url(crypto.createHash("sha256").update(codeVerifier).digest());
+    const state = base64url(crypto.randomBytes(16));
+
+    nativeQfPkceStore.set(state, {
+      codeVerifier,
+      userId,
+      expiresAt: Date.now() + NATIVE_QF_PKCE_TTL_MS,
+    });
+    cleanupNativeQfPkce();
+
+    const params = new URLSearchParams({
+      response_type: "code",
+      client_id: CLIENT_ID,
+      redirect_uri: getRedirectUri(req),
+      scope: SCOPES,
+      state,
+      code_challenge: codeChallenge,
+      code_challenge_method: "S256",
+    });
+    res.json({ url: `${AUTH_BASE}/oauth2/auth?${params.toString()}` });
+  });
+
+  // Shared token exchange helper used by both web and native callback paths.
+  async function exchangeQfCode(
+    code: string,
+    codeVerifier: string,
+    redirectUri: string,
+  ): Promise<{
+    access_token: string;
+    refresh_token?: string;
+    expires_in?: number;
+    scope?: string;
+    id_token?: string;
+  } | null> {
+    const body = new URLSearchParams({
+      grant_type: "authorization_code",
+      redirect_uri: redirectUri,
+      code,
+      code_verifier: codeVerifier,
+    });
+    // QF requires client_secret_basic — credentials in the Authorization
+    // header, NOT in the POST body (which would be client_secret_post and
+    // is rejected with invalid_client).
+    const basicAuth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
+    const r = await fetch(`${AUTH_BASE}/oauth2/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${basicAuth}`,
+      },
+      body,
+    });
+    if (!r.ok) {
+      const txt = await r.text().catch(() => "");
+      console.error("[qf-user] token exchange failed:", r.status, txt);
+      return null;
+    }
+    return r.json() as Promise<{
+      access_token: string;
+      refresh_token?: string;
+      expires_in?: number;
+      scope?: string;
+      id_token?: string;
+    }>;
+  }
+
+  // Callback: handles both the web flow (PKCE from session) and the native
+  // flow (PKCE from nativeQfPkceStore). The native branch runs without
+  // isAuthenticated middleware because SFSafariViewController has a different
+  // session than the Capacitor WebView — the userId comes from the PKCE store.
+  app.get("/api/qf/callback", async (req: Request, res: Response) => {
     const { code, state, error } = req.query as Record<string, string | undefined>;
+
+    // ── Native path ────────────────────────────────────────────────────────
+    // Check the server-side PKCE store first (no session auth needed).
+    const nativePending = state ? nativeQfPkceStore.get(state) : null;
+    if (nativePending) {
+      nativeQfPkceStore.delete(state!);
+      if (Date.now() > nativePending.expiresAt) {
+        return res.redirect("istiqoma://qf/failed");
+      }
+      if (error || !code) {
+        return res.redirect("istiqoma://qf/failed");
+      }
+      try {
+        const tok = await exchangeQfCode(
+          code,
+          nativePending.codeVerifier,
+          getRedirectUri(req),
+        );
+        if (!tok) return res.redirect("istiqoma://qf/failed");
+
+        let qfAccountId: string | null = null;
+        if (tok.id_token) {
+          try {
+            const part = tok.id_token.split(".")[1];
+            const json = JSON.parse(Buffer.from(part, "base64").toString("utf8"));
+            if (typeof json.sub === "string") qfAccountId = json.sub;
+          } catch { /* ignore */ }
+        }
+        await writeTokens(nativePending.userId, {
+          accessToken: tok.access_token,
+          refreshToken: tok.refresh_token ?? null,
+          expiresAt: new Date(Date.now() + (tok.expires_in ?? 3600) * 1000),
+          scope: tok.scope ?? SCOPES,
+          qfAccountId,
+        });
+        return res.redirect("istiqoma://qf/done");
+      } catch (err) {
+        console.error("[qf-user] native callback error:", err);
+        return res.redirect("istiqoma://qf/failed");
+      }
+    }
+
+    // ── Web path ───────────────────────────────────────────────────────────
+    // Require an authenticated session (equivalent to the former isAuthenticated
+    // middleware, applied inline so native requests can bypass it above).
+    const webUser = (req as any).user as { claims?: { sub?: string } } | undefined;
+    const userId = webUser?.claims?.sub;
+    if (!userId) {
+      return res.redirect("/api/login?returnTo=/profile");
+    }
+
+    const pending = req.session.qfPkce;
     delete req.session.qfPkce;
 
     if (error) {
@@ -326,36 +476,10 @@ export function registerQfUserRoutes(
       return res.redirect(`/profile?qf=error&reason=state_mismatch`);
     }
     try {
-      const body = new URLSearchParams({
-        grant_type: "authorization_code",
-        redirect_uri: getRedirectUri(req),
-        code,
-        code_verifier: pending.codeVerifier,
-      });
-      // QF requires client_secret_basic — credentials in the Authorization
-      // header, NOT in the POST body (which would be client_secret_post and
-      // is rejected with invalid_client).
-      const basicAuth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
-      const r = await fetch(`${AUTH_BASE}/oauth2/token`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Basic ${basicAuth}`,
-        },
-        body,
-      });
-      if (!r.ok) {
-        const txt = await r.text().catch(() => "");
-        console.error("[qf-user] token exchange failed:", r.status, txt);
+      const tok = await exchangeQfCode(code, pending.codeVerifier, getRedirectUri(req));
+      if (!tok) {
         return res.redirect(`/profile?qf=error&reason=exchange_failed`);
       }
-      const tok = (await r.json()) as {
-        access_token: string;
-        refresh_token?: string;
-        expires_in?: number;
-        scope?: string;
-        id_token?: string;
-      };
       // Best-effort QF account id from id_token (sub claim) — purely
       // informational. Decoding the JWT body is enough; we do not verify
       // the signature here because we just received the token over TLS
@@ -366,9 +490,7 @@ export function registerQfUserRoutes(
           const part = tok.id_token.split(".")[1];
           const json = JSON.parse(Buffer.from(part, "base64").toString("utf8"));
           if (typeof json.sub === "string") qfAccountId = json.sub;
-        } catch {
-          /* ignore */
-        }
+        } catch { /* ignore */ }
       }
       await writeTokens(userId, {
         accessToken: tok.access_token,

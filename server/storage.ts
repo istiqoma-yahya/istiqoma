@@ -1106,11 +1106,13 @@ export class DatabaseStorage implements IStorage {
     deviceToken: string,
     settings: Partial<InsertPushSubscription>,
   ): Promise<PushSubscription> {
-    const sanitizedTimezone = validateTimezone(settings.timezone) ?? "Asia/Jakarta";
-
-    // Try to carry over web subscription settings as defaults so the user
-    // does not lose their reminder preferences on first native registration.
+    // Fetch the web subscription FIRST so we can inherit its timezone and
+    // other settings as defaults — this preserves the user's existing reminder
+    // preferences when they install the app on a new device.
     const webSub = await this.getPushSubscription(userId);
+    // Prefer the explicitly supplied timezone; fall back to the web sub's
+    // timezone so users in non-Jakarta timezones don't lose their preferences.
+    const sanitizedTimezone = validateTimezone(settings.timezone) ?? webSub?.timezone ?? "Asia/Jakarta";
 
     const row = {
       userId,

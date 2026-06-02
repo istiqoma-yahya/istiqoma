@@ -60,7 +60,9 @@ function getApnsJwt(): string {
   const sign = createSign("SHA256");
   sign.update(data);
   // APNS_KEY_P8 is an EC (P-256) private key in PEM / PKCS#8 format.
-  const sig = sign.sign(APNS_KEY_P8!, "base64url");
+  // dsaEncoding: "ieee-p1363" outputs raw R||S (JOSE format) instead of
+  // DER-encoded ASN.1 — APNs rejects tokens with DER-encoded signatures.
+  const sig = sign.sign({ key: APNS_KEY_P8!, dsaEncoding: "ieee-p1363" }, "base64url");
 
   _apnsToken = `${data}.${sig}`;
   _apnsTokenAt = now;

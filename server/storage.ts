@@ -125,7 +125,7 @@ export type TargetHistoryWithStreak = {
 };
 
 export interface IStorage {
-  getDeeds(userId: string): Promise<Deed[]>;
+  getDeeds(userId: string, since?: Date): Promise<Deed[]>;
   createDeed(userId: string, deed: InsertDeed): Promise<Deed>;
   findSholatDeedByLocalDate(userId: string, sholatType: string, localDate: string): Promise<Deed | null>;
   deleteDeed(id: number, userId: string): Promise<void>;
@@ -138,6 +138,7 @@ export interface IStorage {
   markCategoryProtected(id: number, userId: string): Promise<void>;
   getTargets(userId: string): Promise<Target[]>;
   getTargetsWithProgress(userId: string, timezone?: string): Promise<TargetWithProgress[]>;
+  getTargetWithProgress(targetId: number, userId: string, timezone?: string): Promise<TargetWithProgress | null>;
   createTarget(userId: string, target: InsertTarget): Promise<Target>;
   updateTarget(id: number, userId: string, target: Partial<InsertTarget>): Promise<Target>;
   deleteTarget(id: number, userId: string): Promise<void>;
@@ -230,11 +231,14 @@ export type LeaderboardEntry = {
 };
 
 export class DatabaseStorage implements IStorage {
-  async getDeeds(userId: string): Promise<Deed[]> {
+  async getDeeds(userId: string, since?: Date): Promise<Deed[]> {
+    const conditions = since
+      ? and(eq(deeds.userId, userId), gte(deeds.createdAt, since))
+      : eq(deeds.userId, userId);
     return await db
       .select()
       .from(deeds)
-      .where(eq(deeds.userId, userId))
+      .where(conditions)
       .orderBy(desc(deeds.createdAt));
   }
 
@@ -522,6 +526,105 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
+  async getTargetWithProgress(targetId: number, userId: string, timezone?: string): Promise<TargetWithProgress | null> {
+    const [target] = await db
+      .select()
+      .from(targets)
+      .where(and(eq(targets.id, targetId), eq(targets.userId, userId)))
+      .limit(1);
+
+    if (!target) return null;
+
+    const now = new Date();
+    const tz = await this.resolveUserTimezone(userId, timezone);
+
+    if (target.recurrence === "oneTime") {
+      const since = target.startDate ? new Date(target.startDate) : undefined;
+      const userDeeds = await this.getDeeds(userId, since);
+
+      const matchingDeeds = userDeeds.filter((deed) => {
+        const deedDate = new Date(deed.createdAt || now);
+        const afterStart = !target.startDate || deedDate >= new Date(target.startDate);
+        const beforeDue = !target.dueDate || deedDate <= new Date(target.dueDate);
+        const inDateRange = afterStart && beforeDue;
+        const matchesCategory = matchesFastingCategories(deed.category, target.category) || deed.category === target.category;
+        const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;
+        const matchesSholatType = !target.sholatType || deed.sholatType === target.sholatType;
+        const matchesFastingType = !target.fastingType || deed.fastingType === target.fastingType;
+        const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
+        const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
+        const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
+        const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit || !deed.customUnit;
+        return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit && inDateRange;
+      });
+
+      const currentValue = matchingDeeds.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
+      const percentComplete = target.targetValue > 0
+        ? Math.min(100, Math.round((currentValue / target.targetValue) * 100))
+        : 0;
+
+      return { ...target, currentValue, percentComplete };
+    }
+
+    // Recurring target — compute current period boundaries in user's timezone
+    const nowInUserTz = toZonedTime(now, tz);
+    let periodStart: Date;
+    let periodEnd: Date;
+
+    switch (target.period) {
+      case "daily":
+        periodStart = fromZonedTime(startOfDay(nowInUserTz), tz);
+        periodEnd = fromZonedTime(endOfDay(nowInUserTz), tz);
+        break;
+      case "weekly":
+        periodStart = fromZonedTime(startOfWeek(nowInUserTz, { weekStartsOn: 1 }), tz);
+        periodEnd = fromZonedTime(endOfWeek(nowInUserTz, { weekStartsOn: 1 }), tz);
+        break;
+      case "monthly":
+        periodStart = fromZonedTime(startOfMonth(nowInUserTz), tz);
+        periodEnd = fromZonedTime(endOfMonth(nowInUserTz), tz);
+        break;
+      default:
+        periodStart = fromZonedTime(startOfDay(nowInUserTz), tz);
+        periodEnd = fromZonedTime(endOfDay(nowInUserTz), tz);
+    }
+
+    // Fetch only deeds from the current period start onwards — the index on
+    // (user_id, created_at) makes this a very narrow range scan.
+    const userDeeds = await this.getDeeds(userId, periodStart);
+
+    const isLimitTarget = target.targetType === "limit";
+
+    const deedsInPeriod = userDeeds.filter((deed) => {
+      const deedDate = new Date(deed.createdAt || now);
+      const inPeriod = deedDate >= periodStart && deedDate <= periodEnd;
+      const matchesCategory = matchesFastingCategories(deed.category, target.category) || deed.category === target.category;
+      const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;
+      const matchesSholatType = !target.sholatType || deed.sholatType === target.sholatType;
+      const matchesFastingType = !target.fastingType || deed.fastingType === target.fastingType;
+      const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
+      const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
+      const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
+      const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit || !deed.customUnit;
+      return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit && inPeriod;
+    });
+
+    const currentValue = deedsInPeriod.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
+
+    let percentComplete: number;
+    if (isLimitTarget) {
+      if (target.targetValue === 0) {
+        percentComplete = currentValue > 0 ? 100 : 0;
+      } else {
+        percentComplete = Math.round((currentValue / target.targetValue) * 100);
+      }
+    } else {
+      percentComplete = Math.min(100, Math.round((currentValue / target.targetValue) * 100));
+    }
+
+    return { ...target, currentValue, percentComplete };
+  }
+
   private async assertFolderOwnership(folderId: number | null | undefined, userId: string): Promise<void> {
     if (folderId == null) return;
     const [folder] = await db
@@ -679,7 +782,6 @@ export class DatabaseStorage implements IStorage {
     }
 
     const t = target[0];
-    const userDeeds = await this.getDeeds(userId);
     const now = new Date();
 
     // Lock the timezone for this target's history to whatever was used the
@@ -743,6 +845,10 @@ export class DatabaseStorage implements IStorage {
 
     const oldestPeriodStart = validPeriods[validPeriods.length - 1].periodStart;
     const newestPeriodEnd = validPeriods[0].periodEnd;
+
+    // Fetch only deeds within the history window — the (user_id, created_at)
+    // index makes this a narrow range scan instead of a full table scan.
+    const userDeeds = await this.getDeeds(userId, oldestPeriodStart);
     
     await db
       .delete(targetHistory)

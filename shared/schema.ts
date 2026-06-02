@@ -49,6 +49,11 @@ export const deeds = pgTable("deeds", {
   uniqSholatPerDay: uniqueIndex("uniq_sholat_deed_per_day")
     .on(table.userId, table.sholatType, table.localDate)
     .where(sql`category = 'Sholat Fardhu' AND local_date IS NOT NULL AND sholat_type IS NOT NULL`),
+  // Composite indexes for fast per-user time-windowed and category-filtered
+  // deed queries. These are the two hot paths: history window scans (need
+  // userId + createdAt) and lifetime-total scans (need userId + category).
+  userCreatedAtIdx: index("deeds_user_created_at_idx").on(table.userId, table.createdAt),
+  userCategoryIdx: index("deeds_user_category_idx").on(table.userId, table.category),
 }));
 
 export const targetFolders = pgTable("target_folders", {

@@ -814,8 +814,7 @@ export async function registerRoutes(
     }
 
     const timezone = parseTimezone(req.query.timezone);
-    const targetsWithProgress = await storage.getTargetsWithProgress(userId, timezone);
-    const target = targetsWithProgress.find(t => t.id === id);
+    const target = await storage.getTargetWithProgress(id, userId, timezone);
     if (!target) {
       return res.status(404).json({ message: "Target not found" });
     }
@@ -826,7 +825,10 @@ export async function registerRoutes(
 
     const totalAccumulated = history.reduce((sum, h) => sum + h.achievedValue, 0);
 
-    const userDeeds = await storage.getDeeds(userId);
+    // Scope to deeds logged on or after the target was created — uses the
+    // (user_id, created_at) index for a narrow scan instead of all-time.
+    const since = target.createdAt ? new Date(target.createdAt) : undefined;
+    const userDeeds = await storage.getDeeds(userId, since);
     const matchingDeeds = userDeeds.filter(deed => {
       const matchesCategory = deed.category === target.category;
       const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;

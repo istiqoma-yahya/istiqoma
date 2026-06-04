@@ -149,7 +149,7 @@ export interface IStorage {
   moveTargetToFolder(targetId: number, userId: string, folderId: number | null): Promise<Target>;
   getTargetHistory(targetId: number, userId: string, limit?: number): Promise<TargetHistory[]>;
   getTargetHistoryWithStreak(targetId: number, userId: string, limit?: number): Promise<TargetHistoryWithStreak>;
-  calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack?: number, timezone?: string): Promise<TargetHistory[]>;
+  calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack?: number, timezone?: string, prefetched?: { deeds: Deed[]; since?: Date }): Promise<TargetHistory[]>;
   getDeedsForTargetOnDate(targetId: number, userId: string, dateStr: string, timezone?: string): Promise<Deed[]>;
   getDailyBreakdown(targetId: number, userId: string, startDate: string, endDate: string, timezone?: string): Promise<{ date: string; quantity: number }[]>;
   getPushSubscription(userId: string): Promise<PushSubscription | null>;
@@ -773,7 +773,7 @@ export class DatabaseStorage implements IStorage {
     return validateTimezone(sub?.timezone) ?? DEFAULT_TIMEZONE;
   }
 
-  async calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack: number = 7, timezone?: string): Promise<TargetHistory[]> {
+  async calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack: number = 7, timezone?: string, prefetched?: { deeds: Deed[]; since?: Date }): Promise<TargetHistory[]> {
     const target = await db
       .select()
       .from(targets)
@@ -851,27 +851,26 @@ export class DatabaseStorage implements IStorage {
 
     // Fetch only deeds within the history window — the (user_id, created_at)
     // index makes this a narrow range scan instead of a full table scan.
-    const userDeeds = await this.getDeeds(userId, oldestPeriodStart);
-    
-    await db
-      .delete(targetHistory)
-      .where(and(
-        eq(targetHistory.targetId, targetId),
-        eq(targetHistory.userId, userId),
-        gte(targetHistory.periodStart, oldestPeriodStart),
-        lte(targetHistory.periodEnd, newestPeriodEnd)
-      ));
+    // Reuse a caller-provided deed list only when its fetch window already
+    // covers the history window (i.e. it was fetched from a point at or before
+    // the oldest history period start), so we never silently undercount a
+    // boundary period that starts before the prefetch floor.
+    const canUsePrefetch = !!prefetched && (!prefetched.since || prefetched.since <= oldestPeriodStart);
+    const userDeeds = canUsePrefetch ? prefetched!.deeds : await this.getDeeds(userId, oldestPeriodStart);
 
-    const savedHistory: TargetHistory[] = [];
-    
     const isLimitTarget = t.targetType === "limit";
-    
-    for (const { periodStart, periodEnd } of validPeriods) {
+
+    // Build every period row in memory first, then persist with a single
+    // delete + multi-row insert inside one transaction. Previously this loop
+    // issued one INSERT round-trip per period (up to `periodsBack`), which on
+    // the external Supabase database meant ~90 sequential network round-trips
+    // and ~20s page loads. One batched insert collapses that to a single trip.
+    const rowsToInsert = validPeriods.map(({ periodStart, periodEnd }) => {
       const deedsInPeriod = userDeeds.filter((deed) => {
         const deedDate = new Date(deed.createdAt || now);
         const inPeriod = deedDate >= periodStart && deedDate <= periodEnd;
         const matchesCategory = matchesFastingCategories(deed.category, t.category) || deed.category === t.category;
-        
+
         // For dzikir targets with specific type, also match dzikirType
         const matchesDzikirType = !t.dzikirType || deed.dzikirType === t.dzikirType;
         // For sholat targets with specific type, also match sholatType
@@ -882,41 +881,51 @@ export class DatabaseStorage implements IStorage {
         const matchesSedekahType = !t.sedekahType || deed.sedekahType === t.sedekahType;
         const matchesCustomUnit = !t.customUnit || deed.customUnit === t.customUnit || !deed.customUnit;
         const matchesIsJamaah = t.isJamaah === null || t.isJamaah === undefined || deed.isJamaah === t.isJamaah;
-        
+
         return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit && inPeriod;
       });
 
       const achievedValue = deedsInPeriod.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
-      
+
       // For limit targets: success means staying at or below the limit
       // For achievement targets: success means reaching or exceeding the target
-      const completed = isLimitTarget 
-        ? achievedValue <= t.targetValue 
+      const completed = isLimitTarget
+        ? achievedValue <= t.targetValue
         : achievedValue >= t.targetValue;
 
-      const [entry] = await db
-        .insert(targetHistory)
-        .values({
-          targetId,
-          userId,
-          category: t.category,
-          dzikirType: t.dzikirType,
-          sholatType: t.sholatType,
-          fastingType: t.fastingType,
-          periodStart,
-          periodEnd,
-          achievedValue,
-          targetValue: t.targetValue,
-          targetType: t.targetType,
-          completed,
-          timezone: tz,
-        })
-        .returning();
+      return {
+        targetId,
+        userId,
+        category: t.category,
+        dzikirType: t.dzikirType,
+        sholatType: t.sholatType,
+        fastingType: t.fastingType,
+        periodStart,
+        periodEnd,
+        achievedValue,
+        targetValue: t.targetValue,
+        targetType: t.targetType,
+        completed,
+        timezone: tz,
+      };
+    });
 
-      savedHistory.push(entry);
-    }
+    const savedHistory = await db.transaction(async (tx) => {
+      await tx
+        .delete(targetHistory)
+        .where(and(
+          eq(targetHistory.targetId, targetId),
+          eq(targetHistory.userId, userId),
+          gte(targetHistory.periodStart, oldestPeriodStart),
+          lte(targetHistory.periodEnd, newestPeriodEnd)
+        ));
 
-    return savedHistory.sort((a, b) => 
+      if (rowsToInsert.length === 0) return [] as TargetHistory[];
+
+      return await tx.insert(targetHistory).values(rowsToInsert).returning();
+    });
+
+    return savedHistory.sort((a, b) =>
       new Date(b.periodEnd).getTime() - new Date(a.periodEnd).getTime()
     );
   }

@@ -820,15 +820,21 @@ export async function registerRoutes(
     }
 
     const periodsBack = 90;
-    await storage.calculateAndSaveTargetHistory(id, userId, periodsBack, timezone);
+
+    // Fetch the user's deeds once and reuse the same list for both the history
+    // recompute and the totals below, avoiding duplicate round-trips to the
+    // external database. Scope to deeds logged on or after the target was
+    // created — uses the (user_id, created_at) index for a narrow scan instead
+    // of all-time. The history recompute only reuses this list when its window
+    // covers the history window (otherwise it fetches the wider window itself).
+    const since = target.createdAt ? new Date(target.createdAt) : undefined;
+    const userDeeds = await storage.getDeeds(userId, since);
+
+    await storage.calculateAndSaveTargetHistory(id, userId, periodsBack, timezone, { deeds: userDeeds, since });
     const { history, currentStreak } = await storage.getTargetHistoryWithStreak(id, userId, periodsBack);
 
     const totalAccumulated = history.reduce((sum, h) => sum + h.achievedValue, 0);
 
-    // Scope to deeds logged on or after the target was created — uses the
-    // (user_id, created_at) index for a narrow scan instead of all-time.
-    const since = target.createdAt ? new Date(target.createdAt) : undefined;
-    const userDeeds = await storage.getDeeds(userId, since);
     const matchingDeeds = userDeeds.filter(deed => {
       const matchesCategory = deed.category === target.category;
       const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;

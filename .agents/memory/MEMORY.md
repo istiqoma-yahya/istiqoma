@@ -1,1 +1,2 @@
 - [Native OAuth cookie problem](native-oauth-cookie-problem.md) — WKWebView and system browser have separate cookie jars; OIDC/QF OAuth must use exchange-token pattern via @capacitor/browser.
+- [Supabase prod schema drift](supabase-prod-schema-drift.md) — external Supabase prod is NOT migrated by Replit publish; db:push only hits dev; fix prod via project's own drizzle schema.

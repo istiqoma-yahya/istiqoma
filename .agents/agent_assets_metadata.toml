@@ -1,0 +1,19 @@
+uploads = []
+
+[[generated]]
+id = "xiFxQWrPnaTkmXozpWrcv"
+uri = "file://artifacts/istiqoma-demo/public/textures/islamic_pattern.png"
+type = "image"
+title = "Islamic geometric pattern texture"
+
+[[generated]]
+id = "uFKv1AmEP5FNv_XN9MBwW"
+uri = "file://artifacts/istiqoma-demo/public/textures/night_sky.png"
+type = "image"
+title = "Atmospheric night sky dawn"
+
+[[outputs]]
+id = "IeoOnZ5LdXm2EOj1U6VzB"
+uri = "file://artifacts/istiqoma-demo/public/audio/bg_music.mp3"
+type = "audio"
+title = "calm background music"

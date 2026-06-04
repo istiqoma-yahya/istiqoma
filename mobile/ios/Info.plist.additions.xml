@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Istiqoma — Info.plist usage-description additions
+  ===================================================
+  After running `npx cap add ios`, open ios/App/App/Info.plist in Xcode
+  (or a text editor) and merge these key-value pairs into the root <dict>.
+
+  Apple requires every permission your app requests to have a usage description
+  that honestly explains WHY the app needs it. Vague strings like "for app
+  functionality" are rejected. These strings are written for real users.
+
+  Localized versions are in mobile/ios/InfoPlist.strings.* files below.
+  Put each language bundle in ios/App/App/<lang>.lproj/InfoPlist.strings.
+-->
+
+<!-- ── Microphone ── -->
+<key>NSMicrophoneUsageDescription</key>
+<string>Istiqoma uses the microphone to let you record Qur'an recitations for memorization practice. Recordings are stored on your device and sent to our servers only for progress tracking.</string>
+
+<!-- ── Location (while in use) ── -->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Istiqoma uses your location to calculate accurate prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha) and to show you the Qibla direction. Your precise location is never stored permanently.</string>
+
+<!-- ── Location (always) — NOT requested; include only if background reminders -->
+<!-- <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Istiqoma uses your background location to send accurate Sholat reminders even when the app is closed.</string> -->
+
+<!-- ── Camera — NOT requested currently -->
+<!-- <key>NSCameraUsageDescription</key>
+<string>...</string> -->
+
+<!-- ── Face ID — NOT requested currently -->
+<!-- <key>NSFaceIDUsageDescription</key>
+<string>...</string> -->
+
+<!-- ── Notifications (handled at runtime via UNUserNotificationCenter, no plist key needed) -->
+
+<!-- ── Background modes — enable for push + audio ── -->
+<key>UIBackgroundModes</key>
+<array>
+  <string>remote-notification</string>
+  <string>audio</string>
+</array>
+
+<!-- ── App Transport Security ── -->
+<key>NSAppTransportSecurity</key>
+<dict>
+  <key>NSAllowsArbitraryLoads</key>
+  <false/>
+  <key>NSExceptionDomains</key>
+  <dict>
+    <!-- Allow HTTP to localhost for Capacitor live-reload in dev builds only -->
+    <key>localhost</key>
+    <dict>
+      <key>NSExceptionAllowsInsecureHTTPLoads</key>
+      <true/>
+    </dict>
+  </dict>
+</dict>
+
+<!-- ── Capacitor custom scheme ── -->
+<key>CFBundleURLTypes</key>
+<array>
+  <dict>
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>istiqoma</string>
+    </array>
+  </dict>
+</array>

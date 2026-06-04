@@ -1,0 +1,20 @@
+node_modules
+dist
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
+test-results
+playwright-report
+playwright/.cache
+screenshots
+.cache
+
+# Capacitor native project folders — generated locally with `npx cap add ios` / `npx cap add android`
+ios/
+android/
+
+# Local environment files — never commit secrets
+.env
+.env.local
+.env.*.local

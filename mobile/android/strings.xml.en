@@ -1,0 +1,26 @@
+<!--
+  English permission rationale strings for Istiqoma
+  Copy to: android/app/src/main/res/values/strings.xml
+  (Merge inside the existing <resources> element)
+-->
+<resources>
+    <string name="app_name">Istiqoma</string>
+
+    <!-- Microphone rationale (shown in Android permission dialog) -->
+    <string name="permission_microphone_rationale">
+        Istiqoma uses your microphone to record Qur\'an recitations during memorization practice.
+        Recordings are stored on your device and uploaded to your account for progress tracking only.
+    </string>
+
+    <!-- Location rationale -->
+    <string name="permission_location_rationale">
+        Istiqoma uses your location to calculate accurate prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha)
+        and show you the Qibla direction. Your precise location is never stored permanently.
+    </string>
+
+    <!-- Notification rationale -->
+    <string name="permission_notification_rationale">
+        Allow Istiqoma to send you Sholat reminders, daily deed prompts, and streak alerts
+        so you can stay consistent with your worship.
+    </string>
+</resources>

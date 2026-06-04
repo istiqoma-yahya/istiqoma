@@ -1,0 +1,7 @@
+/* Indonesian usage descriptions — copy to ios/App/App/id.lproj/InfoPlist.strings */
+
+NSMicrophoneUsageDescription = "Istiqoma menggunakan mikrofon untuk merekam bacaan Al-Qur'an saat latihan hafalan. Rekaman disimpan di perangkat Anda atau diunggah ke akun untuk pelacakan progres.";
+
+NSLocationWhenInUseUsageDescription = "Istiqoma menggunakan lokasi Anda untuk menghitung waktu sholat yang akurat (Subuh, Dzuhur, Ashar, Maghrib, Isya) dan menampilkan arah kiblat. Lokasi Anda tidak disimpan secara permanen.";
+
+NSLocationAlwaysAndWhenInUseUsageDescription = "Istiqoma menggunakan lokasi latar belakang untuk mengirimkan pengingat sholat yang akurat meskipun aplikasi ditutup.";

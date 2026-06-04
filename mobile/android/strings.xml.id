@@ -1,0 +1,24 @@
+<!--
+  Indonesian permission rationale strings for Istiqoma
+  Copy to: android/app/src/main/res/values-id/strings.xml
+  (Merge inside the existing <resources> element)
+-->
+<resources>
+    <string name="app_name">Istiqoma</string>
+
+    <string name="permission_microphone_rationale">
+        Istiqoma menggunakan mikrofon untuk merekam bacaan Al-Qur\'an saat latihan hafalan.
+        Rekaman disimpan di perangkat Anda dan diunggah ke akun hanya untuk pelacakan progres.
+    </string>
+
+    <string name="permission_location_rationale">
+        Istiqoma menggunakan lokasi Anda untuk menghitung waktu sholat yang akurat
+        (Subuh, Dzuhur, Ashar, Maghrib, Isya) dan menampilkan arah kiblat.
+        Lokasi Anda tidak disimpan secara permanen.
+    </string>
+
+    <string name="permission_notification_rationale">
+        Izinkan Istiqoma mengirimkan pengingat sholat, dorongan amal harian, dan peringatan streak
+        agar Anda tetap konsisten dalam beribadah.
+    </string>
+</resources>

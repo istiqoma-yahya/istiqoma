@@ -1,0 +1,67 @@
+<!--
+  Istiqoma — AndroidManifest.xml additions
+  =========================================
+  After running `npx cap add android`, open
+  android/app/src/main/AndroidManifest.xml and merge these elements.
+
+  1. The <uses-permission> tags go BEFORE the <application> tag.
+  2. The <intent-filter> block goes INSIDE the <activity> tag (same level as the
+     existing Capacitor intent-filter for MAIN/LAUNCHER).
+  3. The <meta-data> and <service> tags go INSIDE <application>.
+
+  User-visible permission rationale strings must also be added to:
+    android/app/src/main/res/values/strings.xml       (English)
+    android/app/src/main/res/values-id/strings.xml    (Indonesian)
+    android/app/src/main/res/values-ms/strings.xml    (Malay)
+  See mobile/android/strings.xml.* files.
+-->
+
+<!-- ═══════════════════════════════════════════════════
+     PERMISSIONS — paste before <application>
+═══════════════════════════════════════════════════ -->
+
+<!-- Internet — required for all API calls -->
+<uses-permission android:name="android.permission.INTERNET" />
+
+<!-- Push notifications (POST_NOTIFICATIONS required on Android 13+) -->
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+<!-- Microphone — Qur'an recitation recording -->
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+<!-- Location (while in use) — prayer times and Qibla -->
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+<!-- Vibrate — notification feedback -->
+<uses-permission android:name="android.permission.VIBRATE" />
+
+<!-- Receive boot completed — reschedule alarms after reboot (optional) -->
+<!-- <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> -->
+
+<!-- ═══════════════════════════════════════════════════
+     DEEP-LINK INTENT FILTER — paste INSIDE <activity>
+     (alongside the existing MAIN/LAUNCHER intent-filter)
+═══════════════════════════════════════════════════ -->
+
+<intent-filter android:label="Istiqoma OAuth Callback">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="istiqoma" />
+</intent-filter>
+
+<!-- ═══════════════════════════════════════════════════
+     FCM / PUSH — paste INSIDE <application>
+     (Capacitor adds this automatically when the push plugin syncs)
+═══════════════════════════════════════════════════ -->
+
+<!--
+<service
+    android:name="com.getcapacitor.PushNotificationsPlugin$MSGService"
+    android:exported="false">
+    <intent-filter>
+        <action android:name="com.google.firebase.MESSAGING_EVENT" />
+    </intent-filter>
+</service>
+-->

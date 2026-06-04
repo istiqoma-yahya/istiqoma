@@ -1,0 +1,51 @@
+<div class="md:p-8 md:mx-0 bg-white max-w-md border-slate-200 border rounded-xl mx-auto px-6 py-6 relative shadow-xl">
+                    <h4 class="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-6 border-b border-slate-100 pb-4">Personalize Goals</h4>
+                    
+                    <div class="space-y-6">
+                        <!-- Control 1: Slider -->
+                        <div class="">
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-slate-700 font-medium">Daily Quran Goal</span>
+                                <span class="text-emerald-600 font-medium">5 Pages</span>
+                            </div>
+                            <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                <div class="h-full w-1/4 bg-emerald-500 rounded-full"></div>
+                            </div>
+                        </div>
+
+                        <!-- Control 2: Toggles -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-slate-50 rounded-md text-slate-600">
+                                    <iconify-icon icon="solar:bell-bing-linear" width="20"></iconify-icon>
+                                </div>
+                                <div class="">
+                                    <p class="text-sm font-medium text-slate-900">Tahajjud Reminders</p>
+                                    <p class="text-xs text-slate-500">Last 3rd of night</p>
+                                </div>
+                            </div>
+                            <!-- Custom Toggle -->
+                            <div class="w-11 h-6 bg-emerald-500 rounded-full flex items-center px-1 cursor-pointer">
+                                <div class="w-4 h-4 bg-white rounded-full shadow-sm ml-auto"></div>
+                            </div>
+                        </div>
+
+                         <!-- Control 3: Toggles -->
+                         <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-slate-50 rounded-md text-slate-600">
+                                    <iconify-icon icon="solar:calendar-linear" width="20"></iconify-icon>
+                                </div>
+                                <div class="">
+                                    <p class="text-sm font-medium text-slate-900">Monday/Thursday Fasting</p>
+                                    <p class="text-xs text-slate-500">Sunnah habit</p>
+                                </div>
+                            </div>
+                            <!-- Custom Toggle Off -->
+                            <div class="w-11 h-6 bg-slate-200 rounded-full flex items-center px-1 cursor-pointer hover:bg-slate-300 transition-colors">
+                                <div class="w-4 h-4 bg-white rounded-full shadow-sm"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>

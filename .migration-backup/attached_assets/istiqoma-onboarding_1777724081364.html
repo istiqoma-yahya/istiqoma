@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Istiqoma — Onboarding</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=DM+Sans:wght@300;400;500&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0E1510;
+  --bg2: #131A15;
+  --bg3: #1A2A1E;
+  --gold: #D4A84B;
+  --gold-dim: rgba(212,168,75,0.15);
+  --gold-border: rgba(212,168,75,0.25);
+  --green: #3D7A52;
+  --green-bright: #5BAF78;
+  --cream: #F0E9D8;
+  --cream-dim: rgba(240,233,216,0.55);
+  --cream-muted: rgba(240,233,216,0.3);
+  --white10: rgba(255,255,255,0.08);
+  --white20: rgba(255,255,255,0.15);
+}
+
+html, body {
+  height: 100%; width: 100%;
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--cream);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── NOISE TEXTURE ─── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.4;
+}
+
+/* ─── AMBIENT GLOW ─── */
+.glow-tl {
+  position: fixed; top: -150px; left: -150px;
+  width: 450px; height: 450px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(61,122,82,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.glow-br {
+  position: fixed; bottom: -100px; right: -100px;
+  width: 350px; height: 350px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,168,75,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ─── PROGRESS BAR ─── */
+.progress-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 2px; background: var(--white10);
+  z-index: 100;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--green), var(--gold));
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ─── STEP LABEL ─── */
+.step-label {
+  position: fixed; top: 1.2rem; right: 1.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--cream-muted);
+  z-index: 100;
+  transition: opacity 0.3s;
+}
+
+/* ─── BACK BUTTON ─── */
+.back-btn {
+  position: fixed; top: 1rem; left: 1.2rem;
+  background: none; border: none;
+  color: var(--cream-muted);
+  font-size: 1.1rem; cursor: pointer;
+  z-index: 100;
+  padding: 0.3rem;
+  transition: color 0.2s;
+  display: none;
+}
+.back-btn:hover { color: var(--cream); }
+.back-btn.visible { display: block; }
+
+/* ─── APP WRAPPER ─── */
+#app {
+  width: 100%; height: 100%;
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ─── SCREEN ─── */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 5rem 1.8rem 6rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateX(40px);
+  overflow-y: auto;
+}
+.screen.active {
+  opacity: 1; pointer-events: all;
+  transform: translateX(0);
+}
+.screen.exit {
+  opacity: 0; transform: translateX(-40px);
+}
+
+/* ─── SHARED ELEMENTS ─── */
+.eyebrow {
+  font-size: 0.65rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.2rem;
+  opacity: 0.85;
+}
+.headline {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.6rem, 5vw, 2.1rem);
+  line-height: 1.3;
+  color: var(--cream);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.headline em { color: var(--gold); font-style: italic; }
+.subtext {
+  font-size: 0.9rem;
+  color: var(--cream-dim);
+  line-height: 1.75;
+  text-align: center;
+  max-width: 340px;
+}
+.divider {
+  width: 40px; height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+  margin: 1.5rem auto;
+}
+.btn-main {
+  margin-top: 2.5rem;
+  padding: 0.9rem 2.5rem;
+  background: linear-gradient(135deg, var(--green), var(--green-bright));
+  color: white;
+  border: none;
+  border-radius: 100px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  box-shadow: 0 8px 24px rgba(61,122,82,0.35);
+  transition: all 0.25s ease;
+}
+.btn-main:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(61,122,82,0.45); }
+.btn-main:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+/* ─── SCREEN 0: SPLASH ─── */
+#s0 { text-align: center; }
+.logo-mark {
+  width: 72px; height: 72px;
+  border: 1px solid var(--gold-border);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2rem;
+  background: var(--gold-dim);
+  animation: pulse-glow 3s ease infinite;
+}
+@keyframes pulse-glow {
+  0%,100% { box-shadow: 0 0 0 0 rgba(212,168,75,0.2); }
+  50% { box-shadow: 0 0 0 12px rgba(212,168,75,0); }
+}
+.app-title {
+  font-family: 'Amiri', serif;
+  font-size: 2.2rem;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.3rem;
+}
+.app-tagline {
+  font-size: 0.78rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--cream-muted);
+  margin-bottom: 2.5rem;
+}
+.bismillah {
+  font-family: 'Amiri', serif;
+  font-size: 1.4rem;
+  color: var(--gold);
+  direction: rtl;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+/* ─── SCREEN 1: APA ITU ─── */
+.feature-list {
+  width: 100%; max-width: 360px;
+  display: flex; flex-direction: column;
+  gap: 0.75rem; margin-top: 1.5rem;
+}
+.feature-item {
+  display: flex; align-items: flex-start; gap: 1rem;
+  padding: 1.1rem 1.2rem;
+  background: var(--white10);
+  border: 1px solid var(--white20);
+  border-radius: 14px;
+  backdrop-filter: blur(6px);
+}
+.fi-icon {
+  width: 38px; height: 38px; flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+.fi-text h4 { font-size: 0.88rem; font-weight: 500; color: var(--cream); margin-bottom: 0.2rem; }
+.fi-text p { font-size: 0.78rem; color: var(--cream-muted); line-height: 1.5; }
+
+/* ─── SCREEN 2: MANFAAT ─── */
+.benefit-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.75rem; margin-top: 1.5rem;
+  width: 100%; max-width: 360px;
+}
+.benefit-card {
+  padding: 1.2rem 1rem;
+  background: var(--bg3);
+  border: 1px solid rgba(61,122,82,0.25);
+  border-radius: 16px;
+  text-align: center;
+}
+.benefit-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+.benefit-card h4 { font-size: 0.8rem; font-weight: 500; color: var(--cream); margin-bottom: 0.3rem; line-height: 1.3; }
+.benefit-card p { font-size: 0.72rem; color: var(--cream-muted); line-height: 1.4; }
+.hadith-box {
+  margin-top: 1.2rem;
+  padding: 1rem 1.2rem;
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  border-radius: 14px;
+  text-align: center;
+  max-width: 360px; width: 100%;
+}
+.hadith-arabic {
+  font-family: 'Amiri', serif;
+  font-size: 1rem;
+  color: var(--gold);
+  direction: rtl;
+  margin-bottom: 0.4rem;
+}
+.hadith-text { font-size: 0.75rem; color: var(--cream-dim); line-height: 1.5; font-style: italic; }
+.hadith-source { font-size: 0.65rem; color: var(--cream-muted); margin-top: 0.3rem; }
+
+/* ─── QUIZ SCREENS ─── */
+.quiz-wrap { width: 100%; max-width: 380px; }
+.quiz-question {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  color: var(--cream);
+  line-height: 1.4;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+.quiz-hint { font-size: 0.78rem; color: var(--cream-muted); text-align: center; margin-bottom: 1.5rem; }
+.options { display: flex; flex-direction: column; gap: 0.65rem; }
+.option {
+  padding: 1rem 1.3rem;
+  background: var(--white10);
+  border: 1px solid var(--white20);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex; align-items: center; gap: 0.9rem;
+  text-align: left;
+}
+.option:hover { background: rgba(255,255,255,0.12); border-color: var(--gold-border); }
+.option.selected {
+  background: rgba(61,122,82,0.25);
+  border-color: rgba(91,175,120,0.5);
+}
+.option-icon { font-size: 1.2rem; flex-shrink: 0; }
+.option-label { font-size: 0.88rem; color: var(--cream); line-height: 1.4; }
+.option-check {
+  margin-left: auto;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--white20);
+  flex-shrink: 0;
+  transition: all 0.2s;
+  background: transparent;
+  display: flex; align-items: center; justify-content: center;
+}
+.option.selected .option-check {
+  background: var(--green-bright);
+  border-color: var(--green-bright);
+}
+.option.selected .option-check::after {
+  content: '✓';
+  color: white;
+  font-size: 0.65rem;
+  font-weight: bold;
+}
+/* Grid option (multi-select) */
+.option.option-grid {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 0.9rem 0.9rem 0.9rem 0.9rem;
+  position: relative;
+}
+.option.option-grid .option-check {
+  position: absolute;
+  top: 0.65rem; right: 0.65rem;
+  margin-left: 0;
+}
+.option.option-grid .option-label {
+  font-size: 0.82rem;
+  line-height: 1.3;
+  padding-right: 1.5rem;
+}
+
+/* ─── SCREEN RESULT ─── */
+#s-result { text-align: center; }
+.result-icon {
+  font-size: 3rem;
+  margin-bottom: 1.2rem;
+  animation: pop-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes pop-in {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.result-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+}
+.result-desc {
+  font-size: 0.88rem;
+  color: var(--cream-dim);
+  line-height: 1.7;
+  max-width: 320px;
+  margin: 0 auto;
+}
+.result-tags {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1.2rem;
+}
+.tag {
+  padding: 0.35rem 0.9rem;
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  border-radius: 100px;
+  font-size: 0.72rem;
+  color: var(--gold);
+}
+
+
+.option-text-block {
+  display: flex; flex-direction: column; flex: 1;
+}
+.option-sublabel {
+  font-size: 0.72rem;
+  color: var(--cream-muted);
+  line-height: 1.4;
+  margin-top: 0.15rem;
+}
+
+/* ─── ANIMATIONS ─── */
+.fade-up { animation: fadeUp 0.6s ease both; }
+.fade-up:nth-child(2) { animation-delay: 0.1s; }
+.fade-up:nth-child(3) { animation-delay: 0.2s; }
+.fade-up:nth-child(4) { animation-delay: 0.3s; }
+.fade-up:nth-child(5) { animation-delay: 0.4s; }
+.fade-up:nth-child(6) { animation-delay: 0.5s; }
+.fade-up:nth-child(7) { animation-delay: 0.6s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.screen:not(.active) .fade-up { animation: none; opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="glow-tl"></div>
+<div class="glow-br"></div>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar">
+  <div class="progress-fill" id="progress" style="width:0%"></div>
+</div>
+
+<!-- STEP LABEL -->
+<div class="step-label" id="step-label"></div>
+
+<!-- BACK BUTTON -->
+<button class="back-btn" id="back-btn" onclick="goBack()">← Kembali</button>
+
+<div id="app">
+
+  <!-- ══════════════════════════
+       SCREEN 0 — SPLASH
+  ══════════════════════════ -->
+  <div class="screen active" id="s0">
+    <div class="logo-mark fade-up">🌿</div>
+    <p class="app-title fade-up">إستقامة</p>
+    <p class="app-tagline fade-up">Istiqoma · Konsisten dalam Kebaikan</p>
+    <div class="divider fade-up"></div>
+    <span class="bismillah fade-up">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</span>
+    <p class="subtext fade-up" style="font-size:0.8rem">Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang</p>
+    <button class="btn-main fade-up" onclick="goTo(1)">Mulai →</button>
+  </div>
+
+  <!-- ══════════════════════════
+       SCREEN 1 — APA ITU ISTIQOMA
+  ══════════════════════════ -->
+  <div class="screen" id="s1">
+    <p class="eyebrow fade-up">Apa itu Istiqoma?</p>
+    <h2 class="headline fade-up">Temanmu dalam<br>perjalanan menjadi <em>lebih baik</em></h2>
+    <p class="subtext fade-up">Istiqoma adalah aplikasi yang membantu kamu mencatat amal kebaikan harian — bukan sebagai kewajiban, tapi sebagai cermin jiwa.</p>
+    <div class="feature-list">
+      <div class="feature-item fade-up">
+        <div class="fi-icon">📿</div>
+        <div class="fi-text">
+          <h4>Catat Amal Baik Spontan</h4>
+          <p>Tidak perlu target. Cukup catat kebaikan sekecil apapun yang kamu lakukan hari ini.</p>
+        </div>
+      </div>
+      <div class="feature-item fade-up">
+        <div class="fi-icon">🌙</div>
+        <div class="fi-text">
+          <h4>Refleksi Penghujung Hari</h4>
+          <p>Diingatkan dengan lembut di malam hari untuk merefleksikan hari yang telah berlalu.</p>
+        </div>
+      </div>
+      <div class="feature-item fade-up">
+        <div class="fi-icon">📖</div>
+        <div class="fi-text">
+          <h4>Lihat Perjalananmu</h4>
+          <p>Catatan amalmu menjadi kisah hidupmu sebagai seorang muslim yang bertumbuh.</p>
+        </div>
+      </div>
+    </div>
+    <button class="btn-main fade-up" onclick="goTo(2)">Selanjutnya →</button>
+  </div>
+
+  <!-- ══════════════════════════
+       SCREEN 2 — MANFAAT
+  ══════════════════════════ -->
+  <div class="screen" id="s2">
+    <p class="eyebrow fade-up">Mengapa Istiqoma?</p>
+    <h2 class="headline fade-up">Manfaat yang<br>kamu akan <em>rasakan</em></h2>
+    <div class="benefit-grid">
+      <div class="benefit-card fade-up">
+        <div class="benefit-icon">🤲</div>
+        <h4>Hati Lebih Tenang</h4>
+        <p>Kesadaran atas amal membuat hati lebih bersyukur</p>
+      </div>
+      <div class="benefit-card fade-up">
+        <div class="benefit-icon">🌱</div>
+        <h4>Identitas Baru</h4>
+        <p>Perlahan membangun diri sebagai muslim yang istiqomah</p>
+      </div>
+      <div class="benefit-card fade-up">
+        <div class="benefit-icon">✨</div>
+        <h4>Ibadah Bermakna</h4>
+        <p>Setiap amal kecil terasa berarti dan dicatat dengan indah</p>
+      </div>
+      <div class="benefit-card fade-up">
+        <div class="benefit-icon">📅</div>
+        <h4>Konsistensi</h4>
+        <p>Dibantu untuk tetap konsisten tanpa merasa terbebani</p>
+      </div>
+    </div>
+    <div class="hadith-box fade-up">
+      <p class="hadith-arabic">إِنَّ أَحَبَّ الأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا</p>
+      <p class="hadith-text">"Sesungguhnya amalan yang paling dicintai Allah adalah yang paling konsisten dilakukan."</p>
+      <p class="hadith-source">— HR. Bukhari & Muslim</p>
+    </div>
+    <button class="btn-main fade-up" onclick="goTo(3)">Mulai Quiz →</button>
+  </div>
+
+  <!-- ══════════════════════════
+       SCREEN Q1 — KONDISI SAAT INI
+  ══════════════════════════ -->
+  <div class="screen" id="s3">
+    <div class="quiz-wrap">
+      <p class="eyebrow fade-up">Pertanyaan 1 dari 4</p>
+      <p class="quiz-question fade-up">Bagaimana kondisi ibadahmu saat ini?</p>
+      <p class="quiz-hint fade-up">Pilih yang paling jujur menggambarkan dirimu</p>
+      <div class="options" id="q1-options">
+        <div class="option fade-up" onclick="selectOption('q1', this, 'pemula')">
+          <span class="option-icon">🌱</span>
+          <span class="option-label">Baru mulai belajar dan ingin lebih baik</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option fade-up" onclick="selectOption('q1', this, 'naik-turun')">
+          <span class="option-icon">🌊</span>
+          <span class="option-label">Naik turun, susah konsisten</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option fade-up" onclick="selectOption('q1', this, 'cukup-baik')">
+          <span class="option-icon">☀️</span>
+          <span class="option-label">Sudah cukup rutin, ingin lebih istiqomah</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option fade-up" onclick="selectOption('q1', this, 'tingkatkan')">
+          <span class="option-icon">🚀</span>
+          <span class="option-label">Ingin meningkatkan kualitas ibadah secara keseluruhan</span>
+          <span class="option-check"></span>
+        </div>
+      </div>
+      <button class="btn-main" id="q1-next" disabled onclick="goTo(4)">Lanjut →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════
+       SCREEN Q2 — MOTIVASI
+  ══════════════════════════ -->
+  <div class="screen" id="s4">
+    <div class="quiz-wrap">
+      <p class="eyebrow fade-up">Pertanyaan 2 dari 4</p>
+      <p class="quiz-question fade-up">Apa yang paling sering menghalangimu untuk berbuat baik lebih banyak?</p>
+      <p class="quiz-hint fade-up">Jujur ya, tidak ada jawaban yang salah</p>
+      <div class="options" id="q2-options">
+        <div class="option fade-up" onclick="selectOption('q2', this, 'lupa')">
+          <span class="option-icon">😅</span>
+          <span class="option-label">Sering lupa atau tidak sadar ada kesempatan</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option fade-up" onclick="selectOption('q2', this, 'males')">
+          <span class="option-icon">😴</span>
+          <span class="option-label">Tahu mau ngapain, tapi malas melakukannya</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option fade-up" onclick="selectOption('q2', this, 'tidak-tahu')">
+          <span class="option-icon">🤷</span>
+          <span class="option-label">Tidak tahu amal apa yang bisa dilakukan sehari-hari</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option fade-up" onclick="selectOption('q2', this, 'sibuk')">
+          <span class="option-icon">⏳</span>
+          <span class="option-label">Kesibukan membuat tidak sempat merefleksikan diri</span>
+          <span class="option-check"></span>
+        </div>
+      </div>
+      <button class="btn-main" id="q2-next" disabled onclick="goTo(5)">Lanjut →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════
+       SCREEN Q3 — AMAL FAVORIT (MULTI SELECT)
+  ══════════════════════════ -->
+  <div class="screen" id="s5">
+    <div class="quiz-wrap">
+      <p class="eyebrow fade-up">Pertanyaan 3 dari 4</p>
+      <p class="quiz-question fade-up">Amal apa yang ingin kamu fokuskan?</p>
+      <p class="quiz-hint fade-up">Pilih sebanyak yang kamu mau — minimal 1</p>
+      <div class="options" id="q3-options" style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem;">
+        <div class="option option-grid fade-up" onclick="toggleMulti('q3', this, 'baca-quran')">
+          <span class="option-icon">📖</span>
+          <span class="option-label">Baca Qur'an</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option option-grid fade-up" onclick="toggleMulti('q3', this, 'dzikir')">
+          <span class="option-icon">📿</span>
+          <span class="option-label">Dzikir</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option option-grid fade-up" onclick="toggleMulti('q3', this, 'sholat-fardhu')">
+          <span class="option-icon">🕌</span>
+          <span class="option-label">Sholat Fardhu</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option option-grid fade-up" onclick="toggleMulti('q3', this, 'sholat-sunnah')">
+          <span class="option-icon">🌙</span>
+          <span class="option-label">Sholat Sunnah</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option option-grid fade-up" onclick="toggleMulti('q3', this, 'puasa')">
+          <span class="option-icon">🌅</span>
+          <span class="option-label">Puasa</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option option-grid fade-up" onclick="toggleMulti('q3', this, 'hafalan-quran')">
+          <span class="option-icon">🧠</span>
+          <span class="option-label">Hafalan Qur'an</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option option-grid fade-up" onclick="toggleMulti('q3', this, 'birrul-walidayn')">
+          <span class="option-icon">🤲</span>
+          <span class="option-label">Birrul Walidayn</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option option-grid fade-up" onclick="toggleMulti('q3', this, 'shodaqoh')">
+          <span class="option-icon">💛</span>
+          <span class="option-label">Shodaqoh</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option option-grid fade-up" style="grid-column: 1/-1;" onclick="toggleMulti('q3', this, 'tolabul-ilmi')">
+          <span class="option-icon">📚</span>
+          <span class="option-label">Tolabul Ilmi</span>
+          <span class="option-check"></span>
+        </div>
+      </div>
+      <p id="q3-count" style="text-align:center; font-size:0.75rem; color:var(--cream-muted); margin-top:0.8rem;">Belum ada yang dipilih</p>
+      <button class="btn-main" id="q3-next" disabled onclick="goTo(6)">Lanjut →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════
+       SCREEN Q4 — REMINDER
+  ══════════════════════════ -->
+  <div class="screen" id="s6">
+    <div class="quiz-wrap">
+      <p class="eyebrow fade-up">Pertanyaan 4 dari 5</p>
+      <p class="quiz-question fade-up">Kapan waktu terbaik untuk merefleksikan harimu?</p>
+      <p class="quiz-hint fade-up">Kami akan mengirim pengingat di waktu ini</p>
+      <div class="options" id="q4-options">
+        <div class="option fade-up" onclick="selectOption('q4', this, 'subuh')">
+          <span class="option-icon">🌅</span>
+          <span class="option-label">Setelah Subuh — niatkan hari dengan baik</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option fade-up" onclick="selectOption('q4', this, 'ashar')">
+          <span class="option-icon">🌤️</span>
+          <span class="option-label">Setelah Ashar — refleksi tengah hari</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option fade-up" onclick="selectOption('q4', this, 'isya')">
+          <span class="option-icon">🌙</span>
+          <span class="option-label">Setelah Isya — tutup hari dengan syukur</span>
+          <span class="option-check"></span>
+        </div>
+        <div class="option fade-up" onclick="selectOption('q4', this, 'tidur')">
+          <span class="option-icon">🌠</span>
+          <span class="option-label">Sebelum tidur — muhasabah malam hari</span>
+          <span class="option-check"></span>
+        </div>
+      </div>
+      <button class="btn-main" id="q4-next" disabled onclick="goTo(7)">Lanjut →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════
+       SCREEN Q5 — IDENTITAS DIRI
+  ══════════════════════════ -->
+  <div class="screen" id="s7">
+    <div class="quiz-wrap">
+      <p class="eyebrow fade-up">Pertanyaan 5 dari 5</p>
+      <p class="quiz-question fade-up">Aku ingin dikenal sebagai muslim yang…</p>
+      <p class="quiz-hint fade-up">Inilah identitas yang akan kamu bangun bersama Istiqoma</p>
+      <div class="options" id="q5-options">
+        <div class="option fade-up" onclick="selectOption('q5', this, 'dekat-allah')">
+          <span class="option-icon">🤲</span>
+          <div class="option-text-block">
+            <span class="option-label">Dekat dengan Allah</span>
+            <span class="option-sublabel">Ibadah terasa ringan, hati selalu terhubung</span>
+          </div>
+          <span class="option-check"></span>
+        </div>
+        <div class="option fade-up" onclick="selectOption('q5', this, 'bermanfaat')">
+          <span class="option-icon">🌟</span>
+          <div class="option-text-block">
+            <span class="option-label">Bermanfaat bagi sesama</span>
+            <span class="option-sublabel">Kehadiranku memberi dampak nyata bagi orang di sekitar</span>
+          </div>
+          <span class="option-check"></span>
+        </div>
+        <div class="option fade-up" onclick="selectOption('q5', this, 'berilmu')">
+          <span class="option-icon">📚</span>
+          <div class="option-text-block">
+            <span class="option-label">Berilmu dan bijaksana</span>
+            <span class="option-sublabel">Terus belajar dan mengamalkan ilmu agama dengan baik</span>
+          </div>
+          <span class="option-check"></span>
+        </div>
+        <div class="option fade-up" onclick="selectOption('q5', this, 'istiqomah')">
+          <span class="option-icon">🏔️</span>
+          <div class="option-text-block">
+            <span class="option-label">Istiqomah dan teguh pendirian</span>
+            <span class="option-sublabel">Konsisten dalam kebaikan meski tidak ada yang melihat</span>
+          </div>
+          <span class="option-check"></span>
+        </div>
+        <div class="option fade-up" onclick="selectOption('q5', this, 'keluarga')">
+          <span class="option-icon">🏡</span>
+          <div class="option-text-block">
+            <span class="option-label">Teladan dalam keluarga</span>
+            <span class="option-sublabel">Menjadi imam, ibu, atau anak yang membawa kebaikan</span>
+          </div>
+          <span class="option-check"></span>
+        </div>
+      </div>
+      <button class="btn-main" id="q5-next" disabled onclick="showResult()">Lihat Identitasku ✨</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════
+       SCREEN RESULT
+  ══════════════════════════ -->
+  <div class="screen" id="s-result">
+    <p class="eyebrow fade-up">Identitasmu telah terbentuk</p>
+    <div class="result-icon fade-up" id="result-icon">🌿</div>
+    <p class="result-name fade-up" id="result-name">Muslim yang Bertumbuh</p>
+    <div class="divider fade-up"></div>
+    <p class="result-desc fade-up" id="result-desc">Berdasarkan jawabanmu, kami akan menyesuaikan pengalamanmu di Istiqoma agar lebih personal dan bermakna.</p>
+    <div class="result-tags fade-up" id="result-tags"></div>
+    <p class="subtext fade-up" style="margin-top:1.5rem; font-size:0.8rem">
+      Identitas ini bukan label — ini adalah <em style="color:var(--gold)">siapa dirimu yang sedang kamu bangun,</em> satu amal baik dalam satu hari.
+    </p>
+    <button class="btn-main fade-up" onclick="alert('Selamat datang di Istiqoma! 🌿\nJourney-mu dimulai hari ini.')">Mulai Perjalananku 🌿</button>
+  </div>
+
+</div>
+
+<script>
+const TOTAL_SCREENS = 8; // s0..s6 + s-result
+const answers = {};
+
+const screenOrder = ['s0','s1','s2','s3','s4','s5','s6','s7','s-result'];
+let current = 0;
+
+function updateUI() {
+  const idx = current;
+  const total = screenOrder.length;
+  const pct = (idx / (total - 1)) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+
+  // Step label
+  const lbl = document.getElementById('step-label');
+  if (idx === 0) lbl.textContent = '';
+  else if (idx <= 2) lbl.textContent = 'Pengenalan';
+  else if (idx <= 6) lbl.textContent = `Quiz ${idx - 2} / 4`;
+  else lbl.textContent = 'Selesai';
+
+  // Back button
+  const back = document.getElementById('back-btn');
+  if (idx > 0 && idx < screenOrder.length - 1) {
+    back.classList.add('visible');
+  } else {
+    back.classList.remove('visible');
+  }
+}
+
+function goTo(targetIndex) {
+  const currentEl = document.getElementById(screenOrder[current]);
+  currentEl.classList.add('exit');
+  currentEl.classList.remove('active');
+
+  setTimeout(() => {
+    currentEl.classList.remove('exit');
+    current = targetIndex;
+    const nextEl = document.getElementById(screenOrder[current]);
+    // Re-trigger animations
+    nextEl.querySelectorAll('.fade-up').forEach(el => {
+      el.style.animation = 'none';
+      el.offsetHeight;
+      el.style.animation = '';
+    });
+    nextEl.classList.add('active');
+    updateUI();
+  }, 350);
+}
+
+function goBack() {
+  if (current > 0) goTo(current - 1);
+}
+
+function selectOption(qId, el, value) {
+  const container = document.getElementById(qId + '-options');
+  container.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[qId] = value;
+  const nextBtn = document.getElementById(qId + '-next');
+  if (nextBtn) nextBtn.disabled = false;
+}
+
+function toggleMulti(qId, el, value) {
+  if (!answers[qId]) answers[qId] = [];
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    answers[qId].push(value);
+  } else {
+    answers[qId] = answers[qId].filter(v => v !== value);
+  }
+  const count = answers[qId].length;
+  const countEl = document.getElementById(qId + '-count');
+  if (countEl) countEl.textContent = count === 0 ? 'Belum ada yang dipilih' : count + ' amal dipilih';
+  const nextBtn = document.getElementById(qId + '-next');
+  if (nextBtn) nextBtn.disabled = count === 0;
+}
+
+function showResult() {
+  let icon = '🌿'; let name = ''; let desc = ''; let tags = [];
+
+  const q1 = answers.q1 || '';
+  const q5 = answers.q5 || '';
+
+  // Identity from Q5 (Atomic Habits: identity-based change)
+  const identityMap = {
+    'dekat-allah':  { icon: '🤲', name: 'Muslim yang Dekat dengan Allah',   desc: 'Kamu merindukan hubungan yang tulus dengan Allah. Setiap amal yang kamu catat di Istiqoma adalah langkah nyata untuk mendekatkan diri kepada-Nya — satu kebaikan dalam satu waktu.', tags: ['Hamba yang Rindu', 'Hati yang Terhubung'] },
+    'bermanfaat':   { icon: '🌟', name: 'Muslim yang Bermanfaat',            desc: 'Kamu percaya bahwa sebaik-baik manusia adalah yang paling bermanfaat. Istiqoma akan membantumu melihat betapa banyak kebaikan yang sudah kamu tebarkan kepada orang di sekitarmu.', tags: ['Pemberi Manfaat', 'Hati yang Peduli'] },
+    'berilmu':      { icon: '📚', name: 'Muslim yang Berilmu',               desc: 'Kamu memahami bahwa ilmu adalah cahaya. Istiqoma akan menemanimu mencatat setiap langkah perjalanan belajar dan amalmu, karena ilmu tanpa amal bagaikan pohon tanpa buah.', tags: ['Pencari Ilmu', 'Amal & Hikmah'] },
+    'istiqomah':    { icon: '🏔️', name: 'Muslim yang Istiqomah',            desc: 'Istiqomah bukan tentang sempurna — tapi tentang tidak berhenti. Dengan Istiqoma, kamu akan melihat sendiri betapa konsistennya dirimu, bahkan di hari-hari yang terasa berat.', tags: ['Teguh Pendirian', 'Konsisten Tanpa Henti'] },
+    'keluarga':     { icon: '🏡', name: 'Teladan dalam Keluarga',            desc: 'Kebaikan terbesar dimulai dari rumah. Setiap amal yang kamu tanam hari ini adalah warisan yang akan dirasakan oleh orang-orang yang paling kamu cintai.', tags: ['Pemimpin Keluarga', 'Warisan Kebaikan'] },
+  };
+
+  const identity = identityMap[q5] || { icon: '🌿', name: 'Muslim yang Bertumbuh', desc: 'Perjalananmu dimulai hari ini. Setiap langkah kecil yang kamu ambil adalah bukti bahwa kamu sedang bertumbuh menjadi versi terbaik dirimu.', tags: ['Terus Bertumbuh'] };
+  icon = identity.icon; name = identity.name; desc = identity.desc; tags = [...identity.tags];
+
+  // Add context tag from Q1
+  if (q1 === 'pemula') tags.push('Langkah Pertama');
+  else if (q1 === 'naik-turun') tags.push('Pejuang Konsistensi');
+  else if (q1 === 'cukup-baik') tags.push('Terus Meningkat');
+  else if (q1 === 'tingkatkan') tags.push('Pencari Keutamaan');
+
+  document.getElementById('result-icon').textContent = icon;
+  document.getElementById('result-name').textContent = name;
+  document.getElementById('result-desc').textContent = desc;
+
+  const tagContainer = document.getElementById('result-tags');
+  tagContainer.innerHTML = tags.map(t => `<span class="tag">${t}</span>`).join('');
+
+  goTo(7);
+}
+
+// Swipe
+let startX = 0;
+document.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const diff = startX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 70) {
+    if (diff < 0 && current > 0) goBack();
+  }
+});
+
+updateUI();
+</script>
+</body>
+</html>

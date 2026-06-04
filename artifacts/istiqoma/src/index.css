@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Amiri:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap');
+
+@font-face {
+  font-family: 'Alhabsyi';
+  src: url('/fonts/Alhabsyi.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+:root {
+  /* Light mode - Islamic Art Inspired Palette */
+  /* Emerald Green Primary */
+  --primary: 158 64% 42%; /* Slightly darker emerald for light mode */
+  --primary-foreground: 0 0% 100%;
+  
+  /* Light Backgrounds */
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  
+  /* Card Surface */
+  --card: 210 40% 98%;
+  --card-foreground: 222 47% 11%;
+  --card-border: 214 32% 91%;
+
+  /* UI Elements */
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+  
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  
+  --accent: 158 64% 42%;
+  --accent-foreground: 0 0% 100%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 158 64% 42%;
+  
+  --radius: 1rem;
+
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Quran Arabic font. Set by QuranFontProvider; defaults to Uthmani-style. */
+  --font-quran-arabic: 'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', serif;
+  /* Quran Arabic verse type scale. Defaults match the previous hard-coded
+     `text-2xl leading-relaxed` rendering so existing readers see no shift
+     until they pick a different size in the typography picker. */
+  --quran-arabic-size: 1.5rem;
+  --quran-arabic-leading: 1.9;
+}
+
+.dark {
+  /* Dark mode - Islamic Art Inspired Palette */
+  --primary: 158 64% 52%; /* #34D399 - Emerald 400ish */
+  --primary-foreground: 222 47% 11%; /* Dark text on emerald for better contrast */
+  
+  /* Deep Night Blue Backgrounds */
+  --background: 222 47% 11%; /* #0F172A */
+  --foreground: 210 40% 98%; /* #F8FAFC */
+  
+  /* Card Surface */
+  --card: 217 33% 17%; /* #1E293B */
+  --card-foreground: 210 40% 98%;
+  --card-border: 217 33% 25%;
+
+  /* UI Elements */
+  --popover: 222 47% 11%;
+  --popover-foreground: 210 40% 98%;
+  
+  --secondary: 217 33% 17%;
+  --secondary-foreground: 210 40% 98%;
+  
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  
+  --accent: 158 64% 52%;
+  --accent-foreground: 222 47% 11%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 217 33% 25%;
+  --input: 217 33% 25%;
+  --ring: 158 64% 52%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary/30;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-bold tracking-tight;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card backdrop-blur-xl border border-border rounded-2xl;
+  }
+  
+  .glass-input {
+    @apply bg-muted border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 rounded-xl font-semibold px-6 py-3;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-foreground border border-border hover:bg-muted hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 rounded-xl font-semibold px-6 py-3;
+  }
+}
+
+/* Product-tour spotlight: highlighted elements must sit above the SpotlightOverlay
+   (z-10) so that both real browser clicks and Playwright hit-tests reach the button
+   rather than the overlay div that covers the same coordinates. */
+[data-tour-highlight] {
+  position: relative;
+  z-index: 20;
+}
+
+/* ── Safe areas (Capacitor / PWA on phones with notches) ── */
+.safe-top    { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-left   { padding-left: env(safe-area-inset-left); }
+.safe-right  { padding-right: env(safe-area-inset-right); }
+
+/* Native shell body: honour the full display including notch area */
+body.native-safe-area {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40;
+}

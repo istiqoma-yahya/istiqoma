@@ -1,0 +1,2122 @@
+{
+  "app": {
+    "name": "Istiqoma",
+    "tagline": "Dibina untuk Ummah"
+  },
+  "quranMenu": {
+    "title": "Al-Quran",
+    "continueReading": "Sambung Membaca",
+    "startReading": "Mula Membaca",
+    "bookmarks": "Tanda Buku",
+    "noBookmarks": "Tiada tanda buku lagi",
+    "noBookmarksHint": "Ketik ikon tanda buku di sebelah ayat untuk menyimpannya di sini.",
+    "searchSurah": "Cari surah mengikut nama atau nombor",
+    "verses": "ayat",
+    "verseShort": "Ayat",
+    "bismillah": "Dengan nama Allah Yang Maha Pemurah, Maha Mengasihani",
+    "bookmarkAdded": "Tanda buku disimpan",
+    "bookmarkRemoved": "Tanda buku dipadam",
+    "nowPlaying": "Sedang Dimainkan",
+    "reciter": "Qari",
+    "close": "Tutup",
+    "memorize": "Hafazan",
+    "memorizationMode": "Mod Hafazan",
+    "exitMemorization": "Keluar mod hafazan",
+    "displayFull": "Tunjuk penuh",
+    "displayFirstLast": "Perkataan awal & akhir",
+    "displayHidden": "Sembunyi",
+    "applyToAll": "Guna pada semua ayat",
+    "tapToReveal": "Ketik untuk tunjuk ayat",
+    "markMemorized": "Tandakan dah hafal",
+    "unmarkMemorized": "Buang tanda hafal",
+    "memorizationSaveFailed": "Gagal menyimpan hafalan. Sila cuba lagi.",
+    "memorized": "Sudah hafal",
+    "record": "Rakam",
+    "stopRecording": "Berhenti rakam",
+    "playRecording": "Main rakaman",
+    "deleteRecording": "Padam rakaman",
+    "voicePlayerSubtitle": "Rakaman anda",
+    "voicePlayerPlay": "Main rakaman",
+    "voicePlayerPause": "Jeda rakaman",
+    "voicePlayerClose": "Tutup pemain rakaman",
+    "voicePlayerSeek": "Kemajuan rakaman",
+    "micPermissionDenied": "Kebenaran mikrofon ditolak",
+    "memorizationProgress": "Kemajuan Hafazan",
+    "totalMemorized": "Jumlah dihafaz",
+    "surahsStarted": "{{started}} daripada {{total}} surah dimulakan",
+    "autoAdvance": "Main seterusnya",
+    "autoAdvanceHint": "Main ayat seterusnya secara automatik",
+    "continuousPlay": "Main berterusan",
+    "continuousPlayHint": "Teruskan ke surah seterusnya secara automatik"
+  },
+  "nav": {
+    "home": "Utama",
+    "progress": "Progres",
+    "dzikir": "Zikir",
+    "qibla": "Solat",
+    "targets": "Sasaran",
+    "quran": "Quran",
+    "quiz": "Kuiz Islam"
+  },
+  "landing": {
+    "joinPill": "Sertai 50+ Muslim yang lain",
+    "editorial": {
+      "premiumLabel": "Penjejak Ibadah Spiritual Premium",
+      "statsUsersLabel": "Pengguna Aktif",
+      "statsDeedsLabel": "Amalan Direkod",
+      "statsStreakLabel": "Rekod Streak Hari",
+      "quoteTranslation": "Maka tetaplah kamu di jalan yang benar sebagaimana yang diperintahkan kepadamu dan juga orang-orang yang telah bertaubat bersamamu.",
+      "philosophyTitle": "Bukan Sekadar Sasaran, Tetapi Ketaatan.",
+      "philosophyDesc": "Aplikasi produktiviti biasa tidak memahami esensi ibadah. Istiqoma dibina khusus dengan kehalusan visual dan struktur yang menghormati perjalanan spiritual seorang Muslim.",
+      "philosophyPoint1": "Jejak Solat Fardhu & Sunat dengan anggun",
+      "philosophyPoint2": "Jurnal tilawah Al-Qur'an harian",
+      "philosophyPoint3": "Puasa sunat dan catatan kebaikan",
+      "philosophyPoint4": "Privasi terjaga, tanpa sebarang iklan",
+      "rhythmTitle": "Irama Kebaikan Harian",
+      "rhythmSubtitle": "Harmoni ibadah dari fajar hingga malam.",
+      "rhythmSubuh": "Subuh",
+      "rhythmSubuhTitle": "Permulaan Suci",
+      "rhythmSubuhDesc": "Solat Subuh & Zikir Pagi",
+      "rhythmDhuha": "Dhuha",
+      "rhythmDhuhaTitle": "Cahaya Rezeki",
+      "rhythmDhuhaDesc": "Solat Dhuha & Tilawah",
+      "rhythmSiang": "Tengah Hari",
+      "rhythmSiangTitle": "Rehat Bermakna",
+      "rhythmSiangDesc": "Zohor & Sedekah",
+      "rhythmMalam": "Malam",
+      "rhythmMalamTitle": "Muhasabah",
+      "rhythmMalamDesc": "Isyak, Witir & Jurnal",
+      "hadithArabic": "إِنَّ أَحَبَّ الأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ",
+      "hadithTranslation": "Amalan yang paling dicintai Allah ialah yang dilakukan secara berterusan walaupun sedikit.",
+      "hadithRef": "Sahih al-Bukhari & Muslim"
+    },
+    "cta": {
+      "title": "Mulakan Perjalanan Istiqomah Anda",
+      "subtitle": "Percuma untuk bermula. Direka untuk membantu anda konsisten.",
+      "button": "Daftar dengan Google",
+      "note": "Atau log masuk dengan nama pengguna & PIN"
+    },
+    "title": "Bina Amalan Harian",
+    "titleLine2": "Yang Konsisten",
+    "subtitle": "Istiqoma membantu anda membina tabiat konsisten dalam berdoa, beramal, dan muhasabah diri.",
+    "startTracking": "Mulakan Perjalanan Anda",
+    "login": "Log Masuk",
+    "usernameLogin": "Log masuk dengan nama pengguna",
+    "authChooser": {
+      "title": "Bagaimana anda ingin meneruskan?",
+      "description": "Pilih kaedah log masuk untuk mula menjejaki amalan anda. Kedua-duanya sesuai untuk pengguna baharu dan sedia ada.",
+      "continueGoogle": "Teruskan dengan Google",
+      "continueUsername": "Teruskan dengan Nama Pengguna & PIN"
+    },
+    "tour": {
+      "cta": "Lihat aksinya",
+      "subtitle": "Ikuti tur interaktif 2 minit"
+    },
+    "featuresLabel": "Ciri-ciri",
+    "featuresTitle": "Teman Rohani Anda",
+    "featuresSubtitle": "Set alat lengkap yang direka untuk membantu anda mengimbangi kehidupan duniawi dengan tanggungjawab rohani.",
+    "features": {
+      "dzikirTitle": "Kaunter Zikir",
+      "dzikirDesc": "Tasbih digital dengan maklum balas haptic. Jejaki zikir harian anda dengan mudah dan selesa.",
+      "quranTitle": "Perjalanan Quran",
+      "quranDesc": "Baca atau dengar bacaan Al-Quran daripada pelbagai Qari. Hafal Al-Quran dengan kaedah rakaman suara.",
+      "analyticsTitle": "Analisis Amal",
+      "analyticsDesc": "Visualisasikan pertumbuhan rohani anda. Kenalpasti bidang untuk penambahbaikan dengan pandangan berasaskan data.",
+      "remindersTitle": "Peringatan Pintar",
+      "remindersDesc": "Jangan terlepas solat. Dapatkan pemberitahuan tepat pada masanya untuk solat dan matlamat rohani anda.",
+      "targetsTitle": "Sasaran Rohani",
+      "targetsDesc": "Tetapkan sasaran bermakna untuk ibadah. Jejaki konsistensi anda dan bina tabiat yang berkekalan.",
+      "communityTitle": "Cabaran Komuniti",
+      "communityDesc": "Sertai cabaran global untuk puasa, zikir, atau sedekah. Berlumba dalam kebaikan (Khair).",
+      "badgesTitle": "Dapatkan Penghargaan",
+      "badgesDesc": "Raih mata, streak, lencana, dan ranking melalui pencapaian rohani untuk mendorong anda terus beristiqamah.",
+      "privacyTitle": "Privasi Terjamin",
+      "privacyDesc": "Amal anda hanya antara anda dan Allah. Kami tidak pernah berkongsi perjalanan rohani anda dengan sesiapa."
+    },
+    "personalize": {
+      "title": "Peribadikan sasaran ibadah",
+      "subtitle": "Sesuaikan papan pemuka untuk fokus pada tabiat yang ingin anda bina sekarang. Mulakan dengan yang wajib (Fardhu), kemudian tambah yang sunat secara beransur-ansur seiring pertumbuhan rohani anda.",
+      "cardTitle": "Peribadikan Matlamat",
+      "quranGoal": "Matlamat Quran Harian",
+      "quranPages": "5 Halaman",
+      "tahajjudTitle": "Peringatan Tahajjud",
+      "tahajjudDesc": "Sepertiga malam terakhir",
+      "fastingTitle": "Puasa Isnin/Khamis",
+      "fastingDesc": "Tabiat sunat",
+      "benefit1": "Peringatan pintar berdasarkan lokasi dan kalendar anda.",
+      "benefit2": "Mengutamakan privasi. Amal anda hanya antara anda dan Allah.",
+      "benefit3": "Boleh offline untuk masa anda memutuskan sambungan untuk menyambung semula."
+    },
+    "featureSections": {
+      "goals": {
+        "eyebrow": "Matlamat Rohani",
+        "title": "Peribadikan sasaran ibadah",
+        "subtitle": "Sesuaikan papan pemuka untuk fokus pada tabiat yang ingin anda bina sekarang. Mulakan dengan yang wajib (Fardhu), kemudian tambah yang sunat secara beransur-ansur seiring pertumbuhan rohani anda.",
+        "benefit1": "Peringatan pintar berdasarkan lokasi dan kalendar anda.",
+        "benefit2": "Mengutamakan privasi. Amal anda hanya antara anda dan Allah."
+      },
+      "dzikir": {
+        "eyebrow": "Kaunter Zikir",
+        "title": "Tasbih yang sentiasa bersamamu",
+        "subtitle": "Kira setiap zikir dengan kaunter yang tenang dan bebas gangguan — di rumah, dalam perjalanan, atau selepas setiap solat.",
+        "benefit1": "Ketuk untuk mengira dengan maklum balas haptic dan sasaran setiap jenis.",
+        "benefit2": "Simpan sesi sebagai amalan supaya setiap zikir menambah streak anda.",
+        "illustration": {
+          "label": "Zikir Hari Ini",
+          "type": "Subhanallah",
+          "tap": "Ketuk untuk mengira"
+        }
+      },
+      "quran": {
+        "eyebrow": "Pembaca Quran",
+        "title": "Baca, dengar, dan hafal Al-Qur'an",
+        "subtitle": "Tipografi Arab yang indah, pelbagai pilihan qari, dan mod hafazan yang mendedahkan setiap ayat mengikut rentakmu.",
+        "benefit1": "Tanda ayat dan sambung tepat di mana anda berhenti.",
+        "benefit2": "Mod hafazan dengan main balik rakaman terbina dalam.",
+        "illustration": {
+          "surah": "Surah Yusuf",
+          "verseRef": "Ayat 87",
+          "translation": "“…dan jangan berputus asa daripada rahmat Allah.”",
+          "progress": "Terakhir dibaca · 2 minit lalu"
+        }
+      },
+      "reminders": {
+        "eyebrow": "Peringatan Pintar",
+        "title": "Jangan terlepas saat yang bermakna",
+        "subtitle": "Peringatan solat berasaskan lokasi, ajakan Tahajjud, dan peringatan sasaran yang menghormati harimu.",
+        "benefit1": "Waktu solat tepat mengikut lokasi anda.",
+        "benefit2": "Peringatan peribadi untuk tabiat sunatmu.",
+        "illustration": {
+          "label": "Peringatan akan datang",
+          "fajrTitle": "Solat Subuh",
+          "fajrDesc": "Bermula 12 minit lagi",
+          "tahajjudTitle": "Tahajjud",
+          "tahajjudDesc": "Sepertiga malam terakhir",
+          "quranTitle": "Bacaan Qur'an",
+          "quranDesc": "Sasaran harian: 5 halaman"
+        }
+      },
+      "analytics": {
+        "eyebrow": "Analisis Amal",
+        "title": "Lihat pertumbuhan rohanimu dengan jelas",
+        "subtitle": "Carta mesra dan sejarah streak yang menunjukkan di mana anda konsisten dan apa yang boleh ditingkatkan.",
+        "benefit1": "Ringkasan mingguan dan bulanan mengikut kategori.",
+        "benefit2": "Sejarah streak yang meraikan konsistensi, bukan kesempurnaan.",
+        "illustration": {
+          "label": "Minggu ini",
+          "deeds": "amal",
+          "streak": "Streak semasa",
+          "days": "hari",
+          "trendLabel": "Tren 30 hari",
+          "categoriesTitle": "Kategori teratas",
+          "category_sholat": "Solat",
+          "category_dzikir": "Zikir",
+          "category_quran": "Qur'an",
+          "dayShort_0": "A",
+          "dayShort_1": "I",
+          "dayShort_2": "S",
+          "dayShort_3": "R",
+          "dayShort_4": "K",
+          "dayShort_5": "J",
+          "dayShort_6": "S"
+        }
+      },
+      "community": {
+        "eyebrow": "Cabaran Komuniti",
+        "title": "Berlumba dalam kebaikan, bersama-sama",
+        "subtitle": "Sertai papan peringkat yang menyenangkan dan cabaran global yang menjadikan ibadah sebagai perjalanan bersama.",
+        "benefit1": "Papan peringkat bermusim untuk zikir, puasa, dan sedekah.",
+        "benefit2": "Saling memberi semangat tanpa mendedahkan butiran peribadi.",
+        "illustration": {
+          "label": "Papan peringkat mingguan",
+          "you": "Anda",
+          "caption": "Top 3 minggu ini · mata reset setiap Isnin"
+        }
+      },
+      "badges": {
+        "eyebrow": "Ganjaran & Lencana",
+        "title": "Kemenangan kecil yang mengekalkan semangat",
+        "subtitle": "Raih mata, pencapaian streak, dan lencana indah seiring tabiatmu berkembang, insya Allah.",
+        "benefit1": "Buka lencana untuk pencapaian solat, Qur'an, dan zikir.",
+        "benefit2": "Gunakan mata untuk melindungi streak dengan streak freeze.",
+        "illustration": {
+          "label": "Pencapaian terkini",
+          "badge1": "Subuh 30 Hari",
+          "badge2": "Pembaca Qur'an",
+          "badge3": "Juara Sedekah",
+          "progressTitle": "Lencana seterusnya"
+        }
+      },
+      "privacy": {
+        "eyebrow": "Privasi Terjamin",
+        "title": "Ibadahmu adalah milikmu",
+        "subtitle": "Istiqoma dibina supaya amalmu kekal antara kamu dan Allah — tiada piksel penjejak, dan data anda tidak pernah dijual.",
+        "benefit1": "Data ibadah anda tidak pernah dijual atau dikongsi dengan pihak ketiga.",
+        "benefit2": "Eksport atau padam datamu bila-bila masa, tanpa sebarang soalan.",
+        "illustration": {
+          "label": "Datamu, peraturanmu",
+          "headline": "Antara kamu dan Allah",
+          "point1": "Disulitkan end-to-end semasa dihantar",
+          "point2": "Tidak pernah dijual atau dikongsi",
+          "point3": "Padam akaunmu bila-bila masa"
+        }
+      }
+    },
+    "testimonial": {
+      "quote": "Istiqoma tidak hanya membantu saya konsisten beribadah kepada Allah setiap hari, ia juga memberikan representasi visual hubungan saya dengan iman saya.",
+      "name": "Yahya Pramudya Ekananta",
+      "role": "Muslim dari Indonesia"
+    },
+    "downloadApp": "Muat Turun App",
+    "downloadAppDesc": "Pasang Istiqoma di peranti anda untuk akses pantas",
+    "heroCard": {
+      "todaysProgress": "Progres Hari Ini",
+      "muharramDate": "14 Muharram",
+      "fajrPrayer": "Solat Subuh",
+      "completedAt": "Selesai pukul 5:45 pagi",
+      "readSurahKahf": "Baca Surah Al-Kahf",
+      "target20mins": "Sasaran: 20 minit",
+      "giveSadaqah": "Beri Sedekah",
+      "dailyGoal": "Matlamat harian",
+      "currentStreak": "Streak Semasa",
+      "days": "Hari",
+      "pts": "mata"
+    }
+  },
+  "dashboard": {
+    "greeting": "Assalaamu'alaikum",
+    "subtitle": "Apa yang telah anda lakukan hari ini?",
+    "recordDeed": "Rekod Kebaikan",
+    "recentActivity": "Aktiviti Terkini",
+    "others": "Rakan Kongsi",
+    "noDeeds": "Tiada amal yang direkod lagi",
+    "startRecording": "Mula merekod amal baik anda untuk melihat progres anda dari semasa ke semasa.",
+    "addDeed": "Tambah amal pertama anda",
+    "activeTargets": "Sasaran Aktif",
+    "viewAll": "Lihat Semua",
+    "noTargetsYet": "Tetapkan matlamat rohani untuk menjejaki progres anda secara automatik",
+    "setupTargets": "Tetapkan Sasaran"
+  },
+  "purposeQuotes": {
+    "dekat-allah": [
+      "\"Amalan yang paling disukai Allah adalah yang dilakukan secara berterusan, walaupun sedikit.\" — Sahih al-Bukhari",
+      "\"Sesiapa yang mendekatkan diri kepada-Ku sejengkal, Aku mendekatkan diri kepadanya sehasta.\" — Hadis Qudsi",
+      "\"Dan Dia bersama kamu di mana sahaja kamu berada.\" — QS. Al-Hadid: 4",
+      "\"Sesungguhnya bersama kesusahan ada kemudahan.\" — QS. Al-Insyirah: 6",
+      "\"Allah tidak membebani seseorang melainkan sesuai dengan kemampuannya.\" — QS. Al-Baqarah: 286"
+    ],
+    "bermanfaat": [
+      "\"Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia lain.\" — Al-Mu'jam al-Awsat",
+      "\"Sedekah tidak mengurangi harta, dan memaafkan hanya menambah kemuliaan.\" — Sahih Muslim",
+      "\"Ucapan yang baik adalah sedekah.\" — Sahih al-Bukhari",
+      "\"Lakukan kebaikan walaupun kecil — kerana anda tidak tahu amalan mana yang akan membawa anda ke syurga.\" — Sunan Ibn Majah",
+      "\"Sesiapa yang meringankan kesusahan seorang mukmin di dunia, Allah akan meringankan kesusahannya di hari kiamat.\" — Sahih Muslim"
+    ],
+    "berilmu": [
+      "\"Menuntut ilmu adalah kewajipan ke atas setiap Muslim.\" — Sunan Ibn Majah",
+      "\"Allah meninggikan darjat orang-orang yang beriman dan orang-orang yang diberi ilmu beberapa darjat.\" — QS. Al-Mujadilah: 11",
+      "\"Para ulama adalah pewaris para nabi.\" — Sunan Abu Dawud",
+      "\"Katakanlah: Ya Tuhanku, tambahkanlah ilmu kepadaku.\" — QS. Taha: 114",
+      "\"Sesiapa yang menempuh jalan untuk mencari ilmu, Allah akan mudahkan baginya jalan ke syurga.\" — Sahih Muslim"
+    ],
+    "istiqomah": [
+      "\"Sesungguhnya orang-orang yang berkata 'Tuhan kami adalah Allah' kemudian mereka istiqomah, malaikat akan turun kepada mereka.\" — QS. Fushshilat: 30",
+      "\"Amalan yang paling disukai Allah adalah yang dilakukan secara berterusan, walaupun sedikit.\" — Sahih al-Bukhari",
+      "\"Tetaplah istiqomah sebagaimana engkau diperintahkan.\" — QS. Hud: 112",
+      "\"Sesiapa yang bersabar, Allah akan menjadikannya sabar. Tiada pemberian yang lebih baik daripada kesabaran.\" — Sahih al-Bukhari",
+      "\"Amalan yang paling disukai Allah adalah yang dikerjakan secara berterusan walaupun sedikit.\" — Sahih Muslim"
+    ],
+    "keluarga": [
+      "\"Sebaik-baik kamu adalah yang terbaik terhadap keluarganya.\" — Sunan al-Tirmizi",
+      "\"Setiap kamu adalah pemimpin, dan setiap pemimpin bertanggungjawab terhadap yang dipimpinnya.\" — Sahih al-Bukhari",
+      "\"Keluargamu mempunyai hak ke atasmu.\" — Sahih al-Bukhari",
+      "\"Sesiapa yang beriman kepada Allah dan hari akhirat, hendaklah ia memuliakan jirannya.\" — Sahih al-Bukhari",
+      "\"Kasih sayang seorang bapa kepada anaknya lebih baik daripada sedekah satu sa'.\" — Sunan al-Tirmizi"
+    ]
+  },
+  "stats": {
+    "goodDeeds": "Amal Baik",
+    "points": "mata",
+    "totalPoints": "Jumlah Mata"
+  },
+  "deed": {
+    "addDeed": "Tambah Amal",
+    "editDeed": "Edit Amal",
+    "deleteDeed": "Padam Amal",
+    "description": "Penerangan",
+    "category": "Kategori",
+    "points": "Mata",
+    "dateTime": "Tarikh & Masa",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "deleteConfirm": "Adakah anda pasti?",
+    "deleteWarning": "Tindakan ini tidak boleh dibatalkan. Ini akan memadam amal ini secara kekal daripada sejarah anda."
+  },
+  "createDeed": {
+    "title": "Rekod Amal Baru",
+    "subtitle": "Jejaki amal baik anda untuk memantau progres rohani anda.",
+    "descriptionLabel": "Penerangan",
+    "descriptionPlaceholder": "contoh: Membantu jiran, Baca Quran...",
+    "categoryLabel": "Kategori",
+    "categoryPlaceholder": "Pilih kategori",
+    "typeLabel": "Jenis",
+    "typePlaceholder": "Pilih jenis",
+    "pointsLabel": "Jumlah",
+    "dateTimeSection": "Tarikh & Masa (Pilihan)",
+    "dateLabel": "Tarikh",
+    "timeLabel": "Masa",
+    "saving": "Menyimpan...",
+    "saveDeed": "Simpan Amal"
+  },
+  "editDeed": {
+    "title": "Edit Amal",
+    "descriptionLabel": "Penerangan",
+    "descriptionPlaceholder": "contoh: Membantu jiran, Baca Quran...",
+    "categoryLabel": "Kategori",
+    "categoryPlaceholder": "Pilih kategori",
+    "typeLabel": "Jenis",
+    "typePlaceholder": "Pilih jenis",
+    "pointsLabel": "Jumlah",
+    "dateTimeSection": "Tarikh & Masa",
+    "dateLabel": "Tarikh",
+    "timeLabel": "Masa",
+    "saving": "Menyimpan...",
+    "confirmChanges": "Sahkan Perubahan",
+    "delete": "Padam",
+    "deleteConfirm": "Padam amal ini?",
+    "deleteWarning": "Tindakan ini tidak boleh dibatalkan. Ini akan memadam amal ini secara kekal daripada sejarah anda.",
+    "deleting": "Memadam..."
+  },
+  "categories": {
+    "title": "Urus Kategori",
+    "addCategory": "Tambah Kategori",
+    "categoryName": "Nama Kategori",
+    "defaultCategories": "Kategori Lalai",
+    "customCategories": "Kategori Tersuai",
+    "noCustom": "Tiada kategori tersuai lagi",
+    "deleteConfirm": "Padam kategori ini?",
+    "protectedCategory": "Kategori ini dilindungi dan tidak boleh diedit atau dipadam",
+    "created": "Kategori Dicipta",
+    "createdDesc": "Kategori anda berjaya dicipta.",
+    "deleted": "Kategori Dipadam",
+    "deletedDesc": "Kategori telah dipadam.",
+    "updated": "Kategori Dikemas Kini",
+    "updatedDesc": "Kategori berjaya dikemas kini."
+  },
+  "categoryNames": {
+    "Dzikir": "Zikir",
+    "Sholat Fardhu": "Solat Fardhu",
+    "Sholat Sunnah": "Solat Sunat",
+    "Puasa": "Puasa",
+    "Fasting": "Puasa",
+    "Fasting Fardhu": "Puasa Fardhu",
+    "Fasting Sunnah": "Puasa Sunat",
+    "Baca Quran": "Baca Quran",
+    "Hafalan Quran": "Hafazan Qur'an",
+    "Shodaqoh": "Sedekah",
+    "Birrul Walidayn": "Bakti kepada Ibu Bapa",
+    "Tolabul Ilmi": "Menuntut Ilmu"
+  },
+  "dzikir": {
+    "title": "Kaunter Zikir",
+    "counter": "Kaunter",
+    "reset": "Set Semula",
+    "save": "Simpan",
+    "target": "Sasaran",
+    "completed": "Selesai",
+    "dzikirDesc": "Ketik kaunter untuk merekod zikir anda. Setiap ketikan bersamaan dengan 1 mata.",
+    "tapToCount": "Ketik untuk mengira",
+    "dzikirReminder": "SubhanAllah, Alhamdulillah, Allahu Akbar - Ingatlah Allah sentiasa.",
+    "nothingToSave": "Tiada apa untuk disimpan",
+    "tapCounterFirst": "Ketik kaunter untuk menambah zikir dahulu.",
+    "dzikirSaved": "Zikir disimpan!",
+    "dzikirSavedDesc": "{{count}} zikir dikira dan disimpan sebagai {{count}} mata.",
+    "dzikirTypeSavedDesc": "{{count}} {{type}} dikira dan disimpan sebagai {{count}} mata.",
+    "failedToSave": "Gagal menyimpan",
+    "tryAgain": "Sila cuba lagi.",
+    "dzikirDeedDesc": "Zikir - {{count}} kiraan",
+    "dzikirTypeDeedDesc": "{{type}} - {{count}} kiraan",
+    "types": {
+      "subhanallah": "Subhanallah",
+      "alhamdulillah": "Alhamdulillah",
+      "allahuakbar": "Allahu Akbar",
+      "lailahaillallah": "La ilaha illallah",
+      "istighfar": "Istighfar",
+      "any": "Semua Jenis"
+    },
+    "selectType": "Pilih Jenis Zikir",
+    "selectUnit": "Pilih Unit",
+    "anyType": "Semua (semua jenis dikira)",
+    "typeRequired": "Sila pilih jenis zikir",
+    "builtInTypes": "Terbina dalam",
+    "customTypes": "Jenis Tersuai Saya",
+    "addCustomType": "Tambah Jenis Tersuai",
+    "customTypePlaceholder": "cth. Selawat, Hauqalah...",
+    "manageCustomTypes": "Urus Jenis Tersuai",
+    "customTypeAdded": "Jenis tersuai ditambah",
+    "customTypeDeleted": "Jenis tersuai dibuang",
+    "customTypeRenamed": "Jenis tersuai diubah nama",
+    "renameCustomType": "Ubah Nama Jenis Tersuai",
+    "renameHistoryNote": "Nota: Mengubah nama jenis ini tidak akan mengemas kini rekod amalan yang lalu. Amalan sejarah masih akan menunjukkan nama lama.",
+    "noCustomTypes": "Tiada jenis tersuai lagi",
+    "units": {
+      "times": "Kiraan"
+    }
+  },
+  "qibla": {
+    "title": "Kiblat & Waktu Solat",
+    "findQibla": "Cari Arah Kiblat",
+    "enableLocation": "Aktifkan Lokasi",
+    "locationDesc": "Untuk mencari arah ke Mekah, kami memerlukan lokasi anda. Ketik butang di bawah dan benarkan akses lokasi apabila diminta.",
+    "gettingLocation": "Mendapatkan lokasi anda...",
+    "allowLocation": "Sila benarkan akses lokasi apabila diminta oleh pelayar anda.",
+    "locationRequired": "Lokasi Diperlukan",
+    "tryAgain": "Cuba Lagi",
+    "qiblaDirection": "Arah Kiblat",
+    "distanceToKaaba": "Jarak ke Kaabah",
+    "yourLocation": "Lokasi Anda",
+    "locatingPlace": "Mencari lokasi…",
+    "enableCompass": "Aktifkan Kompas Langsung",
+    "tapToActivate": "Ketuk untuk mengaktifkan kompas",
+    "compassActive": "Kompas Aktif",
+    "howToUse": "Cara Menggunakan",
+    "rotateDevice": "Pusingkan peranti anda untuk mengaktifkan kompas (mudah alih sahaja)",
+    "step1": "Pegang peranti anda secara rata dan mendatar",
+    "step2": "Anak panah hijau menunjuk ke arah Kaabah di Mekah",
+    "step3": "Pusingkan badan anda sehingga menghadap arah anak panah",
+    "prayerTimes": "Waktu Solat",
+    "nextIn": "Seterusnya dalam",
+    "now": "Sekarang",
+    "next": "Seterusnya",
+    "prayers": {
+      "fajr": "Subuh",
+      "dhuhr": "Zohor",
+      "asr": "Asar",
+      "maghrib": "Maghrib",
+      "isha": "Isyak"
+    },
+    "errors": {
+      "notSupported": "Geolokasi tidak disokong oleh pelayar anda",
+      "unableToRetrieve": "Tidak dapat mendapatkan lokasi anda",
+      "permissionDenied": "Kebenaran lokasi ditolak. Sila aktifkan dalam tetapan pelayar.",
+      "unavailable": "Maklumat lokasi tidak tersedia.",
+      "timeout": "Permintaan lokasi tamat masa."
+    },
+    "changeLocation": "Tukar lokasi",
+    "setLocationManually": "Tetapkan lokasi secara manual",
+    "useAutomaticLocation": "Guna lokasi automatik",
+    "manualBadge": "Manual",
+    "locationSearch": {
+      "title": "Tetapkan lokasi anda",
+      "description": "Cari bandar atau tempat untuk menggantikan lokasi yang dikesan.",
+      "placeholder": "Cari bandar atau tempat…",
+      "hint": "Taip sekurang-kurangnya dua aksara untuk mencari.",
+      "searching": "Mencari…",
+      "empty": "Tiada tempat yang sepadan dijumpai.",
+      "error": "Gagal mencari tempat. Sila cuba lagi."
+    }
+  },
+  "sholatPage": {
+    "title": "Solat",
+    "currentPrayer": "Solat sekarang",
+    "nextPrayer": "Seterusnya",
+    "in": "dalam",
+    "qiblaFinder": "Arah Kiblat",
+    "qiblaFinderDesc": "Buka kompas",
+    "markAllDone": "Tanda semua sebagai selesai",
+    "allDone": "Semua solat hari ini selesai",
+    "doneLabel": "Selesai",
+    "noLocationTitle": "Aktifkan Lokasi",
+    "noLocationDesc": "Untuk memaparkan waktu solat, kami memerlukan lokasi anda.",
+    "loading": "Memuatkan waktu solat...",
+    "imsak": "Imsak",
+    "sunrise": "Syuruk",
+    "dhuha": "Dhuha",
+    "tahajjud": "Tahajud"
+  },
+  "progress": {
+    "title": "Kemajuan",
+    "spiritualProgress": "Progres Spiritual",
+    "weeklyProgress": "Progres Mingguan",
+    "monthlyStats": "Statistik Bulanan",
+    "totalDeeds": "Jumlah Amal",
+    "deeds": "amal",
+    "times": "kali",
+    "deedsOverTime": "Amal Mengikut Masa",
+    "dateRange": "Julat Tarikh",
+    "lastWeek": "Minggu Lepas",
+    "lastMonth": "Bulan Lepas",
+    "lastQuarter": "Suku Tahun Lepas",
+    "lastYear": "Tahun Lepas",
+    "noData": "Tiada data lagi",
+    "noDataDesc": "Mula merekod amal anda untuk melihat carta progres di sini.",
+    "count": "Kiraan",
+    "points": "Mata",
+    "deedsByCategory": "Amal Mengikut Kategori",
+    "targetsProgress": "Progres Sasaran",
+    "summary": {
+      "title": "Ringkasan Anda",
+      "totalDeeds": "Anda merekod {{count}} amal dalam {{period}} yang lalu.",
+      "topCategory": "Amal yang paling kerap anda lakukan ialah {{category}} sebanyak {{count}} kali.",
+      "mostActiveDay": "Hari paling aktif anda ialah {{day}} dengan {{count}} amal.",
+      "consistency": "Anda beramal pada {{activeDays}} daripada {{totalDays}} hari — konsistensi {{percent}}%.",
+      "noData": "Tiada amal direkod dalam tempoh ini. Mula catat untuk melihat ringkasan di sini.",
+      "motivationHigh": "Mashaa Allah! Anda sangat konsisten. Teruskan tabiat baik ini!",
+      "motivationMedium": "Bagus! Cuba untuk lebih konsisten setiap hari — langkah kecil pun bermakna.",
+      "motivationLow": "Setiap amal itu bernilai, walau sekecil mana. Jadikannya tabiat, satu hari satu langkah.",
+      "periodWeek": "minggu",
+      "periodMonth": "bulan",
+      "periodQuarter": "3 bulan",
+      "periodYear": "tahun"
+    }
+  },
+  "targets": {
+    "title": "Sasaran",
+    "individualTabLabel": "Individu",
+    "subtitle": "Tetapkan dan jejaki matlamat rohani anda",
+    "addTarget": "Tambah Sasaran",
+    "addTargetSubtitle": "Cipta sasaran baru untuk menjejaki kemajuan rohani anda",
+    "editTarget": "Edit Sasaran",
+    "editTargetSubtitle": "Kemas kini tetapan sasaran anda",
+    "renameTarget": "Tukar Nama Sasaran",
+    "renameTargetDesc": "Masukkan nama baru untuk sasaran ini",
+    "targetName": "Nama Sasaran",
+    "saveChanges": "Simpan Perubahan",
+    "targetNotFound": "Sasaran Tidak Dijumpai",
+    "targetNotFoundDesc": "Sasaran yang anda cari tidak wujud atau telah dipadam.",
+    "backToTargets": "Kembali ke Sasaran",
+    "noTargets": "Tiada sasaran ditetapkan",
+    "noTargetsDesc": "Tetapkan matlamat rohani untuk menjejaki progres anda secara automatik berdasarkan amal anda.",
+    "addFirstTarget": "Tetapkan sasaran pertama anda",
+    "selectCategory": "Pilih kategori",
+    "targetValue": "Jumlah Sasaran",
+    "targetValueDesc": "Mata minimum untuk dicapai dalam tempoh ini",
+    "maxValue": "Had Maksimum",
+    "maxValueDesc": "Bilangan maksimum untuk kekal dalam had",
+    "period": "Tempoh",
+    "selectPeriod": "Pilih tempoh",
+    "daily": "Harian",
+    "weekly": "Mingguan",
+    "monthly": "Bulanan",
+    "progress": "Progres",
+    "completed": "Selesai",
+    "deleteTarget": "Padam Sasaran",
+    "deleteConfirm": "Padam sasaran ini?",
+    "deleteWarning": "Tindakan ini tidak boleh dibatalkan. Ini akan memadam sasaran ini secara kekal.",
+    "history": "Sejarah",
+    "streak": "berturut-turut",
+    "pastPeriods": "Tempoh Lepas",
+    "noHistory": "Tiada sejarah lagi. Lengkapkan satu tempoh untuk melihat prestasi lepas anda.",
+    "targetType": "Jenis Sasaran",
+    "selectType": "Pilih jenis",
+    "achievementType": "Sasaran Ibadah",
+    "limitType": "Hindari Dosa",
+    "achievementTypeDesc": "Capai bilangan mata minimum untuk amal baik",
+    "limitTypeDesc": "Kekal di bawah had maksimum untuk mengelak dosa",
+    "limitBadge": "Elakkan Dosa",
+    "usage": "Penggunaan",
+    "max": "maks",
+    "used": "digunakan",
+    "withinLimit": "Dalam Had",
+    "exceeded": "Melebihi",
+    "recurring": "Berulang",
+    "oneTime": "Sekali",
+    "recurrenceType": "Jenis Pengulangan",
+    "deadline": "Tarikh Akhir",
+    "duration": {
+      "1day": "1 Hari",
+      "1week": "1 Minggu",
+      "1month": "1 Bulan",
+      "3months": "3 Bulan"
+    },
+    "targetNamePlaceholder": "contoh: Khatam Al-Quran, Lengkapkan 30 juz",
+    "targetNameRequired": "Nama sasaran diperlukan",
+    "saveTarget": "Simpan Sasaran",
+    "updateTarget": "Kemas Kini Sasaran",
+    "dueIn": "Tamat dalam {{time}}",
+    "overdue": "Lewat {{time}}",
+    "statusActive": "Aktif",
+    "statusCompleted": "Selesai",
+    "statusExpired": "Tamat Tempoh",
+    "customDeadline": "Tarikh Tersuai",
+    "pickDate": "Pilih tarikh",
+    "oneTimeGoal": "Sasaran Sekali",
+    "oneTimeTargetValue": "Nilai Sasaran",
+    "oneTimeTargetValueDesc": "Nilai untuk dicapai sebelum tarikh akhir",
+    "updateProgress": "Kemas Kini",
+    "updateProgressTitle": "Kemas Kini Progres",
+    "modeQuick": "Pantas",
+    "currentProgress": "Progres Semasa",
+    "newProgress": "Progres Baharu",
+    "targetWillBeCompleted": "Sasaran akan tercapai!",
+    "progressSaved": "Progres Disimpan",
+    "progressSavedDesc": "{{count}} mata ditambah ke progres {{target}}",
+    "deedCreatedFromTarget": "{{target}}",
+    "markComplete": "Tandakan Selesai",
+    "targetLabel": "Sasaran:",
+    "categoryLabel": "Kategori:",
+    "perPeriod": "per {{period}}",
+    "untilDate": "hingga {{date}}",
+    "detail": "Detail",
+    "update": "Kemas Kini",
+    "periodDay": "Hari",
+    "periodWeek": "Minggu",
+    "periodMonth": "Bulan",
+    "anySubtype": "Semua",
+    "intentionCardTitle": "Bila & Di Mana",
+    "intentionCardEmpty": "Nyatakan bila dan di mana anda akan melakukannya. Menetapkan masa dan tempat tertentu menjadikan anda lebih konsisten.",
+    "intentionHelper": "Menetapkan masa dan tempat tertentu menjadikan anda lebih konsisten.",
+    "intentionWhenLabel": "Bila anda akan lakukannya?",
+    "intentionWhenPlaceholder": "cth. selepas Subuh",
+    "intentionWhereLabel": "Di mana anda akan lakukannya?",
+    "intentionWherePlaceholder": "cth. di masjid",
+    "intentionNudgeTitle": "Tingkatkan konsistensi anda",
+    "intentionNudgeBody": "Menetapkan masa dan tempat tertentu menjadikan anda lebih cenderung untuk istiqamah melakukannya.",
+    "intentionNudgeCta": "Tambah bila & di mana",
+    "intentionNudgeGotIt": "Faham",
+    "intentionNudgeDismiss": "Tutup",
+    "notificationTimes": "Masa Peringatan",
+    "notificationTimesDesc": "Tetapkan sehingga 5 masa peringatan untuk sasaran ini",
+    "addReminderTime": "Tambah Masa Peringatan",
+    "maxReminders": "Maksimum 5 peringatan setiap sasaran",
+    "reminderTimeLabel": "Peringatan {{number}}",
+    "targetCreated": "Sasaran Dicipta",
+    "targetCreatedDesc": "Sasaran baharu anda telah berjaya ditambah.",
+    "targetUpdated": "Sasaran Dikemas Kini",
+    "targetUpdatedDesc": "Sasaran anda telah berjaya dikemas kini.",
+    "createError": "Gagal mencipta sasaran. Sila cuba lagi.",
+    "updateError": "Gagal mengemas kini sasaran. Sila cuba lagi.",
+    "notFound": "Sasaran Tidak Dijumpai",
+    "notFoundDesc": "Sasaran yang anda cari tidak wujud.",
+    "newFolder": "Folder Baru",
+    "createFolder": "Cipta folder",
+    "createFolderDesc": "Kumpulkan sasaran berkaitan supaya lebih kemas.",
+    "renameFolder": "Tukar nama folder",
+    "renameFolderDesc": "Masukkan nama baharu untuk folder ini.",
+    "deleteFolder": "Padam folder",
+    "deleteFolderConfirm": "Padam folder ini?",
+    "deleteFolderWarning": "Folder akan dipadam, tetapi sasaran di dalamnya akan dikekalkan dan dialih keluar dari folder.",
+    "folderName": "Nama folder",
+    "folderNamePlaceholder": "cth. Ibadah Harian, Ramadan",
+    "moveToFolder": "Alih ke folder",
+    "moveToFolderDesc": "Pilih folder untuk sasaran ini, atau keluarkannya daripada semua folder.",
+    "noFolder": "Tiada folder",
+    "ungrouped": "Tiada Folder",
+    "targetCount": "{{count}} sasaran",
+    "targetCountOne": "1 sasaran",
+    "targetCountZero": "Tiada sasaran",
+    "moveError": "Gagal mengalih sasaran. Sila cuba lagi.",
+    "folderCreated": "Folder dicipta",
+    "folderRenamed": "Nama folder dikemaskini",
+    "folderDeleted": "Folder dipadam",
+    "targetMoved": "Sasaran dialihkan",
+    "targetDeleted": "Sasaran Dipadam",
+    "targetDeletedDesc": "Sasaran telah dipadam.",
+    "targetCompleted": "Sasaran Selesai",
+    "targetCompletedDesc": "Tahniah kerana mencapai matlamat anda!"
+  },
+  "user": {
+    "profile": "Profil",
+    "manageCategories": "Urus Kategori",
+    "logout": "Log Keluar"
+  },
+  "common": {
+    "loading": "Memuatkan...",
+    "error": "Ralat",
+    "success": "Berjaya",
+    "save": "Simpan",
+    "saving": "Menyimpan...",
+    "cancel": "Batal",
+    "delete": "Padam",
+    "edit": "Edit",
+    "add": "Tambah",
+    "close": "Tutup",
+    "back": "Kembali",
+    "language": "Bahasa",
+    "filter": "Filter",
+    "allCategories": "Semua Kategori",
+    "allSubCategories": "Semua Jenis",
+    "confirm": "Sahkan",
+    "next": "Seterusnya",
+    "previous": "Sebelumnya",
+    "sessionExpired": "Log masuk semula…",
+    "sessionExpiredDesc": "Sesi anda telah tamat. Menyambung semula."
+  },
+  "sholat": {
+    "selectType": "Pilih Jenis Solat",
+    "selectUnit": "Pilih Unit",
+    "anyType": "Semua (semua jenis dikira)",
+    "isJamaah": "Solat berjemaah",
+    "inCongregation": "Berjemaah",
+    "units": {
+      "times": "Kali",
+      "rakaat": "Rakaat"
+    },
+    "types": {
+      "subuh": "Subuh",
+      "dzuhur": "Zuhur",
+      "ashar": "Asar",
+      "maghrib": "Maghrib",
+      "isya": "Isyak",
+      "jumat": "Jumaat",
+      "rawatib": "Rawatib",
+      "dhuha": "Dhuha",
+      "tahajjud": "Tahajjud",
+      "witir": "Witir",
+      "tarawih": "Tarawih",
+      "tasbih": "Tasbih",
+      "eid": "Solat Eid",
+      "istikharah": "Istikharah",
+      "hajat": "Hajat",
+      "taubat": "Taubat"
+    }
+  },
+  "fasting": {
+    "selectType": "Pilih Jenis Puasa",
+    "selectUnit": "Pilih Unit",
+    "anyType": "Semua (semua jenis dikira)",
+    "units": {
+      "days": "Hari"
+    },
+    "types": {
+      "ramadhan": "Ramadan",
+      "qadha": "Qadha (Ganti)",
+      "kaffarah": "Kaffarah (Tebusan)",
+      "nadzar": "Nazar",
+      "seninkamis": "Isnin-Khamis",
+      "ayyamulbidh": "Ayyamul Bidh (Hari Putih)",
+      "arafah": "Hari Arafah",
+      "asyura": "Hari Asyura",
+      "syawal": "Syawal (6 hari)",
+      "daud": "Puasa Daud"
+    }
+  },
+  "quran": {
+    "selectUnit": "Pilih Unit",
+    "units": {
+      "ayat": "Ayat",
+      "halaman": "Halaman",
+      "surat": "Surah",
+      "juz": "Juzuk"
+    }
+  },
+  "sedekah": {
+    "selectType": "Pilih Jenis",
+    "types": {
+      "uang": "Wang (Jumlah)",
+      "hitungan": "Kiraan (Kali)"
+    }
+  },
+  "customUnit": {
+    "selectUnit": "Pilih Unit",
+    "units": {
+      "hitungan": "Kiraan (Kali)",
+      "ayat": "Ayat",
+      "halaman": "Halaman",
+      "surat": "Surah",
+      "juz": "Juzuk",
+      "rakaat": "Rakaat",
+      "hari": "Hari",
+      "uang": "Wang (Jumlah)"
+    }
+  },
+  "notifications": {
+    "title": "Pemberitahuan",
+    "subtitle": "Urus tetapan pemberitahuan anda",
+    "notSupported": "Pemberitahuan push tidak disokong dalam pelayar ini",
+    "permissionDenied": "Kebenaran pemberitahuan ditolak. Sila aktifkan dalam tetapan pelayar.",
+    "enableNotifications": "Aktifkan Pemberitahuan",
+    "disableNotifications": "Nyahaktifkan Pemberitahuan",
+    "enabling": "Mengaktifkan...",
+    "dailyReminder": "Peringatan Harian",
+    "dailyReminderDesc": "Dapatkan peringatan harian untuk merekod amal anda",
+    "reminderTime": "Masa Peringatan",
+    "targetAlerts": "Amaran Sasaran",
+    "targetAlertsDesc": "Dapatkan pemberitahuan tentang kemajuan sasaran anda",
+    "testNotification": "Uji Pemberitahuan",
+    "testSent": "Pemberitahuan ujian dihantar!",
+    "testFailed": "Gagal menghantar pemberitahuan ujian",
+    "testFailedNoSubscription": "Tiada langganan pemberitahuan aktif. Ketik Aktifkan Pemberitahuan untuk menetapkannya.",
+    "testFailedExpired": "Langganan pemberitahuan anda telah tamat tempoh (ini berlaku pada iPhone selepas beberapa waktu). Sila ketik Nyahaktifkan kemudian Aktifkan Pemberitahuan untuk membaharuinya.",
+    "testFailedNotConfigured": "Pemberitahuan push belum dikonfigurasi pada pelayan. Sila hubungi sokongan.",
+    "testFailedPushServiceError": "Perkhidmatan push menolak pemberitahuan (status {{status}}). Sila cuba lagi, atau nyahaktifkan kemudian aktifkan semula pemberitahuan.",
+    "settingsSaved": "Tetapan disimpan",
+    "subscribed": "Dilanggan",
+    "notSubscribed": "Tidak dilanggan",
+    "sholatReminder": "Peringatan Solat",
+    "sholatReminderDesc": "Dapatkan pemberitahuan 10 minit sebelum waktu solat",
+    "locationRequired": "Akses lokasi diperlukan untuk waktu solat yang tepat",
+    "updateLocation": "Kemas Kini Lokasi",
+    "locationSaved": "Lokasi disimpan",
+    "promptTitle": "Aktifkan Pemberitahuan",
+    "promptDesc": "Dapatkan peringatan harian dan amaran waktu solat untuk kekal konsisten",
+    "promptEnable": "Aktifkan",
+    "promptDismiss": "Bukan Sekarang",
+    "promptLocationDesc": "Benarkan akses lokasi untuk peringatan waktu solat yang tepat",
+    "soundLabel": "Bunyi Pemberitahuan",
+    "soundDesc": "Bunyi yang dimainkan apabila pemberitahuan tiba",
+    "sounds": {
+      "chime": "Loceng",
+      "double": "Loceng Ganda",
+      "ding": "Ding Lembut",
+      "none": "Tiada"
+    }
+  },
+  "reward": {
+    "congratsMessage": "Tahniah kerana melakukan amalan baik! Teruskan usaha anda!",
+    "continue": "Teruskan"
+  },
+  "deedHistory": {
+    "title": "Sejarah Amal",
+    "subtitle": "Layari dan tapis semua amal yang telah direkod",
+    "subcategory": "Jenis",
+    "startDate": "Dari",
+    "endDate": "Hingga",
+    "resultsCount": "Amal Dijumpai",
+    "noResults": "Tiada amal dijumpai",
+    "tryDifferentFilters": "Cuba sesuaikan penapis untuk mencari apa yang anda cari.",
+    "clearFilters": "Padam",
+    "selectDate": "Pilih"
+  },
+  "streak": {
+    "title": "Streak",
+    "daysInARow": "Hari Berturut-turut",
+    "weekDays": [
+      "Isn",
+      "Sel",
+      "Rab",
+      "Kha",
+      "Jum",
+      "Sab",
+      "Ahd"
+    ],
+    "motivationalMessage": "Anda konsisten melakukan amalan baik hari ini. Teruskan istiqomah anda setiap hari!",
+    "continue": "Teruskan",
+    "noStreak": "Mulakan streak anda hari ini!",
+    "day": "Hari"
+  },
+  "streakDetail": {
+    "title": "Streak",
+    "back": "Kembali",
+    "prevMonth": "Bulan sebelumnya",
+    "nextMonth": "Bulan seterusnya",
+    "daysPracticed": "Hari beramal",
+    "freezersUsed": "Pelindung digunakan",
+    "empty": "Tiada aktiviti bulan ini.",
+    "legendDeed": "Hari beramal",
+    "legendFrozen": "Diselamatkan pelindung",
+    "legendInactive": "Tidak aktif",
+    "dayDeedsSubtitle": "Amalan yang anda catat pada hari ini",
+    "dayFrozenSubtitle": "Pelindung streak menyelamatkan hari ini",
+    "dayInactiveSubtitle": "Tiada aktiviti direkodkan",
+    "dayEmpty": "Tiada amalan dicatat pada hari ini.",
+    "frozenTitle": "Diselamatkan pelindung streak",
+    "frozenBody": "Anda tidak mencatat amalan pada hari ini, tetapi satu pelindung streak digunakan secara automatik untuk mengekalkan streak anda."
+  },
+  "streakFreezer": {
+    "title": "Pelindung Streak",
+    "back": "Kembali",
+    "balanceLabel": "Pelindung",
+    "pointsLabel": "Mata",
+    "usedSoFar": "{{count}} telah digunakan",
+    "spentSoFar": "{{count}} telah digunakan",
+    "chipTooltip": "Pelindung streak tersedia",
+    "howItWorksTitle": "Cara ia berfungsi",
+    "howItWorksDescription": "Beli pelindung dengan mata anda. Apabila ada hari lalu dalam streak anda yang tiada amalan dicatat, satu pelindung digunakan secara automatik supaya streak terus hidup. Hari ini tidak pernah dilindungi secara automatik — anda masih ada masa untuk mencatat amalan.",
+    "packsTitle": "Beli pelindung",
+    "packSize_one": "{{count}} pelindung",
+    "packSize_other": "{{count}} pelindung",
+    "pricePer": "{{price}} mata setiap pelindung",
+    "discountBadge": "Jimat {{percent}}%",
+    "buy": "Beli",
+    "notEnough": "Mata tidak mencukupi",
+    "needMorePoints_one": "Perlu {{count}} mata lagi",
+    "needMorePoints_other": "Perlu {{count}} mata lagi",
+    "frozenDaysTitle": "Hari yang dilindungi",
+    "noFrozenDays": "Belum ada hari yang dilindungi. Streak anda masih selamat.",
+    "savedByFreezer": "Diselamatkan oleh pelindung",
+    "refundedByBackdate": "Dipulangkan — anda telah mencatat amalan untuk hari ini",
+    "refundedBadge": "Dipulangkan",
+    "autoConsumedToastTitle": "Pelindung streak digunakan",
+    "autoConsumedToastTitle_other": "Pelindung streak digunakan",
+    "autoConsumedToastDescription_one": "Satu pelindung digunakan secara automatik untuk menyelamatkan {{dates}}. Catat amalan pada hari itu untuk memulihkannya.",
+    "autoConsumedToastDescription_other": "Pelindung digunakan secara automatik untuk menyelamatkan {{dates}}. Catat amalan pada hari-hari itu untuk memulihkannya.",
+    "refundToastTitle": "Pelindung dipulangkan",
+    "refundToastDescription": "Pelindung streak untuk {{date}} telah dikembalikan ke baki anda.",
+    "confirmTitle": "Sahkan pembelian",
+    "confirmDescription_one": "Belanja {{cost}} mata untuk {{count}} pelindung?",
+    "confirmDescription_other": "Belanja {{cost}} mata untuk {{count}} pelindung?",
+    "confirm": "Sahkan",
+    "cancel": "Batal",
+    "purchaseSuccessTitle": "Pelindung ditambah",
+    "purchaseSuccessDescription_one": "{{count}} pelindung ditambah ke baki anda.",
+    "purchaseSuccessDescription_other": "{{count}} pelindung ditambah ke baki anda.",
+    "purchaseErrorTitle": "Pembelian gagal",
+    "insufficientPointsTitle": "Mata tidak mencukupi",
+    "insufficientPointsDescription": "Kumpul lebih banyak mata dengan mencatat amalan baik, kemudian cuba lagi."
+  },
+  "recommendations": {
+    "entryTitle": "Perlukan idea sasaran?",
+    "entryDesc": "Lihat cadangan yang diperibadikan berdasarkan jawapan onboarding anda, setiap satunya berdasarkan ayat al-Quran atau hadis sahih.",
+    "entryCta": "Lihat cadangan",
+    "dismiss": "Tutup",
+    "seeSuggestions": "Lihat cadangan",
+    "sheetTitle": "Sasaran yang dicadangkan untuk anda",
+    "disclaimer": "Cadangan ini dijana oleh AI dan berasaskan al-Quran serta hadis sahih dari Sahih al-Bukhari dan Sahih Muslim. Sila sentiasa sahkan dengan ulama yang dipercayai.",
+    "errorTitle": "Gagal memuatkan cadangan",
+    "errorDesc": "Sila cuba lagi sebentar.",
+    "retry": "Cuba lagi",
+    "refresh": "Muat semula",
+    "empty": "Tiada cadangan tersedia buat masa ini.",
+    "useThisTarget": "Gunakan sasaran ini",
+    "backToList": "Kembali ke senarai",
+    "previewName": "Nama sasaran",
+    "previewCategory": "Kategori",
+    "previewAmount": "Jumlah",
+    "previewPeriod": "Tempoh",
+    "previewRecurrence": "Pengulangan",
+    "sourceKind": {
+      "quran": "Al-Quran",
+      "bukhari": "Sahih al-Bukhari",
+      "muslim": "Sahih Muslim"
+    }
+  },
+  "onboarding": {
+    "intro": "Pengenalan",
+    "done": "Selesai",
+    "back": "Kembali",
+    "next": "Seterusnya",
+    "start": "Mula",
+    "startQuiz": "Mula Quiz",
+    "showIdentity": "Tunjukkan Identiti Saya",
+    "startJourney": "Mulakan Perjalanan Saya",
+    "saveError": "Gagal menyimpan. Sila cuba lagi.",
+    "quizCount": "Quiz {{current}} / {{total}}",
+    "splashTagline": "Istiqoma · Konsisten dalam Kebaikan",
+    "bismillahMeaning": "Dengan nama Allah Yang Maha Pemurah lagi Maha Penyayang",
+    "s1": {
+      "eyebrow": "Apa itu Istiqoma?",
+      "headline": "Teman anda dalam<br>perjalanan menjadi <em>lebih baik</em>",
+      "subtext": "Istiqoma ialah aplikasi yang membantu anda mencatat amal kebaikan harian — bukan sebagai kewajipan, tetapi sebagai cermin jiwa.",
+      "features": {
+        "a": {
+          "icon": "📿",
+          "title": "Catat Amal Baik Spontan",
+          "desc": "Tidak perlu sasaran. Cukup catat sebarang kebaikan kecil yang anda lakukan hari ini."
+        },
+        "b": {
+          "icon": "🌙",
+          "title": "Renungan Hujung Hari",
+          "desc": "Diingatkan dengan lembut pada waktu malam untuk merenungi hari yang berlalu."
+        },
+        "c": {
+          "icon": "📖",
+          "title": "Lihat Perjalanan Anda",
+          "desc": "Catatan amal anda menjadi kisah hidup anda sebagai seorang Muslim yang membesar."
+        }
+      }
+    },
+    "s2": {
+      "eyebrow": "Mengapa Istiqoma?",
+      "headline": "Manfaat yang<br>akan anda <em>rasai</em>",
+      "benefits": {
+        "a": {
+          "icon": "🤲",
+          "title": "Hati Lebih Tenang",
+          "desc": "Kesedaran terhadap amal menjadikan hati lebih bersyukur"
+        },
+        "b": {
+          "icon": "🌱",
+          "title": "Identiti Baharu",
+          "desc": "Perlahan-lahan membina diri sebagai Muslim yang istiqomah"
+        },
+        "c": {
+          "icon": "✨",
+          "title": "Ibadah Bermakna",
+          "desc": "Setiap amal kecil terasa bermakna dan dicatat dengan indah"
+        },
+        "d": {
+          "icon": "📅",
+          "title": "Konsistensi",
+          "desc": "Dibantu untuk kekal konsisten tanpa rasa terbeban"
+        }
+      },
+      "hadithText": "\"Sesungguhnya amalan yang paling dicintai Allah ialah yang paling konsisten dilakukan.\"",
+      "hadithSource": "— HR. Bukhari & Muslim"
+    },
+    "q1": {
+      "question": "Bagaimana keadaan ibadah anda kini?",
+      "hint": "Pilih yang paling jujur menggambarkan diri anda",
+      "options": {
+        "pemula": "Baru mula belajar dan ingin lebih baik",
+        "naik-turun": "Naik turun, sukar konsisten",
+        "cukup-baik": "Sudah agak rutin, ingin lebih istiqomah",
+        "tingkatkan": "Ingin meningkatkan kualiti ibadah secara keseluruhan"
+      }
+    },
+    "qg": {
+      "question": "Yang mana paling menggambarkan anda?",
+      "hint": "Ini membantu kami menyesuaikan avatar notifikasi anda",
+      "skip": "Langkau buat masa ini",
+      "options": {
+        "male": "Muslim (Lelaki)",
+        "female": "Muslimah (Perempuan)"
+      }
+    },
+    "q2": {
+      "question": "Apa yang paling kerap menghalang anda berbuat lebih banyak kebaikan?",
+      "hint": "Jujur ya, tiada jawapan yang salah",
+      "options": {
+        "lupa": "Sering lupa atau tidak sedar ada peluang",
+        "males": "Tahu apa nak buat, tetapi malas melakukannya",
+        "tidak-tahu": "Tidak tahu amal apa yang boleh dilakukan setiap hari",
+        "sibuk": "Kesibukan menyebabkan tiada masa untuk merenung diri"
+      }
+    },
+    "q3": {
+      "question": "Amal apa yang ingin anda fokuskan?",
+      "hint": "Pilih seberapa banyak yang anda mahu — sekurang-kurangnya 1",
+      "empty": "Belum ada yang dipilih",
+      "count": "{{count}} amal dipilih",
+      "options": {
+        "baca-quran": "Baca Qur'an",
+        "dzikir": "Zikir",
+        "sholat-fardhu": "Solat Fardhu",
+        "sholat-sunnah": "Solat Sunat",
+        "puasa": "Puasa",
+        "hafalan-quran": "Hafazan Qur'an",
+        "birrul-walidayn": "Birrul Walidayn",
+        "shodaqoh": "Sedekah",
+        "tolabul-ilmi": "Menuntut Ilmu"
+      }
+    },
+    "q4": {
+      "question": "Bilakah waktu terbaik untuk merenungi hari anda?",
+      "hint": "Kami akan menghantar peringatan pada waktu ini",
+      "options": {
+        "subuh": "Selepas Subuh — niatkan hari dengan baik",
+        "ashar": "Selepas Asar — renungan tengah hari",
+        "isya": "Selepas Isyak — tutup hari dengan syukur",
+        "tidur": "Sebelum tidur — muhasabah malam hari"
+      }
+    },
+    "q5": {
+      "question": "Saya ingin dikenali sebagai Muslim yang…",
+      "hint": "Inilah identiti yang akan anda bina bersama Istiqoma",
+      "options": {
+        "dekat-allah": {
+          "label": "Dekat dengan Allah",
+          "sublabel": "Ibadah terasa ringan, hati sentiasa terhubung"
+        },
+        "bermanfaat": {
+          "label": "Bermanfaat kepada sesama",
+          "sublabel": "Kehadiran saya memberi impak nyata kepada orang sekeliling"
+        },
+        "berilmu": {
+          "label": "Berilmu dan bijaksana",
+          "sublabel": "Terus belajar dan mengamalkan ilmu agama dengan baik"
+        },
+        "istiqomah": {
+          "label": "Istiqomah dan teguh pendirian",
+          "sublabel": "Konsisten dalam kebaikan walaupun tiada yang melihat"
+        },
+        "keluarga": {
+          "label": "Teladan dalam keluarga",
+          "sublabel": "Menjadi imam, ibu, atau anak yang membawa kebaikan"
+        }
+      }
+    },
+    "result": {
+      "eyebrow": "Identiti anda telah terbentuk",
+      "note": "Identiti ini bukan label — ia adalah <em>siapa diri anda yang sedang anda bina,</em> satu amal baik dalam satu hari."
+    },
+    "identities": {
+      "dekat-allah": {
+        "name": "Muslim yang Dekat dengan Allah",
+        "desc": "Anda merindui hubungan yang tulus dengan Allah. Setiap amal yang anda catat di Istiqoma adalah langkah nyata untuk mendekatkan diri kepada-Nya — satu kebaikan dalam satu masa.",
+        "tags": [
+          "Hamba yang Rindu",
+          "Hati yang Terhubung"
+        ]
+      },
+      "bermanfaat": {
+        "name": "Muslim yang Bermanfaat",
+        "desc": "Anda percaya bahawa sebaik-baik manusia adalah yang paling bermanfaat. Istiqoma akan membantu anda melihat betapa banyak kebaikan yang telah anda taburkan.",
+        "tags": [
+          "Pemberi Manfaat",
+          "Hati yang Prihatin"
+        ]
+      },
+      "berilmu": {
+        "name": "Muslim yang Berilmu",
+        "desc": "Anda memahami bahawa ilmu adalah cahaya. Istiqoma akan menemani anda mencatat setiap langkah perjalanan belajar dan amal anda — kerana ilmu tanpa amal bagaikan pohon tanpa buah.",
+        "tags": [
+          "Pencari Ilmu",
+          "Amal & Hikmah"
+        ]
+      },
+      "istiqomah": {
+        "name": "Muslim yang Istiqomah",
+        "desc": "Istiqomah bukan tentang sempurna — tetapi tentang tidak berhenti. Dengan Istiqoma, anda akan melihat sendiri betapa konsistennya diri anda, walau pada hari yang terasa berat.",
+        "tags": [
+          "Teguh Pendirian",
+          "Konsisten Tanpa Henti"
+        ]
+      },
+      "keluarga": {
+        "name": "Teladan dalam Keluarga",
+        "desc": "Kebaikan terbesar bermula dari rumah. Setiap amal yang anda tanam hari ini adalah warisan untuk orang yang paling anda sayangi.",
+        "tags": [
+          "Pemimpin Keluarga",
+          "Warisan Kebaikan"
+        ]
+      }
+    },
+    "identityFallback": {
+      "name": "Muslim yang Membesar",
+      "desc": "Perjalanan anda bermula hari ini. Setiap langkah kecil yang anda ambil adalah bukti bahawa anda sedang membesar menjadi versi terbaik diri sendiri.",
+      "tags": [
+        "Terus Membesar"
+      ]
+    },
+    "contextTags": {
+      "pemula": "Langkah Pertama",
+      "naik-turun": "Pejuang Konsistensi",
+      "cukup-baik": "Terus Meningkat",
+      "tingkatkan": "Pencari Keutamaan"
+    },
+    "hint": {
+      "title": "Sambung dari onboarding",
+      "subtitle": "Anda memilih amal-amal ini semasa onboarding. Tetapkan sasaran untuk bermula.",
+      "dismiss": "Tutup"
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "unnamed": "Pengguna tanpa nama",
+    "identityNote": "Nama, e-mel, dan avatar anda diuruskan oleh akaun Replit Auth anda.",
+    "personalHeading": "Maklumat peribadi",
+    "usernameLabel": "Nama pengguna",
+    "usernamePlaceholder": "cth. yusuf123",
+    "usernameHelp": "Sehingga 40 aksara. Biarkan kosong untuk kosongkan.",
+    "usernameTaken": "Nama pengguna itu telah digunakan. Sila pilih yang lain.",
+    "phoneLabel": "Nombor telefon",
+    "phonePlaceholder": "+60 12-345 6789",
+    "phoneHelp": "Hanya digit, ruang, +, -, ( dan ). Sehingga 30 aksara.",
+    "saveButton": "Simpan perubahan",
+    "saving": "Menyimpan…",
+    "saveSuccess": "Profil dikemas kini",
+    "saveError": "Gagal menyimpan profil",
+    "qfConnectTitle": "Sambungkan Quran Foundation",
+    "qfConnectDesc": "Selaraskan tanda buku Qur'an anda dengan akaun Quran Foundation supaya muncul di Quran.com dan aplikasi lain berasaskan QF. Data tempatan anda tetap di sini.",
+    "qfConnectCta": "Sambungkan Quran Foundation",
+    "qfConnectedHeading": "Quran Foundation disambungkan",
+    "qfConnectedDesc": "Tanda buku yang anda tambah di sini disalin ke akaun Quran Foundation anda di latar belakang.",
+    "qfDisconnectCta": "Putuskan",
+    "qfConnectError": "Gagal menyambung ke Quran Foundation. Sila cuba lagi.",
+    "qfConnectSuccess": "Disambungkan ke Quran Foundation",
+    "qfDisconnectSuccess": "Diputuskan dari Quran Foundation",
+    "connectGmailTitle": "Sambungkan Gmail",
+    "connectGmailDesc": "Pautkan akaun Google ke log masuk anda. Anda akan dibawa ke skrin log masuk Replit, di mana anda boleh memilih Google.",
+    "connectGmailCta": "Sambungkan Gmail",
+    "gmailConnected": "Disambungkan sebagai {{email}}",
+    "journeyTitle": "Perjalanan spiritual anda",
+    "journeySubtitleEmpty": "Beritahu kami tentang diri anda untuk memperibadikan Istiqoma",
+    "changePinHeading": "Tukar PIN",
+    "changePinDesc": "PIN melindungi akaun anda. Pilih 4–8 digit dan ingat baik-baik — PIN tidak boleh dipulihkan.",
+    "currentPinLabel": "PIN semasa",
+    "newPinLabel": "PIN baru",
+    "confirmPinLabel": "Sahkan PIN baru",
+    "changePinButton": "Kemas kini PIN",
+    "changePinSuccess": "PIN dikemas kini",
+    "changePinError": "Gagal menukar PIN",
+    "changePinWrongCurrent": "PIN semasa salah",
+    "dangerZone": {
+      "heading": "Zon Bahaya",
+      "description": "Tindakan ini adalah kekal dan tidak boleh dibuat asal. Sila teruskan dengan berhati-hati.",
+      "exportButton": "Muat turun data saya",
+      "deleteButton": "Padam akaun saya",
+      "dialogTitle": "Padam akaun anda?",
+      "dialogDescription": "Semua data anda — amalan, sasaran, tanda buku, hafazan, streak, dan tetapan — akan dipadam secara kekal. Ini tidak boleh dibuat asal.",
+      "dialogCancel": "Batal",
+      "dialogConfirm": "Ya, padam semua",
+      "deleteError": "Gagal memadam akaun",
+      "deleteSuccessTitle": "Akaun dipadam",
+      "deleteSuccessDesc": "Akaun dan semua data anda telah dipadam secara kekal."
+    }
+  },
+  "usernameAuth": {
+    "pageTitle": "Log masuk dengan nama pengguna",
+    "tabs": {
+      "signin": "Log masuk",
+      "signup": "Daftar akaun"
+    },
+    "fields": {
+      "username": "Nama pengguna",
+      "pin": "PIN",
+      "confirmPin": "Sahkan PIN"
+    },
+    "usernameHelp": "3–40 aksara. Hanya huruf, digit, _ dan -.",
+    "pinHelp": "4–8 digit.",
+    "pinRecoveryWarning": "Simpan kod pemulihan yang akan dipaparkan selepas daftar — itu SATU-SATUNYA cara untuk menetapkan semula PIN yang lupa.",
+    "signinButton": "Log masuk",
+    "signupButton": "Daftar akaun",
+    "forgotPin": "Lupa PIN?",
+    "lockedTitle": "Akaun dikunci",
+    "lockedDescription": "Terlalu banyak PIN salah. Cuba lagi dalam {{time}} atau gunakan kod pemulihan di bawah.",
+    "lockedSeconds": "{{seconds}}s",
+    "lockedMinutesSeconds": "{{minutes}}m {{seconds}}s",
+    "useRecoveryCode": "Guna kod pemulihan",
+    "recoveryCodeTitle": "Simpan kod pemulihan anda",
+    "recoveryCodeBody": "Ini SATU-SATUNYA cara untuk menetapkan semula PIN. Simpan sekarang — kami tidak boleh memaparkannya lagi.",
+    "recoveryCodeCopy": "Salin kod",
+    "recoveryCodeCopied": "Disalin ke papan klip",
+    "recoveryCodeContinue": "Saya sudah simpan — teruskan",
+    "recoveryReset": {
+      "title": "Tetapkan semula PIN anda",
+      "description": "Masukkan nama pengguna, kod pemulihan dan PIN baru.",
+      "recoveryCodeLabel": "Kod pemulihan",
+      "recoveryCodeHelp": "20 huruf/digit. Sengkang dan huruf besar/kecil tidak penting.",
+      "newPinLabel": "PIN baru",
+      "confirmPinLabel": "Sahkan PIN baru",
+      "submit": "Tetapkan semula PIN",
+      "cancel": "Batal",
+      "successTitle": "PIN ditetapkan semula",
+      "successBody": "Log masuk dengan PIN baru anda.",
+      "errors": {
+        "invalidCode": "Kod pemulihan tidak sah atau sudah digunakan.",
+        "lockedFor": "Pemulihan dikunci. Cuba lagi dalam {{minutes}} minit.",
+        "tooManyAttempts": "Terlalu banyak percubaan. Sila cuba lagi nanti.",
+        "failed": "Gagal menetapkan semula PIN"
+      }
+    },
+    "errors": {
+      "usernameTaken": "Nama pengguna itu telah digunakan. Sila pilih yang lain.",
+      "usernameNotFound": "Nama pengguna tidak ditemui.",
+      "wrongPin": "PIN salah. Sila cuba lagi.",
+      "lockedFor": "Akaun dikunci. Cuba lagi dalam {{minutes}} minit.",
+      "signinFailed": "Gagal log masuk",
+      "signupFailed": "Gagal mendaftar akaun"
+    }
+  },
+  "achievements": {
+    "heading": "Pencapaian",
+    "subheading": "Lencana untuk perjalanan ibadah anda",
+    "loadError": "Gagal memuatkan lencana. Sila muat semula halaman.",
+    "milestone": "Tonggak",
+    "behavior": "Tabiat",
+    "tiers": {
+      "1": "Bronze",
+      "2": "Silver",
+      "3": "Gold",
+      "4": "Platinum"
+    },
+    "tierEarned": "Tahap {{tier}} diraih",
+    "notEarnedYet": "Belum diraih",
+    "progress": "Kemajuan",
+    "oneStepAway": "Selangkah lagi: {{value}} {{unit}}",
+    "nextTier": "Tahap seterusnya: {{value}} {{unit}}",
+    "earnedOn": "Diraih pada {{date}}",
+    "tierLabel": "Tahap",
+    "earned": "Diraih",
+    "locked": "Terkunci",
+    "newBadgesToastTitle": "Lencana baharu",
+    "newBadgesToastDesc": "+{{count}} lencana lain dibuka",
+    "newBadgeTierDesc": "Tahap {{tier}} — {{description}}",
+    "celebrationTitle": "Lencana dibuka!",
+    "celebrationContinue": "Hebat!",
+    "celebrationNext": "Seterusnya",
+    "celebrationMore": "+{{count}} lagi menunggu",
+    "share": "Kongsi",
+    "shareText": "Saya baru sahaja membuka lencana {{tier}} {{name}} di Istiqoma! 🏆",
+    "shareCopied": "Disalin ke papan keratan",
+    "badges": {
+      "ahli-sholat": {
+        "name": "Ahli Solat",
+        "description": "Jumlah Solat Fardhu yang dicatatkan."
+      },
+      "jamaah-devotee": {
+        "name": "Jemaah Devotee",
+        "description": "Solat Fardhu yang dilakukan berjemaah."
+      },
+      "penjaga-sunnah": {
+        "name": "Penjaga Sunnah",
+        "description": "Jumlah Solat Sunnah yang dicatatkan."
+      },
+      "pecinta-dzikir": {
+        "name": "Pencinta Zikir",
+        "description": "Jumlah kiraan zikir yang terkumpul."
+      },
+      "sahabat-quran": {
+        "name": "Sahabat Quran",
+        "description": "Bacaan Quran setara ayat (juz × 600, halaman × 15, surah × 55)."
+      },
+      "tangan-pemberi": {
+        "name": "Tangan Pemberi",
+        "description": "Jumlah sedekah yang dicatatkan."
+      },
+      "penahan-hawa": {
+        "name": "Penahan Hawa",
+        "description": "Jumlah hari berpuasa yang dicatatkan."
+      },
+      "pencari-ilmu": {
+        "name": "Pencari Ilmu",
+        "description": "Jumlah aktiviti Tolabul Ilmi yang dicatatkan."
+      },
+      "birrul-walidayn": {
+        "name": "Birrul Walidayn",
+        "description": "Jumlah kebaikan untuk ibu bapa yang dicatatkan."
+      },
+      "kolektor-poin": {
+        "name": "Pengumpul Mata",
+        "description": "Jumlah mata yang pernah dikumpul."
+      },
+      "pencapai-target": {
+        "name": "Pencapai Sasaran",
+        "description": "Sasaran yang berjaya diselesaikan."
+      },
+      "istiqomah-streak": {
+        "name": "Istiqomah Streak",
+        "description": "Streak harian terpanjang yang pernah diraih."
+      },
+      "subuh-warrior": {
+        "name": "Subuh Warrior",
+        "description": "Catat Solat Subuh sebelum jam 6.00 pagi pada hari berbeza."
+      },
+      "tahajjud-knight": {
+        "name": "Tahajjud Knight",
+        "description": "Catat Solat Tahajjud pada hari berbeza."
+      },
+      "sleepless-soul": {
+        "name": "Sleepless Soul",
+        "description": "Catat ibadah antara jam 1.00–4.00 pagi pada hari berbeza."
+      },
+      "full-house": {
+        "name": "Full House",
+        "description": "Lengkap 5 Solat Fardhu dalam satu hari."
+      },
+      "triple-crown": {
+        "name": "Triple Crown",
+        "description": "Solat, Zikir, dan Baca Quran pada hari yang sama."
+      },
+      "quest-explorer": {
+        "name": "Quest Explorer",
+        "description": "Selesaikan sasaran daripada kategori yang berbeza-beza."
+      },
+      "comeback-kid": {
+        "name": "Comeback Kid",
+        "description": "Bangkit semula selepas streak ≥ 7 hari yang sempat terputus."
+      },
+      "freeze-master": {
+        "name": "Freeze Master",
+        "description": "Streak Freezer berjaya menyelamatkan streak anda."
+      },
+      "no-freeze-november": {
+        "name": "No Freeze November",
+        "description": "Streak 30 hari tanpa guna freezer langsung."
+      },
+      "khatam-champion": {
+        "name": "Juara Khatam",
+        "description": "Bacaan Quran setara satu khatam penuh."
+      },
+      "ramadhan-marathoner": {
+        "name": "Maraton Ramadhan",
+        "description": "Puasa Fardhu (Ramadhan) sepanjang bulan Ramadhan."
+      },
+      "senin-kamis": {
+        "name": "Isnin–Khamis",
+        "description": "Puasa Sunnah pada hari Isnin atau Khamis."
+      },
+      "ayyamul-bidh": {
+        "name": "Ayyamul Bidh",
+        "description": "Puasa Sunnah pada 13, 14, atau 15 haribulan (anggaran)."
+      },
+      "diam-diam-bersedekah": {
+        "name": "Diam-Diam Bersedekah",
+        "description": "Sedekah pada 7 hari berbeza dalam satu bulan."
+      },
+      "mistake-mechanic": {
+        "name": "Mistake Mechanic",
+        "description": "Membetulkan catatan amalan yang sudah dibuat."
+      },
+      "midnight-logger": {
+        "name": "Midnight Logger",
+        "description": "Catat amalan untuk hari semalam (back-dated)."
+      },
+      "goal-setter": {
+        "name": "Goal Setter",
+        "description": "Cipta sasaran pertama anda."
+      },
+      "identity-found": {
+        "name": "Identity Found",
+        "description": "Selesaikan onboarding & pilih identiti spiritual anda."
+      },
+      "big-spender": {
+        "name": "Big Spender",
+        "description": "Beli pakej Streak Freezer."
+      },
+      "hari-raya-spirit": {
+        "name": "Semangat Hari Raya",
+        "description": "Catat amalan pada hari Aidilfitri atau Aidiladha."
+      }
+    }
+  },
+  "leaderboard": {
+    "title": "Papan Kedudukan",
+    "profileEntrySubtitle": "Lihat kedudukan anda berbanding pengguna lain",
+    "daily": "Hari ini",
+    "monthly": "Bulan ini",
+    "yearly": "Tahun ini",
+    "you": "Anda",
+    "points": "mata",
+    "loading": "Memuatkan papan kedudukan…",
+    "error": "Gagal memuatkan papan kedudukan.",
+    "retry": "Cuba lagi",
+    "emptyState": "Belum ada sesiapa yang memperoleh mata dalam tempoh ini. Jadilah yang pertama!",
+    "endOfList": "Hujung papan kedudukan",
+    "backToMyRank": "Kembali ke kedudukan saya ({{rank}})",
+    "anonymous": "Tanpa Nama"
+  },
+  "recordChooser": {
+    "title": "Bagaimana anda ingin merakam?",
+    "subtitle": "Pilih cara untuk merekod amalan ini.",
+    "text": "Taip",
+    "textHint": "Isi borang sendiri.",
+    "voice": "Suara",
+    "voiceHint": "Ceritakan dengan suara, kami akan isikan borangnya."
+  },
+  "voiceCapture": {
+    "title": "Rakam dengan suara",
+    "instructions": "Tekan butang mikrofon, kemudian ceritakan satu amalan dengan kata-kata anda. Contoh: \"Pagi tadi saya solat Subuh berjemaah.\"",
+    "start": "Mula rakam",
+    "stop": "Berhenti",
+    "cancel": "Batal",
+    "processing": "Mendengar dan mengisi borang…",
+    "timerHint": "Maksimum {{seconds}} saat.",
+    "permissionDenied": "Kami memerlukan kebenaran mikrofon untuk merakam amalan anda. Sila benarkan dalam tetapan pelayar dan cuba lagi.",
+    "noMicrophone": "Tiada mikrofon dikesan pada peranti ini.",
+    "noSpeech": "Kami tidak menangkap apa-apa. Sila cuba lagi.",
+    "networkError": "Terdapat masalah rangkaian semasa transkripsi. Sila cuba lagi.",
+    "languageNotSupported": "Bahasa anda tidak disokong oleh pengecaman suara pelayar ini. Sila tukar bahasa atau taip amalan secara manual.",
+    "unsupportedTitle": "Rakaman suara tidak tersedia",
+    "unsupported": "Pelayar anda tidak menyokong pengecaman suara. Sila gunakan versi terkini Chrome, Edge, atau Safari, atau taip amalan secara manual.",
+    "couldNotUnderstand": "Kami tidak dapat memahami amalan tersebut. Sila cuba lagi atau taip secara manual.",
+    "rateLimited": "Anda telah menggunakan rakaman suara dengan banyak. Sila tunggu seketika dan cuba lagi.",
+    "serviceUnavailable": "Perkhidmatan suara tidak tersedia buat sementara waktu. Sila cuba lagi atau taip amalan secara manual.",
+    "error": "Sesuatu tidak kena. Sila cuba lagi.",
+    "aborted": "Rakaman terhenti. Sila cuba lagi.",
+    "serviceNotAllowed": "Perkhidmatan pengecaman suara disekat. Sila semak tetapan pelayar atau cuba pada rangkaian lain.",
+    "badGrammar": "Kami tidak dapat memproses tatabahasa pertuturan. Sila cuba lagi atau taip amalan secara manual.",
+    "unknownError": "Rakaman suara gagal ({{code}}). Sila cuba lagi atau taip amalan secara manual.",
+    "tooLarge": "Rakaman terlalu panjang. Sila rakam yang lebih pendek.",
+    "transcribing": "Mentranskripsi rakaman anda…",
+    "retry": "Cuba lagi",
+    "switchToText": "Taip sahaja",
+    "reviewToast": "Sila semak amalan anda sebelum menyimpan"
+  },
+  "quiz": {
+    "title": "Kuiz Islam",
+    "currentLevel": "Tahap Semasa",
+    "totalCorrect": "Jumlah Jawapan Betul",
+    "leaderboard": "Papan Kedudukan Kuiz",
+    "leaderboardTitle": "Papan Kedudukan Kuiz",
+    "leaderboardSubtitle": "Disusun mengikut tahap tertinggi, kemudian jumlah jawapan betul.",
+    "leaderboardEmpty": "Belum ada sesiapa menjawab kuiz. Jadilah yang pertama!",
+    "leaderboardRowSubtitle": "Tahap {{level}} · {{correct}} betul",
+    "yourRank": "Kedudukan anda",
+    "levelShort": "Lv {{level}}",
+    "correctShort": "betul",
+    "intro": "Setiap tahap mempunyai 10 soalan aneka pilihan. Dapatkan 10/10 untuk naik ke tahap berikutnya.",
+    "levelHeading": "Tahap {{level}}",
+    "startLevel": "Mula Tahap {{level}}",
+    "retryLevel": "Cuba Semula Tahap {{level}}",
+    "questionProgress": "Soalan {{index}} daripada {{total}}",
+    "correct": "Betul!",
+    "incorrect": "Belum tepat",
+    "learnMore": "Ketahui lebih lanjut",
+    "next": "Soalan seterusnya",
+    "finish": "Lihat keputusan",
+    "perfectScoreTitle": "Markah penuh!",
+    "perfectScoreBody": "Anda naik ke Tahap {{level}}. Teruskan!",
+    "tryAgainTitle": "Hampir berjaya",
+    "tryAgainBody": "Anda menjawab {{correct}} daripada {{total}} dengan betul. Dapatkan 10/10 untuk naik tahap.",
+    "error": "Gagal memuatkan kuiz.",
+    "retry": "Cuba lagi"
+  },
+  "genderPrompt": {
+    "title": "Peribadikan avatar anda",
+    "subtitle": "Beritahu kami siapa anda supaya kami boleh menunjukkan watak yang sepadan dalam notifikasi.",
+    "male": "Muslim (Lelaki)",
+    "female": "Muslimah (Perempuan)",
+    "dismiss": "Tutup"
+  },
+  "onboardingSettings": {
+    "title": "Perjalanan anda",
+    "identityHeading": "Identiti anda",
+    "reminderPreview": "Peringatan renungan harian anda akan dihantar sekitar {{time}}.",
+    "saveButton": "Simpan perubahan",
+    "saving": "Menyimpan…",
+    "saveSuccess": "Jawapan anda telah disimpan",
+    "saveError": "Gagal menyimpan jawapan anda",
+    "incompleteError": "Sila jawab semua soalan dan pilih sekurang-kurangnya satu fokus.",
+    "unsavedChanges": "Perubahan belum disimpan",
+    "notCompletedYet": "Anda belum menyelesaikan onboarding.",
+    "startOnboardingCta": "Mulakan onboarding",
+    "genderHeading": "Avatar notifikasi",
+    "genderHint": "Pilih watak yang mewakili anda — akan muncul dalam notifikasi push.",
+    "genderMale": "Muslim (Lelaki)",
+    "genderFemale": "Muslimah (Perempuan)",
+    "genderSaved": "Keutamaan avatar disimpan"
+  },
+  "tour": {
+    "steps": {
+      "dashboard": {
+        "title": "Papan Pemuka & Progres Hari Ini",
+        "description": "Lihat semua sasaran ibadah anda hari ini sekilas pandang. Cincin progres menunjukkan berapa banyak yang telah anda selesaikan."
+      },
+      "recordDeed": {
+        "title": "Rekod Amal Baik",
+        "description": "Rekod sebarang ibadah dalam beberapa saat — pilih kategori, tuliskan penerangan, dan simpan. Ketik \"Simpan Amal\" untuk mencuba!"
+      },
+      "dzikir": {
+        "title": "Kaunter Zikir",
+        "description": "Ketik bulatan bercahaya untuk mengira zikir anda. Cuba ketik 3 kali untuk melihat cara ia berfungsi!"
+      },
+      "sholat": {
+        "title": "Penjejakan Solat",
+        "description": "Jejaki 5 solat harian anda dan tandakan yang telah selesai. Ketik \"Tanda selesai\" pada Subuh untuk mencuba."
+      },
+      "targets": {
+        "title": "Sasaran Rohani",
+        "description": "Tetapkan matlamat berulang untuk ibadah anda — halaman Quran harian, kiraan zikir, sedekah mingguan, dan banyak lagi."
+      },
+      "quran": {
+        "title": "Perjalanan Quran",
+        "description": "Baca, dengar, dan jejaki progres Quran anda. Sambung dari tempat terakhir, dengan tanda buku dan alat hafazan."
+      },
+      "progress": {
+        "title": "Progres & Streak",
+        "description": "Saksikan perjalanan rohani anda berkembang — streak, heatmap mingguan, dan carta untuk memotivasikan anda setiap hari."
+      },
+      "final": {
+        "title": "Bersedia untuk Bermula?",
+        "description": "Sertai ribuan Muslim yang berkembang secara rohani setiap hari. Percuma selama-lamanya."
+      }
+    },
+    "actions": {
+      "next": "Seterusnya →",
+      "saveDeed": "Simpan Amal",
+      "tapToCount": "Ketik untuk mengira",
+      "markFajrDone": "Tanda Subuh selesai",
+      "openSurah": "Buka Surah",
+      "signUpFree": "Daftar Percuma"
+    },
+    "nav": {
+      "home": "Utama",
+      "dzikir": "Zikir",
+      "sholat": "Solat",
+      "quran": "Quran"
+    },
+    "dashboardScreen": {
+      "todaysProgress": "Progres Hari Ini",
+      "hijriDate": "3 Muharram 1447",
+      "fajrPrayer": "Solat Subuh",
+      "completedAt": "Selesai pukul 5:12 pagi",
+      "readSurah": "Baca Surah Al-Kahf",
+      "target20mins": "Sasaran: 20 minit",
+      "giveSadaqah": "Beri Sedekah",
+      "dailyGoal": "Matlamat harian",
+      "currentStreak": "Streak Semasa",
+      "streakDays": "12 hari",
+      "streakPts": "+40 mata",
+      "recordGoodDeed": "Rekod Amal Baik",
+      "leaderboard": "Papan Pendahulu"
+    },
+    "recordDeedScreen": {
+      "title": "Rekod Amal Baik",
+      "subtitle": "Rekod ibadah & amalan baik anda",
+      "category": "KATEGORI",
+      "description": "PENERANGAN",
+      "points": "MATA",
+      "sampleDesc": "Solat Subuh, 2 rakaat, berjemaah",
+      "deedRecorded": "Amal direkod! +5 mata diperoleh.",
+      "saveDeedPts": "Simpan Amal (+5 mata)",
+      "catSholat": "Solat",
+      "catDzikir": "Zikir",
+      "catSedekah": "Sedekah",
+      "catQuran": "Quran"
+    },
+    "dzikirScreen": {
+      "title": "Kaunter Zikir",
+      "tapToCount": "Ketik untuk mengira",
+      "reset": "Set Semula",
+      "save": "Simpan (+{{count}})"
+    },
+    "sholatScreen": {
+      "title": "Waktu Solat",
+      "location": "Jakarta · Hari Ini",
+      "nextPrayer": "Seterusnya: Zohor dalam 2j 14m",
+      "markDone": "Tanda selesai",
+      "done": "Selesai"
+    },
+    "targetsScreen": {
+      "title": "Sasaran Rohani",
+      "readQuran": "Baca Quran",
+      "readQuranSub": "Harian · 2 halaman",
+      "subhanallah33": "Subhanallah 33×",
+      "dailyDzikir": "Zikir harian",
+      "sedekahFridays": "Sedekah Jumaat",
+      "weekly": "Mingguan"
+    },
+    "quranScreen": {
+      "title": "Al-Quran",
+      "continueReading": "Sambung Membaca",
+      "currentPosition": "Al-Kahf · Ayat 12",
+      "bookmarks": "Tanda Buku",
+      "memorize": "Hafazan",
+      "verses": "{{count}} ayat",
+      "surahs": {
+        "alFatihah": "Pembukaan",
+        "alBaqarah": "Lembu Betina",
+        "alKahf": "Gua",
+        "yaSin": "Ya Sin"
+      }
+    },
+    "progressScreen": {
+      "title": "Kemajuan Saya",
+      "thisMonth": "Bulan Ini",
+      "goodDeeds": "amal baik",
+      "streak": "Streak",
+      "days": "hari",
+      "thisWeek": "Minggu Ini",
+      "deedsPerDay": "Amal per Hari",
+      "weekDays": [
+        "I",
+        "S",
+        "R",
+        "K",
+        "J",
+        "S",
+        "A"
+      ]
+    },
+    "finalScreen": {
+      "title": "Mulakan Perjalanan Anda",
+      "subtitle": "Sertai ribuan Muslim yang berkembang secara rohani setiap hari.",
+      "continueGoogle": "Teruskan dengan Google",
+      "useUsername": "Guna Nama Pengguna & PIN",
+      "freeForever": "Percuma selama-lamanya · Tanpa kad kredit"
+    },
+    "coachmark": {
+      "stepOf": "Langkah {{current}} daripada {{total}}",
+      "interactHint": "Berinteraksi dengan elemen yang diserlahkan"
+    },
+    "topBar": {
+      "exitTour": "Keluar lawatan",
+      "ariaLabel": "Lawatan produk interaktif",
+      "tryOrSkip": "Cuba di skrin, atau klik Teruskan untuk langkau",
+      "continue": "Teruskan",
+      "skip": "Langkau",
+      "goToStep": "Ke langkah {{step}}: {{title}}",
+      "previousStep": "Langkah sebelumnya",
+      "nextStep": "Langkah seterusnya"
+    }
+  },
+  "target": {
+    "doneBadge": "selesai",
+    "pendingBadge": "belum"
+  },
+  "community": {
+    "tabLabel": "Komuniti",
+    "subtitle": "Sasaran kongsi yang anda dan orang lain usahakan bersama.",
+    "create": "Sasaran komuniti baharu",
+    "createFirst": "Cipta yang pertama",
+    "createTitle": "Sasaran komuniti baharu",
+    "createSubtitle": "Terbitkan sasaran supaya orang lain boleh sertai dan anda boleh lihat kemajuan mereka.",
+    "editTitle": "Sunting sasaran komuniti",
+    "namePlaceholder": "cth. Baca 1 juz Al-Quran setiap hari",
+    "unitLabelOptional": "Label unit (pilihan)",
+    "unitPlaceholder": "cth. ayat, muka surat, juz",
+    "empty": "Belum ada sasaran komuniti",
+    "emptyDesc": "Jadilah yang pertama menerbitkan sasaran komuniti.",
+    "yours": "Milik anda",
+    "joined": "Disertai",
+    "join": "Sertai sasaran",
+    "leave": "Keluar sasaran",
+    "joined_short": "Disertai",
+    "joinedDesc": "Anda kini sebahagian daripada sasaran komuniti ini.",
+    "left": "Keluar",
+    "leftDesc": "Anda telah keluar daripada sasaran komuniti ini.",
+    "joinError": "Tidak dapat menyertai sasaran ini.",
+    "leaveError": "Tidak dapat keluar daripada sasaran ini.",
+    "created": "Sasaran komuniti dicipta",
+    "createdDesc": "Orang lain kini boleh menyertai dan melihat papan kedudukan.",
+    "createError": "Tidak dapat mencipta sasaran komuniti.",
+    "updated": "Sasaran komuniti dikemas kini",
+    "updatedDesc": "Perubahan anda telah disimpan.",
+    "updateError": "Tidak dapat mengemas kini sasaran komuniti.",
+    "deleted": "Sasaran komuniti dipadam",
+    "deleteError": "Tidak dapat memadam sasaran komuniti.",
+    "notFound": "Sasaran komuniti ini tidak dijumpai.",
+    "onlyCreator": "Hanya pencipta boleh menyunting sasaran ini.",
+    "leaderboard": "Papan kedudukan",
+    "leaderboardScope": "Disusun mengikut kemajuan {{period}} ini.",
+    "noParticipants": "Belum ada peserta.",
+    "participantCount": "{{count}} peserta",
+    "createdBy": "Dicipta oleh {{name}}",
+    "youAreCreator": "Anda ialah pencipta sasaran ini.",
+    "confirmLeave": "Keluar daripada sasaran komuniti ini?",
+    "confirmLeaveDesc": "Anda boleh sertai semula nanti, tetapi kemajuan lama tidak akan dikira melainkan anda sertai semula.",
+    "confirmDelete": "Padam sasaran komuniti ini?",
+    "confirmDeleteDesc": "Ini akan membuang sasaran dan semua ahli. Tindakan ini tidak boleh dibuat asal.",
+    "shareToCommunity": "Kongsi dengan komuniti",
+    "shareToCommunityDesc": "Terbitkan sasaran ini ke komuniti supaya orang lain boleh sertai. Harian, mingguan, atau bulanan sahaja.",
+    "alsoSharedDesc": "Sasaran anda telah dicipta dan diterbitkan ke komuniti.",
+    "shareWarningTitle": "Sasaran dicipta, tetapi perkongsian gagal",
+    "shareWarningDesc": "Kami simpan sasaran peribadi anda, tetapi tidak dapat menerbitkannya ke komuniti.",
+    "membersOnly": "Sertai sasaran ini untuk melihat siapa yang menyertai.",
+    "showingTopN": "Menunjukkan {{shown}} daripada {{total}} peserta teratas.",
+    "searchPlaceholder": "Cari sasaran komuniti…",
+    "filterCategory": "Kategori",
+    "filterPeriod": "Tempoh",
+    "allCategories": "Semua kategori",
+    "allPeriods": "Semua tempoh",
+    "sortRecent": "Terbaru",
+    "sortPopular": "Paling popular",
+    "noResults": "Tiada sasaran yang sepadan",
+    "noResultsDesc": "Cuba ubah penapis atau kata kunci carian anda.",
+    "pageOf": "Halaman {{current}} daripada {{total}}"
+  },
+  "deeds": {
+    "recorded": "Amalan Dicatat",
+    "recordedDesc": "Amalan anda berjaya dicatatkan.",
+    "deleted": "Amalan Dipadam",
+    "deletedDesc": "Amalan telah dipadam daripada sejarah anda.",
+    "updated": "Amalan Dikemas Kini",
+    "updatedDesc": "Amalan anda berjaya dikemas kini."
+  },
+  "privacyBanner": {
+    "message": "Kami telah mengemas kini Dasar Privasi kami.",
+    "viewLink": "Lihat perubahan →",
+    "dismiss": "Tutup"
+  },
+  "privacyContact": {
+    "heading": "Pertanyaan Privasi",
+    "body": "Untuk pertanyaan tentang data atau dasar privasi ini, hubungi kami di",
+    "email": "appistiqoma@gmail.com",
+    "responseNote": "Kami menjawab semua pertanyaan privasi dalam 30 hari."
+  },
+  "consent": {
+    "title": "Persetujuan Privasi Data",
+    "required": "Diperlukan sebelum meneruskan",
+    "body": "Istiqoma merekod data amalan keagamaan anda untuk menjalankan ciri-ciri utamanya. Di bawah GDPR (Perkara 9), ini dikategorikan sebagai maklumat peribadi yang sensitif, dan kami memerlukan persetujuan eksplisit anda sebelum menyimpannya.",
+    "dataTypes": {
+      "deeds": "Rekod amalan baik dan ibadah",
+      "prayer": "Penyempurnaan solat dan rekod Solat Fardhu",
+      "quran": "Bacaan Al-Quran, tanda buku, dan kemajuan hafazan"
+    },
+    "gdprNote": "Anda boleh menarik balik persetujuan pada bila-bila masa dengan memadamkan akaun. Kami tidak akan menjual atau berkongsi data keagamaan anda dengan pihak ketiga.",
+    "checkboxReligious": "Saya bersetuju Istiqoma menyimpan data amalan keagamaan saya untuk menjalankan ciri-ciri aplikasi",
+    "checkboxAge": "Saya mengesahkan bahawa saya berusia 13 tahun atau lebih",
+    "continue": "Teruskan",
+    "saveError": "Gagal menyimpan persetujuan. Sila cuba lagi.",
+    "privacyHint": "Dengan meneruskan, anda menerima",
+    "privacyLink": "Dasar Privasi",
+    "refuseHint": "Belum bersedia untuk bersetuju?",
+    "refuseLink": "Log keluar"
+  },
+  "privacy": {
+    "pageTitle": "Dasar Privasi",
+    "effectiveDateLabel": "Tarikh berkuat kuasa:",
+    "effectiveDate": "10 Mei 2026",
+    "appNameLabel": "Nama aplikasi:",
+    "contactLabel": "Hubungi:",
+    "contactSuffix": "— kami akan menjawab dalam 30 hari.",
+    "seeAlso": "Lihat juga",
+    "termsLink": "Terma Perkhidmatan",
+    "s1": {
+      "heading": "1. Tentang Dasar Ini",
+      "pre": "Istiqoma (\"kami\", \"milik kami\", atau \"aplikasi\") adalah aplikasi peningkatan diri secara rohani untuk umat Islam. Ia menggunakan ",
+      "strong": "API Quran Foundation (QF)",
+      "mid": " dan memaparkan kandungan Al-Quran yang bersumber daripada ",
+      "post": ". Dasar Privasi ini menerangkan cara kami mengumpul, menggunakan, dan melindungi maklumat peribadi anda, serta menerangkan hak-hak anda di bawah undang-undang privasi yang terpakai termasuk GDPR."
+    },
+    "s2": {
+      "heading": "2. Data yang Kami Kumpul",
+      "colData": "Data",
+      "colSource": "Sumber",
+      "colPurpose": "Tujuan",
+      "row1Data": "Alamat e-mel",
+      "row1Source": "Google / Replit OAuth",
+      "row1Purpose": "Pengenalan akaun",
+      "row2Data": "Nama paparan & avatar",
+      "row2Source": "Google / Replit OAuth atau input pengguna",
+      "row2Purpose": "Paparan profil",
+      "row3Data": "Nama pengguna & PIN dipincang",
+      "row3Source": "Dicipta pengguna semasa mendaftar",
+      "row3Purpose": "Pengesahan alternatif",
+      "row4Data": "Log amalan & data amalan keagamaan",
+      "row4Source": "Input pengguna",
+      "row4Purpose": "Ciri utama — menjejak amalan baik dan kemajuan rohani",
+      "row5Data": "Penanda buku Al-Quran & kedudukan bacaan",
+      "row5Source": "Interaksi pengguna",
+      "row5Purpose": "Ciri teruskan membaca",
+      "row6Data": "Kemajuan hafazan",
+      "row6Source": "Interaksi pengguna",
+      "row6Purpose": "Penjejakan hafazan",
+      "row7Data": "Sasaran & jawapan onboarding",
+      "row7Source": "Input pengguna",
+      "row7Purpose": "Matlamat peribadi",
+      "row8Data": "Titik akhir & kunci push subscription",
+      "row8Source": "Browser Web Push API",
+      "row8Purpose": "Menghantar peringatan solat & amalan",
+      "row9Data": "Lokasi anggaran (latitud/longitud)",
+      "row9Source": "Browser Geolocation API (opt-in)",
+      "row9Purpose": "Mengira waktu solat tempatan (peringatan Solat)",
+      "row10Data": "Data sesi",
+      "row10Source": "Jana pelayan",
+      "row10Purpose": "Mengekalkan anda log masuk (TTL 1 minggu)",
+      "notWord": "tidak",
+      "notePre": "Kami ",
+      "notePost": " menjalankan skrip analitik pihak ketiga, atau mengumpul data di luar yang disenaraikan di atas."
+    },
+    "s3": {
+      "heading": "3. Data Sensitif & Persetujuan GDPR",
+      "body1Pre": "Log amalan dan data amalan keagamaan (seperti solat yang dilakukan, bacaan Al-Quran, puasa, dan ibadah) merupakan ",
+      "body1Strong1": "data peribadi kategori khas (sensitif)",
+      "body1Mid": " di bawah Perkara 9 GDPR. Kami bergantung pada ",
+      "body1Strong2": "persetujuan eksplisit dan bebas",
+      "body1Post": " anda sebelum memproses maklumat ini. Anda boleh menarik balik persetujuan pada bila-bila masa dengan memadamkan akaun anda (lihat Seksyen 8).",
+      "body2Label": "Cara kami mengumpul persetujuan:",
+      "body2Rest": " Sebelum sebarang data keagamaan disimpan, setiap pengguna baharu mesti menanda dua kotak pada skrin persetujuan khusus:",
+      "check1": "\"Saya bersetuju Istiqoma menyimpan data amalan keagamaan saya untuk menjalankan ciri-ciri aplikasi.\"",
+      "check2": "\"Saya mengesahkan bahawa saya berusia 13 tahun atau lebih.\"",
+      "body3": "Butang Teruskan kekal dinyahdayakan sehingga kedua-dua kotak ditanda. Pengguna sedia ada yang mendaftar sebelum ciri ini diperkenalkan akan ditunjukkan gesaan persetujuan yang sama pada log masuk seterusnya dan tidak dapat mengakses aplikasi sehingga mereka mengesahkan.",
+      "body4Label": "Keperluan umur:",
+      "body4Rest": " Istiqoma tidak ditujukan untuk pengguna di bawah 13 tahun. Pendaftaran disekat bagi sesiapa yang tidak mengesahkan memenuhi keperluan umur minimum melalui kotak semak perisytiharan kendiri yang diterangkan di atas."
+    },
+    "s4": {
+      "heading": "4. Cara Kami Menggunakan Data Anda",
+      "item1": "Untuk mengendalikan aplikasi dan menyediakan ciri-cirinya kepada anda.",
+      "item2": "Untuk menghantar pemberitahuan push yang anda pilih (peringatan, amaran).",
+      "item3": "Untuk mengira waktu solat berdasarkan lokasi anda.",
+      "item4": "Untuk menyokong papan pendahulu dan sasaran komuniti (agregat).",
+      "item5Pre": "Kami ",
+      "item5Not": "tidak",
+      "item5Post": " menjual data anda atau menggunakannya untuk membina profil pengiklanan pihak ketiga.",
+      "item6Pre": "Kami ",
+      "item6Not": "tidak",
+      "item6Post": " menjual data anda kepada pihak ketiga.",
+      "item7Pre": "Kami ",
+      "item7Not": "tidak",
+      "item7Post": " menggunakan data anda untuk melatih model AI tanpa persetujuan eksplisit berasingan daripada anda."
+    },
+    "s5": {
+      "heading": "5. Sub-Pemproses",
+      "colProcessor": "Sub-pemproses",
+      "colRole": "Peranan",
+      "colPolicy": "Dasar Privasi",
+      "supabaseRole": "Hosting pangkalan data (PostgreSQL)",
+      "replitRole": "Hosting aplikasi & identiti OAuth",
+      "webpushName": "Web Push (piawaian pelayar)",
+      "webpushRole": "Penghantaran pemberitahuan push melalui perkhidmatan push pelayar anda (cth. Google FCM untuk Chrome, Mozilla Autopush untuk Firefox)",
+      "qfName": "Quran Foundation / Quran.com",
+      "qfRole": "Teks, audio, dan data ayat Al-Quran (API baca sahaja)"
+    },
+    "s6": {
+      "heading": "6. Keselamatan",
+      "intro": "Kami serius dalam menjaga keselamatan data peribadi anda dan melaksanakan langkah-langkah berikut:",
+      "item1Label": "TLS semasa transit:",
+      "item1Rest": " Semua komunikasi antara peranti anda dan pelayan kami disulitkan melalui HTTPS.",
+      "item2Label": "Disulitkan semasa penyimpanan:",
+      "item2Rest": " Data anda disimpan pada instance PostgreSQL yang diuruskan Supabase, yang menggunakan penyulitan semasa penyimpanan.",
+      "item3Label": "Kawalan akses:",
+      "item3Rest": " Akses pangkalan data dihadkan kepada akaun perkhidmatan aplikasi dengan kebenaran minimum yang diperlukan. Akses manusia langsung diaudit dan dihadkan.",
+      "item4Label": "Putaran rahsia:",
+      "item4Pre": " Rahsia aplikasi (kunci API, kunci VAPID, kelayakan pangkalan data) diputar secara berkala mengikut keperluan ",
+      "item4Strong": "Security Rule 6.9",
+      "item4End": ".",
+      "item5Label": "Respons insiden keselamatan:",
+      "item5Pre": " Kami komited untuk mengakui insiden keselamatan yang disahkan dalam masa ",
+      "item5Strong": "24 jam",
+      "item5Post": " dan memberitahu pengguna yang terjejas seperti yang dikehendaki oleh undang-undang yang terpakai."
+    },
+    "s7": {
+      "heading": "7. Pemindahan Data Antarabangsa",
+      "bodyPre": "Istiqoma dihoskan pada infrastruktur yang dikendalikan oleh Replit dan Supabase, yang mungkin memproses data di pusat data di luar negara kediaman anda (termasuk Amerika Syarikat dan Kawasan Ekonomi Eropah). Jika dikehendaki oleh undang-undang, pemindahan ini dikawal oleh ",
+      "bodyStrong": "Klausa Kontrak Standard (SCC)",
+      "bodyPost": " atau perlindungan yang setara yang diterima pakai oleh setiap sub-pemproses. Sila rujuk dasar privasi sub-pemproses yang dipautkan di atas untuk butiran."
+    },
+    "s8": {
+      "heading": "8. Hak-Hak Anda",
+      "intro": "Bergantung pada bidang kuasa anda, anda mempunyai hak-hak berikut berkenaan data peribadi anda:",
+      "item1Label": "Akses & pembetulan:",
+      "item1Rest": " Lihat dan kemas kini maklumat profil anda terus dalam aplikasi (halaman Profil).",
+      "item2Label": "Batalkan token OAuth:",
+      "item2Pre": " Anda boleh membatalkan akses Istiqoma ke akaun Google anda pada bila-bila masa melalui ",
+      "item2LinkGoogle": "myaccount.google.com/permissions",
+      "item2Mid": ". Setelah integrasi OAuth Quran Foundation aktif, anda juga boleh membatalkan token tersebut di ",
+      "item2LinkQF": "titik akhir Pembatalan OAuth Quran Foundation",
+      "item2Post": ".",
+      "item3Label": "Pemadaman data:",
+      "item3Pre": " Anda boleh memadam akaun anda dan semua data berkaitan menggunakan ciri \"Padam Akaun Saya\" dalam tetapan aplikasi. Kami akan memadamkan data peribadi anda secara kekal dalam masa ",
+      "item3Strong1": "30 hari",
+      "item3Mid": " selepas permintaan anda, dan membersihkannya daripada sandaran dalam masa ",
+      "item3Strong2": "90 hari",
+      "item3Post": ".",
+      "item4Label": "Pemadaman akaun QF:",
+      "item4Rest": " Jika akaun Quran Foundation yang berkaitan dipadamkan, data berkaitan anda di Istiqoma juga akan dipadamkan.",
+      "contactPre": "Untuk menggunakan mana-mana hak ini, e-mel kami di ",
+      "contactPost": ". Kami akan menjawab dalam 30 hari."
+    },
+    "s9": {
+      "heading": "9. Kanak-Kanak",
+      "body": "Istiqoma tidak ditujukan untuk kanak-kanak di bawah umur 13 tahun. Kami tidak dengan sengaja mengumpul maklumat peribadi daripada kanak-kanak di bawah 13 tahun. Jika anda percaya seorang kanak-kanak di bawah 13 tahun telah memberikan kami maklumat peribadi, sila hubungi kami dan kami akan memadamnya dengan segera."
+    },
+    "s10": {
+      "heading": "10. Perubahan pada Dasar Ini",
+      "body": "Kami mungkin mengemas kini Dasar Privasi ini dari semasa ke semasa. Kami akan memberitahu anda tentang perubahan ketara melalui sepanduk dalam aplikasi atau dengan mengemas kini tarikh berkuat kuasa di atas. Penggunaan aplikasi yang berterusan selepas perubahan merupakan penerimaan anda terhadap dasar yang dikemas kini."
+    }
+  },
+  "terms": {
+    "pageTitle": "Terma Perkhidmatan",
+    "effectiveDateLabel": "Tarikh berkuat kuasa:",
+    "effectiveDate": "10 Mei 2026",
+    "appNameLabel": "Nama aplikasi:",
+    "intro": "Selamat datang ke Istiqoma. Dengan mengakses atau menggunakan aplikasi, anda bersetuju untuk terikat dengan Terma Perkhidmatan ini (\"Terma\"). Sila baca dengan teliti.",
+    "seeAlso": "Lihat juga",
+    "privacyLink": "Dasar Privasi",
+    "s1": {
+      "heading": "1. Penggunaan yang Dibenarkan",
+      "intro": "Anda bersetuju untuk menggunakan Istiqoma hanya untuk tujuan yang sah dan dengan cara yang:",
+      "item1": "Tidak melanggar mana-mana undang-undang atau peraturan tempatan, nasional, atau antarabangsa yang terpakai.",
+      "item2": "Tidak cuba mendapatkan akses tanpa kebenaran kepada mana-mana bahagian perkhidmatan, pelayan, atau sistem yang disambungkan.",
+      "item3": "Tidak mengganggu, mendisrupsi, atau membebankan infrastruktur aplikasi.",
+      "item4": "Tidak menghantar kandungan yang palsu, mengelirukan, atau berbahaya.",
+      "item5": "Tidak melakukan kejuruteraan terbalik, menyahkompilasi, atau mencuba mengekstrak kod sumber aplikasi.",
+      "item6": "Tidak menggunakan aplikasi untuk sebarang tujuan komersial tanpa persetujuan bertulis kami terlebih dahulu.",
+      "suspension": "Kami berhak untuk menggantung atau menamatkan akaun yang melanggar terma ini."
+    },
+    "s2": {
+      "heading": "2. Atribusi Kandungan Al-Quran",
+      "pre": "Teks Al-Quran, terjemahan, dan kandungan audio yang dipaparkan dalam Istiqoma bersumber daripada ",
+      "strong": "Quran Foundation",
+      "mid": " melalui API ",
+      "linkText": "Quran.com",
+      "after": ". Kandungan ini dibentangkan apa adanya dan ",
+      "notModified": "tidak diubah suai",
+      "rest": " oleh Istiqoma dengan cara apa pun. Semua hak ke atas kandungan Al-Quran kekal dengan Quran Foundation dan penulis terjemahan masing-masing. Penggunaan kandungan ini dikawal oleh ",
+      "qfTosLink": "Terma Perkhidmatan Quran Foundation",
+      "end": "."
+    },
+    "s3": {
+      "heading": "3. Kandungan Pengguna",
+      "body1": "Anda kekal memiliki kandungan yang anda cipta dalam aplikasi (log amalan, sasaran, nota, dll.). Dengan menghantar kandungan, anda memberikan kami lesen terhad, bukan eksklusif untuk menyimpan dan memaparkannya semata-mata untuk tujuan menyediakan perkhidmatan kepada anda.",
+      "body2": "Anda bertanggungjawab atas ketepatan dan kesesuaian kandungan yang anda hantar."
+    },
+    "s4": {
+      "heading": "4. Penafian",
+      "body1Pre": "Istiqoma disediakan atas dasar ",
+      "body1AsIs": "\"apa adanya\"",
+      "body1Mid": " dan ",
+      "body1AsAvail": "\"sebagaimana tersedia\"",
+      "body1Post": " tanpa jaminan apa pun, sama ada tersurat atau tersirat. Kami tidak menjamin bahawa perkhidmatan akan tidak terputus, bebas ralat, atau bebas daripada virus atau komponen berbahaya lain.",
+      "body2": "Aplikasi ini adalah alat penjejak tabiat rohani. Ia tidak memberikan nasihat keagamaan, undang-undang, perubatan, atau kewangan. Pengiraan waktu solat adalah anggaran dan harus disahkan dengan sumber tempatan."
+    },
+    "s5": {
+      "heading": "5. Had Liabiliti",
+      "body": "Setakat yang dibenarkan oleh undang-undang, Istiqoma dan operatornya tidak akan bertanggungjawab atas sebarang kerosakan tidak langsung, sampingan, khas, akibatan, atau punitif yang timbul daripada atau berkaitan dengan penggunaan aplikasi anda, walaupun kami telah dimaklumkan tentang kemungkinan kerosakan tersebut."
+    },
+    "s6": {
+      "heading": "6. Undang-Undang yang Mengawal & Pertikaian",
+      "body": "Terma ini dikawal oleh dan ditafsirkan mengikut undang-undang yang terpakai. Sebarang pertikaian yang timbul daripada atau berkaitan dengan Terma ini atau penggunaan Istiqoma anda akan cuba diselesaikan terlebih dahulu melalui rundingan suci hati. Jika tidak diselesaikan, pertikaian boleh dikemukakan kepada timbang tara yang mengikat atau mahkamah yang berwibawa. Di mana terma Quran Foundation memerlukan bidang kuasa New York untuk pertikaian berkaitan kandungan API mereka, terma tersebut mengutamakan perkara-perkara tersebut."
+    },
+    "s7": {
+      "heading": "7. Perubahan pada Terma Ini",
+      "body": "Kami mungkin mengemas kini Terma ini dari semasa ke semasa. Kami akan memberitahu anda tentang perubahan material melalui sepanduk dalam aplikasi atau dengan mengemas kini tarikh berkuat kuasa di atas. Penggunaan aplikasi yang berterusan selepas perubahan berkuat kuasa merupakan penerimaan anda terhadap Terma yang disemak."
+    },
+    "s8": {
+      "heading": "8. Privasi",
+      "pre": "",
+      "link": "Dasar Privasi",
+      "post": " kami menerangkan cara kami mengumpul, menggunakan, dan melindungi data peribadi anda. Dengan menggunakan Istiqoma, anda mengakui bahawa anda telah membaca dan memahami Dasar Privasi kami."
+    },
+    "s9": {
+      "heading": "9. Hubungi",
+      "pre": "Untuk pertanyaan tentang Terma ini, hubungi kami di ",
+      "post": "."
+    }
+  },
+  "seo": {
+    "landing": {
+      "title": "Istiqoma — Penjejak tabiat rohani untuk Muslim",
+      "description": "Bina ibadah harian yang konsisten. Jejaki solat, zikir, puasa, sedekah dan bacaan Al-Quran dengan peringatan lembut, streak dan analitik yang indah."
+    },
+    "dashboard": {
+      "title": "Papan pemuka — Ibadah harian anda",
+      "description": "Lihat solat harian, zikir, bacaan Al-Quran dan kemajuan streak anda sekilas pandang."
+    },
+    "progress": {
+      "title": "Kemajuan — Perjalanan rohani anda",
+      "description": "Visualkan tabiat ibadah anda dari masa ke masa dengan carta dan pecahan kategori."
+    },
+    "targets": {
+      "title": "Sasaran — Tetapkan matlamat rohani",
+      "description": "Cipta dan jejaki sasaran peribadi dan komuniti untuk solat, puasa, Al-Quran dan banyak lagi."
+    },
+    "quran": {
+      "title": "Al-Quran — Baca, dengar dan hafal",
+      "description": "Baca Al-Quran dengan tipografi Arab yang indah, dengar pelbagai qari dan hafal ayat demi ayat."
+    },
+    "quranSurah": {
+      "title": "Al-Quran — Surah {{name}} ({{transliteration}})",
+      "description": "Surah {{transliteration}} ({{name}}) — {{translated}}. Surah ke-{{number}} dalam Al-Quran, diturunkan di {{revelation}}, mengandungi {{verses}} ayat. Baca dengan terjemahan, dengar pelbagai qari dan hafal ayat demi ayat di Istiqoma.",
+      "makkah": "Makkah",
+      "madinah": "Madinah"
+    },
+    "quranBookmarks": {
+      "title": "Tanda buku Al-Quran",
+      "description": "Sambung bacaan anda tepat di tempat anda berhenti."
+    },
+    "quranMemorization": {
+      "title": "Kemajuan hafazan Al-Quran",
+      "description": "Pantau ayat-ayat yang telah anda hafal di seluruh Al-Quran."
+    },
+    "quiz": {
+      "title": "Kuiz Islamik — Uji pengetahuan anda",
+      "description": "Asah pengetahuan Islam anda melalui 10 tahap soalan aneka pilihan."
+    },
+    "quizLeaderboard": {
+      "title": "Papan kedudukan kuiz",
+      "description": "Lihat prestasi komuniti dalam Kuiz Islamik."
+    },
+    "leaderboard": {
+      "title": "Papan kedudukan — Berlumba dalam kebaikan",
+      "description": "Lihat prestasi terbaik komuniti Istiqoma dan berlumba dalam amal kebaikan."
+    },
+    "profile": {
+      "title": "Profil & tetapan",
+      "description": "Urus akaun, bahasa, peringatan dan perkhidmatan tersambung anda."
+    },
+    "dzikir": {
+      "title": "Pengira Zikir",
+      "description": "Tasbih digital yang tenang menemani anda, dengan sasaran setiap jenis dan sesi tersimpan."
+    },
+    "sholat": {
+      "title": "Penjejak Solat",
+      "description": "Catatkan solat fardhu harian anda dan bina tabiat solat yang konsisten."
+    },
+    "qibla": {
+      "title": "Kiblat & waktu solat",
+      "description": "Cari arah Kaabah dan lihat waktu solat hari ini berdasarkan lokasi anda."
+    },
+    "privacy": {
+      "title": "Dasar privasi",
+      "description": "Bagaimana Istiqoma mengumpul, menyimpan dan melindungi data perjalanan rohani anda."
+    },
+    "terms": {
+      "title": "Terma perkhidmatan",
+      "description": "Terma yang terpakai apabila anda menggunakan Istiqoma."
+    }
+  }
+}

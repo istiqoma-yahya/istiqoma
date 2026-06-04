@@ -1,0 +1,2121 @@
+{
+  "app": {
+    "name": "Istiqoma",
+    "tagline": "Built for the Ummah"
+  },
+  "nav": {
+    "home": "Home",
+    "progress": "Progress",
+    "dzikir": "Dzikir",
+    "qibla": "Prayer",
+    "targets": "Targets",
+    "quran": "Quran",
+    "quiz": "Islamic Quiz"
+  },
+  "quranMenu": {
+    "title": "Quran",
+    "continueReading": "Continue Reading",
+    "startReading": "Start Reading",
+    "bookmarks": "Bookmarks",
+    "noBookmarks": "No bookmarks yet",
+    "noBookmarksHint": "Tap the bookmark icon next to a verse to save it here.",
+    "searchSurah": "Search surah by name or number",
+    "verses": "verses",
+    "verseShort": "Verse",
+    "bismillah": "In the name of Allah, the Most Gracious, the Most Merciful",
+    "bookmarkAdded": "Bookmark saved",
+    "bookmarkRemoved": "Bookmark removed",
+    "nowPlaying": "Now Playing",
+    "reciter": "Reciter",
+    "close": "Close",
+    "memorize": "Memorize",
+    "memorizationMode": "Memorization Mode",
+    "exitMemorization": "Exit memorization mode",
+    "displayFull": "Show full",
+    "displayFirstLast": "First & last word",
+    "displayHidden": "Hidden",
+    "applyToAll": "Apply to all verses",
+    "tapToReveal": "Tap to reveal verse",
+    "markMemorized": "Mark as memorized",
+    "unmarkMemorized": "Unmark memorized",
+    "memorizationSaveFailed": "Couldn't save memorization. Please try again.",
+    "memorized": "Memorized",
+    "record": "Record",
+    "stopRecording": "Stop recording",
+    "playRecording": "Play recording",
+    "deleteRecording": "Delete recording",
+    "voicePlayerSubtitle": "Your recording",
+    "voicePlayerPlay": "Play recording",
+    "voicePlayerPause": "Pause recording",
+    "voicePlayerClose": "Close recording player",
+    "voicePlayerSeek": "Recording progress",
+    "micPermissionDenied": "Microphone permission denied",
+    "memorizationProgress": "Memorization Progress",
+    "totalMemorized": "Total memorized",
+    "surahsStarted": "{{started}} of {{total}} surahs started",
+    "autoAdvance": "Auto-advance",
+    "autoAdvanceHint": "Play next ayah automatically",
+    "continuousPlay": "Continuous play",
+    "continuousPlayHint": "Continue into the next surah automatically"
+  },
+  "landing": {
+    "joinPill": "Join 50+ Muslims on their journey",
+    "editorial": {
+      "premiumLabel": "Premium Spiritual Habit Tracker",
+      "statsUsersLabel": "Active Users",
+      "statsDeedsLabel": "Deeds Recorded",
+      "statsStreakLabel": "Day Streak Record",
+      "quoteTranslation": "So remain on a straight course as you have been commanded, and also those who have turned with you to Allah.",
+      "philosophyTitle": "Not Just Goals, But Devotion.",
+      "philosophyDesc": "Ordinary productivity apps don't understand the essence of worship. Istiqoma is purpose-built with a visual gentleness and structure that honours a Muslim's spiritual journey.",
+      "philosophyPoint1": "Track obligatory & sunnah prayers with elegance",
+      "philosophyPoint2": "Daily Qur'an recitation journal",
+      "philosophyPoint3": "Sunnah fasting and good deed logging",
+      "philosophyPoint4": "Privacy-first, completely ad-free",
+      "rhythmTitle": "Daily Rhythm of Goodness",
+      "rhythmSubtitle": "A harmony of worship from dawn to night.",
+      "rhythmSubuh": "Fajr",
+      "rhythmSubuhTitle": "Sacred Beginning",
+      "rhythmSubuhDesc": "Fajr Prayer & Morning Dhikr",
+      "rhythmDhuha": "Dhuha",
+      "rhythmDhuhaTitle": "Light of Provision",
+      "rhythmDhuhaDesc": "Dhuha Prayer & Qur'an Recitation",
+      "rhythmSiang": "Noon",
+      "rhythmSiangTitle": "Meaningful Pause",
+      "rhythmSiangDesc": "Dhuhr & Charity",
+      "rhythmMalam": "Night",
+      "rhythmMalamTitle": "Reflection",
+      "rhythmMalamDesc": "Isha, Witr & Journal",
+      "hadithArabic": "إِنَّ أَحَبَّ الأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ",
+      "hadithTranslation": "The most beloved deeds to Allah are those done consistently, even if they are small.",
+      "hadithRef": "Sahih al-Bukhari & Muslim"
+    },
+    "cta": {
+      "title": "Start Your Journey of Istiqomah",
+      "subtitle": "Free to start. Designed to help you stay consistent.",
+      "button": "Sign up with Google",
+      "note": "Or sign in with username & PIN"
+    },
+    "title": "Build Consistent",
+    "titleLine2": "Daily Deeds",
+    "subtitle": "Istiqoma helps you build consistent habits in prayer, good deeds, and self-reflection.",
+    "startTracking": "Begin Your Journey",
+    "login": "Login",
+    "usernameLogin": "Sign in with username",
+    "authChooser": {
+      "title": "How would you like to continue?",
+      "description": "Choose a sign in method to start tracking your deeds. Both work for new and returning users.",
+      "continueGoogle": "Continue with Google",
+      "continueUsername": "Continue with Username & PIN"
+    },
+    "tour": {
+      "cta": "See it in action",
+      "subtitle": "Take a 2-min interactive tour"
+    },
+    "featuresLabel": "Features",
+    "featuresTitle": "Your Spiritual Companion",
+    "featuresSubtitle": "A comprehensive suite of tools designed to help you balance worldly life with your spiritual obligations.",
+    "features": {
+      "dzikirTitle": "Dzikir Counter",
+      "dzikirDesc": "Digital tasbih with haptic feedback. Track your daily remembrance of Allah with ease.",
+      "quranTitle": "Quran Journey",
+      "quranDesc": "Read or listen to Qur'an recitations from various reciters. Memorise the Qur'an using a voice recording method.",
+      "analyticsTitle": "Deed Analytics",
+      "analyticsDesc": "Visualize your spiritual growth. Identify areas for improvement with gentle, data-driven insights.",
+      "remindersTitle": "Smart Reminders",
+      "remindersDesc": "Never miss a Salah. Get timely notifications for prayers and your spiritual goals.",
+      "targetsTitle": "Spiritual Goals",
+      "targetsDesc": "Set meaningful targets for worship. Track your consistency and build lasting habits.",
+      "communityTitle": "Community Challenges",
+      "communityDesc": "Join global challenges for fasting, Dhikr, or charity. Compete in goodness (Khair).",
+      "badgesTitle": "Earn Rewards",
+      "badgesDesc": "Earn points, streaks, badges, and rankings through spiritual achievements to encourage you to stay consistent.",
+      "privacyTitle": "Privacy First",
+      "privacyDesc": "Your deeds are between you and Allah alone. We never share your spiritual journey with anyone."
+    },
+    "personalize": {
+      "title": "Personalize your worship goals",
+      "subtitle": "Customize your dashboard to focus on the habits you want to build right now. Start with the obligatory (Fard), then gradually add voluntary ones (Sunnah) as your spiritual growth progresses.",
+      "cardTitle": "Personalize Goals",
+      "quranGoal": "Daily Quran Goal",
+      "quranPages": "5 Pages",
+      "tahajjudTitle": "Tahajjud Reminders",
+      "tahajjudDesc": "Last 3rd of night",
+      "fastingTitle": "Monday/Thursday Fasting",
+      "fastingDesc": "Sunnah habit",
+      "benefit1": "Smart reminders based on your location and calendar.",
+      "benefit2": "Privacy first. Your deeds are between you and Allah.",
+      "benefit3": "Offline capable for when you disconnect to reconnect."
+    },
+    "featureSections": {
+      "goals": {
+        "eyebrow": "Spiritual Goals",
+        "title": "Personalize your worship goals",
+        "subtitle": "Customize your dashboard to focus on the habits you want to build right now. Start with the obligatory (Fard), then gradually add voluntary ones (Sunnah) as your spiritual growth progresses.",
+        "benefit1": "Smart reminders based on your location and calendar.",
+        "benefit2": "Privacy first. Your deeds are between you and Allah."
+      },
+      "dzikir": {
+        "eyebrow": "Dzikir Counter",
+        "title": "A tasbih that travels with you",
+        "subtitle": "Count each remembrance with a calm, distraction-free counter — at home, on the road, or after every prayer.",
+        "benefit1": "Tap-to-count with haptic feedback and per-type targets.",
+        "benefit2": "Save your sessions as deeds so every dhikr adds to your streak.",
+        "illustration": {
+          "label": "Today's Dzikir",
+          "type": "Subhanallah",
+          "tap": "Tap to count"
+        }
+      },
+      "quran": {
+        "eyebrow": "Quran Reader",
+        "title": "Read, listen, and memorise the Qur'an",
+        "subtitle": "Beautiful Arabic typography, multiple reciters, and a memorisation mode that gently reveals each verse at your pace.",
+        "benefit1": "Bookmark verses and pick up exactly where you left off.",
+        "benefit2": "Built-in memorisation mode with recording playback.",
+        "illustration": {
+          "surah": "Surah Yusuf",
+          "verseRef": "Verse 87",
+          "translation": "“…and do not despair of the mercy of Allah.”",
+          "progress": "Last read · 2 minutes ago"
+        }
+      },
+      "reminders": {
+        "eyebrow": "Smart Reminders",
+        "title": "Never miss the moments that matter",
+        "subtitle": "Location-aware prayer alerts, Tahajjud nudges, and target reminders that respect your day.",
+        "benefit1": "Adhan-accurate prayer times based on your location.",
+        "benefit2": "Personalised reminders for your sunnah habits.",
+        "illustration": {
+          "label": "Upcoming reminders",
+          "fajrTitle": "Fajr Prayer",
+          "fajrDesc": "Starts in 12 minutes",
+          "tahajjudTitle": "Tahajjud",
+          "tahajjudDesc": "Last third of the night",
+          "quranTitle": "Quran Reading",
+          "quranDesc": "Daily goal: 5 pages"
+        }
+      },
+      "analytics": {
+        "eyebrow": "Deed Analytics",
+        "title": "See your spiritual growth clearly",
+        "subtitle": "Friendly charts and streak history that show where you're consistent and where to lean in next.",
+        "benefit1": "Weekly and monthly breakdowns by category.",
+        "benefit2": "Streak history that celebrates consistency, not perfection.",
+        "illustration": {
+          "label": "This week",
+          "deeds": "deeds",
+          "streak": "Current streak",
+          "days": "days",
+          "trendLabel": "30-day trend",
+          "categoriesTitle": "Top categories",
+          "category_sholat": "Sholat",
+          "category_dzikir": "Dzikir",
+          "category_quran": "Qur'an",
+          "dayShort_0": "S",
+          "dayShort_1": "M",
+          "dayShort_2": "T",
+          "dayShort_3": "W",
+          "dayShort_4": "T",
+          "dayShort_5": "F",
+          "dayShort_6": "S"
+        }
+      },
+      "community": {
+        "eyebrow": "Community Challenges",
+        "title": "Compete in goodness, together",
+        "subtitle": "Join friendly leaderboards and global challenges that turn worship into a shared journey.",
+        "benefit1": "Seasonal leaderboards for dhikr, fasting, and charity.",
+        "benefit2": "Encourage friends without ever exposing private details.",
+        "illustration": {
+          "label": "Weekly leaderboard",
+          "you": "You",
+          "caption": "Top 3 this week · points reset every Monday"
+        }
+      },
+      "badges": {
+        "eyebrow": "Rewards & Badges",
+        "title": "Small wins that keep you going",
+        "subtitle": "Earn points, streak milestones, and beautiful badges as your habits take root, inshaAllah.",
+        "benefit1": "Unlock badges for prayer, Qur'an, and dhikr milestones.",
+        "benefit2": "Use points to protect your streak with streak freezes.",
+        "illustration": {
+          "label": "Recent achievements",
+          "badge1": "30-Day Fajr",
+          "badge2": "Qur'an Reader",
+          "badge3": "Charity Champ",
+          "progressTitle": "Next badge"
+        }
+      },
+      "privacy": {
+        "eyebrow": "Privacy First",
+        "title": "Your worship is yours alone",
+        "subtitle": "Istiqoma is built so your deeds stay between you and Allah — no tracking pixels, and your data is never sold.",
+        "benefit1": "Your worship data is never sold or shared with third parties.",
+        "benefit2": "Export or delete your data anytime, no questions asked.",
+        "illustration": {
+          "label": "Your data, your rules",
+          "headline": "Between you and Allah",
+          "point1": "End-to-end encrypted in transit",
+          "point2": "Never sold or shared",
+          "point3": "Delete your account anytime"
+        }
+      }
+    },
+    "testimonial": {
+      "quote": "Istiqoma didn't just help to get consistent worshipping Allah every day, it also gave me a visual representation of my relationship with my faith.",
+      "name": "Yahya Pramudya Ekananta",
+      "role": "Muslim from Indonesia"
+    },
+    "downloadApp": "Download App",
+    "downloadAppDesc": "Install Istiqoma on your device for quick access",
+    "heroCard": {
+      "todaysProgress": "Today's Progress",
+      "muharramDate": "14 Muharram",
+      "fajrPrayer": "Fajr Prayer",
+      "completedAt": "Completed at 5:45 AM",
+      "readSurahKahf": "Read Surah Kahf",
+      "target20mins": "Target: 20 mins",
+      "giveSadaqah": "Give Sadaqah",
+      "dailyGoal": "Daily goal",
+      "currentStreak": "Current Streak",
+      "days": "Days",
+      "pts": "pts"
+    }
+  },
+  "dashboard": {
+    "greeting": "Assalaamu'alaikum",
+    "subtitle": "What have you done today?",
+    "recordDeed": "Record Good Deed",
+    "recentActivity": "Recent Activity",
+    "others": "Partners",
+    "noDeeds": "No deeds recorded yet",
+    "startRecording": "Start tracking your good deeds to see your progress over time.",
+    "addDeed": "Add your first deed",
+    "activeTargets": "Active Targets",
+    "viewAll": "View All",
+    "noTargetsYet": "Set spiritual goals to track your progress automatically",
+    "setupTargets": "Set Up Targets"
+  },
+  "purposeQuotes": {
+    "dekat-allah": [
+      "\"The most beloved of deeds to Allah are those done consistently, even if they are few.\" — Sahih al-Bukhari",
+      "\"Whoever draws near to Me by a hand's span, I draw near to him by an arm's length.\" — Hadith Qudsi",
+      "\"And He is with you wherever you are.\" — Quran 57:4",
+      "\"Verily, with hardship comes ease.\" — Quran 94:6",
+      "\"Allah does not burden a soul beyond that it can bear.\" — Quran 2:286"
+    ],
+    "bermanfaat": [
+      "\"The best of people are those most beneficial to people.\" — Al-Mu'jam al-Awsat",
+      "\"Charity does not decrease wealth, and forgiving others only adds to one's honour.\" — Sahih Muslim",
+      "\"A kind word is charity.\" — Sahih al-Bukhari",
+      "\"Do good deeds, even if they are small — for you do not know which deed will enter you into Paradise.\" — Ibn Majah",
+      "\"Whoever removes a worldly hardship from a believer, Allah will remove one of their hardships on the Day of Judgement.\" — Sahih Muslim"
+    ],
+    "berilmu": [
+      "\"Seeking knowledge is an obligation upon every Muslim.\" — Sunan Ibn Majah",
+      "\"Allah elevates those who believe among you and those given knowledge, in degrees.\" — Quran 58:11",
+      "\"The scholars are the heirs of the Prophets.\" — Sunan Abu Dawud",
+      "\"Say: My Lord, increase me in knowledge.\" — Quran 20:114",
+      "\"Whoever treads a path in search of knowledge, Allah makes easy for him a path to Paradise.\" — Sahih Muslim"
+    ],
+    "istiqomah": [
+      "\"Indeed, those who say 'Our Lord is Allah' and then remain steadfast — the angels descend upon them.\" — Quran 41:30",
+      "\"The most beloved deeds to Allah are those done consistently, even if small.\" — Sahih al-Bukhari",
+      "\"Be steadfast as you have been commanded.\" — Quran 11:112",
+      "\"Whoever is patient, Allah will make him patient. No one can be given a blessing better or greater than patience.\" — Sahih al-Bukhari",
+      "\"The deed most loved by Allah is the one done consistently, even if it is little.\" — Sahih Muslim"
+    ],
+    "keluarga": [
+      "\"The best of you are those who are best to their families.\" — Sunan al-Tirmidhi",
+      "\"Every one of you is a shepherd, and every one of you is responsible for his flock.\" — Sahih al-Bukhari",
+      "\"Your family has a right over you.\" — Sahih al-Bukhari",
+      "\"Whoever believes in Allah and the Last Day should treat his neighbour with generosity.\" — Sahih al-Bukhari",
+      "\"A father's kindness to his child is better than giving a sa' in charity.\" — Sunan al-Tirmidhi"
+    ]
+  },
+  "stats": {
+    "goodDeeds": "Good Deeds",
+    "points": "points",
+    "totalPoints": "Total Points"
+  },
+  "deed": {
+    "addDeed": "Add Deed",
+    "editDeed": "Edit Deed",
+    "deleteDeed": "Delete Deed",
+    "description": "Description",
+    "category": "Category",
+    "points": "Points",
+    "dateTime": "Date & Time",
+    "save": "Save",
+    "cancel": "Cancel",
+    "deleteConfirm": "Are you sure?",
+    "deleteWarning": "This action cannot be undone. This will permanently delete this deed from your history."
+  },
+  "createDeed": {
+    "title": "Record a New Deed",
+    "subtitle": "Track your good actions to monitor your spiritual progress.",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "e.g., Helped a neighbor, Read Quran...",
+    "categoryLabel": "Category",
+    "categoryPlaceholder": "Select category",
+    "typeLabel": "Type",
+    "typePlaceholder": "Select type",
+    "pointsLabel": "Amount",
+    "dateTimeSection": "Record Date & Time (Optional)",
+    "dateLabel": "Date",
+    "timeLabel": "Time",
+    "saving": "Saving...",
+    "saveDeed": "Save Deed"
+  },
+  "editDeed": {
+    "title": "Edit Deed",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "e.g., Helped a neighbor, Read Quran...",
+    "categoryLabel": "Category",
+    "categoryPlaceholder": "Select category",
+    "typeLabel": "Type",
+    "typePlaceholder": "Select type",
+    "pointsLabel": "Amount",
+    "dateTimeSection": "Record Date & Time",
+    "dateLabel": "Date",
+    "timeLabel": "Time",
+    "saving": "Saving...",
+    "confirmChanges": "Confirm Changes",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this deed?",
+    "deleteWarning": "This action cannot be undone. This will permanently delete this deed from your history.",
+    "deleting": "Deleting..."
+  },
+  "categories": {
+    "title": "Manage Categories",
+    "addCategory": "Add Category",
+    "categoryName": "Category Name",
+    "defaultCategories": "Default Categories",
+    "customCategories": "Custom Categories",
+    "noCustom": "No custom categories yet",
+    "deleteConfirm": "Delete this category?",
+    "protectedCategory": "This category is protected and cannot be edited or deleted",
+    "created": "Category Created",
+    "createdDesc": "Your category has been created successfully.",
+    "deleted": "Category Deleted",
+    "deletedDesc": "The category has been removed.",
+    "updated": "Category Updated",
+    "updatedDesc": "The category has been updated successfully."
+  },
+  "categoryNames": {
+    "Dzikir": "Dzikir",
+    "Sholat Fardhu": "Sholat Fardhu",
+    "Sholat Sunnah": "Sholat Sunnah",
+    "Puasa": "Fasting",
+    "Fasting": "Fasting",
+    "Fasting Fardhu": "Fasting Fardhu",
+    "Fasting Sunnah": "Fasting Sunnah",
+    "Baca Quran": "Recite Quran",
+    "Hafalan Quran": "Qur'an Memorisation",
+    "Shodaqoh": "Shodaqoh",
+    "Birrul Walidayn": "Kindness to Parents",
+    "Tolabul Ilmi": "Seeking Knowledge"
+  },
+  "dzikir": {
+    "title": "Dzikir Counter",
+    "counter": "Counter",
+    "reset": "Reset",
+    "save": "Save",
+    "target": "Target",
+    "completed": "Completed",
+    "dzikirDesc": "Tap the counter to record your dzikir. Each tap equals 1 point.",
+    "tapToCount": "Tap to count",
+    "dzikirReminder": "SubhanAllah, Alhamdulillah, Allahu Akbar - Remember Allah often.",
+    "nothingToSave": "Nothing to save",
+    "tapCounterFirst": "Tap the counter to add dzikir first.",
+    "dzikirSaved": "Dzikir saved!",
+    "dzikirSavedDesc": "{{count}} dzikir counted and saved as {{count}} points.",
+    "dzikirTypeSavedDesc": "{{count}} {{type}} counted and saved as {{count}} points.",
+    "failedToSave": "Failed to save",
+    "tryAgain": "Please try again.",
+    "dzikirDeedDesc": "Dzikir - {{count}} counts",
+    "dzikirTypeDeedDesc": "{{type}} - {{count}} counts",
+    "types": {
+      "subhanallah": "Subhanallah",
+      "alhamdulillah": "Alhamdulillah",
+      "allahuakbar": "Allahu Akbar",
+      "lailahaillallah": "La ilaha illallah",
+      "istighfar": "Istighfar",
+      "any": "Any Type"
+    },
+    "selectType": "Select Dzikir Type",
+    "selectUnit": "Select Unit",
+    "anyType": "Any (all types counted)",
+    "typeRequired": "Please select a dzikir type",
+    "builtInTypes": "Built-in",
+    "customTypes": "My Custom Types",
+    "addCustomType": "Add Custom Type",
+    "customTypePlaceholder": "e.g. Shalawat, Hauqalah...",
+    "manageCustomTypes": "Manage Custom Types",
+    "customTypeAdded": "Custom type added",
+    "customTypeDeleted": "Custom type removed",
+    "customTypeRenamed": "Custom type renamed",
+    "renameCustomType": "Rename Custom Type",
+    "renameHistoryNote": "Note: Renaming this type will not update past deed records. Historical deeds will still show the old name.",
+    "noCustomTypes": "No custom types yet",
+    "units": {
+      "times": "Counts"
+    }
+  },
+  "qibla": {
+    "title": "Qibla & Prayer Times",
+    "findQibla": "Find Qibla Direction",
+    "enableLocation": "Enable Location",
+    "locationDesc": "To find the direction to Mecca, we need your location. Tap the button below and allow location access when prompted.",
+    "gettingLocation": "Getting your location...",
+    "allowLocation": "Please allow location access when prompted by your browser.",
+    "locationRequired": "Location Required",
+    "tryAgain": "Try Again",
+    "qiblaDirection": "Qibla Direction",
+    "distanceToKaaba": "Distance to Kaaba",
+    "yourLocation": "Your Location",
+    "locatingPlace": "Locating…",
+    "enableCompass": "Enable Live Compass",
+    "tapToActivate": "Tap to activate compass",
+    "compassActive": "Compass Active",
+    "howToUse": "How to Use",
+    "rotateDevice": "Rotate your device to enable compass (mobile only)",
+    "step1": "Hold your device flat and level",
+    "step2": "The green arrow points toward the Kaaba in Mecca",
+    "step3": "Turn your body until facing the arrow direction",
+    "prayerTimes": "Prayer Times",
+    "nextIn": "Next in",
+    "now": "Now",
+    "next": "Next",
+    "prayers": {
+      "fajr": "Fajr",
+      "dhuhr": "Dhuhr",
+      "asr": "Asr",
+      "maghrib": "Maghrib",
+      "isha": "Isha"
+    },
+    "errors": {
+      "notSupported": "Geolocation is not supported by your browser",
+      "unableToRetrieve": "Unable to retrieve your location",
+      "permissionDenied": "Location permission denied. Please enable it in your browser settings.",
+      "unavailable": "Location information is unavailable.",
+      "timeout": "Location request timed out."
+    },
+    "changeLocation": "Change location",
+    "setLocationManually": "Set location manually",
+    "useAutomaticLocation": "Use automatic location",
+    "manualBadge": "Manual",
+    "locationSearch": {
+      "title": "Set your location",
+      "description": "Search for a city or place to override the detected location.",
+      "placeholder": "Search city or place…",
+      "hint": "Type at least two characters to search.",
+      "searching": "Searching…",
+      "empty": "No matching places found.",
+      "error": "Could not search places. Please try again."
+    }
+  },
+  "sholatPage": {
+    "title": "Prayer",
+    "currentPrayer": "Current prayer",
+    "nextPrayer": "Next",
+    "in": "in",
+    "qiblaFinder": "Qibla Direction",
+    "qiblaFinderDesc": "Open compass",
+    "markAllDone": "Mark all as completed",
+    "allDone": "All prayers completed today",
+    "doneLabel": "Done",
+    "noLocationTitle": "Enable Location",
+    "noLocationDesc": "To display prayer times, we need your location.",
+    "loading": "Loading prayer times...",
+    "imsak": "Imsak",
+    "sunrise": "Sunrise",
+    "dhuha": "Dhuha",
+    "tahajjud": "Tahajjud"
+  },
+  "progress": {
+    "title": "Progress",
+    "spiritualProgress": "Spiritual Progress",
+    "weeklyProgress": "Weekly Progress",
+    "monthlyStats": "Monthly Stats",
+    "totalDeeds": "Total Deeds",
+    "deeds": "deeds",
+    "times": "times",
+    "deedsOverTime": "Deeds Over Time",
+    "dateRange": "Date Range",
+    "lastWeek": "Last Week",
+    "lastMonth": "Last Month",
+    "lastQuarter": "Last Quarter",
+    "lastYear": "Last Year",
+    "noData": "No data yet",
+    "noDataDesc": "Start recording your deeds to see your progress charts here.",
+    "count": "Count",
+    "points": "Points",
+    "deedsByCategory": "Deeds by Category",
+    "targetsProgress": "Targets Progress",
+    "summary": {
+      "title": "Your Summary",
+      "totalDeeds": "You recorded {{count}} deeds in the last {{period}}.",
+      "topCategory": "Your most frequent deed is {{category}} with {{count}} entries.",
+      "mostActiveDay": "Your most active day was {{day}} with {{count}} deeds.",
+      "consistency": "You did good deeds on {{activeDays}} out of {{totalDays}} days — {{percent}}% consistency.",
+      "noData": "No deeds recorded in this period. Start logging to see your insights here.",
+      "motivationHigh": "Mashaa Allah! You are very consistent. Keep up this great habit!",
+      "motivationMedium": "Good progress! Try to be consistent every day — small steps add up.",
+      "motivationLow": "Every deed counts, no matter how small. Let's make it a habit, one day at a time.",
+      "periodWeek": "week",
+      "periodMonth": "month",
+      "periodQuarter": "3 months",
+      "periodYear": "year"
+    }
+  },
+  "targets": {
+    "title": "Targets",
+    "individualTabLabel": "Individual",
+    "subtitle": "Set and track your spiritual goals",
+    "addTarget": "Add Target",
+    "addTargetSubtitle": "Create a new goal to track your spiritual progress",
+    "editTarget": "Edit Target",
+    "editTargetSubtitle": "Update your target settings",
+    "renameTarget": "Rename Target",
+    "renameTargetDesc": "Enter a new name for this target",
+    "targetName": "Target Name",
+    "saveChanges": "Save Changes",
+    "targetNotFound": "Target Not Found",
+    "targetNotFoundDesc": "The target you're looking for doesn't exist or has been deleted.",
+    "backToTargets": "Back to Targets",
+    "noTargets": "No targets set",
+    "noTargetsDesc": "Set spiritual goals to track your progress automatically based on your deeds.",
+    "addFirstTarget": "Set your first target",
+    "selectCategory": "Select a category",
+    "targetValue": "Target Amount",
+    "targetValueDesc": "Minimum points to achieve this period",
+    "maxValue": "Maximum Allowed",
+    "maxValueDesc": "Maximum occurrences to stay within limit",
+    "period": "Period",
+    "selectPeriod": "Select period",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "progress": "Progress",
+    "completed": "Completed",
+    "deleteConfirm": "Delete this target?",
+    "deleteWarning": "This action cannot be undone. This will permanently remove this target.",
+    "history": "History",
+    "streak": "streak",
+    "pastPeriods": "Past Periods",
+    "noHistory": "No history yet. Complete a period to see your past performance.",
+    "targetType": "Target Type",
+    "selectType": "Select type",
+    "achievementType": "Worship Target",
+    "limitType": "Avoid Sin",
+    "achievementTypeDesc": "Reach a minimum number of points for good deeds",
+    "limitTypeDesc": "Stay under a maximum limit to avoid sins",
+    "limitBadge": "Avoid Sin",
+    "usage": "Usage",
+    "max": "max",
+    "used": "used",
+    "withinLimit": "Within Limit",
+    "exceeded": "Exceeded",
+    "recurring": "Recurring",
+    "oneTime": "One-Time",
+    "recurrenceType": "Recurrence Type",
+    "deadline": "Deadline",
+    "duration": {
+      "1day": "1 Day",
+      "1week": "1 Week",
+      "1month": "1 Month",
+      "3months": "3 Months"
+    },
+    "targetNamePlaceholder": "e.g., Finish reading Quran, Complete 30 juz",
+    "targetNameRequired": "Target name is required",
+    "saveTarget": "Save Target",
+    "updateTarget": "Update Target",
+    "dueIn": "Due in {{time}}",
+    "overdue": "Overdue by {{time}}",
+    "statusActive": "Active",
+    "statusCompleted": "Completed",
+    "statusExpired": "Expired",
+    "customDeadline": "Custom Date",
+    "pickDate": "Pick a date",
+    "oneTimeGoal": "One-Time Goal",
+    "oneTimeTargetValue": "Target Value",
+    "oneTimeTargetValueDesc": "Value to achieve by deadline",
+    "updateProgress": "Update",
+    "updateProgressTitle": "Update Progress",
+    "modeQuick": "Quick",
+    "currentProgress": "Current Progress",
+    "newProgress": "New Progress",
+    "targetWillBeCompleted": "Target will be completed!",
+    "progressSaved": "Progress Saved",
+    "progressSavedDesc": "{{count}} points added to target {{target}}",
+    "deedCreatedFromTarget": "{{target}}",
+    "markComplete": "Mark as Complete",
+    "targetLabel": "Target:",
+    "categoryLabel": "Category:",
+    "perPeriod": "per {{period}}",
+    "untilDate": "until {{date}}",
+    "detail": "Detail",
+    "update": "Update",
+    "periodDay": "Day",
+    "periodWeek": "Week",
+    "periodMonth": "Month",
+    "anySubtype": "Any",
+    "intentionCardTitle": "When & Where",
+    "intentionCardEmpty": "Tell yourself when and where you'll do this. Setting a specific time and place makes you much more likely to follow through.",
+    "intentionHelper": "Setting a specific time and place makes you much more likely to follow through.",
+    "intentionWhenLabel": "When will you do this?",
+    "intentionWhenPlaceholder": "e.g., right after Subuh",
+    "intentionWhereLabel": "Where will you do this?",
+    "intentionWherePlaceholder": "e.g., in the masjid",
+    "intentionNudgeTitle": "Boost your follow-through",
+    "intentionNudgeBody": "Setting a specific time and place makes you much more likely to follow through.",
+    "intentionNudgeCta": "Add when & where",
+    "intentionNudgeGotIt": "Got it",
+    "intentionNudgeDismiss": "Dismiss",
+    "notificationTimes": "Reminder Times",
+    "notificationTimesDesc": "Set up to 5 reminder times for this target",
+    "addReminderTime": "Add Reminder Time",
+    "maxReminders": "Maximum 5 reminders per target",
+    "reminderTimeLabel": "Reminder {{number}}",
+    "targetCreated": "Target Created",
+    "targetCreatedDesc": "Your new target has been added successfully.",
+    "targetUpdated": "Target Updated",
+    "targetUpdatedDesc": "Your target has been updated successfully.",
+    "createError": "Failed to create target. Please try again.",
+    "updateError": "Failed to update target. Please try again.",
+    "notFound": "Target Not Found",
+    "notFoundDesc": "The target you're looking for doesn't exist.",
+    "newFolder": "New Folder",
+    "createFolder": "Create folder",
+    "createFolderDesc": "Group related targets together to keep things organized.",
+    "renameFolder": "Rename folder",
+    "renameFolderDesc": "Enter a new name for this folder.",
+    "deleteFolder": "Delete folder",
+    "deleteFolderConfirm": "Delete this folder?",
+    "deleteFolderWarning": "The folder will be removed, but the targets inside will be kept and moved out of the folder.",
+    "folderName": "Folder name",
+    "folderNamePlaceholder": "e.g., Daily Ibadah, Ramadan",
+    "moveToFolder": "Move to folder",
+    "moveToFolderDesc": "Choose a folder for this target, or move it out of all folders.",
+    "noFolder": "No folder",
+    "ungrouped": "Ungrouped",
+    "targetCount": "{{count}} targets",
+    "targetCountOne": "1 target",
+    "targetCountZero": "No targets",
+    "moveError": "Failed to move target. Please try again.",
+    "folderCreated": "Folder created",
+    "folderRenamed": "Folder renamed",
+    "folderDeleted": "Folder deleted",
+    "targetMoved": "Target moved",
+    "targetDeleted": "Target Deleted",
+    "targetDeletedDesc": "The spiritual goal has been removed.",
+    "targetCompleted": "Target Completed",
+    "targetCompletedDesc": "Congratulations on achieving your goal!"
+  },
+  "user": {
+    "profile": "Profile",
+    "manageCategories": "Manage Categories",
+    "logout": "Log out"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "back": "Back",
+    "language": "Language",
+    "filter": "Filter",
+    "allCategories": "All Categories",
+    "allSubCategories": "All Types",
+    "confirm": "Confirm",
+    "next": "Next",
+    "previous": "Previous",
+    "sessionExpired": "Signing you back in…",
+    "sessionExpiredDesc": "Your session expired. Reconnecting now."
+  },
+  "sholat": {
+    "selectType": "Select Prayer Type",
+    "selectUnit": "Select Unit",
+    "anyType": "Any (all types counted)",
+    "isJamaah": "Prayed in congregation (Jamaah)",
+    "inCongregation": "In Congregation",
+    "units": {
+      "times": "Times",
+      "rakaat": "Rakaat"
+    },
+    "types": {
+      "subuh": "Subuh (Fajr)",
+      "dzuhur": "Dzuhur (Dhuhr)",
+      "ashar": "Ashar (Asr)",
+      "maghrib": "Maghrib",
+      "isya": "Isya (Isha)",
+      "jumat": "Jumat (Friday)",
+      "rawatib": "Rawatib",
+      "dhuha": "Dhuha",
+      "tahajjud": "Tahajjud",
+      "witir": "Witir",
+      "tarawih": "Tarawih",
+      "tasbih": "Tasbih",
+      "eid": "Eid Prayer",
+      "istikharah": "Istikharah",
+      "hajat": "Hajat",
+      "taubat": "Taubat"
+    }
+  },
+  "fasting": {
+    "selectType": "Select Fasting Type",
+    "selectUnit": "Select Unit",
+    "anyType": "Any (all types counted)",
+    "units": {
+      "days": "Days"
+    },
+    "types": {
+      "ramadhan": "Ramadhan",
+      "qadha": "Qadha (Make-up)",
+      "kaffarah": "Kaffarah (Expiation)",
+      "nadzar": "Nadzar (Vow)",
+      "seninkamis": "Monday-Thursday",
+      "ayyamulbidh": "Ayyamul Bidh (White Days)",
+      "arafah": "Day of Arafah",
+      "asyura": "Day of Ashura",
+      "syawal": "Syawal (6 days)",
+      "daud": "Daud Fasting"
+    }
+  },
+  "quran": {
+    "selectUnit": "Select Unit",
+    "units": {
+      "ayat": "Verses (Ayat)",
+      "halaman": "Pages",
+      "surat": "Chapters (Surah)",
+      "juz": "Juz"
+    }
+  },
+  "sedekah": {
+    "selectType": "Select Type",
+    "types": {
+      "uang": "Money (Amount)",
+      "hitungan": "Count (Times)"
+    }
+  },
+  "customUnit": {
+    "selectUnit": "Select Unit",
+    "units": {
+      "hitungan": "Count (Times)",
+      "ayat": "Verses (Ayat)",
+      "halaman": "Pages",
+      "surat": "Chapters (Surah)",
+      "juz": "Juz",
+      "rakaat": "Rakaat",
+      "hari": "Days",
+      "uang": "Money (Amount)"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Manage your notification preferences",
+    "notSupported": "Push notifications are not supported in this browser",
+    "permissionDenied": "Notification permission denied. Please enable in browser settings.",
+    "enableNotifications": "Enable Notifications",
+    "disableNotifications": "Disable Notifications",
+    "enabling": "Enabling...",
+    "dailyReminder": "Daily Reminder",
+    "dailyReminderDesc": "Get a daily reminder to log your deeds",
+    "reminderTime": "Reminder Time",
+    "targetAlerts": "Target Alerts",
+    "targetAlertsDesc": "Get notified about your target progress",
+    "testNotification": "Test Notification",
+    "testSent": "Test notification sent!",
+    "testFailed": "Failed to send test notification",
+    "testFailedNoSubscription": "No active notification subscription. Tap Enable Notifications to set one up.",
+    "testFailedExpired": "Your notification subscription expired (this happens on iPhone after a while). Please tap Disable then Enable Notifications to renew it.",
+    "testFailedNotConfigured": "Push notifications are not configured on the server. Please contact support.",
+    "testFailedPushServiceError": "The push service rejected the notification (status {{status}}). Please try again, or disable then re-enable notifications.",
+    "settingsSaved": "Settings saved",
+    "subscribed": "Subscribed",
+    "notSubscribed": "Not subscribed",
+    "sholatReminder": "Sholat Reminders",
+    "sholatReminderDesc": "Get notified 10 minutes before each prayer time",
+    "locationRequired": "Location access is needed for accurate prayer times",
+    "updateLocation": "Update Location",
+    "locationSaved": "Location saved",
+    "promptTitle": "Enable Notifications",
+    "promptDesc": "Get daily reminders and sholat prayer time alerts to help you stay consistent",
+    "promptEnable": "Enable",
+    "promptDismiss": "Not Now",
+    "promptLocationDesc": "Allow location access for accurate prayer time reminders",
+    "soundLabel": "Notification Sound",
+    "soundDesc": "Sound played when a notification arrives",
+    "sounds": {
+      "chime": "Chime",
+      "double": "Double Chime",
+      "ding": "Soft Ding",
+      "none": "None"
+    }
+  },
+  "reward": {
+    "congratsMessage": "Congratulations on performing a good deed! Keep it up!",
+    "continue": "Continue"
+  },
+  "deedHistory": {
+    "title": "Deed History",
+    "subtitle": "Browse and filter all your recorded deeds",
+    "subcategory": "Type",
+    "startDate": "From",
+    "endDate": "To",
+    "resultsCount": "Deeds Found",
+    "noResults": "No deeds found",
+    "tryDifferentFilters": "Try adjusting your filters to find what you're looking for.",
+    "clearFilters": "Clear",
+    "selectDate": "Select"
+  },
+  "streak": {
+    "title": "Streak",
+    "daysInARow": "Days in a Row",
+    "weekDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
+    "motivationalMessage": "You are consistent in doing good deeds today. Keep it up being Istiqomah every single day!",
+    "continue": "Continue",
+    "noStreak": "Start your streak today!",
+    "day": "Day"
+  },
+  "streakDetail": {
+    "title": "Streak",
+    "back": "Back",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "daysPracticed": "Days practiced",
+    "freezersUsed": "Freezers used",
+    "empty": "No activity this month yet.",
+    "legendDeed": "Deed day",
+    "legendFrozen": "Saved by freezer",
+    "legendInactive": "Inactive",
+    "dayDeedsSubtitle": "Deeds you logged on this day",
+    "dayFrozenSubtitle": "A streak freezer kept this day alive",
+    "dayInactiveSubtitle": "No activity recorded",
+    "dayEmpty": "No deeds were logged on this day.",
+    "frozenTitle": "Saved by a streak freezer",
+    "frozenBody": "You didn't log a deed on this day, but a streak freezer was used automatically to keep your streak going."
+  },
+  "streakFreezer": {
+    "title": "Streak Freezer",
+    "back": "Back",
+    "balanceLabel": "Freezers",
+    "pointsLabel": "Points",
+    "usedSoFar": "{{count}} used so far",
+    "spentSoFar": "{{count}} spent so far",
+    "chipTooltip": "Streak freezers available",
+    "howItWorksTitle": "How it works",
+    "howItWorksDescription": "Buy freezers with your points. When a past day in your streak has no recorded deed, one freezer is automatically used to keep the streak alive. Today is never auto-frozen — you still have time to log a deed.",
+    "packsTitle": "Buy freezers",
+    "packSize_one": "{{count}} freezer",
+    "packSize_other": "{{count}} freezers",
+    "pricePer": "{{price}} pts per freezer",
+    "discountBadge": "Save {{percent}}%",
+    "buy": "Buy",
+    "notEnough": "Not enough points",
+    "needMorePoints_one": "Need {{count}} more point",
+    "needMorePoints_other": "Need {{count}} more points",
+    "frozenDaysTitle": "Frozen days",
+    "noFrozenDays": "No days have been frozen yet. Your streak is on solid ground.",
+    "savedByFreezer": "Saved by a freezer",
+    "refundedByBackdate": "Refunded — you logged a deed for this day",
+    "refundedBadge": "Refunded",
+    "autoConsumedToastTitle": "Streak freezer used",
+    "autoConsumedToastTitle_other": "Streak freezers used",
+    "autoConsumedToastDescription_one": "A freezer was automatically used to save {{dates}}. Log a deed on that day to get it back.",
+    "autoConsumedToastDescription_other": "Freezers were automatically used to save {{dates}}. Log a deed on those days to get them back.",
+    "refundToastTitle": "Freezer refunded",
+    "refundToastDescription": "Your streak freezer for {{date}} was returned to your balance.",
+    "confirmTitle": "Confirm purchase",
+    "confirmDescription_one": "Spend {{cost}} points for {{count}} freezer?",
+    "confirmDescription_other": "Spend {{cost}} points for {{count}} freezers?",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "purchaseSuccessTitle": "Freezers added",
+    "purchaseSuccessDescription_one": "{{count}} freezer added to your balance.",
+    "purchaseSuccessDescription_other": "{{count}} freezers added to your balance.",
+    "purchaseErrorTitle": "Purchase failed",
+    "insufficientPointsTitle": "Not enough points",
+    "insufficientPointsDescription": "Earn more points by recording good deeds, then try again."
+  },
+  "recommendations": {
+    "entryTitle": "Need target ideas?",
+    "entryDesc": "See personalized suggestions based on your onboarding answers, each backed by a verse from the Quran or an authentic hadith.",
+    "entryCta": "See suggestions",
+    "dismiss": "Dismiss",
+    "seeSuggestions": "See suggestions",
+    "sheetTitle": "Suggested targets for you",
+    "disclaimer": "These are AI-generated suggestions grounded in the Quran and authentic hadith from Sahih al-Bukhari and Sahih Muslim. Always verify with a trusted scholar.",
+    "errorTitle": "Couldn't load suggestions",
+    "errorDesc": "Please try again in a moment.",
+    "retry": "Try again",
+    "refresh": "Refresh",
+    "empty": "No suggestions are available right now.",
+    "useThisTarget": "Use this target",
+    "backToList": "Back to suggestions",
+    "previewName": "Target name",
+    "previewCategory": "Category",
+    "previewAmount": "Amount",
+    "previewPeriod": "Period",
+    "previewRecurrence": "Recurrence",
+    "sourceKind": {
+      "quran": "Quran",
+      "bukhari": "Sahih al-Bukhari",
+      "muslim": "Sahih Muslim"
+    }
+  },
+  "onboarding": {
+    "intro": "Introduction",
+    "done": "Done",
+    "back": "Back",
+    "next": "Next",
+    "start": "Begin",
+    "startQuiz": "Start Quiz",
+    "showIdentity": "Reveal My Identity",
+    "startJourney": "Start My Journey",
+    "saveError": "Failed to save. Please try again.",
+    "quizCount": "Quiz {{current}} / {{total}}",
+    "splashTagline": "Istiqoma · Consistent in Goodness",
+    "bismillahMeaning": "In the name of Allah, the Most Gracious, the Most Merciful",
+    "s1": {
+      "eyebrow": "What is Istiqoma?",
+      "headline": "Your companion on<br>becoming <em>better</em>",
+      "subtext": "Istiqoma is an app that helps you record your daily good deeds — not as an obligation, but as a mirror of the soul.",
+      "features": {
+        "a": {
+          "icon": "📿",
+          "title": "Record Spontaneous Good Deeds",
+          "desc": "No targets needed. Simply record any small kindness you do today."
+        },
+        "b": {
+          "icon": "🌙",
+          "title": "End-of-Day Reflection",
+          "desc": "Gently reminded in the evening to reflect on the day that has passed."
+        },
+        "c": {
+          "icon": "📖",
+          "title": "See Your Journey",
+          "desc": "Your record of deeds becomes the story of you growing as a Muslim."
+        }
+      }
+    },
+    "s2": {
+      "eyebrow": "Why Istiqoma?",
+      "headline": "Benefits you<br>will <em>feel</em>",
+      "benefits": {
+        "a": {
+          "icon": "🤲",
+          "title": "A Calmer Heart",
+          "desc": "Awareness of your deeds makes your heart more grateful"
+        },
+        "b": {
+          "icon": "🌱",
+          "title": "A New Identity",
+          "desc": "Slowly build yourself as a Muslim who is istiqomah"
+        },
+        "c": {
+          "icon": "✨",
+          "title": "Meaningful Worship",
+          "desc": "Every small deed feels meaningful and beautifully recorded"
+        },
+        "d": {
+          "icon": "📅",
+          "title": "Consistency",
+          "desc": "Helped to stay consistent without feeling burdened"
+        }
+      },
+      "hadithText": "\"Verily, the most beloved deeds to Allah are the most consistent ones.\"",
+      "hadithSource": "— Bukhari & Muslim"
+    },
+    "q1": {
+      "question": "How is your worship right now?",
+      "hint": "Pick what most honestly describes you",
+      "options": {
+        "pemula": "Just starting to learn and want to do better",
+        "naik-turun": "Up and down, struggling to stay consistent",
+        "cukup-baik": "Already fairly regular, want more istiqomah",
+        "tingkatkan": "Want to raise the overall quality of my worship"
+      }
+    },
+    "qg": {
+      "question": "Which best describes you?",
+      "hint": "This helps us personalise your notification avatars",
+      "skip": "Skip for now",
+      "options": {
+        "male": "Muslim (Male)",
+        "female": "Muslimah (Female)"
+      }
+    },
+    "q2": {
+      "question": "What most often holds you back from doing more good?",
+      "hint": "Be honest — there are no wrong answers",
+      "options": {
+        "lupa": "I often forget or miss the opportunity",
+        "males": "I know what to do, but feel lazy doing it",
+        "tidak-tahu": "I don't know what daily good deeds I could do",
+        "sibuk": "Busyness leaves me no time to reflect"
+      }
+    },
+    "q3": {
+      "question": "Which deeds do you want to focus on?",
+      "hint": "Pick as many as you like — at least 1",
+      "empty": "None selected yet",
+      "count": "{{count}} selected",
+      "options": {
+        "baca-quran": "Read Qur'an",
+        "dzikir": "Dzikir",
+        "sholat-fardhu": "Fardhu Prayer",
+        "sholat-sunnah": "Sunnah Prayer",
+        "puasa": "Fasting",
+        "hafalan-quran": "Memorise Qur'an",
+        "birrul-walidayn": "Birrul Walidayn",
+        "shodaqoh": "Charity",
+        "tolabul-ilmi": "Seeking Knowledge"
+      }
+    },
+    "q4": {
+      "question": "When is the best time to reflect on your day?",
+      "hint": "We'll send a reminder at this time",
+      "options": {
+        "subuh": "After Subuh — set the day with good intent",
+        "ashar": "After Ashar — a midday reflection",
+        "isya": "After Isya — close the day with gratitude",
+        "tidur": "Before sleep — muhasabah at night"
+      }
+    },
+    "q5": {
+      "question": "I want to be known as a Muslim who is…",
+      "hint": "This is the identity you'll build together with Istiqoma",
+      "options": {
+        "dekat-allah": {
+          "label": "Close to Allah",
+          "sublabel": "Worship feels light, the heart always connected"
+        },
+        "bermanfaat": {
+          "label": "Beneficial to others",
+          "sublabel": "My presence brings real impact to those around me"
+        },
+        "berilmu": {
+          "label": "Knowledgeable and wise",
+          "sublabel": "Always learning and practising the deen with excellence"
+        },
+        "istiqomah": {
+          "label": "Istiqomah and steadfast",
+          "sublabel": "Consistent in good even when no one is watching"
+        },
+        "keluarga": {
+          "label": "An example in the family",
+          "sublabel": "Being an imam, mother, or child who carries goodness"
+        }
+      }
+    },
+    "result": {
+      "eyebrow": "Your identity has formed",
+      "note": "This identity isn't a label — it is <em>who you are becoming,</em> one good deed at a time."
+    },
+    "identities": {
+      "dekat-allah": {
+        "name": "A Muslim Close to Allah",
+        "desc": "You long for a sincere connection with Allah. Every deed you record in Istiqoma is a real step closer to Him — one kindness at a time.",
+        "tags": [
+          "A Longing Servant",
+          "A Connected Heart"
+        ]
+      },
+      "bermanfaat": {
+        "name": "A Beneficial Muslim",
+        "desc": "You believe the best of people are those most beneficial to others. Istiqoma will help you see how much goodness you've already spread.",
+        "tags": [
+          "Bringer of Benefit",
+          "A Caring Heart"
+        ]
+      },
+      "berilmu": {
+        "name": "A Knowledgeable Muslim",
+        "desc": "You understand that knowledge is light. Istiqoma will accompany you in recording every step of learning and practice — for knowledge without action is a tree without fruit.",
+        "tags": [
+          "Seeker of Knowledge",
+          "Action & Wisdom"
+        ]
+      },
+      "istiqomah": {
+        "name": "A Steadfast Muslim",
+        "desc": "Istiqomah isn't about perfection — it's about not stopping. With Istiqoma, you'll see how consistent you really are, even on the heaviest days.",
+        "tags": [
+          "Steadfast",
+          "Consistent Without End"
+        ]
+      },
+      "keluarga": {
+        "name": "A Family Role Model",
+        "desc": "The greatest goodness begins at home. Every deed you plant today is an inheritance for those you love most.",
+        "tags": [
+          "Family Leader",
+          "Legacy of Good"
+        ]
+      }
+    },
+    "identityFallback": {
+      "name": "A Growing Muslim",
+      "desc": "Your journey begins today. Every small step you take is proof that you are growing into the best version of yourself.",
+      "tags": [
+        "Always Growing"
+      ]
+    },
+    "contextTags": {
+      "pemula": "First Steps",
+      "naik-turun": "Consistency Warrior",
+      "cukup-baik": "Always Improving",
+      "tingkatkan": "Seeker of Excellence"
+    },
+    "hint": {
+      "title": "Continue from onboarding",
+      "subtitle": "You picked these deeds during onboarding. Set targets to begin.",
+      "dismiss": "Dismiss"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "unnamed": "Unnamed user",
+    "identityNote": "Your name, email, and avatar are managed by your Replit Auth account.",
+    "personalHeading": "Personal info",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "e.g. yusuf123",
+    "usernameHelp": "Up to 40 characters. Leave blank to clear.",
+    "usernameTaken": "That username is already taken. Please pick another.",
+    "phoneLabel": "Phone number",
+    "phonePlaceholder": "+62 812 3456 7890",
+    "phoneHelp": "Digits, spaces, +, -, ( and ) only. Up to 30 characters.",
+    "saveButton": "Save changes",
+    "saving": "Saving…",
+    "saveSuccess": "Profile updated",
+    "saveError": "Couldn't save your profile",
+    "connectGmailTitle": "Connect Gmail",
+    "connectGmailDesc": "Link a Google account to your sign-in. You'll be sent to the Replit login screen, where you can choose Google.",
+    "connectGmailCta": "Connect Gmail",
+    "gmailConnected": "Connected as {{email}}",
+    "journeyTitle": "Your spiritual journey",
+    "journeySubtitleEmpty": "Tell us about yourself to personalize Istiqoma",
+    "changePinHeading": "Change PIN",
+    "changePinDesc": "Your PIN keeps your account safe. Choose 4–8 digits and remember it — it can't be recovered.",
+    "currentPinLabel": "Current PIN",
+    "newPinLabel": "New PIN",
+    "confirmPinLabel": "Confirm new PIN",
+    "changePinButton": "Update PIN",
+    "changePinSuccess": "PIN updated",
+    "changePinError": "Couldn't change your PIN",
+    "changePinWrongCurrent": "Current PIN is wrong",
+    "qfConnectTitle": "Connect Quran Foundation",
+    "qfConnectDesc": "Sync your Qur'an bookmarks with your Quran Foundation account so they show up in Quran.com and other QF-powered apps. Your local data stays here either way.",
+    "qfConnectCta": "Connect Quran Foundation",
+    "qfConnectedHeading": "Quran Foundation connected",
+    "qfConnectedDesc": "Bookmarks you add here are mirrored to your Quran Foundation account in the background.",
+    "qfDisconnectCta": "Disconnect",
+    "qfConnectError": "Couldn't connect to Quran Foundation. Please try again.",
+    "qfConnectSuccess": "Connected to Quran Foundation",
+    "qfDisconnectSuccess": "Disconnected from Quran Foundation",
+    "dangerZone": {
+      "heading": "Danger Zone",
+      "description": "These actions are permanent and cannot be undone. Please proceed with care.",
+      "exportButton": "Download my data",
+      "deleteButton": "Delete my account",
+      "dialogTitle": "Delete your account?",
+      "dialogDescription": "All your data — deeds, targets, bookmarks, memorizations, streaks, and settings — will be permanently deleted. This cannot be undone.",
+      "dialogCancel": "Cancel",
+      "dialogConfirm": "Yes, delete everything",
+      "deleteError": "Could not delete account",
+      "deleteSuccessTitle": "Account deleted",
+      "deleteSuccessDesc": "Your account and all data have been permanently removed."
+    }
+  },
+  "usernameAuth": {
+    "pageTitle": "Sign in with username",
+    "tabs": {
+      "signin": "Sign in",
+      "signup": "Create account"
+    },
+    "fields": {
+      "username": "Username",
+      "pin": "PIN",
+      "confirmPin": "Confirm PIN"
+    },
+    "usernameHelp": "3–40 characters. Letters, digits, _ and - only.",
+    "pinHelp": "4–8 digits.",
+    "pinRecoveryWarning": "Save the recovery code we'll show after signup — it's the ONLY way to reset a forgotten PIN.",
+    "signinButton": "Sign in",
+    "signupButton": "Create account",
+    "forgotPin": "Forgot your PIN?",
+    "lockedTitle": "Account locked",
+    "lockedDescription": "Too many wrong PINs. Try again in {{time}} or use your recovery code below.",
+    "lockedSeconds": "{{seconds}}s",
+    "lockedMinutesSeconds": "{{minutes}}m {{seconds}}s",
+    "useRecoveryCode": "Use recovery code",
+    "recoveryCodeTitle": "Save your recovery code",
+    "recoveryCodeBody": "This is the ONLY way to reset your PIN. Save it now — we cannot show it again.",
+    "recoveryCodeCopy": "Copy code",
+    "recoveryCodeCopied": "Copied to clipboard",
+    "recoveryCodeContinue": "I've saved it — continue",
+    "recoveryReset": {
+      "title": "Reset your PIN",
+      "description": "Enter your username, recovery code, and a new PIN.",
+      "recoveryCodeLabel": "Recovery code",
+      "recoveryCodeHelp": "20 letters/digits. Dashes and case don't matter.",
+      "newPinLabel": "New PIN",
+      "confirmPinLabel": "Confirm new PIN",
+      "submit": "Reset PIN",
+      "cancel": "Cancel",
+      "successTitle": "PIN reset",
+      "successBody": "Sign in with your new PIN.",
+      "errors": {
+        "invalidCode": "Recovery code is invalid or already used.",
+        "lockedFor": "Recovery locked. Try again in {{minutes}} minute(s).",
+        "tooManyAttempts": "Too many attempts. Please try again later.",
+        "failed": "Couldn't reset your PIN"
+      }
+    },
+    "errors": {
+      "usernameTaken": "That username is already taken. Please pick another.",
+      "usernameNotFound": "We couldn't find that username.",
+      "wrongPin": "Wrong PIN. Please try again.",
+      "lockedFor": "Account locked. Try again in {{minutes}} minute(s).",
+      "signinFailed": "Couldn't sign you in",
+      "signupFailed": "Couldn't create your account"
+    }
+  },
+  "achievements": {
+    "heading": "Achievements",
+    "subheading": "Badges for your worship journey",
+    "loadError": "Couldn't load badges. Please refresh the page.",
+    "milestone": "Milestone",
+    "behavior": "Behavior",
+    "tiers": {
+      "1": "Bronze",
+      "2": "Silver",
+      "3": "Gold",
+      "4": "Platinum"
+    },
+    "tierEarned": "{{tier}} tier earned",
+    "notEarnedYet": "Not earned yet",
+    "progress": "Progress",
+    "oneStepAway": "One step away: {{value}} {{unit}}",
+    "nextTier": "Next tier: {{value}} {{unit}}",
+    "earnedOn": "Earned on {{date}}",
+    "tierLabel": "Tier",
+    "earned": "Earned",
+    "locked": "Locked",
+    "newBadgesToastTitle": "New badges",
+    "newBadgesToastDesc": "+{{count}} more badges unlocked",
+    "newBadgeTierDesc": "{{tier}} tier — {{description}}",
+    "celebrationTitle": "Badge unlocked!",
+    "celebrationContinue": "Awesome!",
+    "celebrationNext": "Next",
+    "celebrationMore": "+{{count}} more to go",
+    "share": "Share",
+    "shareText": "I just unlocked the {{tier}} {{name}} badge on Istiqoma! 🏆",
+    "shareCopied": "Copied to clipboard",
+    "badges": {
+      "ahli-sholat": {
+        "name": "Prayer Devotee",
+        "description": "Total Fardhu prayers logged."
+      },
+      "jamaah-devotee": {
+        "name": "Jamaah Devotee",
+        "description": "Fardhu prayers performed in congregation."
+      },
+      "penjaga-sunnah": {
+        "name": "Sunnah Guardian",
+        "description": "Total Sunnah prayers logged."
+      },
+      "pecinta-dzikir": {
+        "name": "Dzikir Lover",
+        "description": "Total dzikir count accumulated."
+      },
+      "sahabat-quran": {
+        "name": "Quran Companion",
+        "description": "Quran reading equivalent in verses (juz × 600, page × 15, surah × 55)."
+      },
+      "tangan-pemberi": {
+        "name": "Giving Hand",
+        "description": "Total charity logged."
+      },
+      "penahan-hawa": {
+        "name": "Self-Restraint",
+        "description": "Total fasting days logged."
+      },
+      "pencari-ilmu": {
+        "name": "Knowledge Seeker",
+        "description": "Total Tolabul Ilmi activities logged."
+      },
+      "birrul-walidayn": {
+        "name": "Birrul Walidayn",
+        "description": "Total acts of kindness toward parents logged."
+      },
+      "kolektor-poin": {
+        "name": "Point Collector",
+        "description": "Total points ever earned."
+      },
+      "pencapai-target": {
+        "name": "Target Achiever",
+        "description": "Targets successfully completed."
+      },
+      "istiqomah-streak": {
+        "name": "Istiqomah Streak",
+        "description": "Longest daily streak ever achieved."
+      },
+      "subuh-warrior": {
+        "name": "Subuh Warrior",
+        "description": "Log Subuh prayer before 6 AM on different days."
+      },
+      "tahajjud-knight": {
+        "name": "Tahajjud Knight",
+        "description": "Log Tahajjud prayer on different days."
+      },
+      "sleepless-soul": {
+        "name": "Sleepless Soul",
+        "description": "Log worship between 1–4 AM on different days."
+      },
+      "full-house": {
+        "name": "Full House",
+        "description": "Complete all 5 Fardhu prayers in a single day."
+      },
+      "triple-crown": {
+        "name": "Triple Crown",
+        "description": "Pray, dzikir, and read Quran on the same day."
+      },
+      "quest-explorer": {
+        "name": "Quest Explorer",
+        "description": "Complete targets across different categories."
+      },
+      "comeback-kid": {
+        "name": "Comeback Kid",
+        "description": "Bounce back after a streak of 7+ days was broken."
+      },
+      "freeze-master": {
+        "name": "Freeze Master",
+        "description": "Streak Freezer successfully saved your streak."
+      },
+      "no-freeze-november": {
+        "name": "No Freeze November",
+        "description": "30-day streak without using a single freezer."
+      },
+      "khatam-champion": {
+        "name": "Khatam Champion",
+        "description": "Quran reading equivalent to one full khatam."
+      },
+      "ramadhan-marathoner": {
+        "name": "Ramadhan Marathoner",
+        "description": "Fardhu fasting (Ramadhan) throughout the month of Ramadhan."
+      },
+      "senin-kamis": {
+        "name": "Monday–Thursday",
+        "description": "Sunnah fasting on Mondays or Thursdays."
+      },
+      "ayyamul-bidh": {
+        "name": "Ayyamul Bidh",
+        "description": "Sunnah fasting on the 13th, 14th, or 15th (approximate)."
+      },
+      "diam-diam-bersedekah": {
+        "name": "Quiet Charity",
+        "description": "Give charity on 7 different days in a month."
+      },
+      "mistake-mechanic": {
+        "name": "Mistake Mechanic",
+        "description": "Correct a deed entry you've already logged."
+      },
+      "midnight-logger": {
+        "name": "Midnight Logger",
+        "description": "Log a deed for the previous day (back-dated)."
+      },
+      "goal-setter": {
+        "name": "Goal Setter",
+        "description": "Create your first target."
+      },
+      "identity-found": {
+        "name": "Identity Found",
+        "description": "Complete onboarding & pick your spiritual identity."
+      },
+      "big-spender": {
+        "name": "Big Spender",
+        "description": "Purchase a Streak Freezer pack."
+      },
+      "hari-raya-spirit": {
+        "name": "Hari Raya Spirit",
+        "description": "Log a deed on Eid al-Fitr or Eid al-Adha."
+      }
+    }
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "profileEntrySubtitle": "See how you stack up against others",
+    "daily": "Today",
+    "monthly": "This month",
+    "yearly": "This year",
+    "you": "You",
+    "points": "pts",
+    "loading": "Loading leaderboard…",
+    "error": "Couldn't load the leaderboard.",
+    "retry": "Try again",
+    "emptyState": "No one has earned points in this period yet. Be the first!",
+    "endOfList": "End of leaderboard",
+    "backToMyRank": "Back to my rank ({{rank}})",
+    "anonymous": "Anonymous"
+  },
+  "recordChooser": {
+    "title": "How would you like to record?",
+    "subtitle": "Pick how you want to log this deed.",
+    "text": "Type it",
+    "textHint": "Fill out the form yourself.",
+    "voice": "Speak it",
+    "voiceHint": "Describe it out loud and we'll fill the form."
+  },
+  "voiceCapture": {
+    "title": "Record by voice",
+    "instructions": "Tap the microphone, then describe a single deed in your own words. For example: \"I prayed Subuh in jamaah this morning.\"",
+    "start": "Start recording",
+    "stop": "Stop",
+    "cancel": "Cancel",
+    "processing": "Listening to what you said and filling the form…",
+    "timerHint": "Up to {{seconds}} seconds.",
+    "permissionDenied": "We need microphone permission to record your deed. Please allow it in your browser settings and try again.",
+    "noMicrophone": "No microphone was detected on this device.",
+    "noSpeech": "We didn't catch anything. Please try again.",
+    "networkError": "There was a network problem during transcription. Please try again.",
+    "languageNotSupported": "Your current language isn't supported by this browser's voice recognition. Please switch to a supported language or type the deed instead.",
+    "unsupportedTitle": "Voice recording isn't available",
+    "unsupported": "Your browser doesn't support voice recognition. Please use a recent version of Chrome, Edge, or Safari, or type the deed instead.",
+    "couldNotUnderstand": "We couldn't understand the deed. Please try again or type it instead.",
+    "rateLimited": "You've used voice recording a lot recently. Please wait a bit and try again.",
+    "serviceUnavailable": "The voice service is temporarily unavailable. Please try again or type the deed instead.",
+    "error": "Something went wrong. Please try again.",
+    "aborted": "Recording was interrupted. Please try again.",
+    "serviceNotAllowed": "The voice recognition service was blocked. Please check your browser settings or try again on a different network.",
+    "badGrammar": "We couldn't process the speech grammar. Please try again or type the deed instead.",
+    "unknownError": "Voice recording failed ({{code}}). Please try again or type the deed instead.",
+    "tooLarge": "That recording is too long. Please record a shorter clip.",
+    "transcribing": "Transcribing your recording…",
+    "retry": "Try again",
+    "switchToText": "Type instead",
+    "reviewToast": "Please review your deed before saving it"
+  },
+  "quiz": {
+    "title": "Islamic Quiz",
+    "currentLevel": "Current Level",
+    "totalCorrect": "Total Correct",
+    "leaderboard": "Quiz Leaderboard",
+    "leaderboardTitle": "Quiz Leaderboard",
+    "leaderboardSubtitle": "Ranked by level reached, then total correct answers.",
+    "leaderboardEmpty": "No one has earned a quiz score yet. Be the first!",
+    "leaderboardRowSubtitle": "Level {{level}} · {{correct}} correct",
+    "yourRank": "Your rank",
+    "levelShort": "Lv {{level}}",
+    "correctShort": "correct",
+    "intro": "Each level has 10 multiple-choice questions. Score 10/10 to advance to the next level.",
+    "levelHeading": "Level {{level}}",
+    "startLevel": "Start Level {{level}}",
+    "retryLevel": "Retry Level {{level}}",
+    "questionProgress": "Question {{index}} of {{total}}",
+    "correct": "Correct!",
+    "incorrect": "Not quite",
+    "learnMore": "Learn more",
+    "next": "Next question",
+    "finish": "See result",
+    "perfectScoreTitle": "Perfect score!",
+    "perfectScoreBody": "You unlocked Level {{level}}. Keep going!",
+    "tryAgainTitle": "Almost there",
+    "tryAgainBody": "You answered {{correct}} of {{total}} correctly. Score 10/10 to advance.",
+    "error": "Couldn't load the quiz.",
+    "retry": "Try again"
+  },
+  "genderPrompt": {
+    "title": "Personalise your avatars",
+    "subtitle": "Tell us who you are so we can show you a matching character in notifications.",
+    "male": "Muslim (Male)",
+    "female": "Muslimah (Female)",
+    "dismiss": "Dismiss"
+  },
+  "onboardingSettings": {
+    "title": "Your journey",
+    "identityHeading": "Your identity",
+    "reminderPreview": "We'll send your daily reflection reminder around {{time}}.",
+    "saveButton": "Save changes",
+    "saving": "Saving…",
+    "saveSuccess": "Your answers were saved",
+    "saveError": "Couldn't save your answers",
+    "incompleteError": "Please answer every question and pick at least one focus.",
+    "unsavedChanges": "Unsaved changes",
+    "notCompletedYet": "You haven't finished onboarding yet.",
+    "startOnboardingCta": "Start onboarding",
+    "genderHeading": "Notification avatar",
+    "genderHint": "Pick the character that matches you — we'll show it in push notifications.",
+    "genderMale": "Muslim (Male)",
+    "genderFemale": "Muslimah (Female)",
+    "genderSaved": "Avatar preference saved"
+  },
+  "tour": {
+    "steps": {
+      "dashboard": {
+        "title": "Dashboard & Today's Progress",
+        "description": "See all your worship goals for today at a glance. Your progress ring shows how much you've already completed."
+      },
+      "recordDeed": {
+        "title": "Record a Good Deed",
+        "description": "Log any act of worship in seconds — pick a category, describe it, and save. Tap \"Save Deed\" to try it!"
+      },
+      "dzikir": {
+        "title": "Dzikir Counter",
+        "description": "Tap the glowing circle to count your dhikr. Try tapping 3 times to see it in action!"
+      },
+      "sholat": {
+        "title": "Sholat Tracking",
+        "description": "Track your 5 daily prayers and mark them complete. Tap \"Mark done\" on Fajr to try it."
+      },
+      "targets": {
+        "title": "Spiritual Targets",
+        "description": "Set recurring goals for your worship — daily Quran pages, dzikir counts, weekly sadaqah, and more."
+      },
+      "quran": {
+        "title": "Quran Journey",
+        "description": "Read, listen, and track your Quran progress. Pick up exactly where you left off, with bookmarks and memorization tools."
+      },
+      "progress": {
+        "title": "Progress & Streaks",
+        "description": "Watch your spiritual journey unfold — streaks, weekly heatmaps, and charts to keep you motivated day after day."
+      },
+      "final": {
+        "title": "Ready to Begin?",
+        "description": "Join thousands of Muslims growing spiritually every day. It's free forever."
+      }
+    },
+    "actions": {
+      "next": "Next →",
+      "saveDeed": "Save Deed",
+      "tapToCount": "Tap to count",
+      "markFajrDone": "Mark Fajr done",
+      "openSurah": "Open a Surah",
+      "signUpFree": "Sign Up Free"
+    },
+    "nav": {
+      "home": "Home",
+      "dzikir": "Dzikir",
+      "sholat": "Sholat",
+      "quran": "Quran"
+    },
+    "dashboardScreen": {
+      "todaysProgress": "Today's Progress",
+      "hijriDate": "3 Muharram 1447",
+      "fajrPrayer": "Fajr Prayer",
+      "completedAt": "Completed at 5:12 AM",
+      "readSurah": "Read Surah Al-Kahf",
+      "target20mins": "Target: 20 mins",
+      "giveSadaqah": "Give Sadaqah",
+      "dailyGoal": "Daily goal",
+      "currentStreak": "Current Streak",
+      "streakDays": "12 days",
+      "streakPts": "+40 pts",
+      "recordGoodDeed": "Record a Good Deed",
+      "leaderboard": "Leaderboard"
+    },
+    "recordDeedScreen": {
+      "title": "Record Good Deed",
+      "subtitle": "Log your worship & good acts",
+      "category": "CATEGORY",
+      "description": "DESCRIPTION",
+      "points": "POINTS",
+      "sampleDesc": "Fajr prayer, 2 rakaat, in congregation",
+      "deedRecorded": "Deed recorded! +5 points earned.",
+      "saveDeedPts": "Save Deed (+5 pts)",
+      "catSholat": "Sholat",
+      "catDzikir": "Dzikir",
+      "catSedekah": "Sedekah",
+      "catQuran": "Quran"
+    },
+    "dzikirScreen": {
+      "title": "Dzikir Counter",
+      "tapToCount": "Tap to count",
+      "reset": "Reset",
+      "save": "Save (+{{count}})"
+    },
+    "sholatScreen": {
+      "title": "Prayer Times",
+      "location": "Jakarta · Today",
+      "nextPrayer": "Next: Dhuhr in 2h 14m",
+      "markDone": "Mark done",
+      "done": "Done"
+    },
+    "targetsScreen": {
+      "title": "Spiritual Goals",
+      "readQuran": "Read Quran",
+      "readQuranSub": "Daily · 2 pages",
+      "subhanallah33": "Subhanallah 33×",
+      "dailyDzikir": "Daily dzikir",
+      "sedekahFridays": "Sedekah Fridays",
+      "weekly": "Weekly"
+    },
+    "quranScreen": {
+      "title": "Al-Quran",
+      "continueReading": "Continue Reading",
+      "currentPosition": "Al-Kahf · Verse 12",
+      "bookmarks": "Bookmarks",
+      "memorize": "Memorize",
+      "verses": "{{count}} verses",
+      "surahs": {
+        "alFatihah": "The Opening",
+        "alBaqarah": "The Cow",
+        "alKahf": "The Cave",
+        "yaSin": "Ya Sin"
+      }
+    },
+    "progressScreen": {
+      "title": "My Progress",
+      "thisMonth": "This Month",
+      "goodDeeds": "good deeds",
+      "streak": "Streak",
+      "days": "days",
+      "thisWeek": "This Week",
+      "deedsPerDay": "Deeds per Day",
+      "weekDays": [
+        "M",
+        "T",
+        "W",
+        "T",
+        "F",
+        "S",
+        "S"
+      ]
+    },
+    "finalScreen": {
+      "title": "Start Your Journey",
+      "subtitle": "Join thousands of Muslims growing spiritually every day.",
+      "continueGoogle": "Continue with Google",
+      "useUsername": "Use Username & PIN",
+      "freeForever": "Free forever · No credit card needed"
+    },
+    "coachmark": {
+      "stepOf": "Step {{current}} of {{total}}",
+      "interactHint": "Interact with the highlighted element"
+    },
+    "topBar": {
+      "exitTour": "Exit tour",
+      "ariaLabel": "Interactive product tour",
+      "tryOrSkip": "Try it in the screen, or click Continue to skip",
+      "continue": "Continue",
+      "skip": "Skip",
+      "goToStep": "Go to step {{step}}: {{title}}",
+      "previousStep": "Previous step",
+      "nextStep": "Next step"
+    }
+  },
+  "target": {
+    "doneBadge": "done",
+    "pendingBadge": "pending"
+  },
+  "community": {
+    "tabLabel": "Community",
+    "subtitle": "Shared targets you and others work on together.",
+    "create": "New community target",
+    "createFirst": "Create the first one",
+    "createTitle": "New community target",
+    "createSubtitle": "Publish a target so others can join and you can see who is making progress.",
+    "editTitle": "Edit community target",
+    "namePlaceholder": "e.g. Read 1 juz of Quran daily",
+    "unitLabelOptional": "Unit label (optional)",
+    "unitPlaceholder": "e.g. ayah, page, juz",
+    "empty": "No community targets yet",
+    "emptyDesc": "Be the first to publish a community target.",
+    "yours": "Yours",
+    "joined": "Joined",
+    "join": "Join target",
+    "leave": "Leave target",
+    "joined_short": "Joined",
+    "joinedDesc": "You are now part of this community target.",
+    "left": "Left",
+    "leftDesc": "You have left this community target.",
+    "joinError": "Could not join this target.",
+    "leaveError": "Could not leave this target.",
+    "created": "Community target created",
+    "createdDesc": "Others can now join and see the leaderboard.",
+    "createError": "Could not create the community target.",
+    "updated": "Community target updated",
+    "updatedDesc": "Your changes have been saved.",
+    "updateError": "Could not update the community target.",
+    "deleted": "Community target deleted",
+    "deleteError": "Could not delete the community target.",
+    "notFound": "This community target was not found.",
+    "onlyCreator": "Only the creator can edit this target.",
+    "leaderboard": "Leaderboard",
+    "leaderboardScope": "Ranked by progress this {{period}}.",
+    "noParticipants": "No participants yet.",
+    "participantCount": "{{count}} participants",
+    "createdBy": "Created by {{name}}",
+    "youAreCreator": "You are the creator of this target.",
+    "confirmLeave": "Leave this community target?",
+    "confirmLeaveDesc": "You can rejoin later, but your past progress will no longer be counted unless you rejoin.",
+    "confirmDelete": "Delete this community target?",
+    "confirmDeleteDesc": "This will remove the target and all members. This action cannot be undone.",
+    "shareToCommunity": "Share with community",
+    "shareToCommunityDesc": "Also publish this target to the community so others can join. Daily, weekly, or monthly only.",
+    "alsoSharedDesc": "Your target was created and published to the community.",
+    "shareWarningTitle": "Target created, but sharing failed",
+    "shareWarningDesc": "We saved your personal target, but couldn't publish it to the community.",
+    "membersOnly": "Join this target to see who is participating.",
+    "showingTopN": "Showing top {{shown}} of {{total}} participants.",
+    "searchPlaceholder": "Search community targets…",
+    "filterCategory": "Category",
+    "filterPeriod": "Period",
+    "allCategories": "All categories",
+    "allPeriods": "All periods",
+    "sortRecent": "Newest first",
+    "sortPopular": "Most popular",
+    "noResults": "No targets match your search",
+    "noResultsDesc": "Try adjusting your filters or search term.",
+    "pageOf": "Page {{current}} of {{total}}"
+  },
+  "deeds": {
+    "recorded": "Deed Recorded",
+    "recordedDesc": "Your deed has been successfully tracked.",
+    "deleted": "Deed Deleted",
+    "deletedDesc": "The deed has been removed from your history.",
+    "updated": "Deed Updated",
+    "updatedDesc": "Your deed has been successfully updated."
+  },
+  "privacyBanner": {
+    "message": "We've updated our Privacy Policy.",
+    "viewLink": "View changes →",
+    "dismiss": "Dismiss"
+  },
+  "privacyContact": {
+    "heading": "Privacy Inquiries",
+    "body": "For questions about your data or this privacy policy, contact us at",
+    "email": "appistiqoma@gmail.com",
+    "responseNote": "We respond to all privacy inquiries within 30 days."
+  },
+  "consent": {
+    "title": "Data Privacy Consent",
+    "required": "Required before you can continue",
+    "body": "Istiqoma records your religious practice data to power its core features. Under GDPR (Article 9), this is classified as sensitive personal information, and we need your explicit consent before storing it.",
+    "dataTypes": {
+      "deeds": "Good deeds and worship logs",
+      "prayer": "Prayer completions and Sholat records",
+      "quran": "Qur'an reading, bookmarks, and memorization progress"
+    },
+    "gdprNote": "You may withdraw consent at any time by deleting your account. We will never sell or share your religious data with third parties.",
+    "checkboxReligious": "I consent to Istiqoma storing my religious practice data to power app features",
+    "checkboxAge": "I confirm I am 13 years of age or older",
+    "continue": "Continue",
+    "saveError": "Could not save your consent. Please try again.",
+    "privacyHint": "By continuing you accept our",
+    "privacyLink": "Privacy Policy",
+    "refuseHint": "Not ready to consent?",
+    "refuseLink": "Sign out"
+  },
+  "privacy": {
+    "pageTitle": "Privacy Policy",
+    "effectiveDateLabel": "Effective date:",
+    "effectiveDate": "May 10, 2026",
+    "appNameLabel": "App name:",
+    "contactLabel": "Contact:",
+    "contactSuffix": "— we respond within 30 days.",
+    "seeAlso": "See also our",
+    "termsLink": "Terms of Service",
+    "s1": {
+      "heading": "1. About This Policy",
+      "pre": "Istiqoma (\"we\", \"our\", or \"the app\") is a spiritual self-improvement application for Muslims. It uses the ",
+      "strong": "Quran Foundation (QF) APIs",
+      "mid": " and displays Qur'an content sourced from ",
+      "post": ". This Privacy Policy explains how we collect, use, and protect your personal information, and describes your rights under applicable privacy law including the GDPR."
+    },
+    "s2": {
+      "heading": "2. Data We Collect",
+      "colData": "Data",
+      "colSource": "Source",
+      "colPurpose": "Purpose",
+      "row1Data": "Email address",
+      "row1Source": "Google / Replit OAuth",
+      "row1Purpose": "Account identification",
+      "row2Data": "Display name & avatar",
+      "row2Source": "Google / Replit OAuth or user input",
+      "row2Purpose": "Profile display",
+      "row3Data": "Username & hashed PIN",
+      "row3Source": "User-created during sign-up",
+      "row3Purpose": "Alternative authentication",
+      "row4Data": "Deed logs & religious practice data",
+      "row4Source": "User input",
+      "row4Purpose": "Core feature — tracking good deeds and spiritual progress",
+      "row5Data": "Qur'an bookmarks & reading position",
+      "row5Source": "User interaction",
+      "row5Purpose": "Continue-reading feature",
+      "row6Data": "Memorization progress",
+      "row6Source": "User interaction",
+      "row6Purpose": "Hafalan tracking",
+      "row7Data": "Targets & onboarding answers",
+      "row7Source": "User input",
+      "row7Purpose": "Personalized goals",
+      "row8Data": "Push subscription endpoint & keys",
+      "row8Source": "Browser Web Push API",
+      "row8Purpose": "Sending prayer & deed reminders",
+      "row9Data": "Approximate location (latitude/longitude)",
+      "row9Source": "Browser Geolocation API (opt-in)",
+      "row9Purpose": "Calculating local prayer times (Sholat reminders)",
+      "row10Data": "Session data",
+      "row10Source": "Server-generated",
+      "row10Purpose": "Keeping you signed in (1-week TTL)",
+      "notWord": "not",
+      "notePre": "We do ",
+      "notePost": " run third-party analytics scripts, or collect data beyond what is listed above."
+    },
+    "s3": {
+      "heading": "3. Sensitive Data & GDPR Consent",
+      "body1Pre": "Deed logs and religious practice data (such as prayers performed, Qur'an recitation, fasting, and acts of worship) constitute ",
+      "body1Strong1": "special category (sensitive) personal data",
+      "body1Mid": " under Article 9 of the GDPR. We rely on your ",
+      "body1Strong2": "explicit, freely given consent",
+      "body1Post": " before processing this information. You may withdraw consent at any time by deleting your account (see Section 8).",
+      "body2Label": "How we collect consent:",
+      "body2Rest": " Before any religious data is stored, every new user must actively check two boxes on a dedicated consent screen:",
+      "check1": "\"I consent to Istiqoma storing my religious practice data to power app features.\"",
+      "check2": "\"I confirm I am 13 years of age or older.\"",
+      "body3": "The Continue button remains disabled until both boxes are ticked. Existing users who signed up before this feature was introduced are shown the same consent prompt on their next login and cannot access the app until they confirm.",
+      "body4Label": "Age requirement:",
+      "body4Rest": " Istiqoma is not intended for users under 13 years of age. Sign-up is blocked for anyone who does not confirm they meet the minimum age requirement via the self-declaration checkbox described above."
+    },
+    "s4": {
+      "heading": "4. How We Use Your Data",
+      "item1": "To operate the app and provide its features to you.",
+      "item2": "To send push notifications you opt into (reminders, alerts).",
+      "item3": "To calculate prayer times based on your location.",
+      "item4": "To power leaderboards and community targets (aggregated).",
+      "item5Pre": "We do ",
+      "item5Not": "not",
+      "item5Post": " sell your data or use it to build third-party advertising profiles.",
+      "item6Pre": "We do ",
+      "item6Not": "not",
+      "item6Post": " sell your data to third parties.",
+      "item7Pre": "We do ",
+      "item7Not": "not",
+      "item7Post": " use your data to train AI models without your separate, explicit consent."
+    },
+    "s5": {
+      "heading": "5. Sub-Processors",
+      "colProcessor": "Sub-processor",
+      "colRole": "Role",
+      "colPolicy": "Privacy Policy",
+      "supabaseRole": "Database hosting (PostgreSQL)",
+      "replitRole": "Application hosting & OAuth identity",
+      "webpushName": "Web Push (browser standard)",
+      "webpushRole": "Push notification delivery via your browser's push service (e.g. Google FCM for Chrome, Mozilla Autopush for Firefox)",
+      "qfName": "Quran Foundation / Quran.com",
+      "qfRole": "Qur'an text, audio, and verse data (read-only API)"
+    },
+    "s6": {
+      "heading": "6. Security",
+      "intro": "We take the security of your personal data seriously and implement the following measures:",
+      "item1Label": "TLS in transit:",
+      "item1Rest": " All communication between your device and our servers is encrypted via HTTPS.",
+      "item2Label": "Encrypted at rest:",
+      "item2Rest": " Your data is stored on Supabase-managed PostgreSQL instances, which use encryption at rest.",
+      "item3Label": "Access controls:",
+      "item3Rest": " Database access is restricted to application service accounts with minimal required permissions. Direct human access is audited and limited.",
+      "item4Label": "Secret rotation:",
+      "item4Pre": " Application secrets (API keys, VAPID keys, database credentials) are rotated on a cadence consistent with ",
+      "item4Strong": "Security Rule 6.9",
+      "item4End": " requirements.",
+      "item5Label": "Security incident response:",
+      "item5Pre": " We commit to acknowledging confirmed security incidents within ",
+      "item5Strong": "24 hours",
+      "item5Post": " and notifying affected users as required by applicable law."
+    },
+    "s7": {
+      "heading": "7. International Data Transfers",
+      "bodyPre": "Istiqoma is hosted on infrastructure operated by Replit and Supabase, which may process data in data centers outside your country of residence (including the United States and the European Economic Area). Where required by law, these transfers are governed by ",
+      "bodyStrong": "Standard Contractual Clauses (SCCs)",
+      "bodyPost": " or equivalent safeguards adopted by each sub-processor. Please refer to the sub-processor privacy policies linked above for details."
+    },
+    "s8": {
+      "heading": "8. Your Rights",
+      "intro": "Depending on your jurisdiction, you have the following rights regarding your personal data:",
+      "item1Label": "Access & correction:",
+      "item1Rest": " View and update your profile information directly in the app (Profile page).",
+      "item2Label": "Revoke OAuth token:",
+      "item2Pre": " You can revoke Istiqoma's access to your Google account at any time via ",
+      "item2LinkGoogle": "myaccount.google.com/permissions",
+      "item2Mid": ". Once Quran Foundation OAuth integration is active, you can also revoke that token at the ",
+      "item2LinkQF": "Quran Foundation OAuth Revocation endpoint",
+      "item2Post": ".",
+      "item3Label": "Data deletion:",
+      "item3Pre": " You can delete your account and all associated data using the \"Delete My Account\" feature in the app settings. We will hard-delete your personal data within ",
+      "item3Strong1": "30 days",
+      "item3Mid": " of your request, and purge it from backups within ",
+      "item3Strong2": "90 days",
+      "item3Post": ".",
+      "item4Label": "QF account deletion:",
+      "item4Rest": " If your associated Quran Foundation account is deleted, your linked data in Istiqoma will also be deleted.",
+      "contactPre": "To exercise any of these rights, email us at ",
+      "contactPost": ". We will respond within 30 days."
+    },
+    "s9": {
+      "heading": "9. Children",
+      "body": "Istiqoma is not directed at children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe a child under 13 has provided us with personal information, please contact us and we will delete it promptly."
+    },
+    "s10": {
+      "heading": "10. Changes to This Policy",
+      "body": "We may update this Privacy Policy from time to time. We will notify you of significant changes via an in-app banner or by updating the effective date above. Continued use of the app after changes constitutes your acceptance of the updated policy."
+    }
+  },
+  "terms": {
+    "pageTitle": "Terms of Service",
+    "effectiveDateLabel": "Effective date:",
+    "effectiveDate": "May 10, 2026",
+    "appNameLabel": "App name:",
+    "intro": "Welcome to Istiqoma. By accessing or using the app, you agree to be bound by these Terms of Service (\"Terms\"). Please read them carefully.",
+    "seeAlso": "See also our",
+    "privacyLink": "Privacy Policy",
+    "s1": {
+      "heading": "1. Acceptable Use",
+      "intro": "You agree to use Istiqoma only for lawful purposes and in a way that:",
+      "item1": "Does not violate any applicable local, national, or international law or regulation.",
+      "item2": "Does not attempt to gain unauthorized access to any part of the service, its servers, or any connected systems.",
+      "item3": "Does not interfere with, disrupt, or overburden the app's infrastructure.",
+      "item4": "Does not submit false, misleading, or harmful content.",
+      "item5": "Does not reverse-engineer, decompile, or attempt to extract the source code of the application.",
+      "item6": "Does not use the app for any commercial purpose without our prior written consent.",
+      "suspension": "We reserve the right to suspend or terminate accounts that violate these terms."
+    },
+    "s2": {
+      "heading": "2. Qur'an Content Attribution",
+      "pre": "The Qur'an text, translations, and audio content displayed in Istiqoma are sourced from the ",
+      "strong": "Quran Foundation",
+      "mid": " via the ",
+      "linkText": "Quran.com",
+      "after": " API. This content is presented as-is and is ",
+      "notModified": "not modified",
+      "rest": " by Istiqoma in any way. All rights to the Qur'an content remain with the Quran Foundation and the respective translation authors. Use of this content is governed by the ",
+      "qfTosLink": "Quran Foundation Terms of Service",
+      "end": "."
+    },
+    "s3": {
+      "heading": "3. User Content",
+      "body1": "You retain ownership of any content you create within the app (deed logs, targets, notes, etc.). By submitting content, you grant us a limited, non-exclusive license to store and display it solely for the purpose of providing the service to you.",
+      "body2": "You are responsible for the accuracy and appropriateness of content you submit."
+    },
+    "s4": {
+      "heading": "4. Disclaimers",
+      "body1Pre": "Istiqoma is provided on an ",
+      "body1AsIs": "\"as is\"",
+      "body1Mid": " and ",
+      "body1AsAvail": "\"as available\"",
+      "body1Post": " basis without warranties of any kind, either express or implied. We do not warrant that the service will be uninterrupted, error-free, or free of viruses or other harmful components.",
+      "body2": "The app is a spiritual habit-tracking tool. It does not constitute religious, legal, medical, or financial advice. Prayer time calculations are estimates and should be verified against local sources."
+    },
+    "s5": {
+      "heading": "5. Limitation of Liability",
+      "body": "To the fullest extent permitted by law, Istiqoma and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or related to your use of the app, even if we have been advised of the possibility of such damages."
+    },
+    "s6": {
+      "heading": "6. Governing Law & Disputes",
+      "body": "These Terms are governed by and construed in accordance with applicable law. Any dispute arising out of or relating to these Terms or your use of Istiqoma shall first be attempted to be resolved through good-faith negotiation. If unresolved, disputes may be submitted to binding arbitration or the courts of competent jurisdiction. Where Quran Foundation terms require New York jurisdiction for disputes related to their API content, those terms take precedence for such matters."
+    },
+    "s7": {
+      "heading": "7. Changes to These Terms",
+      "body": "We may update these Terms from time to time. We will notify you of material changes via an in-app banner or by updating the effective date above. Continued use of the app after changes become effective constitutes your acceptance of the revised Terms."
+    },
+    "s8": {
+      "heading": "8. Privacy",
+      "pre": "Our ",
+      "link": "Privacy Policy",
+      "post": " explains how we collect, use, and protect your personal data. By using Istiqoma, you acknowledge that you have read and understood our Privacy Policy."
+    },
+    "s9": {
+      "heading": "9. Contact",
+      "pre": "For questions about these Terms, contact us at ",
+      "post": "."
+    }
+  },
+  "seo": {
+    "landing": {
+      "title": "Istiqoma — Spiritual habit tracker for Muslims",
+      "description": "Build consistent daily worship. Track prayers, dzikir, fasting, sadaqah, and Qur'an reading with gentle reminders, streaks, and beautiful analytics."
+    },
+    "dashboard": {
+      "title": "Dashboard — Your daily worship",
+      "description": "See your daily prayers, dzikir, Qur'an reading and streak progress at a glance."
+    },
+    "progress": {
+      "title": "Progress — Your spiritual journey",
+      "description": "Visualise your worship habits over time with friendly charts and category breakdowns."
+    },
+    "targets": {
+      "title": "Targets — Set spiritual goals",
+      "description": "Create and track personal and community targets for prayer, fasting, Qur'an, and more."
+    },
+    "quran": {
+      "title": "Qur'an — Read, listen and memorise",
+      "description": "Read the Qur'an in beautiful Arabic typography, listen to multiple reciters, and memorise verse by verse."
+    },
+    "quranSurah": {
+      "title": "Qur'an — Surah {{name}} ({{transliteration}})",
+      "description": "Surah {{transliteration}} ({{name}}) — {{translated}}. Chapter {{number}} of the Holy Qur'an, revealed in {{revelation}}, {{verses}} verses. Read with translation, listen to multiple reciters, and memorise verse by verse on Istiqoma.",
+      "makkah": "Makkah",
+      "madinah": "Madinah"
+    },
+    "quranBookmarks": {
+      "title": "Qur'an bookmarks",
+      "description": "Pick up exactly where you left off in your Qur'an reading."
+    },
+    "quranMemorization": {
+      "title": "Qur'an memorisation progress",
+      "description": "Track which verses you've memorised across the entire Qur'an."
+    },
+    "quiz": {
+      "title": "Islamic Quiz — Test your knowledge",
+      "description": "Sharpen your Islamic knowledge across 10 levels of multiple-choice questions."
+    },
+    "quizLeaderboard": {
+      "title": "Quiz leaderboard",
+      "description": "See how the community is doing on the Islamic Quiz."
+    },
+    "leaderboard": {
+      "title": "Leaderboard — Compete in goodness",
+      "description": "See top performers across the Istiqoma community and compete in good deeds."
+    },
+    "profile": {
+      "title": "Profile & settings",
+      "description": "Manage your account, language, reminders and connected services."
+    },
+    "dzikir": {
+      "title": "Dzikir counter",
+      "description": "A calm digital tasbih that travels with you, with per-type targets and saved sessions."
+    },
+    "sholat": {
+      "title": "Sholat tracker",
+      "description": "Log your daily Fardhu prayers and build a consistent prayer habit."
+    },
+    "qibla": {
+      "title": "Qibla & prayer times",
+      "description": "Find the direction of the Kaaba and see today's prayer times based on your location."
+    },
+    "privacy": {
+      "title": "Privacy policy",
+      "description": "How Istiqoma collects, stores, and protects your spiritual journey data."
+    },
+    "terms": {
+      "title": "Terms of service",
+      "description": "The terms that apply when you use Istiqoma."
+    }
+  }
+}

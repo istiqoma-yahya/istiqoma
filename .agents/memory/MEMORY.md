@@ -1,2 +1,4 @@
 - [Native OAuth cookie problem](native-oauth-cookie-problem.md) — WKWebView and system browser have separate cookie jars; OIDC/QF OAuth must use exchange-token pattern via @capacitor/browser.
 - [Supabase prod schema drift](supabase-prod-schema-drift.md) — external Supabase prod is NOT migrated by Replit publish; db:push only hits dev; fix prod via project's own drizzle schema.
+- [Express 5 wildcard routes](express5-wildcards.md) — Express 5 path-to-regexp v8 broke /:param(*) syntax; use /*param instead.
+- [esbuild dynamic import resolution](esbuild-dynamic-imports.md) — esbuild cannot resolve directory-style dynamic imports (await import("./dir")); convert to static imports or point to explicit index file.

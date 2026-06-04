@@ -1,0 +1,61 @@
+modules = ["web", "python-3.11", "postgresql-16", "nodejs-22"]
+run = "npm run dev"
+hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
+
+[nix]
+channel = "stable-24_05"
+packages = ["unzip"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 23636
+externalPort = 3000
+
+[env]
+PORT = "5000"
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["node", "./dist/index.cjs"]
+build = ["npm", "run", "build"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[agent]
+integrations = ["javascript_log_in_with_replit:2.0.0", "javascript_anthropic_ai_integrations:2.0.0", "javascript_openai_ai_integrations:2.0.0", "javascript_object_storage:2.0.0"]
+
+[userenv]
+
+[userenv.shared]
+VAPID_PUBLIC_KEY = ""
+VAPID_PRIVATE_KEY = ""
+VITE_VAPID_PUBLIC_KEY = ""
+QF_ENV = "production"
+QF_CONTENT_ENV = "production"
+QF_REDIRECT_URI = "https://istiqoma.com/api/qf/callback"
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 180000

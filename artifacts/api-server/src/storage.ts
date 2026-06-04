@@ -1,0 +1,2528 @@
+import { db } from "./db";
+export { db };
+import { computeCommunityTargetLeaderboard, getCommunityPeriodBounds as getCommunityPeriodBoundsHelper, type LeaderboardMember } from "./community-targets-helpers";
+import { deeds, categories, targets, targetFolders, targetHistory, pushSubscriptions, customDzikirTypes, userOnboarding, streakFreezes, pointPurchases, userStreakState, getPackByCount, users, usernameLogins, quranBookmarks, quranReadingState, quranMemorizations, quranMemorizationAwards, quizQuestions, userQuizProgress, quizAttempts, campaigns, communityTargets, communityTargetMembers, recommendationRateLimitCalls, voiceParseRateLimitCalls, type InsertDeed, type Deed, type Category, type InsertCategory, type Target, type InsertTarget, type TargetFolder, type InsertTargetFolder, type TargetWithProgress, type TargetHistory, type InsertTargetHistory, type PushSubscription, type InsertPushSubscription, type CustomDzikirType, type UserOnboarding, type InsertUserOnboarding, type StreakFreezerPackSize, type QuranBookmark, type InsertQuranBookmark, type QuranReadingState, type UpsertQuranReadingState, type QuranMemorization, type InsertQuranMemorization, type QuizState, type QuizActiveAttempt, type QuizAnswerResult, type QuizLeaderboardEntry, type Campaign, type InsertCampaign, type UpdateCampaign, type CommunityTarget, type InsertCommunityTarget, type CommunityTargetMember, type CommunityTargetListItem, type CommunityTargetLeaderboardEntry } from "@workspace/db";
+import { userBadges } from "@workspace/db";
+import { eq, desc, and, asc, sql, gte, lte, gt, isNull, inArray, ilike, or, count } from "drizzle-orm";
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
+
+// Default timezone for users (Indonesia)
+const DEFAULT_TIMEZONE = "Asia/Jakarta";
+
+// Canonical list of built-in protected categories seeded for every user.
+// Used both for new-user seeding (createCategory) and lazy backfill
+// (getCategories) so the two paths can never drift.
+const REQUIRED_PROTECTED_CATEGORIES = [
+  "Sholat Fardhu",
+  "Sholat Sunnah",
+  "Puasa",
+  "Dzikir",
+  "Baca Quran",
+  "Shodaqoh",
+  "Hafalan Quran",
+] as const;
+
+// Typed error used by the quiz code-path so the route handlers (which read
+// `status` off the thrown error via getErrorStatus) get an HTTP status and
+// a clean JSON-safe message instead of a generic 500/HTML response.
+class QuizError extends Error {
+  readonly status: number;
+  constructor(message: string, status: number, options?: { cause?: unknown }) {
+    super(message);
+    this.name = "QuizError";
+    this.status = status;
+    if (options && "cause" in options) {
+      (this as Error & { cause?: unknown }).cause = options.cause;
+    }
+  }
+}
+
+// Translate raw Postgres errors raised by the quiz code-path into a QuizError
+// with a clear message. The most common failure mode in the wild is a missing
+// table (relation does not exist) when the dev DB hasn't been migrated — we
+// turn that into a 503 with an actionable message. Anything else is rethrown
+// untouched so route-level handling preserves existing semantics.
+function translateQuizDbError(err: unknown): unknown {
+  if (err instanceof QuizError) return err;
+  const code = (err as { code?: string } | null)?.code;
+  const message = (err as { message?: string } | null)?.message ?? "";
+  if (code === "42P01" || /relation .* does not exist/i.test(message)) {
+    return new QuizError(
+      "Quiz tables are not set up yet. Please run `npm run db:push` and restart the server.",
+      503,
+      { cause: err },
+    );
+  }
+  return err;
+}
+
+// Confirm the question bank has at least one row. We surface the empty-bank
+// case as a 503 with a clear message rather than letting the request silently
+// succeed (and bewilder the user) when seeding has failed or the table is
+// freshly created.
+async function assertQuizBankNonEmpty(): Promise<void> {
+  const result = await db.execute<{ exists: boolean }>(
+    sql`SELECT EXISTS (SELECT 1 FROM ${quizQuestions} LIMIT 1) AS exists`,
+  );
+  const row = ((result.rows ?? result) as Array<{ exists: boolean }>)[0];
+  if (!row?.exists) {
+    throw new QuizError(
+      "Quiz question bank is empty. Please seed the questions and try again.",
+      503,
+    );
+  }
+}
+
+// ─── Locale helpers (quiz) ──────────────────────────────────
+// Pick the best available translation of a string given a locale code.
+// Falls back to the English source-of-truth if the localized column is null.
+function pickLocale(
+  locale: string,
+  en: string,
+  id: string | null | undefined,
+  ms: string | null | undefined,
+): string {
+  if (locale === "id" && id) return id;
+  if (locale === "ms" && ms) return ms;
+  return en;
+}
+
+// Same as pickLocale but for string arrays (options).
+function pickLocaleArray(
+  locale: string,
+  en: string[],
+  id: string[] | null | undefined,
+  ms: string[] | null | undefined,
+): string[] {
+  if (locale === "id" && id && id.length === en.length) return id;
+  if (locale === "ms" && ms && ms.length === en.length) return ms;
+  return en;
+}
+
+// Validate an IANA timezone string. Returns the string if valid, otherwise undefined.
+function validateTimezone(tz: unknown): string | undefined {
+  if (!tz || typeof tz !== "string") return undefined;
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: tz });
+    return tz;
+  } catch {
+    return undefined;
+  }
+}
+
+const FASTING_CATEGORY_VARIANTS = ["puasa", "fasting", "puasa fardhu", "puasa sunnah", "fasting fardhu", "fasting sunnah"];
+function isFastingCategory(cat: string): boolean {
+  return FASTING_CATEGORY_VARIANTS.includes(cat.toLowerCase());
+}
+function matchesFastingCategories(cat1: string, cat2: string): boolean {
+  return cat1 === cat2 || (isFastingCategory(cat1) && isFastingCategory(cat2));
+}
+
+export type TargetHistoryWithStreak = {
+  history: TargetHistory[];
+  currentStreak: number;
+};
+
+export interface IStorage {
+  getDeeds(userId: string, since?: Date): Promise<Deed[]>;
+  createDeed(userId: string, deed: InsertDeed): Promise<Deed>;
+  findSholatDeedByLocalDate(userId: string, sholatType: string, localDate: string): Promise<Deed | null>;
+  deleteDeed(id: number, userId: string): Promise<void>;
+  updateDeed(id: number, userId: string, deed: InsertDeed): Promise<Deed>;
+  getCategories(userId: string): Promise<Category[]>;
+  createCategory(userId: string, category: InsertCategory): Promise<Category>;
+  deleteCategory(id: number, userId: string): Promise<void>;
+  updateCategory(id: number, userId: string, name: string): Promise<Category>;
+  reorderCategories(userId: string, orderedIds: number[]): Promise<Category[]>;
+  markCategoryProtected(id: number, userId: string): Promise<void>;
+  getTargets(userId: string): Promise<Target[]>;
+  getTargetsWithProgress(userId: string, timezone?: string): Promise<TargetWithProgress[]>;
+  getTargetWithProgress(targetId: number, userId: string, timezone?: string): Promise<TargetWithProgress | null>;
+  createTarget(userId: string, target: InsertTarget): Promise<Target>;
+  updateTarget(id: number, userId: string, target: Partial<InsertTarget>): Promise<Target>;
+  deleteTarget(id: number, userId: string): Promise<void>;
+  getTargetFolders(userId: string): Promise<TargetFolder[]>;
+  createTargetFolder(userId: string, folder: InsertTargetFolder): Promise<TargetFolder>;
+  updateTargetFolder(id: number, userId: string, folder: InsertTargetFolder): Promise<TargetFolder | undefined>;
+  deleteTargetFolder(id: number, userId: string): Promise<boolean>;
+  moveTargetToFolder(targetId: number, userId: string, folderId: number | null): Promise<Target>;
+  getTargetHistory(targetId: number, userId: string, limit?: number): Promise<TargetHistory[]>;
+  getTargetHistoryWithStreak(targetId: number, userId: string, limit?: number): Promise<TargetHistoryWithStreak>;
+  calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack?: number, timezone?: string, prefetched?: { deeds: Deed[]; since?: Date }): Promise<TargetHistory[]>;
+  getDeedsForTargetOnDate(targetId: number, userId: string, dateStr: string, timezone?: string): Promise<Deed[]>;
+  getDailyBreakdown(targetId: number, userId: string, startDate: string, endDate: string, timezone?: string): Promise<{ date: string; quantity: number }[]>;
+  getPushSubscription(userId: string): Promise<PushSubscription | null>;
+  savePushSubscription(userId: string, subscription: InsertPushSubscription): Promise<PushSubscription>;
+  updatePushSubscriptionSettings(userId: string, settings: Partial<InsertPushSubscription>): Promise<PushSubscription | null>;
+  deletePushSubscription(userId: string): Promise<void>;
+  deletePushSubscriptionByPlatform(userId: string, platform: string): Promise<void>;
+  getAllPushSubscriptions(): Promise<PushSubscription[]>;
+  saveNativePushToken(userId: string, platform: "ios" | "android", deviceToken: string, settings: Partial<InsertPushSubscription>): Promise<PushSubscription>;
+  deleteNativePushTokenByPlatform(userId: string, platform: "ios" | "android"): Promise<void>;
+  getCustomDzikirTypes(userId: string): Promise<CustomDzikirType[]>;
+  createCustomDzikirType(userId: string, label: string): Promise<CustomDzikirType>;
+  updateCustomDzikirType(id: number, userId: string, label: string): Promise<CustomDzikirType>;
+  deleteCustomDzikirType(id: number, userId: string): Promise<void>;
+  getUserOnboarding(userId: string): Promise<UserOnboarding | null>;
+  upsertUserOnboarding(userId: string, data: InsertUserOnboarding): Promise<UserOnboarding>;
+  patchOnboardingGender(userId: string, patch: { gender?: string | null; genderPromptDismissed?: boolean }): Promise<UserOnboarding | null>;
+  getStreakFreezerBalance(userId: string): Promise<{ owned: number; used: number; available: number }>;
+  getPointsBalance(userId: string): Promise<{ earned: number; spent: number; available: number }>;
+  getFrozenDates(userId: string): Promise<Set<string>>;
+  getFreezerEntries(userId: string): Promise<{ date: string; refundedAt: string | null }[]>;
+  consumeFreezerForDate(userId: string, dateStr: string): Promise<boolean>;
+  refundFreezerForDate(userId: string, dateStr: string): Promise<boolean>;
+  getStreakFloor(userId: string): Promise<string | null>;
+  setStreakFloor(userId: string, dateStr: string): Promise<void>;
+  purchaseStreakFreezers(userId: string, packSize: StreakFreezerPackSize): Promise<{
+    freezer: { owned: number; used: number; available: number };
+    points: { earned: number; spent: number; available: number };
+    purchased: { packSize: number; pointsCost: number; freezersGranted: number };
+  }>;
+  getQuranBookmarks(userId: string): Promise<QuranBookmark[]>;
+  addQuranBookmark(userId: string, bookmark: InsertQuranBookmark): Promise<QuranBookmark>;
+  removeQuranBookmark(userId: string, surahNumber: number, verseNumber: number): Promise<void>;
+  getQuranReadingState(userId: string): Promise<QuranReadingState | null>;
+  upsertQuranReadingState(userId: string, data: UpsertQuranReadingState): Promise<QuranReadingState>;
+  getQuranMemorizations(userId: string, surahNumber?: number): Promise<QuranMemorization[]>;
+  addQuranMemorization(userId: string, data: InsertQuranMemorization): Promise<QuranMemorization>;
+  removeQuranMemorization(userId: string, surahNumber: number, verseNumber: number): Promise<void>;
+  hasQuranMemorizationAward(userId: string, surahNumber: number, verseNumber: number): Promise<boolean>;
+  recordQuranMemorizationAward(userId: string, surahNumber: number, verseNumber: number, deedId: number): Promise<boolean>;
+  getLeaderboard(
+    currentUserId: string,
+    period: "daily" | "monthly" | "yearly",
+    opts: { mode: "around" | "before" | "after"; cursor: number | null; limit: number; timezone?: string },
+  ): Promise<{
+    entries: LeaderboardEntry[];
+    me: { rank: number; points: number } | null;
+    total: number;
+  }>;
+
+  // Public: Active Campaigns
+  listActiveCampaigns(): Promise<Campaign[]>;
+
+  // Admin: Campaigns
+  listCampaigns(): Promise<Campaign[]>;
+  getCampaign(id: number): Promise<Campaign | null>;
+  createCampaign(data: InsertCampaign): Promise<Campaign>;
+  updateCampaign(id: number, data: UpdateCampaign): Promise<Campaign | null>;
+  deleteCampaign(id: number): Promise<boolean>;
+
+  // Quiz
+  getQuizState(userId: string): Promise<QuizState>;
+  startQuizAttempt(userId: string): Promise<QuizActiveAttempt>;
+  recordQuizAnswer(userId: string, attemptId: number, optionIndex: number): Promise<QuizAnswerResult>;
+  getQuizLeaderboard(currentUserId: string, limit: number): Promise<{
+    entries: QuizLeaderboardEntry[];
+    me: { rank: number; level: number; totalCorrect: number } | null;
+    total: number;
+  }>;
+
+  deleteAccount(userId: string): Promise<void>;
+  exportAccountData(userId: string): Promise<Record<string, unknown>>;
+}
+
+export type LeaderboardEntry = {
+  rank: number;
+  userId: string;
+  username: string | null;
+  email: string | null;
+  profileImageUrl: string | null;
+  points: number;
+};
+
+export class DatabaseStorage implements IStorage {
+  async getDeeds(userId: string, since?: Date): Promise<Deed[]> {
+    const conditions = since
+      ? and(eq(deeds.userId, userId), gte(deeds.createdAt, since))
+      : eq(deeds.userId, userId);
+    return await db
+      .select()
+      .from(deeds)
+      .where(conditions)
+      .orderBy(desc(deeds.createdAt));
+  }
+
+  async createDeed(userId: string, insertDeed: InsertDeed): Promise<Deed> {
+    const values: any = { ...insertDeed, userId, deedType: insertDeed.deedType || "good" };
+    const [deed] = await db
+      .insert(deeds)
+      .values(values)
+      .returning();
+    return deed;
+  }
+
+  // Idempotency lookup for Sholat Fardhu deeds. Each (user, prayer, local
+  // calendar date) tuple should map to at most one deed. This lets the POST
+  // route short-circuit duplicate creates from rapid taps, retries, or stale
+  // client caches without ever inserting a second row.
+  async findSholatDeedByLocalDate(
+    userId: string,
+    sholatType: string,
+    localDate: string,
+  ): Promise<Deed | null> {
+    const rows = await db
+      .select()
+      .from(deeds)
+      .where(
+        and(
+          eq(deeds.userId, userId),
+          eq(deeds.category, "Sholat Fardhu"),
+          eq(deeds.sholatType, sholatType),
+          eq(deeds.localDate, localDate),
+        ),
+      )
+      .orderBy(asc(deeds.id))
+      .limit(1);
+    return rows[0] ?? null;
+  }
+
+  async deleteDeed(id: number, userId: string): Promise<void> {
+    await db
+      .delete(deeds)
+      .where(and(eq(deeds.id, id), eq(deeds.userId, userId)));
+  }
+
+  async updateDeed(id: number, userId: string, updateDeed: InsertDeed): Promise<Deed> {
+    const values: any = { ...updateDeed, editCount: sql`${deeds.editCount} + 1` };
+    const [deed] = await db
+      .update(deeds)
+      .set(values)
+      .where(and(eq(deeds.id, id), eq(deeds.userId, userId)))
+      .returning();
+    return deed;
+  }
+
+  async getCategories(userId: string): Promise<Category[]> {
+    const existing = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.userId, userId))
+      .orderBy(asc(categories.sortOrder), asc(categories.id));
+
+    // Backfill any missing required protected categories for existing users
+    const existingNames = new Set(existing.map(c => c.name));
+    const missing = REQUIRED_PROTECTED_CATEGORIES.filter(name => !existingNames.has(name));
+    if (missing.length > 0) {
+      let maxSortOrder = existing.length > 0 ? Math.max(...existing.map(c => c.sortOrder)) : -1;
+      for (const name of missing) {
+        await db.insert(categories).values({
+          name,
+          userId,
+          isProtected: true,
+          sortOrder: ++maxSortOrder,
+        }).onConflictDoNothing();
+      }
+      return await db
+        .select()
+        .from(categories)
+        .where(eq(categories.userId, userId))
+        .orderBy(asc(categories.sortOrder), asc(categories.id));
+    }
+
+    return existing;
+  }
+
+  async createCategory(userId: string, insertCategory: InsertCategory): Promise<Category> {
+    const existing = await this.getCategories(userId);
+    const duplicateCheck = existing.find(c => c.name.toLowerCase() === insertCategory.name.toLowerCase());
+    if (duplicateCheck) {
+      return duplicateCheck;
+    }
+    let maxSortOrder = existing.length > 0 ? Math.max(...existing.map(c => c.sortOrder)) : -1;
+    const [category] = await db
+      .insert(categories)
+      .values({ 
+        ...insertCategory, 
+        userId, 
+        sortOrder: maxSortOrder + 1,
+        isProtected: insertCategory.isProtected ?? false,
+      })
+      .returning();
+    
+    // If this is a new user (only 1 category), seed other protected categories
+    if (existing.length === 0) {
+      // Get current categories again to avoid race conditions
+      const currentCategories = await this.getCategories(userId);
+      const existingNames = new Set(currentCategories.map(c => c.name));
+      
+      for (const name of REQUIRED_PROTECTED_CATEGORIES) {
+        if (!existingNames.has(name)) {
+          await db.insert(categories).values({
+            name,
+            userId,
+            isProtected: true,
+            sortOrder: ++maxSortOrder + 1
+          }).onConflictDoNothing();
+          existingNames.add(name);
+        }
+      }
+    }
+    
+    return category;
+  }
+
+  async deleteCategory(id: number, userId: string): Promise<void> {
+    await db
+      .delete(categories)
+      .where(and(eq(categories.id, id), eq(categories.userId, userId)));
+  }
+
+  async updateCategory(id: number, userId: string, name: string): Promise<Category> {
+    const [category] = await db
+      .update(categories)
+      .set({ name })
+      .where(and(eq(categories.id, id), eq(categories.userId, userId)))
+      .returning();
+    return category;
+  }
+
+  async reorderCategories(userId: string, orderedIds: number[]): Promise<Category[]> {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await db
+        .update(categories)
+        .set({ sortOrder: i })
+        .where(and(eq(categories.id, orderedIds[i]), eq(categories.userId, userId)));
+    }
+    return this.getCategories(userId);
+  }
+
+  async markCategoryProtected(id: number, userId: string): Promise<void> {
+    await db
+      .update(categories)
+      .set({ isProtected: true })
+      .where(and(eq(categories.id, id), eq(categories.userId, userId)));
+  }
+
+  async getTargets(userId: string): Promise<Target[]> {
+    return await db
+      .select()
+      .from(targets)
+      .where(eq(targets.userId, userId))
+      .orderBy(desc(targets.createdAt));
+  }
+
+  async getTargetsWithProgress(userId: string, timezone?: string): Promise<TargetWithProgress[]> {
+    const userTargets = await this.getTargets(userId);
+    const userDeeds = await this.getDeeds(userId);
+    const now = new Date();
+    const tz = await this.resolveUserTimezone(userId, timezone);
+
+    return userTargets.map((target) => {
+      const isOneTime = target.recurrence === "oneTime";
+      
+      // For one-time targets, count matching deeds only
+      if (isOneTime) {
+        // Filter deeds by date range (startDate to dueDate) and matching category/subcategory
+        const isLimitTarget = target.targetType === "limit";
+        
+        const matchingDeeds = userDeeds.filter((deed) => {
+          const deedDate = new Date(deed.createdAt || now);
+          
+          // Check date range if specified
+          const afterStart = !target.startDate || deedDate >= new Date(target.startDate);
+          const beforeDue = !target.dueDate || deedDate <= new Date(target.dueDate);
+          const inDateRange = afterStart && beforeDue;
+          
+          // Match category (with backward compat for merged fasting categories)
+          const matchesCategory = matchesFastingCategories(deed.category, target.category) || deed.category === target.category;
+          
+          // Match subcategories (metadata)
+          const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;
+          const matchesSholatType = !target.sholatType || deed.sholatType === target.sholatType;
+          const matchesFastingType = !target.fastingType || deed.fastingType === target.fastingType;
+          const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
+          const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
+          const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
+          const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit || !deed.customUnit;
+          
+          // All deeds are now good deeds - count matching deeds
+          return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit && inDateRange;
+        });
+        
+        const deedProgress = matchingDeeds.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
+        const currentValue = deedProgress;
+        
+        const percentComplete = target.targetValue > 0 
+          ? Math.min(100, Math.round((currentValue / target.targetValue) * 100))
+          : 0;
+        
+        return {
+          ...target,
+          currentValue,
+          percentComplete,
+        };
+      }
+      
+      // Recurring target logic - use user's timezone for period calculations
+      let periodStart: Date;
+      let periodEnd: Date;
+      
+      // Convert current time to user's timezone for period calculations
+      const nowInUserTz = toZonedTime(now, tz);
+
+      switch (target.period) {
+        case "daily":
+          // Calculate start/end of day in user's timezone, then convert back to UTC
+          periodStart = fromZonedTime(startOfDay(nowInUserTz), tz);
+          periodEnd = fromZonedTime(endOfDay(nowInUserTz), tz);
+          break;
+        case "weekly":
+          periodStart = fromZonedTime(startOfWeek(nowInUserTz, { weekStartsOn: 1 }), tz);
+          periodEnd = fromZonedTime(endOfWeek(nowInUserTz, { weekStartsOn: 1 }), tz);
+          break;
+        case "monthly":
+          periodStart = fromZonedTime(startOfMonth(nowInUserTz), tz);
+          periodEnd = fromZonedTime(endOfMonth(nowInUserTz), tz);
+          break;
+        default:
+          periodStart = fromZonedTime(startOfDay(nowInUserTz), tz);
+          periodEnd = fromZonedTime(endOfDay(nowInUserTz), tz);
+      }
+
+      // For achievement targets: count good deeds
+      // For limit targets: count bad deeds (or deeds in that category regardless of type for Maksiat)
+      const isLimitTarget = target.targetType === "limit";
+      
+      const deedsInPeriod = userDeeds.filter((deed) => {
+        const deedDate = new Date(deed.createdAt || now);
+        const inPeriod = deedDate >= periodStart && deedDate <= periodEnd;
+        const matchesCategory = matchesFastingCategories(deed.category, target.category) || deed.category === target.category;
+        
+        // Match subcategories (metadata)
+        const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;
+        const matchesSholatType = !target.sholatType || deed.sholatType === target.sholatType;
+        const matchesFastingType = !target.fastingType || deed.fastingType === target.fastingType;
+        const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
+        const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
+        const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
+        const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit || !deed.customUnit;
+        
+        // All deeds are now good deeds - count matching deeds
+        return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit && inPeriod;
+      });
+
+      const currentValue = deedsInPeriod.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
+      
+      let percentComplete: number;
+      if (isLimitTarget) {
+        // For limit targets: 100% means at limit, over 100% means exceeded
+        // Show as usage percentage
+        if (target.targetValue === 0) {
+          // If limit is 0, any deed means 100%+ (exceeded)
+          percentComplete = currentValue > 0 ? 100 : 0;
+        } else {
+          percentComplete = Math.round((currentValue / target.targetValue) * 100);
+        }
+      } else {
+        // For achievement targets: progress toward goal, capped at 100%
+        percentComplete = Math.min(100, Math.round((currentValue / target.targetValue) * 100));
+      }
+
+      return {
+        ...target,
+        currentValue,
+        percentComplete,
+      };
+    });
+  }
+
+  async getTargetWithProgress(targetId: number, userId: string, timezone?: string): Promise<TargetWithProgress | null> {
+    const [target] = await db
+      .select()
+      .from(targets)
+      .where(and(eq(targets.id, targetId), eq(targets.userId, userId)))
+      .limit(1);
+
+    if (!target) return null;
+
+    const now = new Date();
+    const tz = await this.resolveUserTimezone(userId, timezone);
+
+    if (target.recurrence === "oneTime") {
+      const since = target.startDate ? new Date(target.startDate) : undefined;
+      const userDeeds = await this.getDeeds(userId, since);
+
+      const matchingDeeds = userDeeds.filter((deed) => {
+        const deedDate = new Date(deed.createdAt || now);
+        const afterStart = !target.startDate || deedDate >= new Date(target.startDate);
+        const beforeDue = !target.dueDate || deedDate <= new Date(target.dueDate);
+        const inDateRange = afterStart && beforeDue;
+        const matchesCategory = matchesFastingCategories(deed.category, target.category) || deed.category === target.category;
+        const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;
+        const matchesSholatType = !target.sholatType || deed.sholatType === target.sholatType;
+        const matchesFastingType = !target.fastingType || deed.fastingType === target.fastingType;
+        const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
+        const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
+        const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
+        const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit || !deed.customUnit;
+        return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit && inDateRange;
+      });
+
+      const currentValue = matchingDeeds.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
+      const percentComplete = target.targetValue > 0
+        ? Math.min(100, Math.round((currentValue / target.targetValue) * 100))
+        : 0;
+
+      return { ...target, currentValue, percentComplete };
+    }
+
+    // Recurring target — compute current period boundaries in user's timezone
+    const nowInUserTz = toZonedTime(now, tz);
+    let periodStart: Date;
+    let periodEnd: Date;
+
+    switch (target.period) {
+      case "daily":
+        periodStart = fromZonedTime(startOfDay(nowInUserTz), tz);
+        periodEnd = fromZonedTime(endOfDay(nowInUserTz), tz);
+        break;
+      case "weekly":
+        periodStart = fromZonedTime(startOfWeek(nowInUserTz, { weekStartsOn: 1 }), tz);
+        periodEnd = fromZonedTime(endOfWeek(nowInUserTz, { weekStartsOn: 1 }), tz);
+        break;
+      case "monthly":
+        periodStart = fromZonedTime(startOfMonth(nowInUserTz), tz);
+        periodEnd = fromZonedTime(endOfMonth(nowInUserTz), tz);
+        break;
+      default:
+        periodStart = fromZonedTime(startOfDay(nowInUserTz), tz);
+        periodEnd = fromZonedTime(endOfDay(nowInUserTz), tz);
+    }
+
+    // Fetch only deeds from the current period start onwards — the index on
+    // (user_id, created_at) makes this a very narrow range scan.
+    const userDeeds = await this.getDeeds(userId, periodStart);
+
+    const isLimitTarget = target.targetType === "limit";
+
+    const deedsInPeriod = userDeeds.filter((deed) => {
+      const deedDate = new Date(deed.createdAt || now);
+      const inPeriod = deedDate >= periodStart && deedDate <= periodEnd;
+      const matchesCategory = matchesFastingCategories(deed.category, target.category) || deed.category === target.category;
+      const matchesDzikirType = !target.dzikirType || deed.dzikirType === target.dzikirType;
+      const matchesSholatType = !target.sholatType || deed.sholatType === target.sholatType;
+      const matchesFastingType = !target.fastingType || deed.fastingType === target.fastingType;
+      const matchesQuranUnit = !target.quranUnit || deed.quranUnit === target.quranUnit;
+      const matchesSedekahType = !target.sedekahType || deed.sedekahType === target.sedekahType;
+      const matchesIsJamaah = target.isJamaah === null || target.isJamaah === undefined || deed.isJamaah === target.isJamaah;
+      const matchesCustomUnit = !target.customUnit || deed.customUnit === target.customUnit || !deed.customUnit;
+      return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit && inPeriod;
+    });
+
+    const currentValue = deedsInPeriod.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
+
+    let percentComplete: number;
+    if (isLimitTarget) {
+      if (target.targetValue === 0) {
+        percentComplete = currentValue > 0 ? 100 : 0;
+      } else {
+        percentComplete = Math.round((currentValue / target.targetValue) * 100);
+      }
+    } else {
+      percentComplete = Math.min(100, Math.round((currentValue / target.targetValue) * 100));
+    }
+
+    return { ...target, currentValue, percentComplete };
+  }
+
+  private async assertFolderOwnership(folderId: number | null | undefined, userId: string): Promise<void> {
+    if (folderId == null) return;
+    const [folder] = await db
+      .select({ id: targetFolders.id })
+      .from(targetFolders)
+      .where(and(eq(targetFolders.id, folderId), eq(targetFolders.userId, userId)))
+      .limit(1);
+    if (!folder) {
+      const err = new Error("Folder not found or not owned by user") as Error & { status?: number };
+      err.status = 403;
+      throw err;
+    }
+  }
+
+  async createTarget(userId: string, insertTarget: InsertTarget): Promise<Target> {
+    await this.assertFolderOwnership(insertTarget.folderId ?? null, userId);
+    const [target] = await db
+      .insert(targets)
+      .values({ ...insertTarget, userId })
+      .returning();
+    return target;
+  }
+
+  async updateTarget(id: number, userId: string, updateTarget: Partial<InsertTarget>): Promise<Target> {
+    if ("folderId" in updateTarget) {
+      await this.assertFolderOwnership(updateTarget.folderId ?? null, userId);
+    }
+    const [target] = await db
+      .update(targets)
+      .set(updateTarget)
+      .where(and(eq(targets.id, id), eq(targets.userId, userId)))
+      .returning();
+    return target;
+  }
+
+  async deleteTarget(id: number, userId: string): Promise<void> {
+    await db
+      .delete(targets)
+      .where(and(eq(targets.id, id), eq(targets.userId, userId)));
+  }
+
+  async getTargetFolders(userId: string): Promise<TargetFolder[]> {
+    return await db
+      .select()
+      .from(targetFolders)
+      .where(eq(targetFolders.userId, userId))
+      .orderBy(asc(targetFolders.sortOrder), asc(targetFolders.id));
+  }
+
+  async createTargetFolder(userId: string, insertFolder: InsertTargetFolder): Promise<TargetFolder> {
+    const existing = await this.getTargetFolders(userId);
+    const maxSortOrder = existing.length > 0 ? Math.max(...existing.map(f => f.sortOrder)) : -1;
+    const [folder] = await db
+      .insert(targetFolders)
+      .values({
+        ...insertFolder,
+        userId,
+        sortOrder: maxSortOrder + 1,
+      })
+      .returning();
+    return folder;
+  }
+
+  async updateTargetFolder(id: number, userId: string, updateFolder: InsertTargetFolder): Promise<TargetFolder | undefined> {
+    const [folder] = await db
+      .update(targetFolders)
+      .set({ name: updateFolder.name })
+      .where(and(eq(targetFolders.id, id), eq(targetFolders.userId, userId)))
+      .returning();
+    return folder;
+  }
+
+  async deleteTargetFolder(id: number, userId: string): Promise<boolean> {
+    // ON DELETE SET NULL on targets.folder_id keeps the targets but ungroups them.
+    const deleted = await db
+      .delete(targetFolders)
+      .where(and(eq(targetFolders.id, id), eq(targetFolders.userId, userId)))
+      .returning({ id: targetFolders.id });
+    return deleted.length > 0;
+  }
+
+  async moveTargetToFolder(targetId: number, userId: string, folderId: number | null): Promise<Target> {
+    await this.assertFolderOwnership(folderId, userId);
+    const [target] = await db
+      .update(targets)
+      .set({ folderId })
+      .where(and(eq(targets.id, targetId), eq(targets.userId, userId)))
+      .returning();
+    if (!target) {
+      const err = new Error("Target not found") as Error & { status?: number };
+      err.status = 404;
+      throw err;
+    }
+    return target;
+  }
+
+  async updateTargetProgress(id: number, userId: string, progress: number): Promise<Target> {
+    const [target] = await db
+      .update(targets)
+      .set({ manualProgress: progress })
+      .where(and(eq(targets.id, id), eq(targets.userId, userId)))
+      .returning();
+    return target;
+  }
+
+  async completeTarget(id: number, userId: string): Promise<Target> {
+    const [target] = await db
+      .update(targets)
+      .set({ completedAt: new Date() })
+      .where(and(eq(targets.id, id), eq(targets.userId, userId)))
+      .returning();
+    return target;
+  }
+
+  async getTargetHistory(targetId: number, userId: string, limit: number = 30): Promise<TargetHistory[]> {
+    return await db
+      .select()
+      .from(targetHistory)
+      .where(and(eq(targetHistory.targetId, targetId), eq(targetHistory.userId, userId)))
+      .orderBy(desc(targetHistory.periodEnd))
+      .limit(limit);
+  }
+
+  async getTargetHistoryWithStreak(targetId: number, userId: string, limit: number = 30): Promise<TargetHistoryWithStreak> {
+    const history = await this.getTargetHistory(targetId, userId, limit);
+    
+    let currentStreak = 0;
+    for (const entry of history) {
+      if (entry.completed) {
+        currentStreak++;
+      } else {
+        break;
+      }
+    }
+
+    return { history, currentStreak };
+  }
+
+  private async resolveUserTimezone(userId: string, explicitTz?: string): Promise<string> {
+    const validated = validateTimezone(explicitTz);
+    if (validated) return validated;
+    const sub = await this.getPushSubscription(userId);
+    return validateTimezone(sub?.timezone) ?? DEFAULT_TIMEZONE;
+  }
+
+  async calculateAndSaveTargetHistory(targetId: number, userId: string, periodsBack: number = 7, timezone?: string, prefetched?: { deeds: Deed[]; since?: Date }): Promise<TargetHistory[]> {
+    const target = await db
+      .select()
+      .from(targets)
+      .where(and(eq(targets.id, targetId), eq(targets.userId, userId)))
+      .limit(1);
+
+    if (!target.length) {
+      return [];
+    }
+
+    const t = target[0];
+    const now = new Date();
+
+    // Lock the timezone for this target's history to whatever was used the
+    // first time we computed history for it. Otherwise, a user travelling or
+    // toggling their device timezone would shift every future recalculation
+    // onto a different calendar grid, retroactively breaking past streaks.
+    //
+    // The request timezone is only used as the seed when:
+    //   - the target has no history rows yet (brand-new target), or
+    //   - the most recent history row is a legacy pre-column row whose
+    //     timezone is NULL (we don't fabricate a timezone for it — we trust
+    //     the caller's current timezone instead of locking everyone to a
+    //     hardcoded default that would mis-shift non-Jakarta users).
+    const requestTz = await this.resolveUserTimezone(userId, timezone);
+    const [existingForTz] = await db
+      .select({ timezone: targetHistory.timezone })
+      .from(targetHistory)
+      .where(and(eq(targetHistory.targetId, targetId), eq(targetHistory.userId, userId)))
+      .orderBy(desc(targetHistory.periodEnd))
+      .limit(1);
+    const tz = validateTimezone(existingForTz?.timezone) ?? requestTz;
+
+    // Convert to user's timezone for accurate period calculations
+    const nowInUserTz = toZonedTime(now, tz);
+    
+    const periodBoundaries: Array<{ periodStart: Date; periodEnd: Date }> = [];
+    for (let i = 1; i <= periodsBack; i++) {
+      let periodStart: Date;
+      let periodEnd: Date;
+
+      switch (t.period) {
+        case "daily":
+          const dayInUserTz = subDays(nowInUserTz, i);
+          periodStart = fromZonedTime(startOfDay(dayInUserTz), tz);
+          periodEnd = fromZonedTime(endOfDay(dayInUserTz), tz);
+          break;
+        case "weekly":
+          const weekInUserTz = subWeeks(nowInUserTz, i);
+          periodStart = fromZonedTime(startOfWeek(weekInUserTz, { weekStartsOn: 1 }), tz);
+          periodEnd = fromZonedTime(endOfWeek(weekInUserTz, { weekStartsOn: 1 }), tz);
+          break;
+        case "monthly":
+          const monthInUserTz = subMonths(nowInUserTz, i);
+          periodStart = fromZonedTime(startOfMonth(monthInUserTz), tz);
+          periodEnd = fromZonedTime(endOfMonth(monthInUserTz), tz);
+          break;
+        default:
+          continue;
+      }
+      periodBoundaries.push({ periodStart, periodEnd });
+    }
+
+    // Filter out periods that end before the target was created
+    // We use periodEnd so that the period containing the creation date is included
+    const targetCreatedAt = t.createdAt ? new Date(t.createdAt) : new Date();
+    const validPeriods = periodBoundaries.filter(({ periodEnd }) => periodEnd >= targetCreatedAt);
+
+    if (validPeriods.length === 0) {
+      return [];
+    }
+
+    const oldestPeriodStart = validPeriods[validPeriods.length - 1].periodStart;
+    const newestPeriodEnd = validPeriods[0].periodEnd;
+
+    // Fetch only deeds within the history window — the (user_id, created_at)
+    // index makes this a narrow range scan instead of a full table scan.
+    // Reuse a caller-provided deed list only when its fetch window already
+    // covers the history window (i.e. it was fetched from a point at or before
+    // the oldest history period start), so we never silently undercount a
+    // boundary period that starts before the prefetch floor.
+    const canUsePrefetch = !!prefetched && (!prefetched.since || prefetched.since <= oldestPeriodStart);
+    const userDeeds = canUsePrefetch ? prefetched!.deeds : await this.getDeeds(userId, oldestPeriodStart);
+
+    const isLimitTarget = t.targetType === "limit";
+
+    // Build every period row in memory first, then persist with a single
+    // delete + multi-row insert inside one transaction. Previously this loop
+    // issued one INSERT round-trip per period (up to `periodsBack`), which on
+    // the external Supabase database meant ~90 sequential network round-trips
+    // and ~20s page loads. One batched insert collapses that to a single trip.
+    const rowsToInsert = validPeriods.map(({ periodStart, periodEnd }) => {
+      const deedsInPeriod = userDeeds.filter((deed) => {
+        const deedDate = new Date(deed.createdAt || now);
+        const inPeriod = deedDate >= periodStart && deedDate <= periodEnd;
+        const matchesCategory = matchesFastingCategories(deed.category, t.category) || deed.category === t.category;
+
+        // For dzikir targets with specific type, also match dzikirType
+        const matchesDzikirType = !t.dzikirType || deed.dzikirType === t.dzikirType;
+        // For sholat targets with specific type, also match sholatType
+        const matchesSholatType = !t.sholatType || deed.sholatType === t.sholatType;
+        // For fasting targets with specific type, also match fastingType
+        const matchesFastingType = !t.fastingType || deed.fastingType === t.fastingType;
+        const matchesQuranUnit = !t.quranUnit || deed.quranUnit === t.quranUnit;
+        const matchesSedekahType = !t.sedekahType || deed.sedekahType === t.sedekahType;
+        const matchesCustomUnit = !t.customUnit || deed.customUnit === t.customUnit || !deed.customUnit;
+        const matchesIsJamaah = t.isJamaah === null || t.isJamaah === undefined || deed.isJamaah === t.isJamaah;
+
+        return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit && inPeriod;
+      });
+
+      const achievedValue = deedsInPeriod.reduce((sum, deed) => sum + (deed.quantity || 1), 0);
+
+      // For limit targets: success means staying at or below the limit
+      // For achievement targets: success means reaching or exceeding the target
+      const completed = isLimitTarget
+        ? achievedValue <= t.targetValue
+        : achievedValue >= t.targetValue;
+
+      return {
+        targetId,
+        userId,
+        category: t.category,
+        dzikirType: t.dzikirType,
+        sholatType: t.sholatType,
+        fastingType: t.fastingType,
+        periodStart,
+        periodEnd,
+        achievedValue,
+        targetValue: t.targetValue,
+        targetType: t.targetType,
+        completed,
+        timezone: tz,
+      };
+    });
+
+    const savedHistory = await db.transaction(async (tx) => {
+      await tx
+        .delete(targetHistory)
+        .where(and(
+          eq(targetHistory.targetId, targetId),
+          eq(targetHistory.userId, userId),
+          gte(targetHistory.periodStart, oldestPeriodStart),
+          lte(targetHistory.periodEnd, newestPeriodEnd)
+        ));
+
+      if (rowsToInsert.length === 0) return [] as TargetHistory[];
+
+      return await tx.insert(targetHistory).values(rowsToInsert).returning();
+    });
+
+    return savedHistory.sort((a, b) =>
+      new Date(b.periodEnd).getTime() - new Date(a.periodEnd).getTime()
+    );
+  }
+
+  async getDeedsForTargetOnDate(targetId: number, userId: string, dateStr: string, timezone?: string): Promise<Deed[]> {
+    const target = await db
+      .select()
+      .from(targets)
+      .where(and(eq(targets.id, targetId), eq(targets.userId, userId)))
+      .limit(1);
+
+    if (!target.length) {
+      return [];
+    }
+
+    const t = target[0];
+    const tz = await this.resolveUserTimezone(userId, timezone);
+    const dateInUserTz = new Date(dateStr + "T00:00:00");
+    const dayStart = fromZonedTime(startOfDay(dateInUserTz), tz);
+    const dayEnd = fromZonedTime(endOfDay(dateInUserTz), tz);
+
+    const userDeeds = await db
+      .select()
+      .from(deeds)
+      .where(
+        and(
+          eq(deeds.userId, userId),
+          gte(deeds.createdAt, dayStart),
+          lte(deeds.createdAt, dayEnd)
+        )
+      );
+
+    return userDeeds.filter((deed) => {
+      const matchesCategory = matchesFastingCategories(deed.category, t.category) || deed.category === t.category;
+      const matchesDzikirType = !t.dzikirType || deed.dzikirType === t.dzikirType;
+      const matchesSholatType = !t.sholatType || deed.sholatType === t.sholatType;
+      const matchesFastingType = !t.fastingType || deed.fastingType === t.fastingType;
+      const matchesQuranUnit = !t.quranUnit || deed.quranUnit === t.quranUnit;
+      const matchesSedekahType = !t.sedekahType || deed.sedekahType === t.sedekahType;
+      const matchesIsJamaah = t.isJamaah === null || t.isJamaah === undefined || deed.isJamaah === t.isJamaah;
+      const matchesCustomUnit = !t.customUnit || deed.customUnit === t.customUnit || !deed.customUnit;
+      return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit;
+    });
+  }
+
+  async getDailyBreakdown(
+    targetId: number,
+    userId: string,
+    startDate: string,
+    endDate: string,
+    timezone?: string,
+  ): Promise<{ date: string; quantity: number }[]> {
+    const targetRows = await db
+      .select()
+      .from(targets)
+      .where(and(eq(targets.id, targetId), eq(targets.userId, userId)))
+      .limit(1);
+
+    if (!targetRows.length) return [];
+
+    const t = targetRows[0];
+    const tz = await this.resolveUserTimezone(userId, timezone);
+
+    const rangeStart = fromZonedTime(startOfDay(new Date(startDate + "T00:00:00")), tz);
+    const rangeEnd = fromZonedTime(endOfDay(new Date(endDate + "T00:00:00")), tz);
+
+    const userDeeds = await db
+      .select()
+      .from(deeds)
+      .where(
+        and(
+          eq(deeds.userId, userId),
+          gte(deeds.createdAt, rangeStart),
+          lte(deeds.createdAt, rangeEnd)
+        )
+      );
+
+    const matchingDeeds = userDeeds.filter((deed) => {
+      const matchesCategory = matchesFastingCategories(deed.category, t.category) || deed.category === t.category;
+      const matchesDzikirType = !t.dzikirType || deed.dzikirType === t.dzikirType;
+      const matchesSholatType = !t.sholatType || deed.sholatType === t.sholatType;
+      const matchesFastingType = !t.fastingType || deed.fastingType === t.fastingType;
+      const matchesQuranUnit = !t.quranUnit || deed.quranUnit === t.quranUnit;
+      const matchesSedekahType = !t.sedekahType || deed.sedekahType === t.sedekahType;
+      const matchesIsJamaah = t.isJamaah === null || t.isJamaah === undefined || deed.isJamaah === t.isJamaah;
+      const matchesCustomUnit = !t.customUnit || deed.customUnit === t.customUnit || !deed.customUnit;
+      return matchesCategory && matchesDzikirType && matchesSholatType && matchesFastingType && matchesQuranUnit && matchesSedekahType && matchesIsJamaah && matchesCustomUnit;
+    });
+
+    const byDay = new Map<string, number>();
+    for (const deed of matchingDeeds) {
+      const deedInUserTz = toZonedTime(new Date(deed.createdAt!), tz);
+      const dateStr = format(deedInUserTz, "yyyy-MM-dd");
+      byDay.set(dateStr, (byDay.get(dateStr) || 0) + (deed.quantity || 1));
+    }
+
+    return Array.from(byDay.entries()).map(([date, quantity]) => ({ date, quantity }));
+  }
+
+  async getPushSubscription(userId: string): Promise<PushSubscription | null> {
+    // Returns the web (VAPID) row only. Native rows are accessed via getAllPushSubscriptions().
+    const [subscription] = await db
+      .select()
+      .from(pushSubscriptions)
+      .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.platform, "web")))
+      .limit(1);
+    return subscription || null;
+  }
+
+  async savePushSubscription(userId: string, subscription: InsertPushSubscription): Promise<PushSubscription> {
+    const existing = await this.getPushSubscription(userId);
+    const sanitizedTimezone = validateTimezone(subscription.timezone) ?? existing?.timezone ?? "Asia/Jakarta";
+
+    if (existing) {
+      const [updated] = await db
+        .update(pushSubscriptions)
+        .set({
+          endpoint: subscription.endpoint,
+          p256dh: subscription.p256dh,
+          auth: subscription.auth,
+          platform: "web",
+          dailyReminder: subscription.dailyReminder ?? existing.dailyReminder,
+          reminderTime: subscription.reminderTime ?? existing.reminderTime,
+          timezone: sanitizedTimezone,
+          targetAlerts: subscription.targetAlerts ?? existing.targetAlerts,
+          sholatReminder: subscription.sholatReminder ?? existing.sholatReminder,
+          latitude: subscription.latitude ?? existing.latitude,
+          longitude: subscription.longitude ?? existing.longitude,
+        })
+        .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.platform, "web")))
+        .returning();
+      return updated;
+    }
+
+    const [created] = await db
+      .insert(pushSubscriptions)
+      .values({ ...subscription, userId, platform: "web", timezone: sanitizedTimezone })
+      .returning();
+    return created;
+  }
+
+  async updatePushSubscriptionSettings(userId: string, settings: Partial<InsertPushSubscription>): Promise<PushSubscription | null> {
+    const existing = await this.getPushSubscription(userId);
+    if (!existing) return null;
+
+    const sanitized = { ...settings };
+    if ("timezone" in sanitized) {
+      sanitized.timezone = validateTimezone(sanitized.timezone) ?? existing.timezone ?? "Asia/Jakarta";
+    }
+
+    // Propagate settings to ALL platforms for this user so reminder prefs stay
+    // consistent across web, iOS, and Android subscriptions.
+    await db
+      .update(pushSubscriptions)
+      .set(sanitized)
+      .where(eq(pushSubscriptions.userId, userId));
+
+    // Return the web row for the route response.
+    const [updated] = await db
+      .select()
+      .from(pushSubscriptions)
+      .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.platform, "web")))
+      .limit(1);
+    return updated ?? null;
+  }
+
+  async deletePushSubscription(userId: string): Promise<void> {
+    // Deletes the web (VAPID) row only. Native tokens are not affected.
+    await db
+      .delete(pushSubscriptions)
+      .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.platform, "web")));
+  }
+
+  async deletePushSubscriptionByPlatform(userId: string, platform: string): Promise<void> {
+    await db
+      .delete(pushSubscriptions)
+      .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.platform, platform as "web" | "ios" | "android")));
+  }
+
+  async getAllPushSubscriptions(): Promise<PushSubscription[]> {
+    return await db.select().from(pushSubscriptions);
+  }
+
+  async saveNativePushToken(
+    userId: string,
+    platform: "ios" | "android",
+    deviceToken: string,
+    settings: Partial<InsertPushSubscription>,
+  ): Promise<PushSubscription> {
+    // Fetch the web subscription FIRST so we can inherit its timezone and
+    // other settings as defaults — this preserves the user's existing reminder
+    // preferences when they install the app on a new device.
+    const webSub = await this.getPushSubscription(userId);
+    // Prefer the explicitly supplied timezone; fall back to the web sub's
+    // timezone so users in non-Jakarta timezones don't lose their preferences.
+    const sanitizedTimezone = validateTimezone(settings.timezone) ?? webSub?.timezone ?? "Asia/Jakarta";
+
+    const row = {
+      userId,
+      platform,
+      deviceToken,
+      dailyReminder: settings.dailyReminder ?? webSub?.dailyReminder ?? true,
+      reminderTime: settings.reminderTime ?? webSub?.reminderTime ?? "21:00",
+      timezone: sanitizedTimezone,
+      targetAlerts: settings.targetAlerts ?? webSub?.targetAlerts ?? true,
+      sholatReminder: settings.sholatReminder ?? webSub?.sholatReminder ?? true,
+      latitude: settings.latitude ?? webSub?.latitude ?? null,
+      longitude: settings.longitude ?? webSub?.longitude ?? null,
+      notificationSound: settings.notificationSound ?? webSub?.notificationSound ?? "chime",
+    };
+
+    // Upsert by (userId, platform) — updates token and syncs settings on re-registration.
+    const [upserted] = await db
+      .insert(pushSubscriptions)
+      .values(row)
+      .onConflictDoUpdate({
+        target: [pushSubscriptions.userId, pushSubscriptions.platform],
+        set: {
+          deviceToken,
+          dailyReminder: row.dailyReminder,
+          reminderTime: row.reminderTime,
+          timezone: row.timezone,
+          targetAlerts: row.targetAlerts,
+          sholatReminder: row.sholatReminder,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          notificationSound: row.notificationSound,
+        },
+      })
+      .returning();
+    return upserted;
+  }
+
+  async deleteNativePushTokenByPlatform(userId: string, platform: "ios" | "android"): Promise<void> {
+    await db
+      .delete(pushSubscriptions)
+      .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.platform, platform)));
+  }
+
+  async getCustomDzikirTypes(userId: string): Promise<CustomDzikirType[]> {
+    return await db
+      .select()
+      .from(customDzikirTypes)
+      .where(eq(customDzikirTypes.userId, userId))
+      .orderBy(asc(customDzikirTypes.createdAt));
+  }
+
+  async createCustomDzikirType(userId: string, label: string): Promise<CustomDzikirType> {
+    const [created] = await db
+      .insert(customDzikirTypes)
+      .values({ userId, label })
+      .returning();
+    return created;
+  }
+
+  async updateCustomDzikirType(id: number, userId: string, label: string): Promise<CustomDzikirType> {
+    const [existing] = await db
+      .select()
+      .from(customDzikirTypes)
+      .where(and(eq(customDzikirTypes.id, id), eq(customDzikirTypes.userId, userId)))
+      .limit(1);
+    if (!existing) {
+      const err = new Error("Custom dzikir type not found") as Error & { status?: number };
+      err.status = 404;
+      throw err;
+    }
+
+    const oldLabel = existing.label;
+
+    const [updated] = await db
+      .update(customDzikirTypes)
+      .set({ label })
+      .where(and(eq(customDzikirTypes.id, id), eq(customDzikirTypes.userId, userId)))
+      .returning();
+
+    if (oldLabel !== label) {
+      await db
+        .update(deeds)
+        .set({ dzikirType: label })
+        .where(and(eq(deeds.userId, userId), eq(deeds.dzikirType, oldLabel)));
+
+      await db
+        .update(targets)
+        .set({ dzikirType: label })
+        .where(and(eq(targets.userId, userId), eq(targets.dzikirType, oldLabel)));
+    }
+
+    return updated;
+  }
+
+  async deleteCustomDzikirType(id: number, userId: string): Promise<void> {
+    await db
+      .delete(customDzikirTypes)
+      .where(and(eq(customDzikirTypes.id, id), eq(customDzikirTypes.userId, userId)));
+  }
+
+  async getUserOnboarding(userId: string): Promise<UserOnboarding | null> {
+    const [row] = await db
+      .select()
+      .from(userOnboarding)
+      .where(eq(userOnboarding.userId, userId))
+      .limit(1);
+    return row || null;
+  }
+
+  async upsertUserOnboarding(userId: string, data: InsertUserOnboarding): Promise<UserOnboarding> {
+    const now = new Date();
+    const values = {
+      userId,
+      q1: data.q1,
+      q2: data.q2,
+      q3: data.q3,
+      q4: data.q4,
+      q5: data.q5,
+      identityKey: data.identityKey,
+      gender: data.gender ?? null,
+      completed: true,
+      completedAt: now,
+      updatedAt: now,
+    };
+    const [row] = await db
+      .insert(userOnboarding)
+      .values(values)
+      .onConflictDoUpdate({
+        target: userOnboarding.userId,
+        set: {
+          q1: values.q1,
+          q2: values.q2,
+          q3: values.q3,
+          q4: values.q4,
+          q5: values.q5,
+          identityKey: values.identityKey,
+          ...(values.gender != null ? { gender: values.gender } : {}),
+          completed: true,
+          completedAt: now,
+          updatedAt: now,
+        },
+      })
+      .returning();
+    return row;
+  }
+
+  async patchOnboardingGender(userId: string, patch: { gender?: string | null; genderPromptDismissed?: boolean }): Promise<UserOnboarding | null> {
+    const now = new Date();
+    const set: Record<string, unknown> = { updatedAt: now };
+    if ('gender' in patch) set.gender = patch.gender ?? null;
+    if ('genderPromptDismissed' in patch) set.genderPromptDismissed = patch.genderPromptDismissed;
+    const [row] = await db
+      .update(userOnboarding)
+      .set(set)
+      .where(eq(userOnboarding.userId, userId))
+      .returning();
+    return row || null;
+  }
+
+  // ─── Streak Freezer ────────────────────────────────────────────
+  // All balances are computed from append-only ledgers (point_purchases,
+  // streak_freezes) so no separate counter can drift. The unique index on
+  // (user_id, frozen_date) is what makes consumeFreezerForDate safe under
+  // concurrency — a duplicate insert raises 23505 and we treat that as a
+  // no-op success (the date is already frozen).
+
+  async getStreakFreezerBalance(userId: string): Promise<{ owned: number; used: number; available: number }> {
+    const [grantedRow] = await db
+      .select({ total: sql<number>`COALESCE(SUM(${pointPurchases.freezersGranted}), 0)::int` })
+      .from(pointPurchases)
+      .where(eq(pointPurchases.userId, userId));
+    const [usedRow] = await db
+      .select({ total: sql<number>`COUNT(*)::int` })
+      .from(streakFreezes)
+      .where(and(eq(streakFreezes.userId, userId), isNull(streakFreezes.refundedAt)));
+    const owned = Number(grantedRow?.total ?? 0);
+    const used = Number(usedRow?.total ?? 0);
+    return { owned, used, available: Math.max(0, owned - used) };
+  }
+
+  async getPointsBalance(userId: string): Promise<{ earned: number; spent: number; available: number }> {
+    const [earnedRow] = await db
+      .select({ total: sql<number>`COALESCE(SUM(${deeds.points}), 0)::int` })
+      .from(deeds)
+      .where(eq(deeds.userId, userId));
+    const [spentRow] = await db
+      .select({ total: sql<number>`COALESCE(SUM(${pointPurchases.pointsCost}), 0)::int` })
+      .from(pointPurchases)
+      .where(eq(pointPurchases.userId, userId));
+    const earned = Number(earnedRow?.total ?? 0);
+    const spent = Number(spentRow?.total ?? 0);
+    return { earned, spent, available: Math.max(0, earned - spent) };
+  }
+
+  // Normalize a drizzle `date` column (which can come back as string or Date
+   // depending on the driver path) to a strict YYYY-MM-DD string.
+  private normalizeDateColumn(value: string | Date | null): string | null {
+    if (value === null) return null;
+    if (typeof value === "string") return value.slice(0, 10);
+    return value.toISOString().slice(0, 10);
+  }
+
+  // Acquire a per-user transaction-scoped advisory lock. Released
+  // automatically at end of transaction. Serializes all freezer point
+  // operations for this user, preventing read-then-insert races
+  // (double-spend on rapid clicks, or two concurrent walks both
+  // consuming the same one freezer).
+  private async acquireUserFreezerLock(tx: Parameters<Parameters<typeof db.transaction>[0]>[0], userId: string) {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`streak-freezer:${userId}`}, 0))`);
+  }
+
+  async getFrozenDates(userId: string): Promise<Set<string>> {
+    const rows = await db
+      .select({ d: streakFreezes.frozenDate })
+      .from(streakFreezes)
+      .where(and(eq(streakFreezes.userId, userId), isNull(streakFreezes.refundedAt)));
+    return new Set(
+      rows
+        .map((r) => this.normalizeDateColumn(r.d))
+        .filter((s): s is string => s !== null),
+    );
+  }
+
+  async getFreezerEntries(userId: string): Promise<{ date: string; refundedAt: string | null }[]> {
+    const rows = await db
+      .select({ d: streakFreezes.frozenDate, refundedAt: streakFreezes.refundedAt })
+      .from(streakFreezes)
+      .where(eq(streakFreezes.userId, userId))
+      .orderBy(asc(streakFreezes.frozenDate));
+    return rows
+      .map((r) => {
+        const date = this.normalizeDateColumn(r.d);
+        if (date === null) return null;
+        return {
+          date,
+          refundedAt: r.refundedAt ? r.refundedAt.toISOString() : null,
+        };
+      })
+      .filter((e): e is { date: string; refundedAt: string | null } => e !== null);
+  }
+
+  async getStreakFloor(userId: string): Promise<string | null> {
+    const [row] = await db
+      .select({ d: userStreakState.floorDate })
+      .from(userStreakState)
+      .where(eq(userStreakState.userId, userId));
+    return this.normalizeDateColumn(row?.d ?? null);
+  }
+
+  // Idempotent upsert. Always advances forward in time — i.e. if a more
+   // recent floor already exists we keep that one rather than rolling it
+   // back to an older date. This makes setStreakFloor safe to call from
+   // anywhere in the walk without ordering concerns.
+  async setStreakFloor(userId: string, dateStr: string): Promise<void> {
+    await db
+      .insert(userStreakState)
+      .values({ userId, floorDate: dateStr, updatedAt: new Date() })
+      .onConflictDoUpdate({
+        target: userStreakState.userId,
+        set: {
+          floorDate: sql`GREATEST(${userStreakState.floorDate}, ${dateStr}::date)`,
+          updatedAt: new Date(),
+        },
+      });
+  }
+
+  async consumeFreezerForDate(userId: string, dateStr: string): Promise<boolean> {
+    return await db.transaction(async (tx) => {
+      await this.acquireUserFreezerLock(tx, userId);
+      const [grantedRow] = await tx
+        .select({ total: sql<number>`COALESCE(SUM(${pointPurchases.freezersGranted}), 0)::int` })
+        .from(pointPurchases)
+        .where(eq(pointPurchases.userId, userId));
+      const [usedRow] = await tx
+        .select({ total: sql<number>`COUNT(*)::int` })
+        .from(streakFreezes)
+        .where(and(eq(streakFreezes.userId, userId), isNull(streakFreezes.refundedAt)));
+      const available = Number(grantedRow?.total ?? 0) - Number(usedRow?.total ?? 0);
+      if (available <= 0) return false;
+      try {
+        await tx.insert(streakFreezes).values({ userId, frozenDate: dateStr });
+        return true;
+      } catch (err: unknown) {
+        // 23505 = unique_violation: another concurrent walk already froze
+        // this same date. Treat as success — the date is frozen, no double charge.
+        if (typeof err === "object" && err !== null && "code" in err && (err as { code?: string }).code === "23505") {
+          return true;
+        }
+        throw err;
+      }
+    });
+  }
+
+  async refundFreezerForDate(userId: string, dateStr: string): Promise<boolean> {
+    return await db.transaction(async (tx) => {
+      await this.acquireUserFreezerLock(tx, userId);
+      const updated = await tx
+        .update(streakFreezes)
+        .set({ refundedAt: new Date() })
+        .where(
+          and(
+            eq(streakFreezes.userId, userId),
+            eq(streakFreezes.frozenDate, dateStr),
+            isNull(streakFreezes.refundedAt),
+          ),
+        )
+        .returning({ id: streakFreezes.id });
+      return updated.length > 0;
+    });
+  }
+
+  async purchaseStreakFreezers(userId: string, packSize: StreakFreezerPackSize) {
+    const pack = getPackByCount(packSize);
+    if (!pack) {
+      const err = new Error(`Invalid pack size: ${packSize}`) as Error & { status?: number };
+      err.status = 400;
+      throw err;
+    }
+    return await db.transaction(async (tx) => {
+      await this.acquireUserFreezerLock(tx, userId);
+      const [earnedRow] = await tx
+        .select({ total: sql<number>`COALESCE(SUM(${deeds.points}), 0)::int` })
+        .from(deeds)
+        .where(eq(deeds.userId, userId));
+      const [spentRow] = await tx
+        .select({ total: sql<number>`COALESCE(SUM(${pointPurchases.pointsCost}), 0)::int` })
+        .from(pointPurchases)
+        .where(eq(pointPurchases.userId, userId));
+      const earned = Number(earnedRow?.total ?? 0);
+      const spent = Number(spentRow?.total ?? 0);
+      const available = Math.max(0, earned - spent);
+      if (available < pack.cost) {
+        const err = new Error("INSUFFICIENT_POINTS") as Error & {
+          status?: number;
+          code?: string;
+          available?: number;
+          required?: number;
+        };
+        err.status = 402;
+        err.code = "INSUFFICIENT_POINTS";
+        err.available = available;
+        err.required = pack.cost;
+        throw err;
+      }
+      await tx.insert(pointPurchases).values({
+        userId,
+        kind: "streak_freezer",
+        packSize: pack.size,
+        pointsCost: pack.cost,
+        freezersGranted: pack.size,
+      });
+      const newSpent = spent + pack.cost;
+      const newGranted = await tx
+        .select({ total: sql<number>`COALESCE(SUM(${pointPurchases.freezersGranted}), 0)::int` })
+        .from(pointPurchases)
+        .where(eq(pointPurchases.userId, userId));
+      const [usedRow] = await tx
+        .select({ total: sql<number>`COUNT(*)::int` })
+        .from(streakFreezes)
+        .where(and(eq(streakFreezes.userId, userId), isNull(streakFreezes.refundedAt)));
+      const owned = Number(newGranted[0]?.total ?? 0);
+      const used = Number(usedRow?.total ?? 0);
+      return {
+        freezer: { owned, used, available: Math.max(0, owned - used) },
+        points: { earned, spent: newSpent, available: Math.max(0, earned - newSpent) },
+        purchased: { packSize: pack.size, pointsCost: pack.cost, freezersGranted: pack.size },
+      };
+    });
+  }
+
+  // ─── Qur'an ──────────────────────────────────────────────────
+  async getQuranBookmarks(userId: string): Promise<QuranBookmark[]> {
+    return await db
+      .select()
+      .from(quranBookmarks)
+      .where(eq(quranBookmarks.userId, userId))
+      .orderBy(asc(quranBookmarks.surahNumber), asc(quranBookmarks.verseNumber));
+  }
+
+  async addQuranBookmark(userId: string, bookmark: InsertQuranBookmark): Promise<QuranBookmark> {
+    // Idempotent: if the (user, surah, verse) row already exists, return it
+    // instead of letting the unique index raise. Bookmark toggling on the
+    // client should never error on a double-tap.
+    const existing = await db
+      .select()
+      .from(quranBookmarks)
+      .where(
+        and(
+          eq(quranBookmarks.userId, userId),
+          eq(quranBookmarks.surahNumber, bookmark.surahNumber),
+          eq(quranBookmarks.verseNumber, bookmark.verseNumber),
+        ),
+      )
+      .limit(1);
+    if (existing[0]) return existing[0];
+    const [created] = await db
+      .insert(quranBookmarks)
+      .values({ userId, ...bookmark })
+      .returning();
+    return created;
+  }
+
+  async removeQuranBookmark(userId: string, surahNumber: number, verseNumber: number): Promise<void> {
+    await db
+      .delete(quranBookmarks)
+      .where(
+        and(
+          eq(quranBookmarks.userId, userId),
+          eq(quranBookmarks.surahNumber, surahNumber),
+          eq(quranBookmarks.verseNumber, verseNumber),
+        ),
+      );
+  }
+
+  async getQuranReadingState(userId: string): Promise<QuranReadingState | null> {
+    const [row] = await db
+      .select()
+      .from(quranReadingState)
+      .where(eq(quranReadingState.userId, userId))
+      .limit(1);
+    return row || null;
+  }
+
+  async upsertQuranReadingState(userId: string, data: UpsertQuranReadingState): Promise<QuranReadingState> {
+    const now = new Date();
+    // Only overwrite columns the caller actually supplied. e.g. updating
+    // just the reciter must not blow away the saved last-read position.
+    const set: Record<string, unknown> = { updatedAt: now };
+    if (data.lastSurahNumber !== undefined) set.lastSurahNumber = data.lastSurahNumber;
+    if (data.lastVerseNumber !== undefined) set.lastVerseNumber = data.lastVerseNumber;
+    if (data.preferredReciterId !== undefined) set.preferredReciterId = data.preferredReciterId;
+    if (data.arabicFont !== undefined) set.arabicFont = data.arabicFont;
+    if (data.arabicFontSize !== undefined) set.arabicFontSize = data.arabicFontSize;
+    if (data.arabicLineHeight !== undefined) set.arabicLineHeight = data.arabicLineHeight;
+    if (data.autoAdvanceAyah !== undefined) set.autoAdvanceAyah = data.autoAdvanceAyah;
+    if (data.continuousPlay !== undefined) set.continuousPlay = data.continuousPlay;
+
+    const [row] = await db
+      .insert(quranReadingState)
+      .values({
+        userId,
+        lastSurahNumber: data.lastSurahNumber ?? null,
+        lastVerseNumber: data.lastVerseNumber ?? null,
+        preferredReciterId: data.preferredReciterId ?? null,
+        ...(data.arabicFont !== undefined ? { arabicFont: data.arabicFont } : {}),
+        ...(data.arabicFontSize !== undefined ? { arabicFontSize: data.arabicFontSize } : {}),
+        ...(data.arabicLineHeight !== undefined ? { arabicLineHeight: data.arabicLineHeight } : {}),
+        ...(data.autoAdvanceAyah !== undefined ? { autoAdvanceAyah: data.autoAdvanceAyah } : {}),
+        ...(data.continuousPlay !== undefined ? { continuousPlay: data.continuousPlay } : {}),
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: quranReadingState.userId,
+        set,
+      })
+      .returning();
+    return row;
+  }
+
+  async getQuranMemorizations(userId: string, surahNumber?: number): Promise<QuranMemorization[]> {
+    const where = surahNumber !== undefined
+      ? and(eq(quranMemorizations.userId, userId), eq(quranMemorizations.surahNumber, surahNumber))
+      : eq(quranMemorizations.userId, userId);
+    return await db
+      .select()
+      .from(quranMemorizations)
+      .where(where)
+      .orderBy(asc(quranMemorizations.surahNumber), asc(quranMemorizations.verseNumber));
+  }
+
+  async addQuranMemorization(userId: string, data: InsertQuranMemorization): Promise<QuranMemorization> {
+    // Idempotent: a re-tap of "mark memorized" should converge on the
+    // existing row instead of raising on the unique index.
+    const existing = await db
+      .select()
+      .from(quranMemorizations)
+      .where(
+        and(
+          eq(quranMemorizations.userId, userId),
+          eq(quranMemorizations.surahNumber, data.surahNumber),
+          eq(quranMemorizations.verseNumber, data.verseNumber),
+        ),
+      )
+      .limit(1);
+    if (existing[0]) return existing[0];
+    const [created] = await db
+      .insert(quranMemorizations)
+      .values({ userId, ...data })
+      .returning();
+    return created;
+  }
+
+  async removeQuranMemorization(userId: string, surahNumber: number, verseNumber: number): Promise<void> {
+    await db
+      .delete(quranMemorizations)
+      .where(
+        and(
+          eq(quranMemorizations.userId, userId),
+          eq(quranMemorizations.surahNumber, surahNumber),
+          eq(quranMemorizations.verseNumber, verseNumber),
+        ),
+      );
+  }
+
+  async hasQuranMemorizationAward(userId: string, surahNumber: number, verseNumber: number): Promise<boolean> {
+    const rows = await db
+      .select({ id: quranMemorizationAwards.id })
+      .from(quranMemorizationAwards)
+      .where(
+        and(
+          eq(quranMemorizationAwards.userId, userId),
+          eq(quranMemorizationAwards.surahNumber, surahNumber),
+          eq(quranMemorizationAwards.verseNumber, verseNumber),
+        ),
+      )
+      .limit(1);
+    return rows.length > 0;
+  }
+
+  // Insert an award ledger row. Uses ON CONFLICT DO NOTHING on the unique
+  // (user, surah, verse) index so a concurrent second request can't create
+  // a duplicate award. Returns true if this call inserted a fresh row
+  // (i.e. caller should treat the deed as freshly awarded), false if the
+  // award was already present.
+  async recordQuranMemorizationAward(
+    userId: string,
+    surahNumber: number,
+    verseNumber: number,
+    deedId: number,
+  ): Promise<boolean> {
+    const inserted = await db
+      .insert(quranMemorizationAwards)
+      .values({ userId, surahNumber, verseNumber, deedId })
+      .onConflictDoNothing({ target: [
+        quranMemorizationAwards.userId,
+        quranMemorizationAwards.surahNumber,
+        quranMemorizationAwards.verseNumber,
+      ] })
+      .returning({ id: quranMemorizationAwards.id });
+    return inserted.length > 0;
+  }
+
+  // ─── Leaderboard ─────────────────────────────────────────────
+  // Ranks all users by deed points within the requested time window
+  // (daily/monthly/yearly, computed in the user's local timezone) and
+  // returns a windowed slice around a target rank. Users with 0 points
+  // in the window are excluded from the ranking. Ties are broken
+  // deterministically by user id (ROW_NUMBER) so ranks are stable
+  // across requests.
+  async getLeaderboard(
+    currentUserId: string,
+    period: "daily" | "monthly" | "yearly",
+    opts: { mode: "around" | "before" | "after"; cursor: number | null; limit: number; timezone?: string },
+  ): Promise<{
+    entries: LeaderboardEntry[];
+    me: { rank: number; points: number } | null;
+    total: number;
+  }> {
+    const tz = await this.resolveUserTimezone(currentUserId, opts.timezone);
+    const nowInTz = toZonedTime(new Date(), tz);
+    let startUtc: Date;
+    let endUtc: Date;
+    switch (period) {
+      case "daily":
+        startUtc = fromZonedTime(startOfDay(nowInTz), tz);
+        endUtc = fromZonedTime(endOfDay(nowInTz), tz);
+        break;
+      case "monthly":
+        startUtc = fromZonedTime(startOfMonth(nowInTz), tz);
+        endUtc = fromZonedTime(endOfMonth(nowInTz), tz);
+        break;
+      case "yearly":
+        startUtc = fromZonedTime(startOfYear(nowInTz), tz);
+        endUtc = fromZonedTime(endOfYear(nowInTz), tz);
+        break;
+    }
+
+    // One typed Drizzle query fetches every user's points in the period window
+    // along with their display name (OIDC users: users.username; PIN users:
+    // usernameLogins.username). Ranking and windowing are done in TypeScript
+    // so all column references are compile-time safe.
+    const allUserPoints = await db
+      .select({
+        id: users.id,
+        username: sql<string | null>`COALESCE(${users.username}, ${usernameLogins.username})`,
+        email: users.email,
+        profileImageUrl: users.profileImageUrl,
+        pts: sql<number>`COALESCE(SUM(CASE WHEN ${deeds.createdAt} >= ${startUtc} AND ${deeds.createdAt} <= ${endUtc} THEN ${deeds.points} ELSE 0 END), 0)::int`,
+      })
+      .from(users)
+      .leftJoin(usernameLogins, eq(usernameLogins.userId, users.id))
+      .leftJoin(deeds, eq(deeds.userId, users.id))
+      .groupBy(users.id, usernameLogins.username);
+
+    // Filter to users with points > 0, then sort by pts DESC, id ASC
+    // (mirrors the original ROW_NUMBER() OVER (ORDER BY pts DESC, id ASC) ordering).
+    const ranked = allUserPoints
+      .filter(u => u.pts > 0)
+      .sort((a, b) => b.pts - a.pts || a.id.localeCompare(b.id));
+
+    const total = ranked.length;
+
+    // Resolve effective cursor for "around" mode when none is provided.
+    // If the current user has no points in the window, default to the top.
+    let cursor = opts.cursor;
+    let me: { rank: number; points: number } | null = null;
+    if (opts.mode === "around" && cursor === null) {
+      const myIdx = ranked.findIndex(u => u.id === currentUserId);
+      if (myIdx !== -1) {
+        me = { rank: myIdx + 1, points: ranked[myIdx].pts };
+        cursor = me.rank;
+      } else {
+        cursor = 1;
+      }
+    }
+
+    const limit = Math.max(1, Math.min(100, opts.limit | 0 || 50));
+    let lowRank: number;
+    let highRank: number;
+    switch (opts.mode) {
+      case "around": {
+        const half = Math.floor(limit / 2);
+        const c = cursor ?? 1;
+        lowRank = Math.max(1, c - half);
+        highRank = c + half;
+        break;
+      }
+      case "before": {
+        const c = cursor ?? 1;
+        lowRank = Math.max(1, c - limit);
+        highRank = Math.max(1, c - 1);
+        break;
+      }
+      case "after": {
+        const c = cursor ?? 0;
+        lowRank = c + 1;
+        highRank = c + limit;
+        break;
+      }
+    }
+
+    // Slice the ranked array to the requested window (ranks are 1-indexed).
+    const windowSlice = ranked.slice(lowRank - 1, highRank);
+    const entries: LeaderboardEntry[] = windowSlice.map((r, i) => ({
+      rank: lowRank + i,
+      userId: r.id,
+      username: r.username ?? null,
+      email: r.email ?? null,
+      profileImageUrl: r.profileImageUrl ?? null,
+      points: r.pts,
+    }));
+
+    // Compute me if not already set (before/after modes don't set it above).
+    if (!me) {
+      const myIdx = ranked.findIndex(r => r.id === currentUserId);
+      if (myIdx !== -1) {
+        me = { rank: myIdx + 1, points: ranked[myIdx].pts };
+      }
+    }
+
+    return { entries, me, total };
+  }
+
+  // ─── Quiz ───────────────────────────────────────────────────
+  // Per-user level/score tracking, plus an active in-progress attempt
+  // (10 questions). The active attempt persists across reloads via the
+  // `quiz_attempts.completed = false` flag so the user can resume where
+  // they left off. Progress only advances on a perfect score.
+  async getQuizState(userId: string, locale = "en"): Promise<QuizState> {
+    try {
+      return await this.getQuizStateInner(userId, locale);
+    } catch (err) {
+      throw translateQuizDbError(err);
+    }
+  }
+
+  private async getQuizStateInner(userId: string, locale = "en"): Promise<QuizState> {
+    await assertQuizBankNonEmpty();
+    const [progress] = await db
+      .select()
+      .from(userQuizProgress)
+      .where(eq(userQuizProgress.userId, userId));
+    const currentLevel = progress?.currentLevel ?? 1;
+    const totalCorrect = progress?.totalCorrect ?? 0;
+
+    const [active] = await db
+      .select()
+      .from(quizAttempts)
+      .where(and(eq(quizAttempts.userId, userId), eq(quizAttempts.completed, false)))
+      .orderBy(desc(quizAttempts.startedAt))
+      .limit(1);
+
+    let activeAttempt: QuizActiveAttempt | null = null;
+    if (active) {
+      const questions = await this.loadAttemptQuestions(active.questionIds, locale);
+      activeAttempt = {
+        attemptId: active.id,
+        level: active.level,
+        questions,
+        answers: active.answers ?? [],
+      };
+    }
+
+    return { currentLevel, totalCorrect, activeAttempt };
+  }
+
+  private async loadAttemptQuestions(ids: number[], locale: string = "en") {
+    if (!ids.length) return [];
+    const rows = await db
+      .select({
+        id: quizQuestions.id,
+        questionText: quizQuestions.questionText,
+        options: quizQuestions.options,
+        questionTextId: quizQuestions.questionTextId,
+        optionsId: quizQuestions.optionsId,
+        questionTextMs: quizQuestions.questionTextMs,
+        optionsMs: quizQuestions.optionsMs,
+      })
+      .from(quizQuestions)
+      .where(inArray(quizQuestions.id, ids));
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    return ids
+      .map((id) => byId.get(id))
+      .filter((r): r is NonNullable<ReturnType<typeof byId.get>> => Boolean(r))
+      .map((r) => ({
+        id: r.id,
+        questionText: pickLocale(locale, r.questionText, r.questionTextId, r.questionTextMs),
+        options: pickLocaleArray(locale, r.options, r.optionsId, r.optionsMs),
+      }));
+  }
+
+  async startQuizAttempt(userId: string, locale = "en"): Promise<QuizActiveAttempt> {
+    try {
+      return await this.startQuizAttemptInner(userId, locale);
+    } catch (err) {
+      throw translateQuizDbError(err);
+    }
+  }
+
+  private async startQuizAttemptInner(userId: string, locale = "en"): Promise<QuizActiveAttempt> {
+    await assertQuizBankNonEmpty();
+    // Reuse any in-progress attempt rather than creating a duplicate.
+    const [existing] = await db
+      .select()
+      .from(quizAttempts)
+      .where(and(eq(quizAttempts.userId, userId), eq(quizAttempts.completed, false)))
+      .orderBy(desc(quizAttempts.startedAt))
+      .limit(1);
+    if (existing) {
+      const questions = await this.loadAttemptQuestions(existing.questionIds, locale);
+      return {
+        attemptId: existing.id,
+        level: existing.level,
+        questions,
+        answers: existing.answers ?? [],
+      };
+    }
+
+    // Determine current level (or seed progress row).
+    const [progress] = await db
+      .select()
+      .from(userQuizProgress)
+      .where(eq(userQuizProgress.userId, userId));
+    const level = progress?.currentLevel ?? 1;
+    if (!progress) {
+      await db.insert(userQuizProgress).values({ userId, currentLevel: 1, totalCorrect: 0 }).onConflictDoNothing();
+    }
+
+    // Pick 10 random questions for the level. Levels beyond the seeded
+    // content fall back to a random sample drawn from the entire question
+    // bank so progression remains unlimited. We always require at least 10
+    // questions to exist somewhere in the bank.
+    const picked = await db
+      .select({ id: quizQuestions.id })
+      .from(quizQuestions)
+      .where(eq(quizQuestions.level, level))
+      .orderBy(sql`RANDOM()`)
+      .limit(10);
+    let ids = picked.map((r) => r.id);
+    if (ids.length < 10) {
+      const fallback = await db
+        .select({ id: quizQuestions.id })
+        .from(quizQuestions)
+        .orderBy(sql`RANDOM()`)
+        .limit(10);
+      ids = fallback.map((r) => r.id);
+    }
+    if (ids.length < 10) {
+      throw new QuizError(
+        "Not enough quiz questions are seeded yet. Please try again later.",
+        503,
+      );
+    }
+
+    const [attempt] = await db
+      .insert(quizAttempts)
+      .values({ userId, level, questionIds: ids, answers: [] as number[] })
+      .returning();
+    const questions = await this.loadAttemptQuestions(attempt.questionIds, locale);
+    return {
+      attemptId: attempt.id,
+      level: attempt.level,
+      questions,
+      answers: attempt.answers ?? [],
+    };
+  }
+
+  async recordQuizAnswer(userId: string, attemptId: number, optionIndex: number, locale = "en"): Promise<QuizAnswerResult> {
+    try {
+      return await this.recordQuizAnswerInner(userId, attemptId, optionIndex, locale);
+    } catch (err) {
+      throw translateQuizDbError(err);
+    }
+  }
+
+  private async recordQuizAnswerInner(userId: string, attemptId: number, optionIndex: number, locale = "en"): Promise<QuizAnswerResult> {
+    const [attempt] = await db
+      .select()
+      .from(quizAttempts)
+      .where(and(eq(quizAttempts.id, attemptId), eq(quizAttempts.userId, userId)));
+    if (!attempt) {
+      throw new QuizError("Attempt not found", 404);
+    }
+    if (attempt.completed) {
+      throw new QuizError("Attempt already completed", 400);
+    }
+    const answers = [...(attempt.answers ?? [])];
+    const idx = answers.length;
+    if (idx >= attempt.questionIds.length) {
+      throw new QuizError("No more questions to answer", 400);
+    }
+    const questionId = attempt.questionIds[idx];
+    const [question] = await db
+      .select()
+      .from(quizQuestions)
+      .where(eq(quizQuestions.id, questionId));
+    if (!question) {
+      throw new QuizError("Question missing from bank", 500);
+    }
+    const isCorrect = optionIndex === question.correctIndex;
+    answers.push(optionIndex);
+
+    const isLast = answers.length === attempt.questionIds.length;
+    const allCorrect = isLast
+      ? await this.allAnswersCorrect(attempt.questionIds, answers)
+      : false;
+
+    // Every correct answer increments totalCorrect (the leaderboard
+    // tiebreaker after level). Level only advances on a perfect 10/10.
+    const [progress] = await db
+      .select()
+      .from(userQuizProgress)
+      .where(eq(userQuizProgress.userId, userId));
+    const baseLevel = progress?.currentLevel ?? attempt.level;
+    const baseTotal = progress?.totalCorrect ?? 0;
+    const nextLevel = baseLevel + (isLast && allCorrect ? 1 : 0);
+    const nextTotal = baseTotal + (isCorrect ? 1 : 0);
+
+    if (isCorrect || (isLast && allCorrect)) {
+      await db
+        .insert(userQuizProgress)
+        .values({ userId, currentLevel: nextLevel, totalCorrect: nextTotal, updatedAt: new Date() })
+        .onConflictDoUpdate({
+          target: userQuizProgress.userId,
+          set: { currentLevel: nextLevel, totalCorrect: nextTotal, updatedAt: new Date() },
+        });
+    }
+
+    if (isLast) {
+      await db
+        .update(quizAttempts)
+        .set({
+          answers,
+          completed: true,
+          allCorrect,
+          completedAt: new Date(),
+        })
+        .where(eq(quizAttempts.id, attempt.id));
+    } else {
+      await db
+        .update(quizAttempts)
+        .set({ answers })
+        .where(eq(quizAttempts.id, attempt.id));
+    }
+
+    const newLevel = isLast && allCorrect ? nextLevel : undefined;
+    const totalCorrect = nextTotal;
+
+    return {
+      isCorrect,
+      correctIndex: question.correctIndex,
+      explanation: pickLocale(locale, question.explanation, question.explanationId, question.explanationMs),
+      attemptComplete: isLast,
+      allCorrect,
+      newLevel,
+      totalCorrect,
+    };
+  }
+
+  private async allAnswersCorrect(questionIds: number[], answers: number[]): Promise<boolean> {
+    if (questionIds.length !== answers.length) return false;
+    const rows = await db
+      .select({ id: quizQuestions.id, correctIndex: quizQuestions.correctIndex })
+      .from(quizQuestions)
+      .where(inArray(quizQuestions.id, questionIds));
+    const correctById = new Map(rows.map((r) => [r.id, r.correctIndex]));
+    return questionIds.every((qid, i) => correctById.get(qid) === answers[i]);
+  }
+
+  async getQuizLeaderboard(currentUserId: string, limit: number): Promise<{
+    entries: QuizLeaderboardEntry[];
+    me: { rank: number; level: number; totalCorrect: number } | null;
+    total: number;
+  }> {
+    try {
+      return await this.getQuizLeaderboardInner(currentUserId, limit);
+    } catch (err) {
+      throw translateQuizDbError(err);
+    }
+  }
+
+  private async getQuizLeaderboardInner(currentUserId: string, limit: number): Promise<{
+    entries: QuizLeaderboardEntry[];
+    me: { rank: number; level: number; totalCorrect: number } | null;
+    total: number;
+  }> {
+    const cap = Math.max(1, Math.min(200, limit | 0 || 50));
+
+    // One typed Drizzle query fetches all qualifying users with quiz progress
+    // and their display names. Ranking and slicing are done in TypeScript so
+    // all column references are compile-time safe.
+    const allProgress = await db
+      .select({
+        id: users.id,
+        username: sql<string | null>`COALESCE(${users.username}, ${usernameLogins.username})`,
+        email: users.email,
+        profileImageUrl: users.profileImageUrl,
+        level: userQuizProgress.currentLevel,
+        totalCorrect: userQuizProgress.totalCorrect,
+      })
+      .from(users)
+      .leftJoin(usernameLogins, eq(usernameLogins.userId, users.id))
+      .innerJoin(userQuizProgress, eq(userQuizProgress.userId, users.id))
+      .where(
+        or(
+          gt(userQuizProgress.totalCorrect, 0),
+          gt(userQuizProgress.currentLevel, 1),
+        )
+      );
+
+    // Sort by level DESC, totalCorrect DESC, id ASC
+    // (mirrors original ROW_NUMBER() OVER (ORDER BY level DESC, total_correct DESC, id ASC)).
+    const ranked = allProgress.sort((a, b) =>
+      b.level - a.level || b.totalCorrect - a.totalCorrect || a.id.localeCompare(b.id)
+    );
+
+    const total = ranked.length;
+
+    const entries: QuizLeaderboardEntry[] = ranked.slice(0, cap).map((r, i) => ({
+      rank: i + 1,
+      userId: r.id,
+      username: r.username ?? null,
+      email: r.email ?? null,
+      profileImageUrl: r.profileImageUrl ?? null,
+      level: r.level,
+      totalCorrect: r.totalCorrect,
+      isCurrentUser: r.id === currentUserId,
+    }));
+
+    const myIdx = ranked.findIndex(r => r.id === currentUserId);
+    const me = myIdx !== -1
+      ? { rank: myIdx + 1, level: ranked[myIdx].level, totalCorrect: ranked[myIdx].totalCorrect }
+      : null;
+
+    return { entries, me, total };
+  }
+
+  // ─── Public: Active Campaigns ─────────────────────────────────
+  async listActiveCampaigns(): Promise<Campaign[]> {
+    const today = format(new Date(), "yyyy-MM-dd");
+    return await db
+      .select()
+      .from(campaigns)
+      .where(and(lte(campaigns.startDate, today), gte(campaigns.endDate, today)))
+      .orderBy(campaigns.sortOrder, desc(campaigns.createdAt));
+  }
+
+  // ─── Admin: Campaigns ────────────────────────────────────────
+  async listCampaigns(): Promise<Campaign[]> {
+    return await db.select().from(campaigns).orderBy(campaigns.sortOrder, desc(campaigns.createdAt));
+  }
+
+  async getCampaign(id: number): Promise<Campaign | null> {
+    const [row] = await db.select().from(campaigns).where(eq(campaigns.id, id)).limit(1);
+    return row ?? null;
+  }
+
+  async createCampaign(data: InsertCampaign): Promise<Campaign> {
+    const [row] = await db
+      .insert(campaigns)
+      .values({
+        bannerImageUrl: data.bannerImageUrl,
+        landingUrl: data.landingUrl,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        sortOrder: data.sortOrder ?? 0,
+      })
+      .returning();
+    return row;
+  }
+
+  async updateCampaign(id: number, data: UpdateCampaign): Promise<Campaign | null> {
+    const patch: Record<string, unknown> = { updatedAt: new Date() };
+    if (data.bannerImageUrl !== undefined) patch.bannerImageUrl = data.bannerImageUrl;
+    if (data.landingUrl !== undefined) patch.landingUrl = data.landingUrl;
+    if (data.startDate !== undefined) patch.startDate = data.startDate;
+    if (data.endDate !== undefined) patch.endDate = data.endDate;
+    if (data.sortOrder !== undefined) patch.sortOrder = data.sortOrder;
+    const [row] = await db
+      .update(campaigns)
+      .set(patch)
+      .where(eq(campaigns.id, id))
+      .returning();
+    return row ?? null;
+  }
+
+  async deleteCampaign(id: number): Promise<boolean> {
+    const result = await db.delete(campaigns).where(eq(campaigns.id, id)).returning({ id: campaigns.id });
+    return result.length > 0;
+  }
+
+  // ─── Community Targets ───────────────────────────────────────
+
+  async listCommunityTargets(
+    currentUserId: string,
+    opts?: {
+      search?: string;
+      category?: string;
+      period?: string;
+      sort?: "recency" | "participants";
+      limit?: number;
+      offset?: number;
+    },
+  ): Promise<{ items: CommunityTargetListItem[]; total: number }> {
+    const pageSize = Math.min(Math.max(opts?.limit ?? 20, 1), 100);
+    const pageOffset = Math.max(opts?.offset ?? 0, 0);
+    const sortBy = opts?.sort ?? "recency";
+
+    const conditions = [eq(communityTargets.isActive, true)];
+    if (opts?.search && opts.search.trim().length > 0) {
+      conditions.push(ilike(communityTargets.name, `%${opts.search.trim()}%`));
+    }
+    if (opts?.category && opts.category.trim().length > 0) {
+      conditions.push(eq(communityTargets.category, opts.category.trim()));
+    }
+    if (opts?.period && ["daily", "weekly", "monthly"].includes(opts.period)) {
+      conditions.push(eq(communityTargets.period, opts.period as "daily" | "weekly" | "monthly"));
+    }
+
+    const whereClause = and(...conditions);
+
+    const [totalRow] = await db
+      .select({ total: sql<number>`count(*)::int` })
+      .from(communityTargets)
+      .where(whereClause);
+    const total = Number(totalRow?.total ?? 0);
+
+    const participantCountSubq = db
+      .select({ ctId: communityTargetMembers.communityTargetId, cnt: sql<number>`count(*)::int`.as("cnt") })
+      .from(communityTargetMembers)
+      .groupBy(communityTargetMembers.communityTargetId)
+      .as("member_counts");
+
+    const orderExpr =
+      sortBy === "participants"
+        ? [desc(sql`coalesce(${participantCountSubq.cnt}, 0)`), desc(communityTargets.createdAt)]
+        : [desc(communityTargets.createdAt)];
+
+    const rows = await db
+      .select({
+        target: communityTargets,
+        creatorEmail: users.email,
+        creatorFirstName: users.firstName,
+        creatorLastName: users.lastName,
+        creatorUsername: users.username,
+        participantCount: sql<number>`coalesce(${participantCountSubq.cnt}, 0)::int`,
+      })
+      .from(communityTargets)
+      .leftJoin(users, eq(users.id, communityTargets.creatorId))
+      .leftJoin(participantCountSubq, eq(participantCountSubq.ctId, communityTargets.id))
+      .where(whereClause)
+      .orderBy(...orderExpr)
+      .limit(pageSize)
+      .offset(pageOffset);
+
+    if (rows.length === 0) return { items: [], total };
+    const ids = rows.map((r) => r.target.id);
+
+    const myMemberships = await db
+      .select({ ctId: communityTargetMembers.communityTargetId })
+      .from(communityTargetMembers)
+      .where(
+        and(
+          inArray(communityTargetMembers.communityTargetId, ids),
+          eq(communityTargetMembers.userId, currentUserId),
+        ),
+      );
+
+    const memberSet = new Set(myMemberships.map((m) => m.ctId));
+
+    const items = rows.map((r) => {
+      const composedName =
+        [r.creatorFirstName, r.creatorLastName].filter(Boolean).join(" ").trim() ||
+        r.creatorUsername ||
+        null;
+      return {
+        ...r.target,
+        creatorName: composedName,
+        creatorEmail: r.creatorEmail,
+        participantCount: Number(r.participantCount),
+        isMember: memberSet.has(r.target.id) || r.target.creatorId === currentUserId,
+        isCreator: r.target.creatorId === currentUserId,
+      };
+    });
+
+    return { items, total };
+  }
+
+  async listCommunityTargetCategories(): Promise<string[]> {
+    const rows = await db
+      .selectDistinct({ category: communityTargets.category })
+      .from(communityTargets)
+      .where(eq(communityTargets.isActive, true))
+      .orderBy(asc(communityTargets.category));
+    return rows.map((r) => r.category);
+  }
+
+  async getCommunityTarget(id: number, currentUserId: string): Promise<CommunityTargetListItem | null> {
+    const [row] = await db
+      .select({
+        target: communityTargets,
+        creatorEmail: users.email,
+        creatorFirstName: users.firstName,
+        creatorLastName: users.lastName,
+        creatorUsername: users.username,
+      })
+      .from(communityTargets)
+      .leftJoin(users, eq(users.id, communityTargets.creatorId))
+      .where(eq(communityTargets.id, id))
+      .limit(1);
+    if (!row) return null;
+
+    const [{ count } = { count: 0 }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(communityTargetMembers)
+      .where(eq(communityTargetMembers.communityTargetId, id));
+
+    const [mine] = await db
+      .select({ id: communityTargetMembers.id })
+      .from(communityTargetMembers)
+      .where(
+        and(
+          eq(communityTargetMembers.communityTargetId, id),
+          eq(communityTargetMembers.userId, currentUserId),
+        ),
+      )
+      .limit(1);
+
+    const composedName =
+      [row.creatorFirstName, row.creatorLastName].filter(Boolean).join(" ").trim() ||
+      row.creatorUsername ||
+      null;
+
+    return {
+      ...row.target,
+      creatorName: composedName,
+      creatorEmail: row.creatorEmail,
+      participantCount: Number(count ?? 0),
+      isMember: !!mine || row.target.creatorId === currentUserId,
+      isCreator: row.target.creatorId === currentUserId,
+    };
+  }
+
+  async createCommunityTarget(creatorId: string, data: InsertCommunityTarget): Promise<CommunityTarget> {
+    const [row] = await db
+      .insert(communityTargets)
+      .values({ ...data, creatorId })
+      .returning();
+    // Auto-add creator as the first member.
+    await db
+      .insert(communityTargetMembers)
+      .values({ communityTargetId: row.id, userId: creatorId })
+      .onConflictDoNothing();
+    return row;
+  }
+
+  async updateCommunityTarget(id: number, creatorId: string, data: InsertCommunityTarget): Promise<CommunityTarget | null> {
+    const [existing] = await db.select().from(communityTargets).where(eq(communityTargets.id, id)).limit(1);
+    if (!existing) return null;
+    if (existing.creatorId !== creatorId) {
+      const err = new Error("Only the creator can edit this community target") as Error & { status?: number };
+      err.status = 403;
+      throw err;
+    }
+    const [row] = await db
+      .update(communityTargets)
+      .set(data)
+      .where(eq(communityTargets.id, id))
+      .returning();
+    return row ?? null;
+  }
+
+  async deleteCommunityTarget(id: number, creatorId: string): Promise<boolean> {
+    const [existing] = await db.select().from(communityTargets).where(eq(communityTargets.id, id)).limit(1);
+    if (!existing) return false;
+    if (existing.creatorId !== creatorId) {
+      const err = new Error("Only the creator can delete this community target") as Error & { status?: number };
+      err.status = 403;
+      throw err;
+    }
+    await db.delete(communityTargets).where(eq(communityTargets.id, id));
+    return true;
+  }
+
+  async joinCommunityTarget(id: number, userId: string): Promise<CommunityTargetMember | null> {
+    const [existing] = await db.select().from(communityTargets).where(eq(communityTargets.id, id)).limit(1);
+    if (!existing) return null;
+    const [row] = await db
+      .insert(communityTargetMembers)
+      .values({ communityTargetId: id, userId })
+      .onConflictDoNothing()
+      .returning();
+    if (row) return row;
+    const [already] = await db
+      .select()
+      .from(communityTargetMembers)
+      .where(and(eq(communityTargetMembers.communityTargetId, id), eq(communityTargetMembers.userId, userId)))
+      .limit(1);
+    return already ?? null;
+  }
+
+  async leaveCommunityTarget(id: number, userId: string): Promise<boolean> {
+    const [existing] = await db.select().from(communityTargets).where(eq(communityTargets.id, id)).limit(1);
+    if (!existing) return false;
+    if (existing.creatorId === userId) {
+      const err = new Error("Creator cannot leave their own community target") as Error & { status?: number };
+      err.status = 400;
+      throw err;
+    }
+    await db
+      .delete(communityTargetMembers)
+      .where(and(eq(communityTargetMembers.communityTargetId, id), eq(communityTargetMembers.userId, userId)));
+    return true;
+  }
+
+  async getCommunityTargetLeaderboard(
+    id: number,
+    currentUserId: string,
+    options: { limit?: number; offset?: number } = {},
+  ): Promise<{ entries: CommunityTargetLeaderboardEntry[]; total: number } | null | "forbidden"> {
+    const [target] = await db.select().from(communityTargets).where(eq(communityTargets.id, id)).limit(1);
+    if (!target) return null;
+
+    // Members-only: must be the creator or a joined member to view rankings.
+    const [membership] = await db
+      .select({ id: communityTargetMembers.id })
+      .from(communityTargetMembers)
+      .where(
+        and(
+          eq(communityTargetMembers.communityTargetId, id),
+          eq(communityTargetMembers.userId, currentUserId),
+        ),
+      )
+      .limit(1);
+    if (!membership && target.creatorId !== currentUserId) {
+      return "forbidden";
+    }
+
+    const members = await db
+      .select({
+        userId: communityTargetMembers.userId,
+        joinedAt: communityTargetMembers.joinedAt,
+        username: users.username,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+      })
+      .from(communityTargetMembers)
+      .leftJoin(users, eq(users.id, communityTargetMembers.userId))
+      .where(eq(communityTargetMembers.communityTargetId, id));
+
+    if (members.length === 0) return { entries: [], total: 0 };
+
+    // Resolve "now" once so the SQL window and the helper's defense-in-depth
+    // window agree at period boundaries (avoids a 1-tick skew if a request
+    // spans midnight in any member's local timezone).
+    const now = new Date();
+    const memberIds = members.map((m) => m.userId);
+
+    // Resolve each member's timezone (push-subscription tz, falling back to
+    // Asia/Jakarta) so each member's leaderboard window follows their own
+    // local day/week/month boundaries. Batched in a single SQL call to avoid
+    // N+1 queries for large groups. This intentionally inlines the same
+    // logic as `resolveUserTimezone` (push-sub tz → validateTimezone →
+    // DEFAULT_TIMEZONE) for batching; keep these two paths in sync if
+    // `resolveUserTimezone` ever changes its fallback rules.
+    const subs = await db
+      .select({ userId: pushSubscriptions.userId, timezone: pushSubscriptions.timezone })
+      .from(pushSubscriptions)
+      .where(inArray(pushSubscriptions.userId, memberIds));
+    const subTzByUser = new Map<string, string | null>();
+    for (const s of subs) subTzByUser.set(s.userId, s.timezone);
+
+    const memberTimezones = new Map<string, string>();
+    for (const id of memberIds) {
+      const tz = validateTimezone(subTzByUser.get(id) ?? undefined) ?? DEFAULT_TIMEZONE;
+      memberTimezones.set(id, tz);
+    }
+
+    // Compute each member's own period window, then take the union
+    // [min(start) … max(end)] for the SQL fetch. The helper re-applies each
+    // member's individual window in JS so cross-tz overlap can't leak.
+    let unionStart: Date | null = null;
+    let unionEnd: Date | null = null;
+    for (const id of memberIds) {
+      const tz = memberTimezones.get(id)!;
+      const { start, end } = getCommunityPeriodBoundsHelper(target.period, now, tz);
+      if (!unionStart || start < unionStart) unionStart = start;
+      if (!unionEnd || end > unionEnd) unionEnd = end;
+    }
+
+    const periodDeeds = await db
+      .select()
+      .from(deeds)
+      .where(
+        and(
+          inArray(deeds.userId, memberIds),
+          gte(deeds.createdAt, unionStart!),
+          lte(deeds.createdAt, unionEnd!),
+        ),
+      );
+
+    return computeCommunityTargetLeaderboard(
+      target,
+      members as LeaderboardMember[],
+      periodDeeds,
+      currentUserId,
+      { ...options, now, memberTimezones },
+    );
+  }
+
+  async deleteAccount(userId: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      await tx.delete(quizAttempts).where(eq(quizAttempts.userId, userId));
+      await tx.delete(userQuizProgress).where(eq(userQuizProgress.userId, userId));
+      await tx.delete(communityTargetMembers).where(eq(communityTargetMembers.userId, userId));
+      await tx.delete(communityTargets).where(eq(communityTargets.creatorId, userId));
+      await tx.delete(userBadges).where(eq(userBadges.userId, userId));
+      await tx.delete(quranMemorizationAwards).where(eq(quranMemorizationAwards.userId, userId));
+      await tx.delete(quranMemorizations).where(eq(quranMemorizations.userId, userId));
+      await tx.delete(quranBookmarks).where(eq(quranBookmarks.userId, userId));
+      await tx.delete(quranReadingState).where(eq(quranReadingState.userId, userId));
+      await tx.delete(targetHistory).where(eq(targetHistory.userId, userId));
+      await tx.delete(targets).where(eq(targets.userId, userId));
+      await tx.delete(targetFolders).where(eq(targetFolders.userId, userId));
+      await tx.delete(deeds).where(eq(deeds.userId, userId));
+      await tx.delete(categories).where(eq(categories.userId, userId));
+      await tx.delete(customDzikirTypes).where(eq(customDzikirTypes.userId, userId));
+      await tx.delete(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
+      await tx.delete(streakFreezes).where(eq(streakFreezes.userId, userId));
+      await tx.delete(pointPurchases).where(eq(pointPurchases.userId, userId));
+      await tx.delete(userStreakState).where(eq(userStreakState.userId, userId));
+      await tx.delete(recommendationRateLimitCalls).where(eq(recommendationRateLimitCalls.userId, userId));
+      await tx.delete(voiceParseRateLimitCalls).where(eq(voiceParseRateLimitCalls.userId, userId));
+      await tx.delete(userOnboarding).where(eq(userOnboarding.userId, userId));
+      await tx.execute(
+        sql`DELETE FROM sessions WHERE (sess #>> '{passport,user,claims,sub}') = ${userId} OR (sess #>> '{passport,user,id}') = ${userId}`,
+      );
+      await tx.delete(users).where(eq(users.id, userId));
+    });
+  }
+
+  async exportAccountData(userId: string): Promise<Record<string, unknown>> {
+    const [userDeeds, userCategories, userTargets, bookmarks, memorizations] =
+      await Promise.all([
+        db.select().from(deeds).where(eq(deeds.userId, userId)).orderBy(desc(deeds.createdAt)),
+        db.select().from(categories).where(eq(categories.userId, userId)),
+        db.select().from(targets).where(eq(targets.userId, userId)),
+        db.select().from(quranBookmarks).where(eq(quranBookmarks.userId, userId)),
+        db.select().from(quranMemorizations).where(eq(quranMemorizations.userId, userId)),
+      ]);
+    return {
+      exportedAt: new Date().toISOString(),
+      deeds: userDeeds,
+      categories: userCategories,
+      targets: userTargets,
+      quranBookmarks: bookmarks,
+      quranMemorizations: memorizations,
+    };
+  }
+}
+
+export const storage = new DatabaseStorage();

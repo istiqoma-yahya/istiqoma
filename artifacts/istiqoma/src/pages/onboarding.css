@@ -1,0 +1,508 @@
+.onboarding-root {
+  /* Resolve onboarding palette through the app theme so light + dark mode
+     stay in sync with the rest of the app automatically. */
+  --ob-bg: hsl(var(--background));
+  --ob-surface: hsl(var(--card));
+  --ob-surface-strong: hsl(var(--secondary));
+  --ob-text: hsl(var(--foreground));
+  --ob-text-dim: hsl(var(--muted-foreground));
+  --ob-text-muted: hsl(var(--muted-foreground) / 0.7);
+  --ob-border: hsl(var(--border));
+  --ob-border-strong: hsl(var(--card-border));
+  --ob-accent: hsl(var(--primary));
+  --ob-accent-foreground: hsl(var(--primary-foreground));
+  --ob-accent-soft: hsl(var(--primary) / 0.12);
+  --ob-accent-border: hsl(var(--primary) / 0.4);
+
+  /* Backwards-compat aliases for inline styles still referencing the old vars. */
+  --ob-cream: var(--ob-text);
+  --ob-cream-dim: var(--ob-text-dim);
+  --ob-cream-muted: var(--ob-text-muted);
+
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--ob-bg);
+  color: var(--ob-text);
+  font-family: 'DM Sans', 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+.onboarding-root *,
+.onboarding-root *::before,
+.onboarding-root *::after {
+  box-sizing: border-box;
+}
+
+.ob-glow-tl {
+  position: absolute;
+  top: -150px;
+  left: -150px;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.ob-glow-br {
+  position: absolute;
+  bottom: -100px;
+  right: -100px;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.ob-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--ob-border);
+  z-index: 10;
+}
+.ob-progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, hsl(var(--primary)), hsl(var(--primary) / 0.6));
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ob-step-label {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--ob-text-muted);
+  z-index: 10;
+}
+
+.ob-back-btn {
+  position: absolute;
+  top: 1rem;
+  left: 1.2rem;
+  background: transparent;
+  border: none;
+  color: var(--ob-text-dim);
+  font-size: 0.95rem;
+  cursor: pointer;
+  z-index: 10;
+  padding: 0.4rem 0.7rem;
+  border-radius: 0.5rem;
+  transition: background 0.2s, color 0.2s;
+  font-family: inherit;
+}
+.ob-back-btn:hover {
+  color: var(--ob-text);
+  background: hsl(var(--muted));
+}
+
+.ob-app {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.ob-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1.8rem 6rem;
+  overflow-y: auto;
+}
+
+.ob-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 380px;
+}
+
+.ob-eyebrow {
+  font-size: 0.65rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ob-accent);
+  margin-bottom: 1.2rem;
+  opacity: 0.9;
+}
+
+.ob-headline {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.6rem, 5vw, 2.1rem);
+  line-height: 1.3;
+  color: var(--ob-text);
+  text-align: center;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+.ob-headline em {
+  color: var(--ob-accent);
+  font-style: italic;
+  font-weight: 600;
+}
+
+.ob-subtext {
+  font-size: 0.9rem;
+  color: var(--ob-text-dim);
+  line-height: 1.75;
+  text-align: center;
+  max-width: 340px;
+}
+.ob-subtext em {
+  color: var(--ob-accent);
+  font-style: italic;
+}
+
+.ob-divider {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, hsl(var(--primary)), transparent);
+  margin: 1.5rem auto;
+}
+
+/* Primary CTA — mirrors the app's .btn-primary (emerald gradient, rounded-xl,
+   shadow + lift on hover) so onboarding feels like the rest of the product. */
+.ob-btn-main {
+  margin-top: 2.5rem;
+  padding: 0.9rem 2rem;
+  background: linear-gradient(to right, rgb(16 185 129), rgb(5 150 105));
+  color: #ffffff;
+  border: none;
+  border-radius: 0.75rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 15px -3px rgb(16 185 129 / 0.2),
+              0 4px 6px -4px rgb(16 185 129 / 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+.ob-btn-main:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 22px -3px rgb(16 185 129 / 0.4),
+              0 6px 8px -4px rgb(16 185 129 / 0.3);
+}
+.ob-btn-main:active:not(:disabled) {
+  transform: translateY(0);
+}
+.ob-btn-main:disabled {
+  opacity: 0.4;
+  cursor: default;
+  transform: none;
+}
+
+.ob-btn-skip {
+  display: block;
+  margin: 0.5rem auto 0;
+  background: none;
+  border: none;
+  color: var(--ob-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.ob-btn-skip:hover {
+  opacity: 1;
+}
+
+.ob-logo-mark {
+  width: 72px;
+  height: 72px;
+  border: 1px solid var(--ob-accent-border);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2rem;
+  background: var(--ob-accent-soft);
+  animation: ob-pulse-glow 3s ease infinite;
+}
+@keyframes ob-pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.25); }
+  50% { box-shadow: 0 0 0 12px hsl(var(--primary) / 0); }
+}
+
+.ob-app-title {
+  font-family: 'Amiri', 'Alhabsyi', serif;
+  font-size: 2.2rem;
+  color: var(--ob-accent);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.3rem;
+}
+
+.ob-app-tagline {
+  font-size: 0.78rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ob-text-muted);
+  margin-bottom: 2.5rem;
+}
+
+.ob-bismillah {
+  font-family: 'Amiri', serif;
+  font-size: 1.4rem;
+  color: var(--ob-accent);
+  direction: rtl;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.ob-feature-list {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+.ob-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.1rem 1.2rem;
+  background: var(--ob-surface);
+  border: 1px solid var(--ob-border);
+  border-radius: 14px;
+  text-align: left;
+}
+.ob-fi-icon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--ob-accent-soft);
+  border: 1px solid var(--ob-accent-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+.ob-fi-text h4 {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ob-text);
+  margin: 0 0 0.2rem;
+}
+.ob-fi-text p {
+  font-size: 0.78rem;
+  color: var(--ob-text-dim);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.ob-benefit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  width: 100%;
+  max-width: 360px;
+}
+.ob-benefit-card {
+  padding: 1.2rem 1rem;
+  background: var(--ob-surface);
+  border: 1px solid var(--ob-border);
+  border-radius: 16px;
+  text-align: center;
+}
+.ob-benefit-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+.ob-benefit-card h4 {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ob-text);
+  margin: 0 0 0.3rem;
+  line-height: 1.3;
+}
+.ob-benefit-card p {
+  font-size: 0.72rem;
+  color: var(--ob-text-dim);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.ob-hadith-box {
+  margin-top: 1.2rem;
+  padding: 1rem 1.2rem;
+  background: var(--ob-accent-soft);
+  border: 1px solid var(--ob-accent-border);
+  border-radius: 14px;
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+}
+.ob-hadith-arabic {
+  font-family: 'Amiri', serif;
+  font-size: 1rem;
+  color: var(--ob-accent);
+  direction: rtl;
+  margin: 0 0 0.4rem;
+}
+.ob-hadith-text {
+  font-size: 0.75rem;
+  color: var(--ob-text-dim);
+  line-height: 1.5;
+  font-style: italic;
+  margin: 0;
+}
+.ob-hadith-source {
+  font-size: 0.65rem;
+  color: var(--ob-text-muted);
+  margin-top: 0.3rem;
+}
+
+.ob-quiz-wrap { width: 100%; max-width: 380px; }
+.ob-quiz-question {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  color: var(--ob-text);
+  line-height: 1.4;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+.ob-quiz-hint {
+  font-size: 0.78rem;
+  color: var(--ob-text-muted);
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.ob-options { display: flex; flex-direction: column; gap: 0.65rem; }
+.ob-option {
+  padding: 1rem 1.3rem;
+  background: var(--ob-surface);
+  border: 1px solid var(--ob-border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  text-align: left;
+  color: var(--ob-text);
+  font-family: inherit;
+  width: 100%;
+}
+.ob-option:hover {
+  background: hsl(var(--muted));
+  border-color: var(--ob-accent-border);
+}
+.ob-option.selected {
+  background: var(--ob-accent-soft);
+  border-color: var(--ob-accent);
+  color: var(--ob-text);
+}
+.ob-option-icon { font-size: 1.2rem; flex-shrink: 0; }
+.ob-option-label { font-size: 0.88rem; color: var(--ob-text); line-height: 1.4; }
+.ob-option-check {
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ob-border);
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ob-option.selected .ob-option-check {
+  background: var(--ob-accent);
+  border-color: var(--ob-accent);
+}
+.ob-option.selected .ob-option-check::after {
+  content: '✓';
+  color: var(--ob-accent-foreground);
+  font-size: 0.65rem;
+  font-weight: bold;
+}
+
+.ob-option.ob-option-grid {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 0.9rem;
+  position: relative;
+}
+.ob-option.ob-option-grid .ob-option-check {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  margin-left: 0;
+}
+.ob-option.ob-option-grid .ob-option-label {
+  font-size: 0.82rem;
+  line-height: 1.3;
+  padding-right: 1.5rem;
+}
+
+.ob-option-text-block {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.ob-option-sublabel {
+  font-size: 0.72rem;
+  color: var(--ob-text-muted);
+  line-height: 1.4;
+  margin-top: 0.15rem;
+}
+
+.ob-result-icon {
+  font-size: 3rem;
+  margin-bottom: 1.2rem;
+  animation: ob-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes ob-pop-in {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.ob-result-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.8rem;
+  color: var(--ob-accent);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+.ob-result-desc {
+  font-size: 0.88rem;
+  color: var(--ob-text-dim);
+  line-height: 1.7;
+  max-width: 320px;
+  margin: 0 auto;
+}
+.ob-result-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1.2rem;
+}
+.ob-tag {
+  padding: 0.35rem 0.9rem;
+  background: var(--ob-accent-soft);
+  border: 1px solid var(--ob-accent-border);
+  border-radius: 100px;
+  font-size: 0.72rem;
+  color: var(--ob-accent);
+}

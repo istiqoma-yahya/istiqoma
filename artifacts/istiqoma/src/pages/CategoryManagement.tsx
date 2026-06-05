@@ -206,13 +206,13 @@ export default function CategoryManagement() {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = categories.findIndex((c) => c.id === active.id);
-      const newIndex = categories.findIndex((c) => c.id === over.id);
-      const newOrder = arrayMove(categories, oldIndex, newIndex);
-      
+      const oldIndex = displayCategories.findIndex((c) => c.id === active.id);
+      const newIndex = displayCategories.findIndex((c) => c.id === over.id);
+      const newOrder = arrayMove(displayCategories, oldIndex, newIndex);
+
       setLocalCategories(newOrder);
       reorderCategories(newOrder.map((c) => c.id), {
-        onSettled: () => {
+        onError: () => {
           setLocalCategories([]);
         },
       });

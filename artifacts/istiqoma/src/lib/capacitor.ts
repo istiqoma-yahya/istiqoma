@@ -14,9 +14,11 @@ export async function initCapacitorPlugins() {
   const { App } = await import("@capacitor/app");
 
   try {
+    // Edge-to-edge: WebView extends under the status bar so the header
+    // background fills behind it. CSS env(safe-area-inset-top) then pushes
+    // the tappable header content below the status bar overlay.
+    await StatusBar.setOverlaysWebView({ overlay: true });
     // Light icons/text on the dark app background.
-    // setBackgroundColor is intentionally omitted: on iOS it pushes the WebView
-    // out of edge-to-edge mode, creating a gap below the bottom nav bar.
     await StatusBar.setStyle({ style: Style.Light });
   } catch {
   }

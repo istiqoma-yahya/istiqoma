@@ -160,11 +160,15 @@ body.native-safe-area {
   padding-right: env(safe-area-inset-right);
 }
 
-/* Make every sticky <header> clear the status-bar / notch on native.
+/* Make every sticky <header> clear the status-bar / notch.
+   env(safe-area-inset-top) is 0px on desktop / non-notched devices so this
+   is completely harmless outside a native Capacitor context.
    The header background already extends to top:0 for visual continuity;
-   the padding just moves the tappable content below the system overlay. */
-body.native-safe-area header.sticky {
-  padding-top: env(safe-area-inset-top);
+   the padding moves the tappable content below the system status-bar overlay.
+   We intentionally do NOT gate this on body.native-safe-area so it works
+   even if isNative mis-detects or the class is added after first paint. */
+header.sticky {
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 /* Any full-screen page wrapper that used the old fixed pb-20/pb-24 "clear

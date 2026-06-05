@@ -14,9 +14,10 @@ export async function initCapacitorPlugins() {
   const { App } = await import("@capacitor/app");
 
   try {
-    // Light icons/text for the dark (#0a0a0a) app background.
+    // Light icons/text on the dark app background.
+    // setBackgroundColor is intentionally omitted: on iOS it pushes the WebView
+    // out of edge-to-edge mode, creating a gap below the bottom nav bar.
     await StatusBar.setStyle({ style: Style.Light });
-    await StatusBar.setBackgroundColor({ color: "#0a0a0a" });
   } catch {
   }
 

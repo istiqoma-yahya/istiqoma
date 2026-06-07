@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { useTranslation } from "react-i18next";
 import { useUpdateDeed, useDeleteDeed } from "@/hooks/use-deeds";
 import { useCategories, useCategoryName } from "@/hooks/use-categories";

@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { format } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { type Deed } from "@shared/schema";
@@ -73,11 +74,73 @@ export function DeedCard({ deed, index }: DeedCardProps) {
   
   const displayDescription = getDisplayDescription();
 
-  const handleCardTap = (event: MouseEvent | TouchEvent | PointerEvent) => {
-    const target = event.target as HTMLElement;
-    if (target.closest('button') || target.closest('[role="dialog"]')) {
+  // Distinguish a real tap from a scroll/drag. framer-motion's onTap fires on
+  // pointer release even when the finger moved to scroll the list, which made
+  // scrolling accidentally open the edit page. We track the pointer-down
+  // position/time and only navigate when the pointer barely moved (a tap).
+  const pointerStart = useRef<{
+    id: number;
+    x: number;
+    y: number;
+    time: number;
+  } | null>(null);
+  const MOVE_THRESHOLD = 10; // px of travel still counted as a tap
+  const TIME_THRESHOLD = 700; // ms; longer presses are treated as long-press
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    // Only track the primary pointer so a second finger can't hijack the
+    // gesture and produce a false tap.
+    if (!event.isPrimary) {
+      pointerStart.current = null;
       return;
     }
+    pointerStart.current = {
+      id: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      time: Date.now(),
+    };
+  };
+
+  // If the browser takes the gesture over (e.g. to scroll) it fires
+  // pointercancel — drop the pending tap so it can never navigate.
+  const handlePointerCancel = () => {
+    pointerStart.current = null;
+  };
+
+  const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    const start = pointerStart.current;
+    pointerStart.current = null;
+    if (!start || start.id !== event.pointerId) return;
+
+    const target = event.target as HTMLElement;
+    if (target.closest("button") || target.closest('[role="dialog"]')) {
+      return;
+    }
+
+    const movedX = Math.abs(event.clientX - start.x);
+    const movedY = Math.abs(event.clientY - start.y);
+    const elapsed = Date.now() - start.time;
+    if (
+      movedX > MOVE_THRESHOLD ||
+      movedY > MOVE_THRESHOLD ||
+      elapsed > TIME_THRESHOLD
+    ) {
+      // The user scrolled or long-pressed — not an intentional tap.
+      return;
+    }
+
+    sessionStorage.setItem("dashboard-scroll", String(window.scrollY));
+    navigate(`/edit-deed/${deed.id}`);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const target = event.target as HTMLElement;
+    if (target.closest("button") || target.closest('[role="dialog"]')) {
+      return;
+    }
+    event.preventDefault();
     sessionStorage.setItem("dashboard-scroll", String(window.scrollY));
     navigate(`/edit-deed/${deed.id}`);
   };
@@ -88,7 +151,10 @@ export function DeedCard({ deed, index }: DeedCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       className="group relative p-5 rounded-2xl border transition-all duration-300 cursor-pointer touch-manipulation bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/30"
-      onTap={handleCardTap}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
+      onKeyDown={handleKeyDown}
       whileTap={{ scale: 0.98 }}
       role="button"
       tabIndex={0}

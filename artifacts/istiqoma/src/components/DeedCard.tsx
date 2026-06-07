@@ -27,7 +27,15 @@ interface DeedCardProps {
 }
 
 export function DeedCard({ deed, index }: DeedCardProps) {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
+
+  const openEditDeed = () => {
+    sessionStorage.setItem("dashboard-scroll", String(window.scrollY));
+    // Remember where the user opened the deed from so the edit page can return
+    // them here (home vs history) instead of always landing on the list.
+    sessionStorage.setItem("edit-deed-origin", location);
+    navigate(`/edit-deed/${deed.id}`);
+  };
   const { mutate: deleteDeed, isPending } = useDeleteDeed();
   const { t } = useTranslation();
   const translateCategoryName = useCategoryName();
@@ -130,8 +138,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
       return;
     }
 
-    sessionStorage.setItem("dashboard-scroll", String(window.scrollY));
-    navigate(`/edit-deed/${deed.id}`);
+    openEditDeed();
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -141,8 +148,7 @@ export function DeedCard({ deed, index }: DeedCardProps) {
       return;
     }
     event.preventDefault();
-    sessionStorage.setItem("dashboard-scroll", String(window.scrollY));
-    navigate(`/edit-deed/${deed.id}`);
+    openEditDeed();
   };
 
   return (

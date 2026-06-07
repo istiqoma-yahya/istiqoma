@@ -93,6 +93,15 @@ interface EditDeedPageProps {
 export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
+  // Return to wherever the user opened this deed from (home or history),
+  // falling back to the history list if the origin is unknown. The origin is
+  // consumed (cleared) and validated so a stale value can't misdirect a later
+  // direct visit to this page.
+  const goBack = () => {
+    const origin = sessionStorage.getItem("edit-deed-origin");
+    sessionStorage.removeItem("edit-deed-origin");
+    navigate(origin === "/" || origin === "/deeds" ? origin : "/deeds");
+  };
   const { mutate, isPending } = useUpdateDeed();
   const { mutate: deleteDeed, isPending: isDeleting } = useDeleteDeed();
   const { data: categories = [] } = useCategories();
@@ -261,7 +270,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
     mutate({ id: deed.id, data: { ...data, quantity: data.points, createdAt } }, {
       onSuccess: () => {
         form.reset();
-        navigate("/deeds");
+        goBack();
       },
     });
   };
@@ -269,7 +278,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const handleDelete = () => {
     deleteDeed(deed.id, {
       onSuccess: () => {
-        navigate("/deeds");
+        goBack();
       },
     });
   };
@@ -280,7 +289,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
         <div className="container max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
           <h1 className="font-display font-bold text-xl">{t("editDeed.title")}</h1>
           <button
-            onClick={() => navigate("/deeds")}
+            onClick={() => goBack()}
             className="p-2 hover:bg-muted rounded-lg transition-colors"
             data-testid="button-close-edit-form"
           >

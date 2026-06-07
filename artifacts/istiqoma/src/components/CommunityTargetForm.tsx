@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import {
@@ -41,7 +41,7 @@ export function CommunityTargetForm({
   const { data: categories = [] } = useCategories();
 
   const form = useForm<InsertCommunityTarget>({
-    resolver: zodResolver(insertCommunityTargetSchema),
+    resolver: zodResolver(insertCommunityTargetSchema) as unknown as Resolver<InsertCommunityTarget>,
     defaultValues: {
       name: defaultValues?.name ?? "",
       category: defaultValues?.category ?? "",

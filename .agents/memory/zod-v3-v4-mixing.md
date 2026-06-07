@@ -29,6 +29,25 @@ import `z` from `"zod/v4"`.
 the schema it extends. Reproduce in isolation by running the resolver against
 valid input — it will throw rather than return.
 
-**Pre-existing type debt:** `@hookform/resolvers@3.10` types reference zod v3, so
-`zodResolver(<v4 schema>)` shows TS2345 across all v4 forms. This is type-only;
-vite/esbuild ignores it and runtime works once both sides are v4.
+**Resolver version matters too (the deeper bug):** `@hookform/resolvers@3.x`
+does NOT properly support zod v4 at runtime. With a v4 schema it returns
+`{errors:{},values}` for VALID input but **throws the raw ZodError** for ANY
+invalid input instead of returning mapped field errors. RHF swallows the
+rejected promise → submit silently no-ops with no visible field error — even
+when the v3/v4 import mixing is already fixed. Fix = upgrade
+`@hookform/resolvers` to v5.x (needs react-hook-form ≥7.55), which RETURNS
+mapped errors. Verify in isolation with a node repro: invalid input must RETURN
+`{errors:{field:...}}`, not throw.
+
+**v5 type friction:** resolver v5 has a 3rd `TTransformedValues` generic and is
+strict about `z.coerce.number()` (input type becomes `unknown`), causing TS2322
+`Control` leaks and TS2345. Clean bridge: `resolver: zodResolver(schema) as
+unknown as Resolver<FormValues>` (import `type Resolver` from react-hook-form).
+Apply to EVERY `zodResolver` form, not just the broken one — the upgrade is
+workspace-wide.
+
+**Legacy enum data on edit:** deed enum-backed columns (`customUnit`,
+`quranUnit`, `sedekahType`) are plain `text()` in the DB but `z.enum()` in the
+schema. Editing a row whose stored value is outside the enum fails validation
+(now a visible error instead of silent). Sanitize on form hydration: coerce
+unknown enum values to `undefined` so the edit can still be saved.

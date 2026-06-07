@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { AlertTriangle, ArrowLeft, BookOpen, ChevronRight, Download, Link2, Loader2, Lock, Mail, Sparkles, Trash2, User as UserIcon } from "lucide-react";
@@ -199,7 +199,7 @@ export default function ProfilePage() {
   const { toast } = useToast();
 
   const form = useForm<UpdateProfileInput>({
-    resolver: zodResolver(updateProfileSchema),
+    resolver: zodResolver(updateProfileSchema) as unknown as Resolver<UpdateProfileInput>,
     defaultValues: {
       username: "",
       phoneNumber: "",
@@ -251,7 +251,7 @@ export default function ProfilePage() {
   const isUsernameAuth = user?.authProvider === "username";
 
   const pinForm = useForm<ChangePinInput>({
-    resolver: zodResolver(changePinSchema),
+    resolver: zodResolver(changePinSchema) as unknown as Resolver<ChangePinInput>,
     defaultValues: { currentPin: "", newPin: "", confirmPin: "" },
   });
 

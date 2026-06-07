@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod/v4";
 import { useTranslation } from "react-i18next";
@@ -48,6 +48,30 @@ const formSchema = insertDeedSchema.extend({
 
 type FormValues = z.infer<typeof formSchema>;
 
+// Stored enum-backed columns (quranUnit/sedekahType/customUnit) are plain text in
+// the DB and may hold legacy values outside the schema enum. Coerce unknown values
+// to undefined so editing such deeds doesn't fail validation and can still be saved.
+function pickEnum<T extends string>(value: unknown, allowed: readonly T[]): T | undefined {
+  return typeof value === "string" && (allowed as readonly string[]).includes(value)
+    ? (value as T)
+    : undefined;
+}
+
+const QURAN_UNIT_VALUES = ["ayat", "halaman", "surat", "juz"] as const;
+const SEDEKAH_TYPE_VALUES = ["uang", "hitungan"] as const;
+const CUSTOM_UNIT_VALUES = [
+  "hitungan",
+  "ayat",
+  "halaman",
+  "surat",
+  "juz",
+  "rakaat",
+  "hari",
+  "uang",
+  "times",
+  "days",
+] as const;
+
 function formatDateTimeForInput(date: Date | string | null) {
   const d = typeof date === 'string' ? new Date(date) : (date || new Date());
   // Use local timezone for display (user's perspective)
@@ -78,7 +102,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const [showCreateCategoryDialog, setShowCreateCategoryDialog] = useState(false);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as unknown as Resolver<FormValues>,
     defaultValues: {
       description: deed.description ?? "",
       category: deed.category,
@@ -88,9 +112,9 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
       sholatType: deed.sholatType || undefined,
       fastingType: deed.fastingType || undefined,
       isJamaah: deed.isJamaah || undefined,
-      quranUnit: (deed.quranUnit as "ayat" | "halaman" | "surat" | "juz" | undefined) || undefined,
-      sedekahType: (deed.sedekahType as "uang" | "hitungan" | undefined) || undefined,
-      customUnit: (deed.customUnit as "hitungan" | "ayat" | "halaman" | "surat" | "juz" | "rakaat" | "hari" | "uang" | "times" | "days" | undefined) || undefined,
+      quranUnit: pickEnum(deed.quranUnit, QURAN_UNIT_VALUES),
+      sedekahType: pickEnum(deed.sedekahType, SEDEKAH_TYPE_VALUES),
+      customUnit: pickEnum(deed.customUnit, CUSTOM_UNIT_VALUES),
     },
   });
 

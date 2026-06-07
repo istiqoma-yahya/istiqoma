@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod/v4";
 import { useCreateDeed } from "@/hooks/use-deeds";
@@ -56,7 +56,7 @@ export function CreateDeedDialog() {
   const [dateTime, setDateTime] = useState(getCurrentDateTime());
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as unknown as Resolver<FormValues>,
     defaultValues: {
       description: "",
       deedType: "good",

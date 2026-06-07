@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTargetSchema, type InsertTarget, type TargetWithProgress } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -55,7 +55,7 @@ export function TargetForm({
   );
 
   const form = useForm<InsertTarget>({
-    resolver: zodResolver(insertTargetSchema),
+    resolver: zodResolver(insertTargetSchema) as unknown as Resolver<InsertTarget>,
     defaultValues: defaultValues || {
       name: "",
       category: "",

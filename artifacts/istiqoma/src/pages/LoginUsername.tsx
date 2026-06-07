@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -110,7 +110,7 @@ export default function LoginUsername() {
   const [forgotOpen, setForgotOpen] = useState(false);
 
   const signinForm = useForm<UsernameSigninInput>({
-    resolver: zodResolver(usernameSigninSchema),
+    resolver: zodResolver(usernameSigninSchema) as unknown as Resolver<UsernameSigninInput>,
     defaultValues: { username: "", pin: "" },
   });
 
@@ -143,7 +143,7 @@ export default function LoginUsername() {
       (signinUsernameInput ?? "").toLowerCase();
 
   const signupForm = useForm<UsernameSignupInput>({
-    resolver: zodResolver(usernameSignupSchema),
+    resolver: zodResolver(usernameSignupSchema) as unknown as Resolver<UsernameSignupInput>,
     defaultValues: { username: "", pin: "", confirmPin: "" },
   });
 
@@ -593,7 +593,7 @@ function ForgotPinDialog({
   const { t } = useTranslation();
   const { toast } = useToast();
   const form = useForm<ForgotPinInput>({
-    resolver: zodResolver(forgotPinSchema),
+    resolver: zodResolver(forgotPinSchema) as unknown as Resolver<ForgotPinInput>,
     defaultValues: {
       username: defaultUsername,
       recoveryCode: "",

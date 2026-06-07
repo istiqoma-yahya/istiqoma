@@ -169,7 +169,7 @@ export function StreakDialog({ open, streakCount, weekDays, frozenDays = [], has
           >
             <Button
               onClick={onClose}
-              className={`w-full font-semibold ${isActive ? "bg-orange-500 text-white" : "bg-gray-400 text-white"}`}
+              className={`w-full font-semibold ${isActive ? "bg-emerald-500 text-white" : "bg-gray-400 text-white"}`}
               data-testid="button-streak-continue"
             >
               {t("streak.continue")}

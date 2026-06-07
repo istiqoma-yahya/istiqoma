@@ -1,4 +1,4 @@
-const CACHE_NAME = 'istiqoma-v2';
+const CACHE_NAME = 'istiqoma-v3';
 const AUDIO_CACHE_NAME = 'istiqoma-audio-v1';
 // Keep at most this many recently-played surah MP3s on disk per device.
 // Surah audio is 5–30 MB so 6 entries is roughly 60–180 MB worst case.

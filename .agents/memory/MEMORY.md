@@ -2,4 +2,5 @@
 - [Supabase prod schema drift](supabase-prod-schema-drift.md) — external Supabase prod is NOT migrated by Replit publish; db:push only hits dev; fix prod via project's own drizzle schema.
 - [Express 5 wildcard routes](express5-wildcards.md) — Express 5 path-to-regexp v8 broke /:param(*) syntax; use /*param instead.
 - [esbuild dynamic import resolution](esbuild-dynamic-imports.md) — esbuild cannot resolve directory-style dynamic imports (await import("./dir")); convert to static imports or point to explicit index file.
+- [PWA stale-client updates](pwa-stale-client-updates.md) — a correctly-deployed web fix never reaches an installed PWA without a SW update+reload path; "works in dev, not prod, zero write requests in logs" is the tell.
 - [zod v3/v4 mixing](zod-v3-v4-mixing.md) — never compose a `zod/v4` schema with `zod` (v3) fields; the parser throws and RHF swallows it, so submit buttons silently no-op.

@@ -80,7 +80,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      description: deed.description,
+      description: deed.description ?? "",
       category: deed.category,
       points: deed.quantity || 1,
       createdAt: undefined,
@@ -237,7 +237,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
     mutate({ id: deed.id, data: { ...data, quantity: data.points, createdAt } }, {
       onSuccess: () => {
         form.reset();
-        window.history.back();
+        navigate("/deeds");
       },
     });
   };
@@ -245,7 +245,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
   const handleDelete = () => {
     deleteDeed(deed.id, {
       onSuccess: () => {
-        window.history.back();
+        navigate("/deeds");
       },
     });
   };
@@ -256,7 +256,7 @@ export default function EditDeedPage({ deed }: EditDeedPageProps) {
         <div className="container max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
           <h1 className="font-display font-bold text-xl">{t("editDeed.title")}</h1>
           <button
-            onClick={() => window.history.back()}
+            onClick={() => navigate("/deeds")}
             className="p-2 hover:bg-muted rounded-lg transition-colors"
             data-testid="button-close-edit-form"
           >

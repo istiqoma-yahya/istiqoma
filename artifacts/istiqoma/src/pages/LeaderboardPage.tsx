@@ -239,7 +239,7 @@ export default function LeaderboardPage() {
             type="button"
             size="icon"
             variant="ghost"
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/")}
             data-testid="button-back"
             aria-label={t("common.back", { defaultValue: "Back" })}
           >

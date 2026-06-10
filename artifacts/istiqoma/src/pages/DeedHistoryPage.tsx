@@ -252,31 +252,35 @@ export default function DeedHistoryPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-lg mx-auto px-4 py-6 pb-24">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 mb-6"
-        >
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/")}
-            className="rounded-xl"
-            data-testid="button-back"
+      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+        <div className="max-w-lg mx-auto px-4 h-16 flex items-center">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold font-display text-foreground" data-testid="text-page-title">
-              {t('deedHistory.title')}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {t('deedHistory.subtitle')}
-            </p>
-          </div>
-        </motion.div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/")}
+              className="rounded-xl"
+              data-testid="button-back"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold font-display text-foreground" data-testid="text-page-title">
+                {t('deedHistory.title')}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {t('deedHistory.subtitle')}
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </header>
 
+      <div className="max-w-lg mx-auto px-4 py-6 pb-24">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

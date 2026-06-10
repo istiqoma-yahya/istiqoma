@@ -1,7 +1,23 @@
 import { defineConfig } from "vite";
+import type { Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import fs from "fs";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+
+function injectSwBuildTimestamp(): Plugin {
+  return {
+    name: "inject-sw-build-timestamp",
+    apply: "build",
+    closeBundle() {
+      const swPath = path.resolve(import.meta.dirname, "dist/public/sw.js");
+      if (!fs.existsSync(swPath)) return;
+      const content = fs.readFileSync(swPath, "utf-8");
+      const timestamp = Date.now();
+      fs.writeFileSync(swPath, `const BUILD_TS = '${timestamp}';\n` + content);
+    },
+  };
+}
 
 const rawPort = process.env.PORT;
 
@@ -30,6 +46,7 @@ export default defineConfig({
   plugins: [
     react(),
     runtimeErrorOverlay(),
+    injectSwBuildTimestamp(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [

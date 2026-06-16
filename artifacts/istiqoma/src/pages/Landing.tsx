@@ -3,7 +3,6 @@ import { usePageMeta } from "@/hooks/use-page-meta";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Moon, HandCoins, Shield, Calendar, CheckCircle2, Download, KeyRound, Play } from "lucide-react";
 import { DuaHandsIcon } from "@/components/DuaHandsIcon";
-import { SiGoogle } from "react-icons/si";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -16,7 +15,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { useInstallPWA } from "@/hooks/use-install-pwa";
 import { ProductTour } from "@/components/ProductTour";
 import { useToast } from "@/hooks/use-toast";
-import { openNativeLogin } from "@/lib/native-login";
+import { useGuest } from "@/hooks/use-guest";
 
 declare global {
   interface Window {
@@ -572,21 +571,15 @@ export default function Landing() {
     }
   }, []);
 
-  const scrollToChooser = () => {
-    const el = document.querySelector('[data-testid="auth-chooser"]');
-    if (el && "scrollIntoView" in el) {
-      (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+  const { enterGuestMode, openLoginSheet } = useGuest();
+
+  const handleStartJourney = () => {
+    // Begin guest browsing — AuthWrapper swaps to the (skippable) onboarding.
+    enterGuestMode();
   };
 
-  const handleGoogleLogin = () => {
-    openNativeLogin().catch(console.error);
-  };
-
-  const handleUsernameLogin = () => {
-    window.location.href = "/login/username";
+  const handleOpenLoginSheet = () => {
+    openLoginSheet();
   };
 
   useEffect(() => {
@@ -629,18 +622,18 @@ export default function Landing() {
               </div>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={scrollToChooser}
+                  onClick={handleOpenLoginSheet}
                   className="btn-secondary text-sm px-4 py-2 whitespace-nowrap"
                   data-testid="sticky-button-login"
                 >
                   {t('landing.login')}
                 </button>
                 <button
-                  onClick={scrollToChooser}
+                  onClick={handleStartJourney}
                   className="btn-primary text-sm px-4 py-2 flex items-center gap-2 whitespace-nowrap"
                   data-testid="sticky-button-start-tracking"
                 >
-                  {t('landing.startTracking')}
+                  {t('landing.guestCta.startJourney')}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -664,7 +657,7 @@ export default function Landing() {
         <div className="flex flex-wrap items-center gap-2">
           <LanguageSwitcher />
           <button
-            onClick={scrollToChooser}
+            onClick={handleOpenLoginSheet}
             className="btn-secondary text-sm px-5 py-2.5"
             data-testid="button-login"
           >
@@ -705,29 +698,23 @@ export default function Landing() {
                 className="flex flex-col gap-3 max-w-md mx-auto md:mx-0"
                 data-testid="auth-chooser"
               >
-                <p
-                  className="text-xs font-medium uppercase tracking-wider text-muted-foreground text-center md:text-left"
-                  data-testid="text-auth-chooser-title"
-                >
-                  {t('landing.authChooser.title')}
-                </p>
                 <button
                   type="button"
-                  onClick={handleGoogleLogin}
+                  onClick={handleStartJourney}
                   className="btn-primary w-full text-base px-6 py-3.5 flex items-center justify-center gap-2"
-                  data-testid="button-chooser-google"
+                  data-testid="button-start-journey"
                 >
-                  <SiGoogle className="w-5 h-5 shrink-0" />
-                  <span className="whitespace-nowrap">{t('landing.authChooser.continueGoogle')}</span>
+                  <span className="whitespace-nowrap">{t('landing.guestCta.startJourney')}</span>
+                  <ArrowRight className="w-5 h-5 shrink-0" />
                 </button>
                 <button
                   type="button"
-                  onClick={handleUsernameLogin}
+                  onClick={handleOpenLoginSheet}
                   className="btn-secondary w-full text-base px-6 py-3.5 flex items-center justify-center gap-2 border border-border"
-                  data-testid="button-chooser-username"
+                  data-testid="button-login-account"
                 >
                   <KeyRound className="w-5 h-5 shrink-0" />
-                  <span className="whitespace-nowrap">{t('landing.authChooser.continueUsername')}</span>
+                  <span className="whitespace-nowrap">{t('landing.guestCta.loginAccount')}</span>
                 </button>
                 {isInstallable && !isInstalled && (
                   <motion.div
@@ -1100,21 +1087,21 @@ export default function Landing() {
             <div className="flex flex-col gap-3 max-w-md mx-auto">
               <button
                 type="button"
-                onClick={handleGoogleLogin}
+                onClick={handleStartJourney}
                 className="btn-primary w-full text-base px-6 py-3.5 flex items-center justify-center gap-2"
-                data-testid="button-cta-signup"
+                data-testid="button-cta-start-journey"
               >
-                <SiGoogle className="w-5 h-5 shrink-0" />
-                <span className="whitespace-nowrap">{t('landing.authChooser.continueGoogle')}</span>
+                <span className="whitespace-nowrap">{t('landing.guestCta.startJourney')}</span>
+                <ArrowRight className="w-5 h-5 shrink-0" />
               </button>
               <button
                 type="button"
-                onClick={handleUsernameLogin}
+                onClick={handleOpenLoginSheet}
                 className="btn-secondary w-full text-base px-6 py-3.5 flex items-center justify-center gap-2 border border-border"
-                data-testid="button-cta-username"
+                data-testid="button-cta-login-account"
               >
                 <KeyRound className="w-5 h-5 shrink-0" />
-                <span className="whitespace-nowrap">{t('landing.authChooser.continueUsername')}</span>
+                <span className="whitespace-nowrap">{t('landing.guestCta.loginAccount')}</span>
               </button>
             </div>
           </motion.div>

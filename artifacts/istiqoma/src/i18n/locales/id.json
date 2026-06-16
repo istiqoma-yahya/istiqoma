@@ -101,6 +101,10 @@
     "subtitle": "Istiqoma membantu Anda membangun kebiasaan yang konsisten dalam berdoa, beramal, dan introspeksi diri.",
     "startTracking": "Mulai Perjalananmu",
     "login": "Masuk",
+    "guestCta": {
+      "startJourney": "Mulai Perjalananmu",
+      "loginAccount": "Masuk ke Akun Saya"
+    },
     "usernameLogin": "Masuk dengan nama pengguna",
     "authChooser": {
       "title": "Bagaimana Anda ingin melanjutkan?",
@@ -983,9 +987,24 @@
       "muslim": "Sahih Muslim"
     }
   },
+  "auth": {
+    "loginMethod": {
+      "title": "Masuk ke akun Anda",
+      "description": "Pilih cara Anda ingin masuk.",
+      "email": "Lanjutkan dengan Email",
+      "pin": "Lanjutkan dengan Nama Pengguna & PIN"
+    }
+  },
+  "guest": {
+    "upsell": {
+      "title": "Buat akun untuk menyimpan ini",
+      "description": "Anda menjelajah sebagai tamu. Daftar untuk menyimpan amalan, target, dan kemajuan Anda."
+    }
+  },
   "onboarding": {
     "intro": "Pengenalan",
     "done": "Selesai",
+    "skip": "Lewati",
     "back": "Kembali",
     "next": "Lanjut",
     "start": "Mulai",

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useCreateTarget } from "@/hooks/use-targets";
+import { useGuest } from "@/hooks/use-guest";
 import { useCreateCommunityTarget } from "@/hooks/use-community-targets";
 import { useTranslation } from "react-i18next";
 import { TargetForm } from "@/components/TargetForm";
@@ -21,6 +22,7 @@ export default function CreateTargetPage() {
   const search = useSearch();
   const { toast } = useToast();
   const createTarget = useCreateTarget();
+  const { isGuest, promptSignup } = useGuest();
   const createCommunity = useCreateCommunityTarget();
   const [shareToCommunity, setShareToCommunity] = useState(false);
 
@@ -80,6 +82,10 @@ export default function CreateTargetPage() {
     period === "daily" || period === "weekly" || period === "monthly";
 
   const handleSubmit = async (data: InsertTarget) => {
+    if (isGuest) {
+      promptSignup();
+      return;
+    }
     try {
       await createTarget.mutateAsync(data);
       if (recommendationId) clearRecommendation(recommendationId);

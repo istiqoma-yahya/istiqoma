@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useCreateDeed } from "@/hooks/use-deeds";
+import { useGuest } from "@/hooks/use-guest";
 import { useCategories } from "@/hooks/use-categories";
 import { useCustomDzikirTypes, useCreateCustomDzikirType, useRenameCustomDzikirType, useDeleteCustomDzikirType } from "@/hooks/use-dzikir-types";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,7 @@ export default function DzikirPage() {
   const { data: categories = [] } = useCategories();
   const { data: customTypes = [] } = useCustomDzikirTypes();
   const { mutate: createDeed, isPending: isSaving } = useCreateDeed();
+  const { isGuest, promptSignup } = useGuest();
   const { mutate: createCustomType, isPending: isCreating } = useCreateCustomDzikirType();
   const { mutate: renameCustomType, isPending: isRenaming } = useRenameCustomDzikirType();
   const { mutate: deleteCustomType } = useDeleteCustomDzikirType();
@@ -107,6 +109,10 @@ export default function DzikirPage() {
   };
 
   const handleSave = () => {
+    if (isGuest) {
+      promptSignup();
+      return;
+    }
     if (count === 0) {
       toast({
         title: t("dzikir.nothingToSave"),

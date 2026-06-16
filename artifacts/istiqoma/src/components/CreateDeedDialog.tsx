@@ -3,6 +3,7 @@ import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod/v4";
 import { useCreateDeed } from "@/hooks/use-deeds";
+import { useGuest } from "@/hooks/use-guest";
 import { useCategories, useCategoryName } from "@/hooks/use-categories";
 import { insertDeedSchema } from "@shared/schema";
 import {
@@ -51,6 +52,7 @@ function getCurrentDateTime() {
 export function CreateDeedDialog() {
   const [open, setOpen] = useState(false);
   const { mutate, isPending } = useCreateDeed();
+  const { isGuest, promptSignup } = useGuest();
   const { data: categories = [] } = useCategories();
   const translateCategoryName = useCategoryName();
   const [dateTime, setDateTime] = useState(getCurrentDateTime());
@@ -77,6 +79,10 @@ export function CreateDeedDialog() {
   }, [categories, form]);
 
   const onSubmit = (data: FormValues) => {
+    if (isGuest) {
+      promptSignup();
+      return;
+    }
     // Combine date and time if provided
     let createdAt = data.createdAt;
     if (dateTime.date && dateTime.time) {

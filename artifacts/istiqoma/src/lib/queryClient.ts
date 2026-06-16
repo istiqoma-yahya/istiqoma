@@ -1,6 +1,7 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import i18next from "i18next";
+import { isGuestMode } from "@/lib/guest";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -26,6 +27,10 @@ let redirectInFlight = false;
 
 function shouldTriggerSessionRedirect(): boolean {
   if (typeof window === "undefined") return false;
+  // Guests intentionally have no server session — every authenticated GET
+  // returns 401. Bouncing them to /api/login would make guest browse mode
+  // impossible, so we never trigger the session-expired flow for guests.
+  if (isGuestMode()) return false;
   const path = window.location.pathname;
   // Don't bounce off the landing page or the username-login page — the
   // user is already on a "please sign in" surface there, and a redirect

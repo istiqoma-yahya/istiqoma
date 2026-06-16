@@ -101,6 +101,10 @@
     "subtitle": "Istiqoma helps you build consistent habits in prayer, good deeds, and self-reflection.",
     "startTracking": "Begin Your Journey",
     "login": "Login",
+    "guestCta": {
+      "startJourney": "Start Your Journey",
+      "loginAccount": "Login to My Account"
+    },
     "usernameLogin": "Sign in with username",
     "authChooser": {
       "title": "How would you like to continue?",
@@ -982,9 +986,24 @@
       "muslim": "Sahih Muslim"
     }
   },
+  "auth": {
+    "loginMethod": {
+      "title": "Login to your account",
+      "description": "Choose how you'd like to sign in.",
+      "email": "Continue with Email",
+      "pin": "Continue with Username & PIN"
+    }
+  },
+  "guest": {
+    "upsell": {
+      "title": "Create an account to save this",
+      "description": "You're browsing as a guest. Sign up to save your deeds, targets, and progress."
+    }
+  },
   "onboarding": {
     "intro": "Introduction",
     "done": "Done",
+    "skip": "Skip",
     "back": "Back",
     "next": "Next",
     "start": "Begin",

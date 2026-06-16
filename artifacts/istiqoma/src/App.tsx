@@ -48,6 +48,7 @@ import { registerNotificationSoundListener, setupAudioUnlock } from "@/lib/sound
 import PrivacyBanner from "@/components/PrivacyBanner";
 import { useNativePush } from "@/hooks/use-native-push";
 import { useNativeAuth } from "@/hooks/use-native-auth";
+import { GuestProvider } from "@/hooks/use-guest";
 
 function EditDeedRoute({ params }: { params: { id: string } }) {
   const { data: deeds } = useDeeds();
@@ -128,7 +129,9 @@ function App() {
           <QuranFontProvider>
             <QuranAudioProvider>
               <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-                <AppInner />
+                <GuestProvider>
+                  <AppInner />
+                </GuestProvider>
               </WouterRouter>
             </QuranAudioProvider>
           </QuranFontProvider>

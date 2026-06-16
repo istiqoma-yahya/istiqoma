@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod/v4";
 import { useTranslation } from "react-i18next";
 import { useCreateDeed } from "@/hooks/use-deeds";
+import { useGuest } from "@/hooks/use-guest";
 import { useCategories, useCategoryName } from "@/hooks/use-categories";
 import { useCustomDzikirTypes } from "@/hooks/use-dzikir-types";
 import { resolveDzikirTypeLabel } from "@/lib/targets";
@@ -91,6 +92,7 @@ export default function CreateDeedPage() {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
   const { mutate, isPending } = useCreateDeed();
+  const { isGuest, promptSignup } = useGuest();
   const { data: categories = [] } = useCategories();
   const translateCategoryName = useCategoryName();
   const { data: customDzikirTypes = [] } = useCustomDzikirTypes();
@@ -279,6 +281,10 @@ export default function CreateDeedPage() {
   }, [watchedCategory, isDzikirCategory, isSholatCategory, isFastingCategory, isQuranCategory, isSedekahCategory, isCustomCategory, form]);
 
   const onSubmit = (data: FormValues) => {
+    if (isGuest) {
+      promptSignup();
+      return;
+    }
     let createdAt = data.createdAt;
     if (dateTime.date && dateTime.time) {
       // Create date in local timezone (user's perspective)

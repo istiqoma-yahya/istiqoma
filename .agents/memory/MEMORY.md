@@ -5,3 +5,4 @@
 - [PWA stale-client updates](pwa-stale-client-updates.md) — a correctly-deployed web fix never reaches an installed PWA without a SW update+reload path; "works in dev, not prod, zero write requests in logs" is the tell.
 - [framer-motion onTap fires on scroll](framer-motion-ontap-scroll.md) — onTap fires on pointer-release during a touch scroll, so list cards navigate accidentally; gate on pointer move/duration instead.
 - [zod v3/v4 mixing](zod-v3-v4-mixing.md) — never compose a `zod/v4` schema with `zod` (v3) fields; the parser throws and RHF swallows it, so submit buttons silently no-op.
+- [istiqoma pre-existing typecheck](istiqoma-preexisting-typecheck.md) — typecheck fails on ProductTour/calendar/pushNotifications/DzikirPage helpers unrelated to feature work; verify errors are in files you touched before "fixing".

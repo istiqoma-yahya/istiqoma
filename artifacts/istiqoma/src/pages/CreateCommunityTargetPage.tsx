@@ -5,6 +5,7 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { useToast } from "@/hooks/use-toast";
 import { X } from "lucide-react";
 import { useCreateCommunityTarget } from "@/hooks/use-community-targets";
+import { useGuest } from "@/hooks/use-guest";
 import type { InsertCommunityTarget } from "@shared/schema";
 
 export default function CreateCommunityTargetPage() {
@@ -12,8 +13,13 @@ export default function CreateCommunityTargetPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const createMutation = useCreateCommunityTarget();
+  const { isGuest, promptSignup } = useGuest();
 
   const handleSubmit = async (data: InsertCommunityTarget) => {
+    if (isGuest) {
+      promptSignup();
+      return;
+    }
     try {
       const created = await createMutation.mutateAsync(data);
       toast({ title: t("community.created"), description: t("community.createdDesc") });

@@ -22,6 +22,7 @@ import {
   useMoveTargetToFolder,
 } from "@/hooks/use-target-folders";
 import { useCreateDeed } from "@/hooks/use-deeds";
+import { useGuest } from "@/hooks/use-guest";
 import { useCustomDzikirTypes } from "@/hooks/use-dzikir-types";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -257,6 +258,7 @@ export default function TargetsPage() {
   const deleteTarget = useDeleteTarget();
   const completeTarget = useCompleteTarget();
   const createDeed = useCreateDeed();
+  const { isGuest, promptSignup } = useGuest();
   const updateTarget = useUpdateTarget();
 
   const createFolder = useCreateTargetFolder();
@@ -404,6 +406,10 @@ export default function TargetsPage() {
   };
 
   const handleCreateFolder = () => {
+    if (isGuest) {
+      promptSignup();
+      return;
+    }
     const trimmed = folderNameValue.trim();
     if (!trimmed) return;
     createFolder.mutate(
@@ -458,6 +464,10 @@ export default function TargetsPage() {
   };
 
   const handleUpdateProgressWithDeed = async (targetId: number, incrementValue: number) => {
+    if (isGuest) {
+      promptSignup();
+      return;
+    }
     if (!updateModalTarget) return;
     
     setIsSavingProgress(true);

@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import type { Q1, Q2, Q3, Q4, Q5 } from "@/lib/onboardingTypes";
 import type { User } from "@/hooks/use-auth";
 import { useAuth } from "@/hooks/use-auth";
+import { useGuest } from "@/hooks/use-guest";
 import ConsentScreen from "@/components/ConsentScreen";
 import "./onboarding.css";
 
@@ -75,7 +76,10 @@ export default function OnboardingFlow() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { logout } = useAuth();
-  const [index, setIndex] = useState(0);
+  const { isGuest, markGuestOnboarded } = useGuest();
+  // Guests have no server session, so the religious-data consent gate doesn't
+  // apply (nothing is stored). Skip the consent screen and start at the splash.
+  const [index, setIndex] = useState(isGuest ? 1 : 0);
   const [answers, setAnswers] = useState<Answers>({ q3: [] });
 
   const screen = SCREEN_KEYS[index];
@@ -123,7 +127,17 @@ export default function OnboardingFlow() {
   });
 
   const handleFinish = () => {
+    if (isGuest) {
+      // Guests aren't persisted server-side — just flip the local flag so the
+      // app shell renders. No /api/onboarding/complete call.
+      markGuestOnboarded();
+      return;
+    }
     completeMutation.mutate();
+  };
+
+  const handleGuestSkip = () => {
+    markGuestOnboarded();
   };
 
   // Touch swipe back support
@@ -193,6 +207,18 @@ export default function OnboardingFlow() {
           data-testid="button-onboarding-back"
         >
           ← {t("onboarding.back")}
+        </button>
+      )}
+
+      {isGuest && screen !== "result" && (
+        <button
+          type="button"
+          className="ob-back-btn"
+          style={{ left: "auto", right: "1rem" }}
+          onClick={handleGuestSkip}
+          data-testid="button-onboarding-skip"
+        >
+          {t("onboarding.skip")} →
         </button>
       )}
 
@@ -520,16 +546,16 @@ export default function OnboardingFlow() {
                 <button
                   className="ob-btn-main"
                   onClick={handleFinish}
-                  disabled={completeMutation.isPending}
+                  disabled={!isGuest && completeMutation.isPending}
                   data-testid="button-onboarding-finish"
                 >
-                  {completeMutation.isPending ? (
+                  {!isGuest && completeMutation.isPending ? (
                     <Loader2 className="inline w-4 h-4 animate-spin" />
                   ) : (
                     <>{t("onboarding.startJourney")} 🌿</>
                   )}
                 </button>
-                {completeMutation.isError && (
+                {!isGuest && completeMutation.isError && (
                   <p
                     style={{
                       marginTop: "0.8rem",

@@ -11,6 +11,7 @@ import {
   checkRateLimit,
   generateRecommendations,
   getCachedRecommendations,
+  getFallbackRecommendations,
   setCachedRecommendations,
   invalidateUserRecommendationCache,
 } from "../recommendations";
@@ -792,10 +793,16 @@ export async function registerRoutes(
         });
       }
 
+      // When the validator drops every AI-generated item (corpus gap), serve
+      // a pre-validated fallback set rather than a 503. The fallback is drawn
+      // from the curated corpus, so citations are always verified. Reserve
+      // 503 only for true infrastructure failures (Anthropic call throws above).
       if (recommendations.length === 0) {
-        return res.status(503).json({
-          message: "No valid recommendations were returned. Please try again.",
-        });
+        console.warn(
+          "[recommendations] all items dropped — serving pre-validated fallback list",
+        );
+        const fallback = getFallbackRecommendations(onboarding, language);
+        return res.json({ recommendations: fallback, cached: false });
       }
 
       setCachedRecommendations(userId, language, onboarding, recommendations);

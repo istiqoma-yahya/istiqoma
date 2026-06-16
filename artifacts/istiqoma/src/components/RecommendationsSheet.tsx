@@ -32,13 +32,31 @@ export function RecommendationsSheet({ open, onOpenChange }: RecommendationsShee
 
   const language = (["id", "en", "ms"].includes(i18n.language) ? i18n.language : "id") as "id" | "en" | "ms";
 
+  const RECOMMENDATION_TIMEOUT_MS = 30_000;
+
   const mutation = useMutation<TargetRecommendationsResponse, Error, boolean | void>({
     mutationFn: async (forceRefresh) => {
-      const res = await apiRequest("POST", "/api/targets/recommendations", {
-        language,
-        forceRefresh: forceRefresh === true,
-      });
-      return (await res.json()) as TargetRecommendationsResponse;
+      const controller = new AbortController();
+      const timer = setTimeout(
+        () => controller.abort(new DOMException("Recommendation request timed out", "TimeoutError")),
+        RECOMMENDATION_TIMEOUT_MS,
+      );
+      try {
+        const res = await fetch("/api/targets/recommendations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ language, forceRefresh: forceRefresh === true }),
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          const text = (await res.text()) || res.statusText;
+          throw new Error(`${res.status}: ${text}`);
+        }
+        return (await res.json()) as TargetRecommendationsResponse;
+      } finally {
+        clearTimeout(timer);
+      }
     },
   });
 

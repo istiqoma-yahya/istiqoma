@@ -9,8 +9,9 @@
 // Each CORPUS_ENTRIES entry stores the FULL canonical Arabic (no diacritics
 // — the validator strips diacritics on both sides) so that a correct full
 // recitation submitted by the model passes substring containment. The model
-// is shown both the citation and its canonical Arabic in the system prompt
-// so it can copy the text verbatim.
+// is shown the allowed-citation list (reference + topic) in the system
+// prompt, and the full canonical Arabic only for entries whose categories
+// match the user's onboarding profile, so it can copy the text verbatim.
 
 export const QURAN_SURAH_AYAH_COUNTS: Record<number, number> = {
   1: 7, 2: 286, 3: 200, 4: 176, 5: 120, 6: 165, 7: 206, 8: 75, 9: 129, 10: 109,
@@ -44,68 +45,269 @@ export interface CorpusEntry {
   /** Full canonical Arabic (no diacritics). */
   canonical: string;
   topic: string;
+  /**
+   * Recommendation categories this entry is most relevant to.
+   * Used to filter which entries get their Arabic injected into the prompt
+   * based on the user's onboarding profile.
+   */
+  categories: string[];
 }
 
 export const CORPUS_ENTRIES: CorpusEntry[] = [
+  // ── Dzikir ────────────────────────────────────────────────────────────────
   {
     kind: "quran", refKey: "2:152", display: "QS Al-Baqarah 2:152",
     canonical: "فاذكروني اذكركم واشكروا لي ولا تكفرون",
     topic: "remember Me, I will remember you",
+    categories: ["Dzikir"],
   },
   {
-    kind: "quran", refKey: "2:183", display: "QS Al-Baqarah 2:183",
-    canonical: "يا ايها الذين امنوا كتب عليكم الصيام كما كتب على الذين من قبلكم لعلكم تتقون",
-    topic: "fasting prescribed for the believers",
-  },
-  {
-    kind: "quran", refKey: "2:238", display: "QS Al-Baqarah 2:238",
-    canonical: "حافظوا على الصلوات والصلاة الوسطى وقوموا لله قانتين",
-    topic: "guarding the obligatory prayers",
+    kind: "quran", refKey: "2:186", display: "QS Al-Baqarah 2:186",
+    canonical: "واذا سالك عبادي عني فاني قريب اجيب دعوة الداع اذا دعان فليستجيبوا لي وليؤمنوا بي لعلهم يرشدون",
+    topic: "Allah is near and answers the one who calls",
+    categories: ["Dzikir"],
   },
   {
     kind: "quran", refKey: "13:28", display: "QS Ar-Ra'd 13:28",
     canonical: "الذين امنوا وتطمئن قلوبهم بذكر الله الا بذكر الله تطمئن القلوب",
     topic: "hearts find rest in the remembrance of Allah",
-  },
-  {
-    kind: "quran", refKey: "17:23", display: "QS Al-Isra' 17:23",
-    canonical: "وقضى ربك الا تعبدوا الا اياه وبالوالدين احسانا اما يبلغن عندك الكبر احدهما او كلاهما فلا تقل لهما اف ولا تنهرهما وقل لهما قولا كريما",
-    topic: "kindness to parents",
-  },
-  {
-    kind: "quran", refKey: "20:14", display: "QS Ta-Ha 20:14",
-    canonical: "انني انا الله لا اله الا انا فاعبدني واقم الصلاة لذكري",
-    topic: "establish prayer for My remembrance",
-  },
-  {
-    kind: "quran", refKey: "29:45", display: "QS Al-'Ankabut 29:45",
-    canonical: "اتل ما اوحي اليك من الكتاب واقم الصلاة ان الصلاة تنهى عن الفحشاء والمنكر ولذكر الله اكبر والله يعلم ما تصنعون",
-    topic: "prayer restrains from indecency and evil",
+    categories: ["Dzikir"],
   },
   {
     kind: "quran", refKey: "33:41", display: "QS Al-Ahzab 33:41",
     canonical: "يا ايها الذين امنوا اذكروا الله ذكرا كثيرا",
     topic: "remember Allah with abundant remembrance",
-  },
-  {
-    kind: "quran", refKey: "96:1", display: "QS Al-'Alaq 96:1",
-    canonical: "اقرا باسم ربك الذي خلق",
-    topic: "the first revelation: read in the name of your Lord",
-  },
-  {
-    kind: "bukhari", refKey: "1", display: "HR. Bukhari no. 1",
-    canonical: "انما الاعمال بالنيات وانما لكل امرئ ما نوى فمن كانت هجرته الى الله ورسوله فهجرته الى الله ورسوله ومن كانت هجرته لدنيا يصيبها او امراة ينكحها فهجرته الى ما هاجر اليه",
-    topic: "actions are by intentions",
+    categories: ["Dzikir"],
   },
   {
     kind: "bukhari", refKey: "6406", display: "HR. Bukhari no. 6406",
     canonical: "كلمتان حبيبتان الى الرحمن خفيفتان على اللسان ثقيلتان في الميزان سبحان الله وبحمده سبحان الله العظيم",
     topic: "two phrases beloved to Ar-Rahman: SubhanAllahi wa bihamdihi, SubhanAllahil-'Azim",
+    categories: ["Dzikir"],
   },
   {
     kind: "muslim", refKey: "223", display: "HR. Muslim no. 223",
     canonical: "الطهور شطر الايمان والحمد لله تملا الميزان وسبحان الله والحمد لله تملان ما بين السماوات والارض",
-    topic: "purification is half of faith",
+    topic: "purification is half of faith; SubhanAllah and Alhamdulillah fill the scales",
+    categories: ["Dzikir"],
+  },
+  {
+    kind: "muslim", refKey: "2675", display: "HR. Muslim no. 2675",
+    canonical: "من قال لا اله الا الله وحده لا شريك له له الملك وله الحمد وهو على كل شيء قدير في يوم مئة مرة كانت له عدل عشر رقاب وكتبت له مئة حسنة ومحيت عنه مئة سيئة وكانت له حرزا من الشيطان يومه ذلك حتى يمسي",
+    topic: "100x La ilaha illallah: reward of freeing ten slaves and protection from Shaytan",
+    categories: ["Dzikir"],
+  },
+
+  // ── Sholat Fardhu ─────────────────────────────────────────────────────────
+  {
+    kind: "quran", refKey: "2:238", display: "QS Al-Baqarah 2:238",
+    canonical: "حافظوا على الصلوات والصلاة الوسطى وقوموا لله قانتين",
+    topic: "guard the obligatory prayers and the middle prayer",
+    categories: ["Sholat Fardhu"],
+  },
+  {
+    kind: "quran", refKey: "4:103", display: "QS An-Nisa' 4:103",
+    canonical: "ان الصلاة كانت على المؤمنين كتابا موقوتا",
+    topic: "prayer is prescribed upon the believers at fixed times",
+    categories: ["Sholat Fardhu"],
+  },
+  {
+    kind: "quran", refKey: "17:78", display: "QS Al-Isra' 17:78",
+    canonical: "اقم الصلاة لدلوك الشمس الى غسق الليل وقران الفجر ان قران الفجر كان مشهودا",
+    topic: "establish prayer from the decline of the sun to darkness of the night",
+    categories: ["Sholat Fardhu"],
+  },
+  {
+    kind: "quran", refKey: "20:14", display: "QS Ta-Ha 20:14",
+    canonical: "انني انا الله لا اله الا انا فاعبدني واقم الصلاة لذكري",
+    topic: "establish prayer for My remembrance",
+    categories: ["Sholat Fardhu"],
+  },
+  {
+    kind: "quran", refKey: "29:45", display: "QS Al-'Ankabut 29:45",
+    canonical: "اتل ما اوحي اليك من الكتاب واقم الصلاة ان الصلاة تنهى عن الفحشاء والمنكر ولذكر الله اكبر والله يعلم ما تصنعون",
+    topic: "prayer restrains from immorality and wrongdoing",
+    categories: ["Sholat Fardhu", "Dzikir"],
+  },
+  {
+    kind: "bukhari", refKey: "8", display: "HR. Bukhari no. 8",
+    canonical: "بني الاسلام على خمس شهادة ان لا اله الا الله وان محمدا رسول الله واقام الصلاة وايتاء الزكاة والحج وصوم رمضان",
+    topic: "Islam is built on five pillars including prayer and fasting",
+    categories: ["Sholat Fardhu", "Puasa"],
+  },
+
+  // ── Sholat Sunnah ─────────────────────────────────────────────────────────
+  {
+    kind: "quran", refKey: "17:79", display: "QS Al-Isra' 17:79",
+    canonical: "ومن الليل فتهجد به نافلة لك عسى ان يبعثك ربك مقاما محمودا",
+    topic: "arise at night for Tahajjud — a praised station awaits",
+    categories: ["Sholat Sunnah"],
+  },
+  {
+    kind: "quran", refKey: "73:2", display: "QS Al-Muzammil 73:2",
+    canonical: "قم الليل الا قليلا نصفه او انقص منه قليلا او زد عليه ورتل القران ترتيلا",
+    topic: "stand in prayer most of the night and recite Quran distinctly",
+    categories: ["Sholat Sunnah", "Baca Quran"],
+  },
+  {
+    kind: "bukhari", refKey: "1145", display: "HR. Bukhari no. 1145",
+    canonical: "ينزل ربنا تبارك وتعالى كل ليلة الى السماء الدنيا حين يبقى ثلث الليل الاخر يقول من يدعوني فاستجيب له من يسالني فاعطيه من يستغفرني فاغفر له",
+    topic: "Allah descends to the lowest heaven in the last third of the night",
+    categories: ["Sholat Sunnah", "Dzikir"],
+  },
+  {
+    kind: "muslim", refKey: "758", display: "HR. Muslim no. 758",
+    canonical: "افضل الصلاة بعد الفريضة صلاة الليل",
+    topic: "the best prayer after the obligatory is the night prayer",
+    categories: ["Sholat Sunnah"],
+  },
+
+  // ── Puasa ─────────────────────────────────────────────────────────────────
+  {
+    kind: "quran", refKey: "2:183", display: "QS Al-Baqarah 2:183",
+    canonical: "يا ايها الذين امنوا كتب عليكم الصيام كما كتب على الذين من قبلكم لعلكم تتقون",
+    topic: "fasting prescribed for the believers to attain taqwa",
+    categories: ["Puasa"],
+  },
+  {
+    kind: "quran", refKey: "2:185", display: "QS Al-Baqarah 2:185",
+    canonical: "شهر رمضان الذي انزل فيه القران هدى للناس وبينات من الهدى والفرقان فمن شهد منكم الشهر فليصمه",
+    topic: "Ramadan: the month the Quran was revealed; fast it",
+    categories: ["Puasa"],
+  },
+  {
+    kind: "bukhari", refKey: "1894", display: "HR. Bukhari no. 1894",
+    canonical: "اذا جاء رمضان فتحت ابواب الجنة وغلقت ابواب جهنم وصفدت الشياطين",
+    topic: "when Ramadan comes, the gates of Paradise are opened",
+    categories: ["Puasa"],
+  },
+  {
+    kind: "bukhari", refKey: "1904", display: "HR. Bukhari no. 1904",
+    canonical: "من صام رمضان ايمانا واحتسابا غفر له ما تقدم من ذنبه",
+    topic: "whoever fasts Ramadan with faith and hope, their past sins are forgiven",
+    categories: ["Puasa"],
+  },
+  {
+    kind: "muslim", refKey: "1151", display: "HR. Muslim no. 1151",
+    canonical: "الصيام جنة فلا يرفث ولا يجهل وان امرؤ قاتله او شاتمه فليقل اني صائم اني صائم",
+    topic: "fasting is a shield; let the fasting person say 'I am fasting'",
+    categories: ["Puasa"],
+  },
+
+  // ── Baca Quran ────────────────────────────────────────────────────────────
+  {
+    kind: "quran", refKey: "2:2", display: "QS Al-Baqarah 2:2",
+    canonical: "ذلك الكتاب لا ريب فيه هدى للمتقين",
+    topic: "this is the Book, no doubt; guidance for the God-fearing",
+    categories: ["Baca Quran"],
+  },
+  {
+    kind: "quran", refKey: "17:9", display: "QS Al-Isra' 17:9",
+    canonical: "ان هذا القران يهدي للتي هي اقوم ويبشر المؤمنين الذين يعملون الصالحات ان لهم اجرا كبيرا",
+    topic: "this Quran guides to what is most right",
+    categories: ["Baca Quran"],
+  },
+  {
+    kind: "quran", refKey: "96:1", display: "QS Al-'Alaq 96:1",
+    canonical: "اقرا باسم ربك الذي خلق",
+    topic: "the first revelation: read in the name of your Lord who created",
+    categories: ["Baca Quran", "Tolabul Ilmi"],
+  },
+  {
+    kind: "bukhari", refKey: "5027", display: "HR. Bukhari no. 5027",
+    canonical: "خيركم من تعلم القران وعلمه",
+    topic: "the best of you is he who learns the Quran and teaches it",
+    categories: ["Baca Quran", "Tolabul Ilmi"],
+  },
+  {
+    kind: "muslim", refKey: "804", display: "HR. Muslim no. 804",
+    canonical: "اقرؤوا القران فانه ياتي يوم القيامة شفيعا لاصحابه",
+    topic: "recite the Quran; it will intercede for its companions on the Day of Judgement",
+    categories: ["Baca Quran"],
+  },
+
+  // ── Shodaqoh ──────────────────────────────────────────────────────────────
+  {
+    kind: "quran", refKey: "2:261", display: "QS Al-Baqarah 2:261",
+    canonical: "مثل الذين ينفقون اموالهم في سبيل الله كمثل حبة انبتت سبع سنابل في كل سنبلة مئة حبة والله يضاعف لمن يشاء والله واسع عليم",
+    topic: "charity in Allah's path: like a grain that grows seven ears of a hundred grains each",
+    categories: ["Shodaqoh"],
+  },
+  {
+    kind: "quran", refKey: "63:10", display: "QS Al-Munafiqun 63:10",
+    canonical: "وانفقوا مما رزقناكم من قبل ان ياتي احدكم الموت فيقول رب لولا اخرتني الى اجل قريب فاصدق واكن من الصالحين",
+    topic: "spend from what We have provided you before death comes",
+    categories: ["Shodaqoh"],
+  },
+  {
+    kind: "bukhari", refKey: "1", display: "HR. Bukhari no. 1",
+    canonical: "انما الاعمال بالنيات وانما لكل امرئ ما نوى فمن كانت هجرته الى الله ورسوله فهجرته الى الله ورسوله ومن كانت هجرته لدنيا يصيبها او امراة ينكحها فهجرته الى ما هاجر اليه",
+    topic: "actions are judged by intentions",
+    categories: ["Sholat Fardhu", "Puasa", "Shodaqoh", "Dzikir"],
+  },
+  {
+    kind: "muslim", refKey: "1010", display: "HR. Muslim no. 1010",
+    canonical: "ما نقصت صدقة من مال وما زاد الله عبدا بعفو الا عزا وما تواضع احد لله الا رفعه الله",
+    topic: "charity does not decrease wealth; forgiveness raises honor",
+    categories: ["Shodaqoh"],
+  },
+
+  // ── Birrul Walidayn ───────────────────────────────────────────────────────
+  {
+    kind: "quran", refKey: "17:23", display: "QS Al-Isra' 17:23",
+    canonical: "وقضى ربك الا تعبدوا الا اياه وبالوالدين احسانا اما يبلغن عندك الكبر احدهما او كلاهما فلا تقل لهما اف ولا تنهرهما وقل لهما قولا كريما",
+    topic: "be dutiful to parents; never say 'uff' to them",
+    categories: ["Birrul Walidayn"],
+  },
+  {
+    kind: "quran", refKey: "17:24", display: "QS Al-Isra' 17:24",
+    canonical: "واخفض لهما جناح الذل من الرحمة وقل رب ارحمهما كما ربياني صغيرا",
+    topic: "lower the wing of humility for parents and supplicate for their mercy",
+    categories: ["Birrul Walidayn"],
+  },
+  {
+    kind: "quran", refKey: "31:14", display: "QS Luqman 31:14",
+    canonical: "ووصينا الانسان بوالديه حملته امه وهنا على وهن وفصاله في عامين ان اشكر لي ولوالديك الي المصير",
+    topic: "be grateful to Me and to your parents",
+    categories: ["Birrul Walidayn"],
+  },
+  {
+    kind: "bukhari", refKey: "5971", display: "HR. Bukhari no. 5971",
+    canonical: "اي العمل احب الى الله قال الصلاة على وقتها قلت ثم اي قال بر الوالدين قلت ثم اي قال الجهاد في سبيل الله",
+    topic: "the most beloved deeds to Allah: prayer on time, then dutifulness to parents",
+    categories: ["Birrul Walidayn", "Sholat Fardhu"],
+  },
+  {
+    kind: "muslim", refKey: "2548", display: "HR. Muslim no. 2548",
+    canonical: "جاء رجل الى رسول الله فقال من احق الناس بحسن صحابتي قال امك قال ثم من قال امك قال ثم من قال امك قال ثم من قال ابوك",
+    topic: "mother has the most right to your good companionship (three times), then father",
+    categories: ["Birrul Walidayn"],
+  },
+
+  // ── Tolabul Ilmi ──────────────────────────────────────────────────────────
+  {
+    kind: "quran", refKey: "39:9", display: "QS Az-Zumar 39:9",
+    canonical: "قل هل يستوي الذين يعلمون والذين لا يعلمون انما يتذكر اولو الالباب",
+    topic: "are those who know equal to those who do not know?",
+    categories: ["Tolabul Ilmi"],
+  },
+  {
+    kind: "quran", refKey: "58:11", display: "QS Al-Mujadila 58:11",
+    canonical: "يرفع الله الذين امنوا منكم والذين اوتوا العلم درجات والله بما تعملون خبير",
+    topic: "Allah raises those who believe and those given knowledge by degrees",
+    categories: ["Tolabul Ilmi"],
+  },
+  {
+    kind: "bukhari", refKey: "71", display: "HR. Bukhari no. 71",
+    canonical: "من يرد الله به خيرا يفقهه في الدين",
+    topic: "whomever Allah intends good for, He gives understanding of the religion",
+    categories: ["Tolabul Ilmi"],
+  },
+  {
+    kind: "muslim", refKey: "2699", display: "HR. Muslim no. 2699",
+    canonical: "من سلك طريقا يلتمس فيه علما سهل الله له به طريقا الى الجنة",
+    topic: "whoever travels a path seeking knowledge, Allah eases his path to Paradise",
+    categories: ["Tolabul Ilmi"],
   },
 ];
 
@@ -211,11 +413,40 @@ export function arabicMatchesEntry(entry: CorpusEntry, arabic: string): boolean 
   return c.includes(m);
 }
 
-// Renders the corpus for inclusion in the system prompt. Includes the
-// canonical Arabic so the model can copy it verbatim — the server-side
-// matcher requires the submitted Arabic to be contained in this text.
+// Renders the compact allowed-citation list for the system prompt.
+// Only reference + topic is shown (no Arabic) to keep prompt size bounded.
+// The model must pick from this list; Arabic is provided separately for
+// categories matching the user's onboarding profile.
 export function renderCorpusForPrompt(): string {
   return CORPUS_ENTRIES
-    .map((e) => `- ${e.display} (${e.topic})\n  Arabic: ${e.canonical}`)
+    .map((e) => `- ${e.display} [${e.topic}]`)
+    .join("\n");
+}
+
+// Renders the canonical Arabic for corpus entries whose categories overlap
+// with the provided set. Called with the user's onboarding categories so the
+// model has the exact Arabic to copy verbatim — only for the citations it is
+// most likely to use. Entries shared across multiple categories are included
+// if any of the user's categories matches.
+export function renderCorpusArabicForCategories(categories: string[]): string {
+  if (categories.length === 0) {
+    // No onboarding data — include Arabic for all entries so the model is
+    // not left without any Arabic text to copy.
+    return CORPUS_ENTRIES
+      .map((e) => `- ${e.display}\n  Arabic: ${e.canonical}`)
+      .join("\n");
+  }
+  const catSet = new Set(categories);
+  const filtered = CORPUS_ENTRIES.filter((e) =>
+    e.categories.some((c) => catSet.has(c)),
+  );
+  if (filtered.length === 0) {
+    // Fall back to full list if the category mapping produced nothing.
+    return CORPUS_ENTRIES
+      .map((e) => `- ${e.display}\n  Arabic: ${e.canonical}`)
+      .join("\n");
+  }
+  return filtered
+    .map((e) => `- ${e.display}\n  Arabic: ${e.canonical}`)
     .join("\n");
 }

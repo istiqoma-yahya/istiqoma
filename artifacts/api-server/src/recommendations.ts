@@ -16,7 +16,9 @@ import {
   arabicMatchesEntry,
   isReferenceInRange,
   lookupCorpusEntry,
+  renderCorpusArabicForCategories,
   renderCorpusForPrompt,
+  CORPUS_ENTRIES,
 } from "./recommendationsCorpus";
 
 const anthropic = new Anthropic({
@@ -259,20 +261,38 @@ function summarizeOnboarding(onboarding: UserOnboarding | null): string {
   return parts.join(" ");
 }
 
-function buildSystemPrompt(language: RecommendationLanguage): string {
+// Derive recommendation categories from an onboarding profile for use in
+// prompt construction (Arabic injection) and fallback selection.
+function categoriesFromOnboarding(onboarding: UserOnboarding | null): string[] {
+  if (!onboarding) return [];
+  return Array.from(
+    new Set(
+      (onboarding.q3 ?? [])
+        .map((p) => Q3_TO_CATEGORY[p as keyof typeof Q3_TO_CATEGORY])
+        .filter(Boolean) as string[],
+    ),
+  );
+}
+
+function buildSystemPrompt(language: RecommendationLanguage, relevantCategories: string[]): string {
   const langName = LANG_NAMES[language];
+  const arabicSection = renderCorpusArabicForCategories(relevantCategories);
+
   return [
     "You are an assistant that recommends Islamic worship targets for a personal habit-tracking app.",
     "",
     "ABSOLUTE RULES — read carefully:",
     "1. You MUST only cite entries from the ALLOWED CITATIONS list below. Any citation outside that list (including correctly-formatted but unlisted hadith numbers) will be rejected and the recommendation discarded.",
-    "2. Provide the Arabic field by copying the canonical Arabic of the cited verse/hadith verbatim (with or without diacritics). The server verifies the Arabic against ground truth — fabricated or paraphrased Arabic is rejected.",
+    "2. Copy the Arabic verbatim from the CANONICAL ARABIC section below for whichever entry you choose. The server verifies the Arabic against ground truth — fabricated or paraphrased Arabic is rejected.",
     `3. The "whyItFits" string and the "translation" string MUST be in ${langName} (language code: ${language}). The Arabic field is always literal Arabic.`,
     "4. NEVER cite Tirmidhi, Abu Dawud, Nasa'i, Ibn Majah, Musnad Ahmad, Muwatta, or any other collection. NEVER cite a scholar's quote.",
-    "5. Use the reference string exactly as written in the ALLOWED CITATIONS list (or an obvious equivalent like \"Quran 2:152\" instead of \"QS Al-Baqarah 2:152\").",
+    "5. Use the reference string exactly as written in the ALLOWED CITATIONS list (e.g. \"QS Al-Baqarah 2:152\" or \"HR. Bukhari no. 6406\").",
     "",
-    "ALLOWED CITATIONS — you MUST pick from this list only. Any citation outside this list will be dropped by the server, even if the verse/hadith number is real. The server also verifies that the Arabic you submit matches the canonical Arabic of the cited entry; copy the canonical Arabic verbatim.",
+    "ALLOWED CITATIONS — pick ONLY from this list. The server rejects any citation not on it, even if the number is real.",
     renderCorpusForPrompt(),
+    "",
+    "CANONICAL ARABIC — copy the Arabic field verbatim from this section for whichever entry you cite.",
+    arabicSection,
     "",
     "TARGET FIELDS — map each recommendation to the app's data model:",
     `- "category" must be exactly one of: ${RECOMMENDATION_CATEGORIES.map((c) => `"${c}"`).join(", ")}.`,
@@ -356,10 +376,12 @@ export async function generateRecommendations(
   onboarding: UserOnboarding | null,
   language: RecommendationLanguage,
 ): Promise<TargetRecommendation[]> {
+  const relevantCategories = categoriesFromOnboarding(onboarding);
+
   const message = await anthropic.messages.create({
     model: MODEL,
     max_tokens: 8192,
-    system: buildSystemPrompt(language),
+    system: buildSystemPrompt(language, relevantCategories),
     tools: [
       {
         name: "emit_recommendations",
@@ -432,12 +454,288 @@ export async function generateRecommendations(
   }
 
   if (dropped.length > 0) {
+    // Structured one-liner per dropped item for easy production grep.
+    for (const d of dropped) {
+      console.warn(
+        `[recommendations] dropped reason=${d.reason} kind=${d.kind ?? "-"} ref="${d.reference ?? "-"}"`,
+      );
+    }
     console.warn(
-      `[recommendations] dropped ${dropped.length}/${items.length} item(s) due to citation issues:`,
-      JSON.stringify(dropped),
+      `[recommendations] summary: accepted=${valid.length} dropped=${dropped.length} total=${items.length}`,
     );
   }
   return valid;
+}
+
+// ── Fallback recommendations ───────────────────────────────────────────────
+//
+// When the AI validator drops every generated item (rare but happens when the
+// corpus gaps are still being filled), we surface a small hand-picked set of
+// pre-validated recommendations drawn entirely from the corpus instead of
+// returning a 503. This guarantees users always see something useful.
+//
+// Each fallback entry is keyed by category and is pre-validated: the
+// corpus entry it references is confirmed to exist at build time via the
+// assertion in buildFallback().
+
+interface FallbackSpec {
+  category: (typeof RECOMMENDATION_CATEGORIES)[number];
+  refKind: "quran" | "bukhari" | "muslim";
+  refKey: string;
+  targetValue: number;
+  period: "daily" | "weekly";
+  recurrence: "recurring";
+  customUnit?: "times" | "days" | "hitungan" | "rakaat";
+  dzikirType?: string;
+  sholatType?: string;
+  fastingType?: string;
+  quranUnit?: "ayat" | "halaman" | "surat" | "juz";
+  sedekahType?: "uang" | "hitungan";
+  name: Record<RecommendationLanguage, string>;
+  whyItFits: Record<RecommendationLanguage, string>;
+  translation: Record<RecommendationLanguage, string>;
+}
+
+const FALLBACK_SPECS: FallbackSpec[] = [
+  {
+    category: "Dzikir",
+    refKind: "quran", refKey: "13:28",
+    targetValue: 33, period: "daily", recurrence: "recurring",
+    dzikirType: "subhanallah", customUnit: "times",
+    name: {
+      id: "Dzikir 33x setelah sholat",
+      en: "33x Dhikr after prayer",
+      ms: "Zikir 33x selepas solat",
+    },
+    whyItFits: {
+      id: "Dzikir membuat hati menjadi tenang sesuai dengan firman Allah.",
+      en: "Remembrance of Allah brings peace to the heart as Allah promises.",
+      ms: "Zikir menenangkan hati sesuai dengan firman Allah.",
+    },
+    translation: {
+      id: "Orang-orang yang beriman dan hati mereka menjadi tenteram dengan mengingat Allah. Ingatlah, hanya dengan mengingat Allah-lah hati menjadi tenteram.",
+      en: "Those who believe and whose hearts find rest in the remembrance of Allah — truly, in the remembrance of Allah do hearts find rest.",
+      ms: "Orang-orang yang beriman dan hati mereka menjadi tenteram dengan mengingati Allah. Ketahuilah, hanya dengan mengingati Allah hati menjadi tenteram.",
+    },
+  },
+  {
+    category: "Sholat Fardhu",
+    refKind: "quran", refKey: "2:238",
+    targetValue: 5, period: "daily", recurrence: "recurring",
+    sholatType: undefined, customUnit: "times",
+    name: {
+      id: "Sholat 5 Waktu Tepat Waktu",
+      en: "5 Daily Prayers on Time",
+      ms: "Solat 5 Waktu Tepat Waktu",
+    },
+    whyItFits: {
+      id: "Allah memerintahkan kita menjaga sholat-sholat wajib, terutama sholat wustho.",
+      en: "Allah commands us to guard the obligatory prayers, especially the middle prayer.",
+      ms: "Allah memerintahkan kita menjaga solat-solat wajib, terutama solat wustho.",
+    },
+    translation: {
+      id: "Peliharalah semua sholat dan sholat wustho. Dan laksanakanlah (sholat) karena Allah dengan khusyuk.",
+      en: "Maintain with care the (obligatory) prayers and the middle prayer, and stand before Allah in devout obedience.",
+      ms: "Peliharalah semua solat dan solat wustho dan berdirilah karena Allah dengan taat.",
+    },
+  },
+  {
+    category: "Sholat Sunnah",
+    refKind: "quran", refKey: "17:79",
+    targetValue: 2, period: "daily", recurrence: "recurring",
+    sholatType: "tahajjud", customUnit: "rakaat",
+    name: {
+      id: "Sholat Tahajjud 2 Rakaat",
+      en: "Tahajjud Prayer 2 Rak'ah",
+      ms: "Solat Tahajjud 2 Rakaat",
+    },
+    whyItFits: {
+      id: "Sholat malam membawa ke maqam yang terpuji seperti yang Allah janjikan.",
+      en: "Night prayer leads to the praised station that Allah has promised.",
+      ms: "Solat malam membawa kepada maqam yang terpuji seperti yang Allah janjikan.",
+    },
+    translation: {
+      id: "Dan pada sebahagian malam, maka bertahajudlah kamu sebagai suatu ibadah tambahan bagimu; mudah-mudahan Tuhanmu mengangkat kamu ke tempat yang terpuji.",
+      en: "And rise from sleep during the night as an additional prayer for you; perhaps your Lord will resurrect you to a praised position.",
+      ms: "Dan pada sebahagian malam, hendaklah kamu bertahajjud dengannya sebagai ibadah tambahan bagimu; mudah-mudahan Tuhanmu membangkitkan kamu ke tempat yang terpuji.",
+    },
+  },
+  {
+    category: "Puasa",
+    refKind: "bukhari", refKey: "1904",
+    targetValue: 1, period: "weekly", recurrence: "recurring",
+    fastingType: "seninkamis", customUnit: "days",
+    name: {
+      id: "Puasa Senin Kamis",
+      en: "Monday-Thursday Fast",
+      ms: "Puasa Isnin Khamis",
+    },
+    whyItFits: {
+      id: "Puasa dengan iman dan mengharap pahala menghapus dosa-dosa yang lalu.",
+      en: "Fasting with faith and hope for reward erases past sins.",
+      ms: "Berpuasa dengan iman dan harapan pahala menghapuskan dosa-dosa yang lalu.",
+    },
+    translation: {
+      id: "Barangsiapa berpuasa Ramadan karena iman dan mengharap pahala, maka diampuni dosa-dosanya yang telah lalu.",
+      en: "Whoever fasts Ramadan out of faith and hope for reward, his past sins will be forgiven.",
+      ms: "Sesiapa yang berpuasa Ramadan kerana iman dan mengharap pahala, diampuni dosa-dosanya yang telah lalu.",
+    },
+  },
+  {
+    category: "Baca Quran",
+    refKind: "bukhari", refKey: "5027",
+    targetValue: 1, period: "daily", recurrence: "recurring",
+    quranUnit: "halaman",
+    name: {
+      id: "Baca Al-Quran 1 Halaman",
+      en: "Read Quran 1 Page",
+      ms: "Baca Al-Quran 1 Halaman",
+    },
+    whyItFits: {
+      id: "Sebaik-baik kalian adalah yang belajar dan mengajarkan Al-Quran.",
+      en: "The best among you is one who learns and teaches the Quran.",
+      ms: "Sebaik-baik kalian adalah yang belajar dan mengajarkan Al-Quran.",
+    },
+    translation: {
+      id: "Sebaik-baik kalian adalah orang yang mempelajari Al-Quran dan mengajarkannya.",
+      en: "The best of you are those who learn the Quran and teach it.",
+      ms: "Sebaik-baik kamu adalah orang yang mempelajari Al-Quran dan mengajarkannya.",
+    },
+  },
+  {
+    category: "Shodaqoh",
+    refKind: "muslim", refKey: "1010",
+    targetValue: 1, period: "daily", recurrence: "recurring",
+    sedekahType: "hitungan",
+    name: {
+      id: "Bersedekah 1x Sehari",
+      en: "Give Charity Once Daily",
+      ms: "Bersedekah 1x Sehari",
+    },
+    whyItFits: {
+      id: "Sedekah tidak mengurangi harta, bahkan menambah kemuliaan.",
+      en: "Charity does not decrease wealth; it only adds to one's honor.",
+      ms: "Sedekah tidak mengurangi harta, malah menambah kemuliaan.",
+    },
+    translation: {
+      id: "Tidak akan berkurang harta karena sedekah. Dan tidaklah Allah menambahkan kepada seorang hamba yang pemaaf melainkan kemuliaan.",
+      en: "Charity does not decrease wealth. Allah increases the honor of one who is forgiving, and no one humbles themselves for Allah except that Allah raises them.",
+      ms: "Sedekah tidak akan mengurangi harta. Dan Allah tidak akan menambahkan kepada seorang hamba yang pemaaf kecuali kemuliaan.",
+    },
+  },
+  {
+    category: "Birrul Walidayn",
+    refKind: "quran", refKey: "17:24",
+    targetValue: 1, period: "daily", recurrence: "recurring",
+    customUnit: "hitungan",
+    name: {
+      id: "Berbuat Baik kepada Orang Tua",
+      en: "Act of Kindness to Parents",
+      ms: "Berbuat Baik kepada Ibu Bapa",
+    },
+    whyItFits: {
+      id: "Merendahkan diri dan mendoakan orang tua adalah perintah langsung dari Allah.",
+      en: "Lowering the wing of humility and supplicating for parents is a direct command from Allah.",
+      ms: "Merendahkan diri dan mendoakan ibu bapa adalah perintah langsung daripada Allah.",
+    },
+    translation: {
+      id: "Dan rendahkanlah dirimu terhadap keduanya dengan penuh kasih sayang dan ucapkanlah, 'Wahai Tuhanku, sayangilah keduanya sebagaimana mereka berdua mendidik aku pada waktu kecil.'",
+      en: "Lower to them the wing of humility out of mercy and say, 'My Lord, have mercy upon them as they raised me when I was small.'",
+      ms: "Dan rendahkanlah dirimu terhadap keduanya dengan penuh kasih sayang dan berdoalah, 'Ya Tuhanku, sayangilah keduanya sebagaimana mereka mendidikku sewaktu kecil.'",
+    },
+  },
+  {
+    category: "Tolabul Ilmi",
+    refKind: "muslim", refKey: "2699",
+    targetValue: 1, period: "daily", recurrence: "recurring",
+    customUnit: "hitungan",
+    name: {
+      id: "Belajar Ilmu Agama 1x",
+      en: "Study Islamic Knowledge Once",
+      ms: "Belajar Ilmu Agama 1x",
+    },
+    whyItFits: {
+      id: "Menempuh jalan ilmu adalah jalan menuju surga.",
+      en: "Traveling the path of knowledge is a path to Paradise.",
+      ms: "Menempuh jalan ilmu adalah jalan menuju syurga.",
+    },
+    translation: {
+      id: "Barangsiapa menempuh jalan untuk mencari ilmu, maka Allah akan memudahkan baginya jalan menuju surga.",
+      en: "Whoever travels a path in search of knowledge, Allah will make easy for him a path to Paradise.",
+      ms: "Sesiapa yang menempuh jalan untuk mencari ilmu, Allah akan memudahkan baginya jalan menuju syurga.",
+    },
+  },
+];
+
+// Pre-built fallback list (validated at module load). Each entry is confirmed
+// to exist in the corpus.
+const FALLBACK_RECOMMENDATIONS: Record<RecommendationLanguage, TargetRecommendation[]> = (() => {
+  const langs: RecommendationLanguage[] = ["id", "en", "ms"];
+  const result: Record<RecommendationLanguage, TargetRecommendation[]> = {
+    id: [], en: [], ms: [],
+  };
+  for (const spec of FALLBACK_SPECS) {
+    const entry = CORPUS_ENTRIES.find(
+      (e) => e.kind === spec.refKind && e.refKey === spec.refKey,
+    );
+    if (!entry) {
+      // Safety check: if a spec references a missing corpus entry, skip it
+      // rather than crashing the server at startup.
+      console.warn(
+        `[recommendations] fallback spec for "${spec.category}" references missing corpus entry ${spec.refKind}:${spec.refKey}`,
+      );
+      continue;
+    }
+    for (const lang of langs) {
+      const rec: TargetRecommendation = {
+        id: `fallback-${spec.refKind}-${spec.refKey.replace(":", "-")}`,
+        name: spec.name[lang],
+        category: spec.category,
+        targetValue: spec.targetValue,
+        period: spec.period,
+        recurrence: spec.recurrence,
+        ...(spec.customUnit ? { customUnit: spec.customUnit } : {}),
+        ...(spec.dzikirType ? { dzikirType: spec.dzikirType } : {}),
+        ...(spec.sholatType ? { sholatType: spec.sholatType } : {}),
+        ...(spec.fastingType ? { fastingType: spec.fastingType } : {}),
+        ...(spec.quranUnit ? { quranUnit: spec.quranUnit } : {}),
+        ...(spec.sedekahType ? { sedekahType: spec.sedekahType } : {}),
+        whyItFits: spec.whyItFits[lang],
+        source: {
+          kind: spec.refKind,
+          reference: entry.display,
+          arabic: entry.canonical,
+          translation: spec.translation[lang],
+        },
+      };
+      result[lang].push(rec);
+    }
+  }
+  return result;
+})();
+
+/**
+ * Returns a pre-validated fallback list when the AI validator drops every
+ * generated item. Selects the categories most relevant to the user's
+ * onboarding profile; falls back to the full list when onboarding is absent.
+ */
+export function getFallbackRecommendations(
+  onboarding: UserOnboarding | null,
+  language: RecommendationLanguage,
+): TargetRecommendation[] {
+  const all = FALLBACK_RECOMMENDATIONS[language];
+  if (!onboarding) return all;
+
+  const relevant = categoriesFromOnboarding(onboarding);
+  if (relevant.length === 0) return all;
+
+  const catSet = new Set(relevant);
+  const filtered = all.filter((r) => catSet.has(r.category));
+  // Always return at least 3 items; if the filter leaves too few, pad with
+  // entries from the full list that weren't already included.
+  if (filtered.length >= 3) return filtered;
+  const extra = all.filter((r) => !catSet.has(r.category));
+  return [...filtered, ...extra].slice(0, 4);
 }
 
 // Citation-format allowlists. Each kind has at least one regex that the

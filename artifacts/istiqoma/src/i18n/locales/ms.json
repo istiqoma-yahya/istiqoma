@@ -727,7 +727,10 @@
   "user": {
     "profile": "Profil",
     "manageCategories": "Urus Kategori",
-    "logout": "Log Keluar"
+    "logout": "Log Keluar",
+    "guest": "Tetamu",
+    "guestDesc": "Melayari sebagai tetamu",
+    "exitGuestMode": "Keluar Mod Tetamu"
   },
   "common": {
     "loading": "Memuatkan...",

@@ -74,7 +74,7 @@
 
 .ob-step-label {
   position: absolute;
-  top: 1.2rem;
+  top: calc(1.2rem + env(safe-area-inset-top, 0px));
   right: 1.5rem;
   font-size: 0.7rem;
   letter-spacing: 0.12em;
@@ -84,7 +84,7 @@
 
 .ob-back-btn {
   position: absolute;
-  top: 1rem;
+  top: calc(1rem + env(safe-area-inset-top, 0px));
   left: 1.2rem;
   background: transparent;
   border: none;
@@ -117,7 +117,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 5rem 1.8rem 6rem;
+  padding: calc(5rem + env(safe-area-inset-top, 0px)) 1.8rem 6rem;
   overflow-y: auto;
 }
 

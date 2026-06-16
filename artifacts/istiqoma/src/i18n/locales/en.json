@@ -726,7 +726,10 @@
   "user": {
     "profile": "Profile",
     "manageCategories": "Manage Categories",
-    "logout": "Log out"
+    "logout": "Log out",
+    "guest": "Guest",
+    "guestDesc": "Browsing in guest mode",
+    "exitGuestMode": "Exit Guest Mode"
   },
   "common": {
     "loading": "Loading...",

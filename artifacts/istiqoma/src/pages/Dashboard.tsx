@@ -11,7 +11,7 @@ import { GenderPromptCard } from "@/components/GenderPromptCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { CampaignBanner } from "@/components/CampaignBanner";
-import { Loader2, LogOut, User, Settings, Plus, Bell } from "lucide-react";
+import { Loader2, LogOut, User, Settings, Plus, Bell, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DashboardNavLinks } from "@/components/shared/DashboardNavLinks";
 import { useLocation } from "wouter";
@@ -30,11 +30,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import istiqomaHorizontalLogo from "@assets/Istiqoma_New_Horizontal_Logo_1777797342711.png";
 import istiqomaHorizontalLogoDark from "@assets/Istiqoma_New_Horizontal_Logo_-_Darkmode_1777805633685.png";
 import { useTheme } from "@/components/ThemeProvider";
+import { useGuest } from "@/hooks/use-guest";
 
 export default function Dashboard() {
   const { theme } = useTheme();
   const logoSrc = theme === "dark" ? istiqomaHorizontalLogoDark : istiqomaHorizontalLogo;
   const { user, logout, isLoggingOut } = useAuth();
+  const { isGuest, exitGuestMode } = useGuest();
   const { data: deeds, isLoading } = useDeeds();
   const [, navigate] = useLocation();
   const { t, i18n } = useTranslation();
@@ -133,53 +135,74 @@ export default function Dashboard() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar className="h-10 w-10 border-2 border-primary/20">
-                  <AvatarImage src={user?.profileImageUrl || undefined} alt={user?.firstName || "User"} />
+                  {!isGuest && <AvatarImage src={user?.profileImageUrl || undefined} alt={user?.firstName || "User"} />}
                   <AvatarFallback className="bg-primary/10 text-primary">
-                    {(user?.firstName && user.firstName.charAt(0)) || <User className="w-4 h-4" />}
+                    {isGuest ? <UserX className="w-4 h-4" /> : ((user?.firstName && user.firstName.charAt(0)) || <User className="w-4 h-4" />)}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56 bg-popover border-border text-popover-foreground" align="end">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user?.firstName} {user?.lastName}</p>
-                  <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-border" />
-              <DropdownMenuItem 
-                onClick={() => navigate("/categories")}
-                className="cursor-pointer"
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                <span>{t('user.manageCategories')}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => navigate("/profile")}
-                className="cursor-pointer"
-                data-testid="link-profile"
-              >
-                <User className="mr-2 h-4 w-4" />
-                <span>{t('user.profile')}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => navigate("/notifications")}
-                className="cursor-pointer"
-                data-testid="menu-item-notifications"
-              >
-                <Bell className="mr-2 h-4 w-4" />
-                <span>{t('notifications.title')}</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-border" />
-              <DropdownMenuItem 
-                onClick={() => logout()}
-                disabled={isLoggingOut}
-                className="text-rose-600 dark:text-rose-400 focus:text-rose-600 dark:focus:text-rose-400 focus:bg-rose-500/10 cursor-pointer"
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>{t('user.logout')}</span>
-              </DropdownMenuItem>
+              {isGuest ? (
+                <>
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{t('user.guest')}</p>
+                      <p className="text-xs leading-none text-muted-foreground">{t('user.guestDesc')}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-border" />
+                  <DropdownMenuItem
+                    onClick={() => { exitGuestMode(); navigate("/"); }}
+                    className="text-rose-600 dark:text-rose-400 focus:text-rose-600 dark:focus:text-rose-400 focus:bg-rose-500/10 cursor-pointer"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>{t('user.exitGuestMode')}</span>
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user?.firstName} {user?.lastName}</p>
+                      <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-border" />
+                  <DropdownMenuItem 
+                    onClick={() => navigate("/categories")}
+                    className="cursor-pointer"
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>{t('user.manageCategories')}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => navigate("/profile")}
+                    className="cursor-pointer"
+                    data-testid="link-profile"
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    <span>{t('user.profile')}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => navigate("/notifications")}
+                    className="cursor-pointer"
+                    data-testid="menu-item-notifications"
+                  >
+                    <Bell className="mr-2 h-4 w-4" />
+                    <span>{t('notifications.title')}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-border" />
+                  <DropdownMenuItem 
+                    onClick={() => logout()}
+                    disabled={isLoggingOut}
+                    className="text-rose-600 dark:text-rose-400 focus:text-rose-600 dark:focus:text-rose-400 focus:bg-rose-500/10 cursor-pointer"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>{t('user.logout')}</span>
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           </div>

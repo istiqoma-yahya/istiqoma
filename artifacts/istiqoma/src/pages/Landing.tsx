@@ -868,7 +868,8 @@ export default function Landing() {
             initial={{ y: -100 }}
             animate={{ y: 0 }}
             exit={{ y: -100 }}
-            className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border py-3 px-6 shadow-xl"
+            className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border pb-3 px-6 shadow-xl"
+            style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top, 0px))' }}
           >
             <div className="container mx-auto flex items-center justify-between gap-4">
               <div className="flex items-center">
@@ -904,7 +905,7 @@ export default function Landing() {
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
       {/* Navbar */}
-      <nav className="container mx-auto px-6 py-6 relative z-10 flex items-center justify-between gap-4">
+      <nav className="container mx-auto px-6 pb-6 relative z-10 flex items-center justify-between gap-4" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}>
         <div className="flex items-center">
           <img
             src={logoSrc}

@@ -727,7 +727,10 @@
   "user": {
     "profile": "Profil",
     "manageCategories": "Kelola Kategori",
-    "logout": "Keluar"
+    "logout": "Keluar",
+    "guest": "Tamu",
+    "guestDesc": "Menjelajah sebagai tamu",
+    "exitGuestMode": "Keluar Mode Tamu"
   },
   "common": {
     "loading": "Memuat...",

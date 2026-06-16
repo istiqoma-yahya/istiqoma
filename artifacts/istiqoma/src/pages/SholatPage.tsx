@@ -22,6 +22,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { usePrayerCompletion } from "@/hooks/use-prayer-completions";
+import { useGuest } from "@/hooks/use-guest";
 import {
   getSavedLocation,
   saveLocation as saveSharedLocation,
@@ -94,6 +95,7 @@ export default function SholatPage() {
   );
 
   const { flags: done, togglePrayer: togglePrayerMutation, markAll } = usePrayerCompletion(dateKey);
+  const { isGuest, promptSignup } = useGuest();
 
   const [wigglingPrayer, setWigglingPrayer] = useState<PrayerKey | null>(null);
   const wiggleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -384,8 +386,13 @@ export default function SholatPage() {
       triggerWiggle(key);
       return;
     }
+    // Guests have no server session — saving would 401. Prompt sign-up instead.
+    if (isGuest) {
+      promptSignup();
+      return;
+    }
     togglePrayerMutation(key);
-  }, [isPrayerLocked, triggerWiggle, togglePrayerMutation]);
+  }, [isPrayerLocked, triggerWiggle, togglePrayerMutation, isGuest, promptSignup]);
 
   const markablePrayers = useMemo(() => {
     return prayerList.filter((p) => !isPrayerLocked(p.time));
@@ -397,6 +404,11 @@ export default function SholatPage() {
   }, [markablePrayers, done]);
 
   const markAllDone = () => {
+    // Guests have no server session — saving would 401. Prompt sign-up instead.
+    if (isGuest) {
+      promptSignup();
+      return;
+    }
     if (isPastDay) {
       markAll();
     } else {

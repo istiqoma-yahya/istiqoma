@@ -66,3 +66,17 @@ export function clearGuestState(): void {
   setGuestMode(false);
   setGuestOnboardedFlag(false);
 }
+
+// Canonical list of built-in protected categories. Mirrors the server's
+// REQUIRED_PROTECTED_CATEGORIES (artifacts/api-server/src/storage.ts) so a
+// guest — who has no server session and would otherwise get a 401 — sees the
+// same default categories a freshly seeded signed-in user would.
+export const GUEST_DEFAULT_CATEGORY_NAMES = [
+  "Sholat Fardhu",
+  "Sholat Sunnah",
+  "Puasa",
+  "Dzikir",
+  "Baca Quran",
+  "Shodaqoh",
+  "Hafalan Quran",
+] as const;

@@ -4,6 +4,22 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
+import { GUEST_DEFAULT_CATEGORY_NAMES } from "@/lib/guest";
+import { useGuest } from "@/hooks/use-guest";
+
+// Synthetic category list shown to guests (who have no server session). Mirrors
+// the shape of the server's GET /api/categories response so downstream
+// consumers need no special-casing.
+function guestDefaultCategories(): CategoryResponse[] {
+  return GUEST_DEFAULT_CATEGORY_NAMES.map((name, index) => ({
+    id: -(index + 1),
+    userId: "guest",
+    name,
+    sortOrder: index,
+    isProtected: true,
+    createdAt: null,
+  }));
+}
 
 export function useCategoryName() {
   const { t } = useTranslation();
@@ -16,11 +32,15 @@ export function useCategoryName() {
 }
 
 export function useCategories() {
-  const { toast } = useToast();
+  const { isGuest } = useGuest();
 
   return useQuery({
-    queryKey: [api.categories.list.path],
+    queryKey: [api.categories.list.path, isGuest ? "guest" : "user"],
     queryFn: async () => {
+      // Guests have no server session, so the request would 401. Serve the
+      // canonical built-in categories locally instead so the read-only
+      // preview (e.g. the Record Deed dropdown) is populated.
+      if (isGuest) return guestDefaultCategories();
       // Centralized 401 → session-expired redirect (instead of empty list).
       const res = await apiRequest("GET", api.categories.list.path);
       return api.categories.list.responses[200].parse(await res.json());

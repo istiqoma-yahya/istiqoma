@@ -167,6 +167,126 @@ function FeatureCarousel({ features }: { features: FeatureItem[] }) {
   );
 }
 
+function MuslimManAvatar() {
+  return (
+    <div className="w-14 h-14 rounded-full bg-emerald-500/20 border-2 border-emerald-500/30 flex items-center justify-center overflow-hidden flex-shrink-0">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10">
+        <ellipse cx="20" cy="10" rx="7.5" ry="3.5" fill="#10b981" opacity="0.9"/>
+        <rect x="12.5" y="12.5" width="15" height="2.5" rx="1.25" fill="#10b981" opacity="0.9"/>
+        <circle cx="20" cy="19" r="7" fill="#10b981" opacity="0.6"/>
+        <path d="M6 40 C6 31 13 28 20 28 C27 28 34 31 34 40" fill="#10b981" opacity="0.4"/>
+      </svg>
+    </div>
+  );
+}
+
+type TestimonialItem = {
+  quoteKey: string;
+  nameKey: string;
+  roleKey: string;
+  avatar: React.ReactNode;
+};
+
+function TestimonialCarousel() {
+  const { t } = useTranslation();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [direction, setDirection] = useState(1);
+
+  const testimonials: TestimonialItem[] = [
+    {
+      quoteKey: "landing.testimonial.quote",
+      nameKey: "landing.testimonial.name",
+      roleKey: "landing.testimonial.role",
+      avatar: (
+        <Avatar className="w-14 h-14 border-2 border-emerald-500/30 flex-shrink-0" data-testid="img-testimonial-avatar">
+          <AvatarImage src={testimonialAvatar} alt={t("landing.testimonial.name")} className="object-cover" />
+          <AvatarFallback>YPE</AvatarFallback>
+        </Avatar>
+      ),
+    },
+    {
+      quoteKey: "landing.testimonial2.quote",
+      nameKey: "landing.testimonial2.name",
+      roleKey: "landing.testimonial2.role",
+      avatar: <MuslimManAvatar />,
+    },
+  ];
+
+  useEffect(() => {
+    if (paused) return;
+    const timer = setInterval(() => {
+      setDirection(1);
+      setActiveIndex(prev => (prev + 1) % testimonials.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [paused, testimonials.length]);
+
+  const goTo = (index: number) => {
+    setDirection(index > activeIndex ? 1 : -1);
+    setActiveIndex(index);
+  };
+
+  const variants = {
+    enter: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir > 0 ? -60 : 60, opacity: 0 }),
+  };
+
+  const current = testimonials[activeIndex];
+
+  return (
+    <div
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={() => setPaused(true)}
+      onTouchEnd={() => setPaused(false)}
+    >
+      <div className="relative overflow-hidden" style={{ minHeight: 200 }}>
+        <AnimatePresence custom={direction} mode="wait">
+          <motion.div
+            key={activeIndex}
+            custom={direction}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="text-center"
+          >
+            <p className="text-xl md:text-2xl font-medium leading-relaxed mb-8" data-testid="text-testimonial-quote">
+              "{t(current.quoteKey)}"
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              {current.avatar}
+              <div className="text-left">
+                <p className="font-bold" data-testid="text-testimonial-name">{t(current.nameKey)}</p>
+                <p className="text-sm text-muted-foreground" data-testid="text-testimonial-role">{t(current.roleKey)}</p>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <div className="flex justify-center items-center gap-2 mt-6">
+        {testimonials.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => goTo(i)}
+            className={cn(
+              "h-2 rounded-full transition-all duration-300",
+              i === activeIndex
+                ? "w-6 bg-emerald-500"
+                : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+            )}
+            aria-label={`Go to testimonial ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 type FeatureDeepDiveTestIds = {
   section?: string;
   illustration?: string;
@@ -1077,28 +1197,16 @@ export default function Landing() {
           </motion.div>
         </div>
       </section>
-      {/* Testimonial Section (moved before deep-dives) */}
+      {/* Testimonial Section */}
       <section className="relative z-10 py-20 bg-background" data-testid="section-testimonial">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="max-w-3xl mx-auto text-center"
+            className="max-w-3xl mx-auto"
           >
-            <p className="text-xl md:text-2xl font-medium leading-relaxed mb-8" data-testid="text-testimonial-quote">
-              "{t('landing.testimonial.quote')}"
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <Avatar className="w-14 h-14 border-2 border-emerald-500/30" data-testid="img-testimonial-avatar">
-                <AvatarImage src={testimonialAvatar} alt={t('landing.testimonial.name')} className="object-cover" />
-                <AvatarFallback>YPE</AvatarFallback>
-              </Avatar>
-              <div className="text-left">
-                <p className="font-bold" data-testid="text-testimonial-name">{t('landing.testimonial.name')}</p>
-                <p className="text-sm text-muted-foreground" data-testid="text-testimonial-role">{t('landing.testimonial.role')}</p>
-              </div>
-            </div>
+            <TestimonialCarousel />
           </motion.div>
         </div>
       </section>

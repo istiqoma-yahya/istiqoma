@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { usePageMeta } from "@/hooks/use-page-meta";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type PanInfo } from "framer-motion";
+import { cn } from "@/lib/utils";
 import { ArrowRight, Target, TrendingUp, BookOpen, Bell, Users, Award, Fingerprint, Check, Moon, HandCoins, Shield, Calendar, CheckCircle2, Download, KeyRound, Play } from "lucide-react";
 import { DuaHandsIcon } from "@/components/DuaHandsIcon";
 import { useTranslation } from "react-i18next";
@@ -24,6 +25,146 @@ declare global {
       isInitialized?: boolean;
     };
   }
+}
+
+type FeatureItem = {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  desc: string;
+  iconBg: string;
+  iconColor: string;
+};
+
+function FeatureCarousel({ features }: { features: FeatureItem[] }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(320);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  // After entrance stagger completes, drop the per-card delay so
+  // scale/opacity transitions on swipe are instant.
+  const [entranceDone, setEntranceDone] = useState(false);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const ro = new ResizeObserver(([entry]) => {
+      setContainerWidth(entry.contentRect.width);
+    });
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!wrapperRef.current) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setInView(true); },
+      { threshold: 0.15 }
+    );
+    obs.observe(wrapperRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!inView || entranceDone) return;
+    // Allow the full stagger to finish (8 cards × 0.05s + 0.4s card duration)
+    const timer = setTimeout(() => setEntranceDone(true), features.length * 50 + 450);
+    return () => clearTimeout(timer);
+  }, [inView, entranceDone, features.length]);
+
+  const GAP = 16;
+  const CARD_RATIO = 0.82;
+  const cardWidth = containerWidth * CARD_RATIO;
+  const sideOffset = (containerWidth - cardWidth) / 2;
+
+  const getX = (index: number) => sideOffset - index * (cardWidth + GAP);
+
+  const handleDragEnd = (_: PointerEvent, info: PanInfo) => {
+    const { velocity, offset } = info;
+    let newIndex = activeIndex;
+    if (Math.abs(velocity.x) > 300) {
+      newIndex = velocity.x < 0
+        ? Math.min(activeIndex + 1, features.length - 1)
+        : Math.max(activeIndex - 1, 0);
+    } else {
+      const moved = Math.round(-offset.x / (cardWidth + GAP));
+      newIndex = Math.max(0, Math.min(activeIndex + moved, features.length - 1));
+    }
+    setActiveIndex(newIndex);
+  };
+
+  const leftConstraint = getX(features.length - 1);
+  const rightConstraint = getX(0);
+
+  return (
+    <div ref={wrapperRef}>
+      <div ref={containerRef} className="relative overflow-hidden">
+        <motion.div
+          className="flex cursor-grab active:cursor-grabbing"
+          drag="x"
+          dragConstraints={{ left: leftConstraint, right: rightConstraint }}
+          dragElastic={0.12}
+          animate={{ x: getX(activeIndex) }}
+          transition={{ type: "spring", stiffness: 350, damping: 35 }}
+          onDragEnd={handleDragEnd}
+          style={{ gap: GAP, scrollSnapType: "x mandatory" }}
+        >
+          {features.map((feature, i) => {
+            const distance = Math.abs(i - activeIndex);
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{
+                  opacity: inView ? (distance === 0 ? 1 : distance === 1 ? 0.55 : 0.3) : 0,
+                  y: inView ? 0 : 20,
+                  scale: distance === 0 ? 1 : 0.9,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30,
+                  delay: entranceDone ? 0 : i * 0.05,
+                }}
+                style={{
+                  minWidth: cardWidth,
+                  width: cardWidth,
+                  scrollSnapAlign: "center",
+                }}
+                className="glass-card p-5 text-left select-none"
+                data-testid={`card-feature-${i}`}
+              >
+                <div className={`w-11 h-11 rounded-xl ${feature.iconBg} flex items-center justify-center mb-4`}>
+                  <feature.icon className={`w-5 h-5 ${feature.iconColor}`} />
+                </div>
+                <h3 className="text-base font-bold font-display mb-2" data-testid={`text-feature-title-${i}`}>
+                  {feature.title}
+                </h3>
+                <p className="text-muted-foreground text-sm leading-relaxed" data-testid={`text-feature-desc-${i}`}>
+                  {feature.desc}
+                </p>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </div>
+
+      <div className="flex justify-center items-center gap-2 mt-6">
+        {features.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setActiveIndex(i)}
+            className={cn(
+              "h-2 rounded-full transition-all duration-300",
+              i === activeIndex
+                ? "w-6 bg-emerald-500"
+                : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+            )}
+            aria-label={`Go to feature ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 type FeatureDeepDiveTestIds = {
@@ -852,8 +993,8 @@ export default function Landing() {
               </button>
             </motion.div>
 
-            <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {[
+            {(() => {
+              const features: FeatureItem[] = [
                 {
                   icon: Target,
                   title: t('landing.features.targetsTitle'),
@@ -910,16 +1051,29 @@ export default function Landing() {
                   iconBg: "bg-slate-500/10",
                   iconColor: "text-slate-500"
                 }
-              ].map((feature, i) => (
-                <div key={i} className="glass-card p-5 text-left hover-elevate" data-testid={`card-feature-${i}`}>
-                  <div className={`w-11 h-11 rounded-xl ${feature.iconBg} flex items-center justify-center mb-4`}>
-                    <feature.icon className={`w-5 h-5 ${feature.iconColor}`} />
+              ];
+              return (
+                <>
+                  {/* Mobile: swipe carousel */}
+                  <div className="md:hidden">
+                    <FeatureCarousel features={features} />
                   </div>
-                  <h3 className="text-base font-bold font-display mb-2" data-testid={`text-feature-title-${i}`}>{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed" data-testid={`text-feature-desc-${i}`}>{feature.desc}</p>
-                </div>
-              ))}
-            </div>
+
+                  {/* Desktop: original grid */}
+                  <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    {features.map((feature, i) => (
+                      <div key={i} className="glass-card p-5 text-left hover-elevate" data-testid={`card-feature-${i}`}>
+                        <div className={`w-11 h-11 rounded-xl ${feature.iconBg} flex items-center justify-center mb-4`}>
+                          <feature.icon className={`w-5 h-5 ${feature.iconColor}`} />
+                        </div>
+                        <h3 className="text-base font-bold font-display mb-2" data-testid={`text-feature-title-${i}`}>{feature.title}</h3>
+                        <p className="text-muted-foreground text-sm leading-relaxed" data-testid={`text-feature-desc-${i}`}>{feature.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
           </motion.div>
         </div>
       </section>

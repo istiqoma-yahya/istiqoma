@@ -167,14 +167,12 @@ function FeatureCarousel({ features }: { features: FeatureItem[] }) {
   );
 }
 
-function MuslimManAvatar() {
+function GenericPersonAvatar() {
   return (
-    <div className="w-14 h-14 rounded-full bg-emerald-500/20 border-2 border-emerald-500/30 flex items-center justify-center overflow-hidden flex-shrink-0">
-      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10">
-        <ellipse cx="20" cy="10" rx="7.5" ry="3.5" fill="#10b981" opacity="0.9"/>
-        <rect x="12.5" y="12.5" width="15" height="2.5" rx="1.25" fill="#10b981" opacity="0.9"/>
-        <circle cx="20" cy="19" r="7" fill="#10b981" opacity="0.6"/>
-        <path d="M6 40 C6 31 13 28 20 28 C27 28 34 31 34 40" fill="#10b981" opacity="0.4"/>
+    <div className="w-14 h-14 rounded-full bg-emerald-500/20 border-2 border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" />
       </svg>
     </div>
   );
@@ -209,7 +207,7 @@ function TestimonialCarousel() {
       quoteKey: "landing.testimonial2.quote",
       nameKey: "landing.testimonial2.name",
       roleKey: "landing.testimonial2.role",
-      avatar: <MuslimManAvatar />,
+      avatar: <GenericPersonAvatar />,
     },
   ];
 

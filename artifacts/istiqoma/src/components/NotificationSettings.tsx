@@ -150,11 +150,13 @@ export function NotificationSettings() {
       }
 
       const subscription = await subscribeToPush();
-      if (subscription) {
-        const data = getSubscriptionData(subscription);
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Jakarta";
-        await subscribeMutation.mutateAsync({ ...data, timezone });
+      if (!subscription) {
+        toast({ title: t("common.error"), description: t("notifications.subscriptionFailed"), variant: "destructive" });
+        return;
       }
+      const data = getSubscriptionData(subscription);
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Jakarta";
+      await subscribeMutation.mutateAsync({ ...data, timezone });
     } catch (error) {
       console.error("Failed to enable notifications:", error);
       toast({ title: t("common.error"), description: t("notifications.testFailed"), variant: "destructive" });
@@ -203,6 +205,8 @@ export function NotificationSettings() {
       <CardContent className="space-y-6">
         {!isSupported ? (
           <p className="text-sm text-muted-foreground">{t("notifications.notSupported")}</p>
+        ) : pushStatus?.configured === false ? (
+          <p className="text-sm text-muted-foreground">{t("notifications.serverNotConfigured")}</p>
         ) : !isSubscribed ? (
           <div className="space-y-4">
             {permission === "denied" && (

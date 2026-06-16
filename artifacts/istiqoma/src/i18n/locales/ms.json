@@ -853,6 +853,8 @@
     "promptEnable": "Aktifkan",
     "promptDismiss": "Bukan Sekarang",
     "promptLocationDesc": "Benarkan akses lokasi untuk peringatan waktu solat yang tepat",
+    "subscriptionFailed": "Tidak dapat membuat langganan push. Sila cuba lagi.",
+    "serverNotConfigured": "Pemberitahuan push tidak tersedia pada pelayan ini.",
     "soundLabel": "Bunyi Pemberitahuan",
     "soundDesc": "Bunyi yang dimainkan apabila pemberitahuan tiba",
     "sounds": {

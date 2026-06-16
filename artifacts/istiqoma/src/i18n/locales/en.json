@@ -852,6 +852,8 @@
     "promptEnable": "Enable",
     "promptDismiss": "Not Now",
     "promptLocationDesc": "Allow location access for accurate prayer time reminders",
+    "subscriptionFailed": "Could not create push subscription. Please try again.",
+    "serverNotConfigured": "Push notifications are not available on this server.",
     "soundLabel": "Notification Sound",
     "soundDesc": "Sound played when a notification arrives",
     "sounds": {

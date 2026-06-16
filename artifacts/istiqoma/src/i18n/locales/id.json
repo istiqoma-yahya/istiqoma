@@ -853,6 +853,8 @@
     "promptEnable": "Aktifkan",
     "promptDismiss": "Nanti",
     "promptLocationDesc": "Izinkan akses lokasi untuk pengingat waktu sholat yang akurat",
+    "subscriptionFailed": "Tidak dapat membuat langganan push. Silakan coba lagi.",
+    "serverNotConfigured": "Notifikasi push tidak tersedia di server ini.",
     "soundLabel": "Suara Notifikasi",
     "soundDesc": "Suara yang diputar saat notifikasi tiba",
     "sounds": {
